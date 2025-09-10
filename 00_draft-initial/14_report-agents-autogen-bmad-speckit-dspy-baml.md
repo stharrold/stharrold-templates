@@ -165,7 +165,7 @@ class CascadingAgentOrchestrator:
             raise
             
     async def _execute_tier_cascade(self, task: AgentTask) -> Dict[str, Any]:
-        """Execute cascade through all tiers"""
+        """Execute cascade through all tiers with multi-child support"""
         
         # Create agent directory
         agent_dir = self._create_agent_directory(task.tier, task.parent_task_id)
@@ -189,19 +189,98 @@ class CascadingAgentOrchestrator:
         else:
             raise ValueError(f"Invalid tier: {task.tier}")
             
-        # Create next tier if not final
+        # Handle next tier creation - all tiers can spawn multiple children
         if task.tier < 3:
-            child_task = AgentTask(
-                id=f"{task.id}-tier{task.tier+1}",
-                tier=task.tier + 1,
-                priority=task.priority,
-                payload=result,
-                parent_task_id=task.id,
-                redis_key=task.redis_key
-            )
-            result = await self._execute_tier_cascade(child_task)
+            next_tier_configs = result.get('next_tier_configs', [])
+            
+            # Backward compatibility: convert single config to list
+            if 'next_tier_input' in result and not next_tier_configs:
+                next_tier_configs = [result['next_tier_input']]
+            
+            if len(next_tier_configs) > 1:
+                # Multiple children - execute based on strategy
+                parallel_configs = []
+                sequential_configs = []
+                
+                for config in next_tier_configs:
+                    if config.get('parallel', True):
+                        parallel_configs.append(config)
+                    else:
+                        sequential_configs.append(config)
+                
+                children_results = []
+                
+                # Execute parallel children concurrently
+                if parallel_configs:
+                    parallel_tasks = []
+                    for idx, config in enumerate(parallel_configs):
+                        child_task = AgentTask(
+                            id=f"{task.id}-tier{task.tier+1}-p{idx}",
+                            tier=task.tier + 1,
+                            priority=task.priority,
+                            payload=config,
+                            parent_task_id=task.id,
+                            redis_key=task.redis_key
+                        )
+                        parallel_tasks.append(
+                            asyncio.create_task(self._execute_tier_cascade(child_task))
+                        )
+                    parallel_results = await asyncio.gather(*parallel_tasks)
+                    children_results.extend(parallel_results)
+                
+                # Execute sequential children in order
+                for idx, config in enumerate(sequential_configs):
+                    # Pass previous result if dependent
+                    if config.get('depends_on_previous') and children_results:
+                        config['previous_result'] = children_results[-1]
+                    
+                    child_task = AgentTask(
+                        id=f"{task.id}-tier{task.tier+1}-s{idx}",
+                        tier=task.tier + 1,
+                        priority=task.priority,
+                        payload=config,
+                        parent_task_id=task.id,
+                        redis_key=task.redis_key
+                    )
+                    seq_result = await self._execute_tier_cascade(child_task)
+                    children_results.append(seq_result)
+                
+                result['children_results'] = children_results
+                result['children_count'] = len(children_results)
+                
+            elif next_tier_configs:
+                # Single child (backward compatible)
+                child_task = AgentTask(
+                    id=f"{task.id}-tier{task.tier+1}",
+                    tier=task.tier + 1,
+                    priority=task.priority,
+                    payload=next_tier_configs[0],
+                    parent_task_id=task.id,
+                    redis_key=task.redis_key
+                )
+                result = await self._execute_tier_cascade(child_task)
+        
+        # Special handling for tier 3 spawning additional agents
+        elif task.tier == 3 and result.get('spawn_additional'):
+            additional_programs = result.get('additional_programs', [])
+            additional_results = []
+            
+            for idx, add_prog in enumerate(additional_programs):
+                add_task = AgentTask(
+                    id=f"{task.id}-a{idx}",
+                    tier=3,
+                    priority=task.priority,
+                    payload={'programs': [add_prog]},
+                    parent_task_id=task.id,
+                    redis_key=task.redis_key
+                )
+                add_result = await self._execute_tier_cascade(add_task)
+                additional_results.append(add_result)
+            
+            result['additional_executions'] = additional_results
             
         return result
+
         
     def _store_agent_in_redis(self, task: AgentTask):
         """Store agent state in Redis, not KuzuDB"""
@@ -333,8 +412,41 @@ class Tier0AutogenAgent:
             "bmad_stories": result,
             "validation": validation_result,
             "tier": 0,
-            "next_tier_input": self._prepare_tier1_input(result)
+            "next_tier_configs": self._prepare_tier1_configs(result)  # Can return multiple
         }
+        
+    def _prepare_tier1_configs(self, bmad_result: Dict) -> List[Dict]:
+        """Prepare configurations for potentially multiple Tier 1 agents"""
+        
+        stories = bmad_result.get('stories', [])
+        configs = []
+        
+        # Group stories by epic or complexity
+        epic_groups = {}
+        for story in stories:
+            epic_id = story.get('epic_id', 'default')
+            if epic_id not in epic_groups:
+                epic_groups[epic_id] = []
+            epic_groups[epic_id].append(story)
+        
+        # Create separate config for each epic group
+        for epic_id, epic_stories in epic_groups.items():
+            config = {
+                'bmad_stories': epic_stories,
+                'epic_id': epic_id,
+                'parallel': True,  # Epics can be processed in parallel
+                'tier_1_strategy': 'epic_based'
+            }
+            configs.append(config)
+        
+        # If no clear grouping, return single config
+        if not configs:
+            configs = [{
+                'bmad_stories': bmad_result,
+                'tier_1_strategy': 'single'
+            }]
+        
+        return configs
         
     def _query_documentation_context(self, payload: Dict) -> List[Dict]:
         """Query KuzuDB for relevant documentation[11]"""
@@ -426,8 +538,54 @@ class Tier1BAMLAgent:
         return {
             "spec_kit_specs": spec_kit_result,
             "tier": 1,
-            "next_tier_input": self._prepare_tier2_input(spec_kit_result)
+            "next_tier_configs": self._prepare_tier2_configs(spec_kit_result)  # Can return multiple
         }
+        
+    def _prepare_tier2_configs(self, spec_kit_result: List[Dict]) -> List[Dict]:
+        """Prepare configurations for potentially multiple Tier 2 agents"""
+        
+        configs = []
+        
+        # Group specs by feature or complexity
+        feature_groups = {}
+        independent_specs = []
+        
+        for spec in spec_kit_result:
+            if spec.get('feature_id'):
+                feature_id = spec['feature_id']
+                if feature_id not in feature_groups:
+                    feature_groups[feature_id] = []
+                feature_groups[feature_id].append(spec)
+            else:
+                independent_specs.append(spec)
+        
+        # Create config for each feature group
+        for feature_id, feature_specs in feature_groups.items():
+            config = {
+                'spec_kit_specs': feature_specs,
+                'feature_id': feature_id,
+                'parallel': True,
+                'tier_2_strategy': 'feature_based'
+            }
+            configs.append(config)
+        
+        # Create config for independent specs
+        if independent_specs:
+            config = {
+                'spec_kit_specs': independent_specs,
+                'parallel': True,
+                'tier_2_strategy': 'independent'
+            }
+            configs.append(config)
+        
+        # Fallback to single config
+        if not configs:
+            configs = [{
+                'spec_kit_specs': spec_kit_result,
+                'tier_2_strategy': 'single'
+            }]
+        
+        return configs
 
 class Tier2SpecKitToDSPyAgent:
     """Tier 2: Spec-Kit to DSPy Conversion with BAML[2][8][7]"""
@@ -463,15 +621,33 @@ class Tier2SpecKitToDSPyAgent:
         converter = dspy.ChainOfThought(TaskConversion)
         
         dspy_programs = []
-        for spec in task.payload['spec_kit_specs']:
+        dependency_graph = self._build_dependency_graph(task.payload['spec_kit_specs'])
+        
+        for idx, spec in enumerate(task.payload['spec_kit_specs']):
             # Convert each spec-kit task to DSPy
             program = converter(
                 spec_kit_task=spec['task'],
                 task_dependencies=json.dumps(spec.get('dependencies', []))
             )
             
-            # Map task structure
+            # Determine execution strategy
             dspy_module = self._create_dspy_module(program.dspy_program, spec)
+            
+            # Mark for parallel execution if independent
+            if '[P]' in spec.get('task', '') or not spec.get('dependencies'):
+                dspy_module['parallel'] = True
+            
+            # Mark sequential dependencies
+            if spec.get('dependencies'):
+                deps = spec['dependencies']
+                if any(d in [p.get('id') for p in dspy_programs] for d in deps):
+                    dspy_module['depends_on_previous'] = True
+                    
+            # Check if this task might spawn additional tasks
+            if 'iterate' in spec.get('task', '').lower() or 'repeat' in spec.get('task', '').lower():
+                dspy_module['can_spawn'] = True
+                dspy_module['spawn_condition'] = 'iteration_needed'
+                
             dspy_programs.append(dspy_module)
             
         # Save DSPy modules
@@ -480,8 +656,66 @@ class Tier2SpecKitToDSPyAgent:
         return {
             "dspy_programs": dspy_programs,
             "tier": 2,
-            "next_tier_input": dspy_programs
+            "execution_strategy": self._determine_execution_strategy(dspy_programs),
+            "next_tier_configs": self._prepare_tier3_configs(dspy_programs)  # Returns configs for multiple agent-30s
         }
+        
+    def _prepare_tier3_configs(self, dspy_programs: List[Dict]) -> List[Dict]:
+        """Prepare configurations for multiple Tier 3 agents"""
+        
+        configs = []
+        
+        # Group programs by execution strategy
+        for program in dspy_programs:
+            config = {
+                'programs': [program],  # Each agent-30 handles one or more programs
+                'parallel': program.get('parallel', False),
+                'depends_on_previous': program.get('depends_on_previous', False)
+            }
+            configs.append(config)
+        
+        # Optionally batch small programs together
+        if len(configs) > 10:  # Too many individual agents
+            batched_configs = []
+            batch = []
+            for config in configs:
+                if config['parallel'] and len(batch) < 3:
+                    batch.append(config['programs'][0])
+                else:
+                    if batch:
+                        batched_configs.append({
+                            'programs': batch,
+                            'parallel': True,
+                            'batched': True
+                        })
+                        batch = []
+                    batched_configs.append(config)
+            if batch:
+                batched_configs.append({
+                    'programs': batch,
+                    'parallel': True,
+                    'batched': True
+                })
+            return batched_configs
+            
+        return configs
+        
+    def _determine_execution_strategy(self, programs: List[Dict]) -> Dict:
+        """Determine how agent-30 instances should be created"""
+        return {
+            "parallel_groups": [p for p in programs if p.get('parallel')],
+            "sequential_chain": [p for p in programs if p.get('depends_on_previous')],
+            "independent": [p for p in programs if not p.get('parallel') and not p.get('depends_on_previous')],
+            "can_spawn_additional": [p for p in programs if p.get('can_spawn')]
+        }
+        
+    def _build_dependency_graph(self, specs: List[Dict]) -> Dict:
+        """Build dependency graph for execution ordering"""
+        graph = {}
+        for spec in specs:
+            spec_id = spec.get('id', spec.get('task'))
+            graph[spec_id] = spec.get('dependencies', [])
+        return graph
         
     def _create_dspy_module(self, program_code: str, spec: Dict) -> Dict:
         """Create DSPy module from specification"""
@@ -507,13 +741,20 @@ class Tier3DSPyExecutionAgent:
     async def execute(self, task: AgentTask) -> Dict[str, Any]:
         """Execute DSPy programs with BAML-enforced validation"""
         
+        programs = task.payload.get('programs', [])
         results = []
+        spawn_additional = False
+        additional_programs = []
         
-        for program in task.payload:
+        for program in programs:
             # Create BAML-formatted execution prompt[7]
             exec_prompt = await self.baml_client.format_prompt(
                 template="dspy_executor",
-                context={"program": program, "constraints": program.get('validation_constraints', {})}
+                context={
+                    "program": program, 
+                    "constraints": program.get('validation_constraints', {}),
+                    "previous_result": program.get('previous_result')
+                }
             )
             # Execute TDD if required
             if program['tdd_required']:
@@ -532,6 +773,12 @@ class Tier3DSPyExecutionAgent:
             if not validation['valid']:
                 raise ValueError(f"Validation failed: {validation['errors']}")
                 
+            # Check if this execution triggers more agent creation
+            if program.get('can_spawn') and self._check_spawn_condition(result, program):
+                spawn_additional = True
+                new_programs = await self._generate_additional_programs(result, program)
+                additional_programs.extend(new_programs)
+                
             results.append({
                 "program": program,
                 "result": result,
@@ -548,8 +795,58 @@ class Tier3DSPyExecutionAgent:
             "implementation": implementation,
             "tier": 3,
             "status": "completed",
-            "test_results": [r['validation'] for r in results]
+            "test_results": [r['validation'] for r in results],
+            "spawn_additional": spawn_additional,
+            "additional_programs": additional_programs
         }
+        
+    def _check_spawn_condition(self, result: Dict, program: Dict) -> bool:
+        """Check if execution result triggers additional agent spawning"""
+        
+        condition = program.get('spawn_condition', '')
+        
+        if condition == 'iteration_needed':
+            return result.get('requires_iteration', False)
+        elif condition == 'error_recovery':
+            return result.get('recoverable_error', False)
+        elif condition == 'subtask_generation':
+            return len(result.get('generated_subtasks', [])) > 0
+        elif condition == 'threshold_not_met':
+            threshold = program.get('success_threshold', 0.9)
+            return result.get('confidence', 0) < threshold
+            
+        return False
+        
+    async def _generate_additional_programs(self, result: Dict, parent_program: Dict) -> List[Dict]:
+        """Generate additional DSPy programs based on execution results"""
+        
+        additional = []
+        
+        if result.get('generated_subtasks'):
+            # Create programs for each subtask
+            for subtask in result['generated_subtasks']:
+                additional.append({
+                    "code": subtask.get('code'),
+                    "parallel": subtask.get('can_parallelize', False),
+                    "tdd_required": parent_program.get('tdd_required', True),
+                    "dependencies": [parent_program.get('id')],
+                    "validation_constraints": subtask.get('constraints', {}),
+                    "parent_result": result
+                })
+                
+        elif result.get('requires_iteration'):
+            # Create iteration program with updated context
+            additional.append({
+                "code": parent_program['code'],
+                "parallel": False,
+                "tdd_required": parent_program.get('tdd_required', True),
+                "dependencies": [parent_program.get('id')],
+                "validation_constraints": parent_program.get('validation_constraints', {}),
+                "iteration_context": result,
+                "iteration_count": result.get('iteration_count', 0) + 1
+            })
+            
+        return additional
 ```
 
 ### BAML Templates Configuration
@@ -1176,7 +1473,7 @@ class ResourceCleanupManager:
                 await self._cleanup_worktree(agent['worktree'])
                 
     def _find_cascade_agents_in_redis(self, agent_id: str) -> List[Dict]:
-        """Find all cascade agents in Redis"""
+        """Find all cascade agents in Redis including dynamically spawned ones"""
         
         agents = []
         # Get parent agent
@@ -1184,12 +1481,21 @@ class ResourceCleanupManager:
         if agent_data:
             agents.append(agent_data)
             
-        # Find child agents recursively
-        for tier in range(4):
-            child_id = f"{agent_id}-tier{tier}"
-            child_data = self.work_item_manager.get_agent_state(child_id)
-            if child_data:
-                agents.append(child_data)
+        # Find all child agents using pattern matching
+        patterns = [
+            f"{agent_id}-tier*",     # Standard tier children
+            f"{agent_id}-tier*-p*",  # Parallel children at any tier
+            f"{agent_id}-tier*-s*",  # Sequential children at any tier
+            f"{agent_id}-a*"         # Additional spawned agents
+        ]
+        
+        for pattern in patterns:
+            # Use Redis pattern matching to find all spawned agents
+            for key in self.redis.scan_iter(match=f"agent-{pattern}"):
+                spawned_id = key.decode().replace("agent-", "")
+                spawned_data = self.work_item_manager.get_agent_state(spawned_id)
+                if spawned_data and spawned_data not in agents:
+                    agents.append(spawned_data)
                 
         return agents
 ```
@@ -1422,12 +1728,35 @@ async def main():
         epic_id="EP001",
         epic_name="implement-ai-agent"
     )
+    
+    # Example result showing multiple agent-30 spawning:
+    # Tier 2 identified 5 DSPy programs from spec-kit tasks:
+    # - 2 parallel programs → spawned agent-30-p0, agent-30-p1 (concurrent)
+    # - 2 sequential programs → spawned agent-30-s0, agent-30-s1 (ordered)
+    # - 1 iterative program → spawned agent-30-s2, then agent-30-a2-0 (successive)
+    print(f"Tier 3 executions: {result.get('execution_count', 0)} agents spawned")
+    print(f"Parallel: {result.get('parallel_count', 0)}, Sequential: {result.get('sequential_count', 0)}")
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
 ## Key Implementation Features
+
+### Multi-Tier Parallel Agent Spawning
+
+**Universal Multi-Child Support:**
+- Every tier (0-3) can spawn 1, 2, or more child agents running simultaneously
+- Agent-00: Can spawn multiple agent-10s (grouped by epic)
+- Agent-10: Can spawn multiple agent-20s (grouped by feature)  
+- Agent-20: Can spawn multiple agent-30s (parallel/sequential execution)
+- Agent-30: Can spawn additional agent-30s (iteration/subtasks/recovery)
+
+**Execution Strategies:**
+- Parallel: Independent tasks execute concurrently
+- Sequential: Dependent tasks execute in order with result passing
+- Dynamic: Agents spawn additional agents based on runtime conditions
+- Batched: Small tasks grouped to optimize resource usage
 
 ### BAML Integration Throughout All Tiers
 
