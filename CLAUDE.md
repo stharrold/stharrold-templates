@@ -45,11 +45,16 @@ The repository follows a **platform-specific management approach** where:
 /usr/bin/python3 mcp-manager.py --remove         # Interactive server removal
 /usr/bin/python3 mcp-manager.py --disable        # Temporarily disable servers
 /usr/bin/python3 mcp-manager.py --enable         # Re-enable disabled servers
+/usr/bin/python3 mcp-manager.py --deduplicate     # Remove duplicate servers (keeps DISABLED_ versions)
 
 # Cross-Platform Features
 /usr/bin/python3 mcp-manager.py --check-credentials  # Validate credential setup
 /usr/bin/python3 mcp-manager.py --backup-only    # Create configuration backups
 /usr/bin/python3 mcp-manager.py --file ~/.claude.json  # Work with specific config file
+
+# Deduplication Examples
+/usr/bin/python3 mcp-manager.py --deduplicate    # Auto-detect platform and remove duplicates
+/usr/bin/python3 mcp-manager.py --platform claude-code --deduplicate  # Target specific platform
 ```
 
 ### Git Operations
@@ -62,6 +67,18 @@ git log --oneline
 
 # Archive files with UTC timestamp
 cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
+```
+
+### Testing
+```bash
+# Run deduplication test
+/usr/bin/python3 test_mcp_deduplication.py
+
+# Test specific functionality before fixes (TDD approach)
+# 1. Write test to reproduce issue
+# 2. Confirm test fails with expected error
+# 3. Apply fix
+# 4. Verify test passes
 ```
 
 ## MCP Server Configuration Architecture
@@ -113,18 +130,33 @@ The tool operates on **one platform at a time** with the following options:
 
 ## Important Guidelines
 
+### File Management
+- **ALWAYS prefer editing existing files** over creating new ones
+- **NEVER proactively create documentation files** (*.md) or README files unless explicitly requested
+- Do what has been asked; nothing more, nothing less
+
 ### Code Quality (Codacy Integration)
 After making ANY file edits, you MUST:
-1. Run `codacy_cli_analyze` tool from Codacy's MCP Server
-2. Set `rootPath` to the workspace path
+1. **IMMEDIATELY** run `codacy_cli_analyze` tool from Codacy's MCP Server
+2. Set `rootPath` to the workspace path  
 3. Set `file` to the path of the edited file
 4. Apply fixes for any issues found
+5. **This is non-negotiable** - failure to follow this rule is considered a critical error
 
 ### Security Dependencies
-After installing ANY dependencies (npm, pip, etc.), you MUST:
-1. Run `codacy_cli_analyze` with `tool: "trivy"`
-2. Fix any vulnerabilities before continuing
-3. Only proceed with original task after security issues are resolved
+After installing ANY dependencies (npm, pip, yarn, pnpm, etc.), you MUST:
+1. **IMMEDIATELY** run `codacy_cli_analyze` with `tool: "trivy"`
+2. Stop all other operations if vulnerabilities are found
+3. Fix any vulnerabilities before continuing
+4. Only proceed with original task after security issues are resolved
+5. Example: After `npm install react-markdown`, run Codacy with trivy BEFORE any other tasks
+
+### Codacy Analysis Requirements
+- Run analysis on EVERY file modification without exception
+- For security scanning: use `tool: "trivy"` parameter
+- For code quality: leave `tool` parameter empty/unset
+- Always use standard filesystem paths (not URL-encoded)
+- If Codacy MCP Server unavailable, suggest user check VS Code Copilot MCP settings
 
 ### Archive Management
 When archiving files:
@@ -161,6 +193,10 @@ The tool implements a **platform-specific management architecture** with:
   - `enable_server()`: Restores original server name to reactivate
   - `get_disabled_servers()`: Tracks disabled servers for the target platform
   - Preserves complete configuration while making servers inactive
+- **Deduplication functionality**: Remove duplicate servers where both active and DISABLED_ versions exist
+  - `remove_duplicate_servers()`: Identifies and removes active duplicates, keeping DISABLED_ versions
+  - Automatically creates backups before deduplication
+  - Reports which duplicates were found and removed
 - **Single-Platform Operations**: All interactive methods work with one platform at a time
 
 ### MCP Server Tiers
@@ -178,12 +214,68 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - Codacy analysis integration
 - WebFetch for specific domains (github.com, mcpcat.io, apidog.com)
 
+## Development Workflow
+
+### Test-Driven Development (TDD)
+When fixing bugs or adding features, follow the TDD pattern:
+
+1. **Write failing test first**:
+   ```python
+   # test_feature.py
+   import importlib.util
+   spec = importlib.util.spec_from_file_location("mcp_manager", "mcp-manager.py")
+   mcp_manager = importlib.util.module_from_spec(spec)
+   spec.loader.exec_module(mcp_manager)
+   
+   # Test that reproduces the issue
+   def test_feature():
+       # Arrange
+       config = mcp_manager.MCPConfig(test_config)
+       # Act & Assert
+       assert config.feature_works()
+   ```
+
+2. **Verify test fails** with expected error
+3. **Implement minimal fix** to make test pass
+4. **Run test again** to verify fix
+5. **Test with actual command** to confirm real-world behavior
+6. **Run Codacy analysis** on modified files
+
+### Import Pattern for Hyphenated Files
+```python
+import importlib.util
+spec = importlib.util.spec_from_file_location("module_name", "file-name.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+```
+
+## Project Configuration
+
+### Codacy Tools Available
+The repository includes `.codacy/codacy.yaml` with the following analysis tools:
+- **dartanalyzer@3.7.2**: Dart static analysis
+- **eslint@8.57.0**: JavaScript/TypeScript linting
+- **lizard@1.17.31**: Code complexity analysis
+- **pmd@7.11.0**: Java source code analyzer
+- **pylint@3.3.6**: Python code analysis
+- **revive@1.7.0**: Go linting
+- **semgrep@1.78.0**: Pattern-based static analysis
+- **trivy@0.65.0**: Security vulnerability scanner
+
+### Required Runtimes
+- Dart 3.7.2
+- Go 1.22.3
+- Java 17.0.10
+- Node 22.2.0
+- Python 3.11.11
+
 ## Troubleshooting
 
 ### Python Packaging Issues
 - **Use system Python directly**: `/usr/bin/python3 mcp-manager.py`
 - **Skip virtual environment**: Tool uses only standard library modules
 - **Known issue**: pyproject.toml has hatchling build backend configuration issues
+- **Module import errors**: When importing mcp-manager.py in tests, use `importlib.util.spec_from_file_location()` due to hyphen in filename
 
 ### Common Issues
 - **Missing sync-mcp.sh**: Referenced in .vscode/tasks.json but not present (use mcp-manager.py instead)
@@ -192,3 +284,10 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Platform not found**: Use `--status` to see available platforms, or specify different platform with `--platform`
 - **Auto-detection issues**: Explicitly specify target platform with `--platform <name>` if auto-detection fails
 - **No servers shown**: Ensure you're targeting the correct platform where servers are configured
+
+### Recently Fixed Issues
+- **AttributeError in deduplication**: Fixed in remove_duplicate_servers method
+  - Changed `self.config` → `self.data`
+  - Changed `self.platform_name` → `self.name`
+  - Changed `self.server_key` → `'mcpServers'`
+  - Changed method calls from `backup_config()` → `backup()` and `save_config()` → `save()`

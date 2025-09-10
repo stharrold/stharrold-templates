@@ -326,6 +326,51 @@ class MCPConfig:
                             })
         
         return disabled_servers
+    
+    def remove_duplicate_servers(self) -> bool:
+        """Remove duplicate servers where both active and DISABLED_ versions exist."""
+        if not self.data:
+            print(f"No configuration found for {self.name}")
+            return False
+        
+        servers = self.data.get('mcpServers', {})
+        if not servers:
+            print(f"No MCP servers configured for {self.name}")
+            return False
+        
+        # Create backup before deduplication
+        self.backup()
+        
+        # Find duplicates
+        duplicates_found = []
+        servers_to_remove = []
+        
+        for server_name in list(servers.keys()):
+            if server_name.startswith("DISABLED_"):
+                active_name = server_name[9:]  # Remove "DISABLED_" prefix
+                if active_name in servers:
+                    # Both disabled and active versions exist - keep disabled, remove active
+                    duplicates_found.append(active_name)
+                    servers_to_remove.append(active_name)
+        
+        if not duplicates_found:
+            print(f"No duplicate servers found in {self.name} configuration")
+            return True
+        
+        # Remove duplicates
+        print(f"\nFound {len(duplicates_found)} duplicate server(s) in {self.name}:")
+        for name in duplicates_found:
+            print(f"  - {name} (keeping DISABLED_{name}, removing active)")
+        
+        for server_name in servers_to_remove:
+            del servers[server_name]
+        
+        # Save the deduplicated configuration
+        self.data['mcpServers'] = servers
+        self.save()
+        
+        print(f"\nSuccessfully removed {len(duplicates_found)} duplicate(s) from {self.name}")
+        return True
 
 
 class MCPManager:
@@ -921,6 +966,11 @@ Examples:
         help='Interactive server addition'
     )
     parser.add_argument(
+        '--deduplicate',
+        action='store_true',
+        help='Remove duplicate servers (keeps DISABLED_ versions when both exist)'
+    )
+    parser.add_argument(
         '--platform',
         choices=['claude-code', 'vscode', 'claude-desktop'],
         help='Target platform (claude-code, vscode, claude-desktop). If not specified, auto-detects first available platform.'
@@ -989,6 +1039,11 @@ Examples:
     # Handle server enabling
     if args.enable:
         manager.interactive_enable(config)
+        return
+    
+    # Handle deduplication
+    if args.deduplicate:
+        config.remove_duplicate_servers()
         return
     
     # Handle removal if requested
