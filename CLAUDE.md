@@ -8,15 +8,15 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 ### Core Architecture
 
-The repository follows a **unified management approach** where:
-1. **`mcp-manager.py`** serves as the central cross-platform management tool
+The repository follows a **platform-specific management approach** where:
+1. **`mcp-manager.py`** serves as the central platform-targeted management tool with auto-detection
 2. **Documentation guides** in `10_draft-merged/` provide comprehensive setup instructions with cross-references
 3. **Draft documents** in `00_draft-initial/` contain research and reports awaiting finalization
 4. **Archive system** in `ARCHIVED/` stores historical documents with UTC timestamps
 
 ### Key Components
 
-- **Cross-Platform MCP Manager**: `mcp-manager.py` handles server addition, removal, listing, and credential validation across all platforms
+- **Platform-Specific MCP Manager**: `mcp-manager.py` handles server management for individual platforms with auto-detection and platform targeting
 - **Three-Guide System**: 
   - `11_GUIDE-MCP.md` - MCP setup with tiered server categorization (Tier 1-4)
   - `12_GUIDE-CREDENTIALS.md` - Secure credential management with requirements table
@@ -29,11 +29,24 @@ The repository follows a **unified management approach** where:
 ### MCP Management
 ```bash
 # Always use system Python to avoid virtual environment issues
-/usr/bin/python3 mcp-manager.py --list           # List all servers (active and disabled)
+
+# Platform Status and Detection
+/usr/bin/python3 mcp-manager.py --status         # Show all platform statuses
+/usr/bin/python3 mcp-manager.py                  # Auto-detect first available platform
+/usr/bin/python3 mcp-manager.py --list           # List servers from auto-detected platform
+
+# Platform-Specific Operations
+/usr/bin/python3 mcp-manager.py --platform claude-code --list      # List Claude Code CLI servers
+/usr/bin/python3 mcp-manager.py --platform vscode --add           # Add server to VS Code MCP
+/usr/bin/python3 mcp-manager.py --platform claude-desktop --remove # Remove from Claude Desktop
+
+# Server Management (works with auto-detected or specified platform)
 /usr/bin/python3 mcp-manager.py --add            # Interactive server addition
 /usr/bin/python3 mcp-manager.py --remove         # Interactive server removal
 /usr/bin/python3 mcp-manager.py --disable        # Temporarily disable servers
 /usr/bin/python3 mcp-manager.py --enable         # Re-enable disabled servers
+
+# Cross-Platform Features
 /usr/bin/python3 mcp-manager.py --check-credentials  # Validate credential setup
 /usr/bin/python3 mcp-manager.py --backup-only    # Create configuration backups
 /usr/bin/python3 mcp-manager.py --file ~/.claude.json  # Work with specific config file
@@ -69,6 +82,34 @@ cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 - **macOS**: Keychain Access via `security` command
 - **Windows**: Credential Manager via PowerShell `CredentialManager` module
 - **Linux**: Environment variables (fallback)
+
+## Platform Selection
+
+### Platform Targeting
+The tool operates on **one platform at a time** with the following options:
+- **Explicit targeting**: Use `--platform <name>` to specify target platform (`claude-code`, `vscode`, `claude-desktop`)
+- **Auto-detection**: When no platform specified, automatically selects first available platform
+- **Platform status**: Use `--status` to see all platform configurations and server counts
+
+### Platform Selection Behavior
+```bash
+# Auto-detection workflow
+/usr/bin/python3 mcp-manager.py              # Auto-detects first available platform
+# Output: "Auto-detected platform: claude-code (Claude Code CLI)"
+
+# Explicit platform targeting
+/usr/bin/python3 mcp-manager.py --platform vscode --list  # Targets VS Code only
+
+# Platform availability check
+/usr/bin/python3 mcp-manager.py --status     # Shows all platforms with server counts
+```
+
+### Breaking Change from Previous Versions
+**Operations now target one platform at a time** instead of synchronizing across all platforms. This change:
+- Provides cleaner, more predictable operations
+- Eliminates cross-platform synchronization complexity  
+- Allows independent management of each platform's MCP servers
+- Maintains backward compatibility with `--file` flag for direct file operations
 
 ## Important Guidelines
 
@@ -107,16 +148,20 @@ Historical documents with UTC timestamps for reference
 ## Critical Implementation Details
 
 ### mcp-manager.py Architecture
-The tool implements a **MCPConfig class** for each platform with:
-- Cross-platform path detection via `get_platform_config_paths()`
-- Credential validation for environment variables and OS-native stores
-- Schema-aware configuration management
-- Interactive server addition/removal with automatic backups
+The tool implements a **platform-specific management architecture** with:
+- **Platform Selection**: `select_target_platform()` method with auto-detection and explicit targeting
+- **MCPConfig class** for individual platform operations with:
+  - Platform-specific path detection via `get_platform_config_paths()`
+  - Credential validation for environment variables and OS-native stores
+  - Schema-aware configuration management
+  - Interactive server management with automatic backups
+- **Platform Mapping**: `platform_map` dictionary for CLI argument to platform name translation
 - **Disable/Enable functionality**: Servers can be temporarily disabled by renaming with `DISABLED_` prefix
   - `disable_server()`: Renames server key to deactivate without deletion
   - `enable_server()`: Restores original server name to reactivate
-  - `get_disabled_servers()`: Tracks all disabled servers across platforms
+  - `get_disabled_servers()`: Tracks disabled servers for the target platform
   - Preserves complete configuration while making servers inactive
+- **Single-Platform Operations**: All interactive methods work with one platform at a time
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
@@ -144,3 +189,6 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Missing sync-mcp.sh**: Referenced in .vscode/tasks.json but not present (use mcp-manager.py instead)
 - **Permission errors**: Run `chmod +x mcp-manager.py`
 - **Credential failures**: Check GUIDE-CREDENTIALS.md for platform-specific setup
+- **Platform not found**: Use `--status` to see available platforms, or specify different platform with `--platform`
+- **Auto-detection issues**: Explicitly specify target platform with `--platform <name>` if auto-detection fails
+- **No servers shown**: Ensure you're targeting the correct platform where servers are configured
