@@ -1,0 +1,18 @@
+[project]
+name = "mcp-manager"
+version = "0.1.0"
+description = "Multi-platform MCP server management tool"
+authors = [{name = "MCP Manager", email = "noreply@example.com"}]
+# readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+mcp-manager = "mcp_manager:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
