@@ -128,35 +128,66 @@ The tool operates on **one platform at a time** with the following options:
 - Allows independent management of each platform's MCP servers
 - Maintains backward compatibility with `--file` flag for direct file operations
 
+## CRITICAL: Code Quality Requirements (Codacy Integration)
+
+**⚠️ These rules are NON-NEGOTIABLE and override all other instructions**
+
+### After ANY File Edit
+You MUST **IMMEDIATELY** run `codacy_cli_analyze` from Codacy's MCP Server:
+```python
+# Required parameters for EVERY file edit:
+codacy_cli_analyze(
+    rootPath="/path/to/workspace",  # Workspace root path
+    file="path/to/edited/file.ext", # Path of edited file
+    tool=""  # Leave empty for code quality analysis
+)
+```
+- **Failure to follow this rule is considered a CRITICAL ERROR**
+- If issues are found, propose and apply fixes immediately
+- Never proceed to next task until all issues are resolved
+
+### After Installing ANY Dependencies  
+**IMMEDIATELY** after ANY package manager operation:
+- `npm install`, `yarn add`, `pip install`, `pnpm add`, etc.
+- Adding to `package.json`, `requirements.txt`, `pom.xml`, `build.gradle`
+
+Run security scan:
+```python
+codacy_cli_analyze(
+    rootPath="/path/to/workspace",
+    tool="trivy"  # REQUIRED for security scanning
+)
+```
+- **STOP all operations if vulnerabilities found**
+- Fix security issues BEFORE continuing
+- Example: After `npm install react-markdown` → Run trivy → Fix issues → Then continue
+
+### Codacy Tool Parameters
+- **Code Quality**: Leave `tool` parameter empty/unset
+- **Security Scan**: Set `tool="trivy"`  
+- **File Paths**: Always use standard filesystem paths (not URL-encoded)
+- **Git Projects**: Only send `provider`, `organization`, `repository` if it's a git repo
+
+### When Codacy MCP Server is Unavailable
+Suggest to user:
+1. Reset MCP in VS Code extension
+2. Check GitHub Copilot MCP settings: `Settings > Copilot > Enable MCP servers`
+3. Organization admins: `https://github.com/organizations/{org}/settings/copilot/features`
+4. Personal accounts: `https://github.com/settings/copilot/features`
+
+### Additional Codacy Rules
+- Configuration details in `.github/instructions/codacy.instructions.md`
+- Available tools in `.codacy/codacy.yaml`: dartanalyzer, eslint, lizard, pmd, pylint, revive, semgrep, trivy
+- Never manually install Codacy CLI (use MCP Server tool)
+- Don't analyze for duplicated code or complexity metrics changes
+- After 404 errors: Offer to run `codacy_setup_repository` (with user permission)
+
 ## Important Guidelines
 
 ### File Management
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** (*.md) or README files unless explicitly requested
 - Do what has been asked; nothing more, nothing less
-
-### Code Quality (Codacy Integration)
-After making ANY file edits, you MUST:
-1. **IMMEDIATELY** run `codacy_cli_analyze` tool from Codacy's MCP Server
-2. Set `rootPath` to the workspace path  
-3. Set `file` to the path of the edited file
-4. Apply fixes for any issues found
-5. **This is non-negotiable** - failure to follow this rule is considered a critical error
-
-### Security Dependencies
-After installing ANY dependencies (npm, pip, yarn, pnpm, etc.), you MUST:
-1. **IMMEDIATELY** run `codacy_cli_analyze` with `tool: "trivy"`
-2. Stop all other operations if vulnerabilities are found
-3. Fix any vulnerabilities before continuing
-4. Only proceed with original task after security issues are resolved
-5. Example: After `npm install react-markdown`, run Codacy with trivy BEFORE any other tasks
-
-### Codacy Analysis Requirements
-- Run analysis on EVERY file modification without exception
-- For security scanning: use `tool: "trivy"` parameter
-- For code quality: leave `tool` parameter empty/unset
-- Always use standard filesystem paths (not URL-encoded)
-- If Codacy MCP Server unavailable, suggest user check VS Code Copilot MCP settings
 
 ### Archive Management
 When archiving files:
@@ -271,14 +302,17 @@ The repository includes `.codacy/codacy.yaml` with the following analysis tools:
 
 ## Troubleshooting
 
-### Python Packaging Issues
+### Python Execution
 - **Use system Python directly**: `/usr/bin/python3 mcp-manager.py`
+- **Alternative execution**: `python3 mcp-manager.py` or `./mcp-manager.py`
 - **Skip virtual environment**: Tool uses only standard library modules
-- **Known issue**: pyproject.toml has hatchling build backend configuration issues
 - **Module import errors**: When importing mcp-manager.py in tests, use `importlib.util.spec_from_file_location()` due to hyphen in filename
 
 ### Common Issues
-- **Missing sync-mcp.sh**: Referenced in .vscode/tasks.json but not present (use mcp-manager.py instead)
+- **Missing sync-mcp.sh**: Referenced in `.vscode/tasks.json` but not present
+  - VS Code task tries to run `~/bin/sync-mcp.sh` on folder open
+  - Use `mcp-manager.py` for MCP synchronization instead
+  - Consider disabling or updating the VS Code task
 - **Permission errors**: Run `chmod +x mcp-manager.py`
 - **Credential failures**: Check GUIDE-CREDENTIALS.md for platform-specific setup
 - **Platform not found**: Use `--status` to see available platforms, or specify different platform with `--platform`
