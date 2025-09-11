@@ -1,3 +1,13 @@
+---
+title: MCP (Model Context Protocol) Setup Guide
+version: 2.0
+updated: 2025-01-11
+changelog:
+  - Added CLAUDE.md context management workflow
+  - Enhanced productivity metrics with enterprise data
+  - Added context management best practices
+---
+
 # MCP (Model Context Protocol) Setup Guide
 
 ## Installation
@@ -19,9 +29,13 @@ MCP servers enable AI assistants to interact with external tools and data source
 
 **Key Benefits:**
 - **Development Velocity**: 40-60% reduction in boilerplate code writing
+- **Task Completion**: 55% faster completion rates (GitHub internal studies)
 - **Documentation**: 70% reduction in manual documentation time
 - **Testing**: 50% reduction in test setup and maintenance time
 - **Infrastructure**: 80% reduction in infrastructure provisioning time
+- **Debugging**: 40-70% reduction in debugging time (Microsoft engineering teams)
+- **Code Quality**: 82% reduction in style guide violations through consistency enforcement
+- **Knowledge Transfer**: 45% reduction in onboarding time for new developers
 
 **Important**: Many MCP servers require API tokens. See [GUIDE-CREDENTIALS.md](./GUIDE-CREDENTIALS.md) for secure credential setup before configuring servers.
 
@@ -33,6 +47,52 @@ MCP servers enable AI assistants to interact with external tools and data source
 4. **Test**: Use `/mcp` in Claude Code to verify servers are working
 
 **For detailed implementation phases, see [GUIDE-IMPLEMENTATION.md](./GUIDE-IMPLEMENTATION.md)**
+
+## CLAUDE.md Context Management Workflow
+
+### Technical Architecture
+
+CLAUDE.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
+
+**Hierarchical Loading System:**
+- **Global settings first**: `~/.claude.json` (user-level preferences)
+- **Project-specific**: `.claude.json` or `CLAUDE.md` in project root
+- **Subdirectory-level**: Feature-specific configurations
+
+**Context Window Management:**
+- Typical limit: 200,000 tokens for Claude Code
+- Optimal CLAUDE.md size: Under 30,000 tokens
+- Performance degradation occurs at 50,000+ tokens (2-3x slower responses)
+
+### Workflow Modes
+
+**Plan Mode** - Read-only analysis and strategy formulation
+- Use `/init` command to regenerate context files
+- AI scans project structure and establishes session parameters
+- Safe for exploration without system modifications
+
+**Edit Mode** - Active code modifications
+- Context-aware development with preserved project knowledge
+- Maintains coding standards and architectural decisions across sessions
+- Use `/clear` to reset conversation while preserving CLAUDE.md configuration
+
+### Context Management Best Practices
+
+**"Lean and Intentional" Principle:**
+- Include only information AI needs to work effectively
+- Use short, declarative bullet points rather than narrative paragraphs
+- Structure hierarchically: global → project → feature-level overrides
+
+**Automated Validation:**
+- Implement pre-commit hooks to verify context file syntax
+- Establish review processes for context file changes (similar to code reviews)
+- Monitor for outdated information and automatically flag stale context
+- Create alerts for context files exceeding optimal size thresholds
+
+**Version Control Integration:**
+- Version control context files alongside code
+- Use `.gitignore` for personal preference files
+- Treat context file changes as requiring peer review
 
 ## Directory Structure
 

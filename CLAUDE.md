@@ -8,11 +8,19 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 ### Core Architecture
 
-The repository follows a **platform-specific management approach** where:
-1. **`mcp-manager.py`** serves as the central platform-targeted management tool with auto-detection
-2. **Documentation guides** in `10_draft-merged/` provide comprehensive setup instructions with cross-references
-3. **Draft documents** in `00_draft-initial/` contain research and reports awaiting finalization
-4. **Archive system** in `ARCHIVED/` stores historical documents with UTC timestamps
+The repository follows a **platform-specific management approach** with a structured document lifecycle:
+
+**Management Tool Architecture:**
+1. **`mcp-manager.py`** - Central platform-targeted management tool with auto-detection
+   - Single-platform operations (not cross-platform synchronization)
+   - MCPConfig class handles individual platform operations
+   - Platform selection via `select_target_platform()` with auto-detection
+   - Disable/enable servers via `DISABLED_` prefix renaming
+
+**Document Lifecycle Management:**
+2. **Research Phase** (`00_draft-initial/`) - Raw research, reports, and analysis awaiting integration
+3. **Active Guides** (`10_draft-merged/`) - Finalized, cross-referenced documentation with YAML frontmatter
+4. **Archive System** (`ARCHIVED/`) - Historical documents with UTC timestamps (`YYYYMMDDTHHMMSSZ_filename.ext`)
 
 ### Key Components
 
@@ -55,6 +63,11 @@ The repository follows a **platform-specific management approach** where:
 # Deduplication Examples
 /usr/bin/python3 mcp-manager.py --deduplicate    # Auto-detect platform and remove duplicates
 /usr/bin/python3 mcp-manager.py --platform claude-code --deduplicate  # Target specific platform
+
+# Alternative Claude Code CLI commands
+claude mcp list                                   # List configured servers
+claude mcp add <name> <command> [args...]        # Add server
+claude mcp remove <name>                         # Remove server
 ```
 
 ### Git Operations
@@ -67,6 +80,21 @@ git log --oneline
 
 # Archive files with UTC timestamp
 cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
+
+# Move files to archive (preferred over copy)
+mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
+```
+
+### Document Workflow Management
+```bash
+# Working with the three-guide system
+# Edit active guides in 10_draft-merged/:
+code 10_draft-merged/11_GUIDE-MCP.md          # MCP setup and configuration
+code 10_draft-merged/12_GUIDE-CREDENTIALS.md  # Secure credential management
+code 10_draft-merged/13_GUIDE-IMPLEMENTATION.md # Implementation strategy
+
+# Research and reports in 00_draft-initial/ (awaiting integration)
+ls 00_draft-initial/                          # List draft documents
 ```
 
 ### Testing
@@ -79,6 +107,15 @@ cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 # 2. Confirm test fails with expected error
 # 3. Apply fix
 # 4. Verify test passes
+
+# Testing import pattern for hyphenated files
+python3 -c "
+import importlib.util
+spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+print('Import successful')
+"
 ```
 
 ## MCP Server Configuration Architecture
@@ -212,23 +249,29 @@ Historical documents with UTC timestamps for reference
 
 ### mcp-manager.py Architecture
 The tool implements a **platform-specific management architecture** with:
-- **Platform Selection**: `select_target_platform()` method with auto-detection and explicit targeting
-- **MCPConfig class** for individual platform operations with:
-  - Platform-specific path detection via `get_platform_config_paths()`
-  - Credential validation for environment variables and OS-native stores
-  - Schema-aware configuration management
-  - Interactive server management with automatic backups
-- **Platform Mapping**: `platform_map` dictionary for CLI argument to platform name translation
-- **Disable/Enable functionality**: Servers can be temporarily disabled by renaming with `DISABLED_` prefix
+
+**Platform Selection & Management:**
+- `select_target_platform()` method with auto-detection and explicit targeting
+- `platform_map` dictionary for CLI argument to platform name translation
+- Breaking change: Operations target one platform at a time (no cross-platform sync)
+
+**MCPConfig Class Features:**
+- Platform-specific path detection via `get_platform_config_paths()`
+- Credential validation for environment variables and OS-native stores
+- Schema-aware configuration management (handles `mcpServers` vs `servers` differences)
+- Interactive server management with automatic backups
+
+**Server State Management:**
+- **Disable/Enable**: Servers temporarily disabled by renaming with `DISABLED_` prefix
   - `disable_server()`: Renames server key to deactivate without deletion
   - `enable_server()`: Restores original server name to reactivate
-  - `get_disabled_servers()`: Tracks disabled servers for the target platform
   - Preserves complete configuration while making servers inactive
-- **Deduplication functionality**: Remove duplicate servers where both active and DISABLED_ versions exist
-  - `remove_duplicate_servers()`: Identifies and removes active duplicates, keeping DISABLED_ versions
+- **Deduplication**: Remove duplicate servers where both active and DISABLED_ versions exist
+  - `remove_duplicate_servers()`: Keeps DISABLED_ versions, removes active duplicates
   - Automatically creates backups before deduplication
-  - Reports which duplicates were found and removed
-- **Single-Platform Operations**: All interactive methods work with one platform at a time
+
+**Import Pattern for Testing:**
+Due to hyphenated filename, use `importlib.util.spec_from_file_location()` pattern for imports
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)

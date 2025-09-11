@@ -1,3 +1,12 @@
+---
+title: Secure Credentials Management for MCP Servers
+version: 2.0
+updated: 2025-01-11
+changelog:
+  - Updated for enhanced security requirements
+  - Maintained focus on credential security practices
+---
+
 # Secure Credentials Management for MCP Servers
 
 This guide covers secure storage and management of API tokens for MCP servers. See [GUIDE-MCP.md](./GUIDE-MCP.md) for MCP server configuration after setting up credentials.
