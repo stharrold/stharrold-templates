@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and management. The repository provides cross-platform tools, comprehensive guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
 
+**Current MCP State**: All MCP servers have been removed from all platforms (as of 2025-09-12). This provides a clean slate for selective server management using the platform-specific approach.
+
 ### Core Architecture
 
 The repository follows a **platform-specific management approach** with a structured document lifecycle:
@@ -97,7 +99,7 @@ code 10_draft-merged/13_GUIDE-IMPLEMENTATION.md # Implementation strategy
 ls 00_draft-initial/                          # List draft documents
 ```
 
-### Testing
+### Testing and Code Quality
 ```bash
 # Run deduplication test
 /usr/bin/python3 test_mcp_deduplication.py
@@ -116,6 +118,10 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 print('Import successful')
 "
+
+# Code quality analysis (via Codacy MCP Server when available)
+# Automatic analysis runs after file edits per .github/instructions/codacy.instructions.md
+# Security scanning with trivy after dependency installations
 ```
 
 ## MCP Server Configuration Architecture
@@ -215,6 +221,7 @@ Suggest to user:
 ### Additional Codacy Rules
 - Configuration details in `.github/instructions/codacy.instructions.md`
 - Available tools in `.codacy/codacy.yaml`: dartanalyzer, eslint, lizard, pmd, pylint, revive, semgrep, trivy
+- Required runtimes: Dart 3.7.2, Go 1.22.3, Java 17.0.10, Node 22.2.0, Python 3.11.11
 - Never manually install Codacy CLI (use MCP Server tool)
 - Don't analyze for duplicated code or complexity metrics changes
 - After 404 errors: Offer to run `codacy_setup_repository` (with user permission)
@@ -352,10 +359,10 @@ The repository includes `.codacy/codacy.yaml` with the following analysis tools:
 - **Module import errors**: When importing mcp-manager.py in tests, use `importlib.util.spec_from_file_location()` due to hyphen in filename
 
 ### Common Issues
-- **Missing sync-mcp.sh**: Referenced in `.vscode/tasks.json` but not present
-  - VS Code task tries to run `~/bin/sync-mcp.sh` on folder open
-  - Use `mcp-manager.py` for MCP synchronization instead
-  - Consider disabling or updating the VS Code task
+- **VS Code task disabled**: The `.vscode/tasks.json` sync task has been disabled
+  - Previously tried to run `~/bin/sync-mcp.sh` on folder open 
+  - Now uses platform-specific `mcp-manager.py` operations instead
+  - Task is commented out to prevent startup errors
 - **Permission errors**: Run `chmod +x mcp-manager.py`
 - **Credential failures**: Check GUIDE-CREDENTIALS.md for platform-specific setup
 - **Platform not found**: Use `--status` to see available platforms, or specify different platform with `--platform`
@@ -365,6 +372,10 @@ The repository includes `.codacy/codacy.yaml` with the following analysis tools:
 ### Recently Fixed Issues
 - **AttributeError in deduplication**: Fixed in remove_duplicate_servers method
   - Changed `self.config` → `self.data`
-  - Changed `self.platform_name` → `self.name`
+  - Changed `self.platform_name` → `self.name`  
   - Changed `self.server_key` → `'mcpServers'`
   - Changed method calls from `backup_config()` → `backup()` and `save_config()` → `save()`
+- **All MCP servers removed**: Clean slate state as of 2025-09-12
+  - All platforms now have 0 active servers
+  - Backups preserved in `ARCHIVED/` with UTC timestamps
+  - Platform-specific management ready for selective server addition

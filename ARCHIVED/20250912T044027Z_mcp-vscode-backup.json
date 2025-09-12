@@ -1,0 +1,202 @@
+{
+  "servers": {
+    "DISABLED_MSSQL MCP": {
+      "command": "node",
+      "args": [
+        "D:\\source\\repos\\SQL-AI-samples\\MssqlMcp\\Node\\dist\\index.js"
+      ],
+      "env": {
+        "SERVER_NAME": "iuh-edw-sql-dev-01.database.windows.net",
+        "DATABASE_NAME": "EDW",
+        "READONLY": "true"
+      },
+      "type": "stdio"
+    },
+    "DISABLED_github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "type": "sse"
+    },
+    "DISABLED_microsoft-docs": {
+      "url": "https://learn.microsoft.com/api/mcp",
+      "type": "sse"
+    },
+    "DISABLED_deepwiki": {
+      "url": "https://mcp.deepwiki.com/sse",
+      "type": "sse"
+    },
+    "DISABLED_playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_huggingface": {
+      "url": "https://hf.co/mcp",
+      "type": "sse"
+    },
+    "DISABLED_markitdown": {
+      "command": "uvx",
+      "args": [
+        "markitdown-mcp"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_imagesorcery": {
+      "command": "uvx",
+      "args": [
+        "imagesorcery-mcp"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${input:memory_file_path}"
+      },
+      "type": "stdio"
+    },
+    "DISABLED_azure-devops": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure-devops/mcp",
+        "${input:ado_org}"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_terraform": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "hashicorp/terraform-mcp-server"
+      ],
+      "type": "stdio"
+    },
+    "DISABLED_webflow": {
+      "url": "https://mcp.webflow.com/sse",
+      "type": "sse"
+    },
+    "DISABLED_codacy": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@codacy/codacy-mcp@latest"
+      ],
+      "type": "stdio"
+    },
+    "MSSQL MCP": {
+      "command": "node",
+      "args": [
+        "D:\\source\\repos\\SQL-AI-samples\\MssqlMcp\\Node\\dist\\index.js"
+      ],
+      "env": {
+        "SERVER_NAME": "iuh-edw-sql-dev-01.database.windows.net",
+        "DATABASE_NAME": "EDW",
+        "READONLY": "true"
+      },
+      "type": "stdio"
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "type": "sse"
+    },
+    "microsoft-docs": {
+      "url": "https://learn.microsoft.com/api/mcp",
+      "type": "sse"
+    },
+    "huggingface": {
+      "url": "https://hf.co/mcp",
+      "type": "sse"
+    },
+    "markitdown": {
+      "command": "uvx",
+      "args": [
+        "markitdown-mcp"
+      ],
+      "type": "stdio"
+    },
+    "imagesorcery": {
+      "command": "uvx",
+      "args": [
+        "imagesorcery-mcp"
+      ],
+      "type": "stdio"
+    },
+    "sequentialthinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "type": "stdio"
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "${input:memory_file_path}"
+      },
+      "type": "stdio"
+    },
+    "azure-devops": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure-devops/mcp",
+        "${input:ado_org}"
+      ],
+      "type": "stdio"
+    },
+    "terraform": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "hashicorp/terraform-mcp-server"
+      ],
+      "type": "stdio"
+    },
+    "webflow": {
+      "url": "https://mcp.webflow.com/sse",
+      "type": "sse"
+    },
+    "codacy": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@codacy/codacy-mcp@latest"
+      ],
+      "type": "stdio"
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/sse",
+      "type": "sse"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "type": "stdio"
+    }
+  }
+}
