@@ -104,13 +104,7 @@ ls 00_draft-initial/                          # List draft documents
 # Run deduplication test
 /usr/bin/python3 test_mcp_deduplication.py
 
-# Test specific functionality before fixes (TDD approach)
-# 1. Write test to reproduce issue
-# 2. Confirm test fails with expected error
-# 3. Apply fix
-# 4. Verify test passes
-
-# Testing import pattern for hyphenated files
+# Import pattern for hyphenated files (due to mcp-manager.py filename)
 python3 -c "
 import importlib.util
 spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
@@ -118,10 +112,6 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 print('Import successful')
 "
-
-# Code quality analysis (via Codacy MCP Server when available)
-# Automatic analysis runs after file edits per .github/instructions/codacy.instructions.md
-# Security scanning with trivy after dependency installations
 ```
 
 ## MCP Server Configuration Architecture
@@ -175,56 +165,15 @@ The tool operates on **one platform at a time** with the following options:
 
 **⚠️ These rules are NON-NEGOTIABLE and override all other instructions**
 
-### After ANY File Edit
-You MUST **IMMEDIATELY** run `codacy_cli_analyze` from Codacy's MCP Server:
-```python
-# Required parameters for EVERY file edit:
-codacy_cli_analyze(
-    rootPath="/path/to/workspace",  # Workspace root path
-    file="path/to/edited/file.ext", # Path of edited file
-    tool=""  # Leave empty for code quality analysis
-)
-```
-- **Failure to follow this rule is considered a CRITICAL ERROR**
-- If issues are found, propose and apply fixes immediately
-- Never proceed to next task until all issues are resolved
+### After ANY File Edit or Dependency Installation
+- **File edits**: Run `codacy_cli_analyze` immediately with `rootPath` and `file` parameters
+- **Dependencies**: Run `codacy_cli_analyze` with `tool="trivy"` for security scanning
+- **Failure to follow these rules is considered a CRITICAL ERROR**
 
-### After Installing ANY Dependencies  
-**IMMEDIATELY** after ANY package manager operation:
-- `npm install`, `yarn add`, `pip install`, `pnpm add`, etc.
-- Adding to `package.json`, `requirements.txt`, `pom.xml`, `build.gradle`
+**Complete configuration details in `.github/instructions/codacy.instructions.md`**
 
-Run security scan:
-```python
-codacy_cli_analyze(
-    rootPath="/path/to/workspace",
-    tool="trivy"  # REQUIRED for security scanning
-)
-```
-- **STOP all operations if vulnerabilities found**
-- Fix security issues BEFORE continuing
-- Example: After `npm install react-markdown` → Run trivy → Fix issues → Then continue
-
-### Codacy Tool Parameters
-- **Code Quality**: Leave `tool` parameter empty/unset
-- **Security Scan**: Set `tool="trivy"`  
-- **File Paths**: Always use standard filesystem paths (not URL-encoded)
-- **Git Projects**: Only send `provider`, `organization`, `repository` if it's a git repo
-
-### When Codacy MCP Server is Unavailable
-Suggest to user:
-1. Reset MCP in VS Code extension
-2. Check GitHub Copilot MCP settings: `Settings > Copilot > Enable MCP servers`
-3. Organization admins: `https://github.com/organizations/{org}/settings/copilot/features`
-4. Personal accounts: `https://github.com/settings/copilot/features`
-
-### Additional Codacy Rules
-- Configuration details in `.github/instructions/codacy.instructions.md`
-- Available tools in `.codacy/codacy.yaml`: dartanalyzer, eslint, lizard, pmd, pylint, revive, semgrep, trivy
-- Required runtimes: Dart 3.7.2, Go 1.22.3, Java 17.0.10, Node 22.2.0, Python 3.11.11
-- Never manually install Codacy CLI (use MCP Server tool)
-- Don't analyze for duplicated code or complexity metrics changes
-- After 404 errors: Offer to run `codacy_setup_repository` (with user permission)
+**Available tools**: dartanalyzer, eslint, lizard, pmd, pylint, revive, semgrep, trivy
+**Required runtimes**: Dart 3.7.2, Go 1.22.3, Java 17.0.10, Node 22.2.0, Python 3.11.11
 
 ## Important Guidelines
 
@@ -240,17 +189,9 @@ When archiving files:
 - Use `mv` not `cp` to move files
 
 ## Documentation Structure
-
-### Active Guides (10_draft-merged/)
-- **11_GUIDE-MCP.md**: Tiered server categorization, security considerations, monitoring
-- **12_GUIDE-CREDENTIALS.md**: Credential requirements table, CVE warnings, rotation schedules
-- **13_GUIDE-IMPLEMENTATION.md**: 4-phase rollout, KPIs, ROI calculations
-
-### Draft Documents (00_draft-initial/)
-Reports and research awaiting review or integration into guides
-
-### Archived Documents (ARCHIVED/)
-Historical documents with UTC timestamps for reference
+- **Active Guides** (`10_draft-merged/`): Three-guide system (MCP, Credentials, Implementation)
+- **Draft Documents** (`00_draft-initial/`): Research awaiting integration  
+- **Archived Documents** (`ARCHIVED/`): Historical documents with UTC timestamps
 
 ## Critical Implementation Details
 
@@ -277,17 +218,15 @@ The tool implements a **platform-specific management architecture** with:
   - `remove_duplicate_servers()`: Keeps DISABLED_ versions, removes active duplicates
   - Automatically creates backups before deduplication
 
-**Import Pattern for Testing:**
-Due to hyphenated filename, use `importlib.util.spec_from_file_location()` pattern for imports
+**Import Pattern:** Due to hyphenated filename, use `importlib.util.spec_from_file_location()` for importing in tests
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
 - **Tier 2**: High-Impact Productivity (Codacy, Sentry, Azure DevOps, Terraform)
-- **Tier 3**: Advanced Collaboration (Slack, Notion, PostHog, Zapier)
+- **Tier 3**: Advanced Collaboration (Slack, Notion, PostHog, Zapier)  
 - **Tier 4**: Specialized Domain (MongoDB, Figma, Apidog)
 
 ## Local Permissions
-
 Claude Code permissions configured in `.claude/settings.local.json`:
 - GitHub repository search and file access
 - File system operations (`chmod`, `sed`, `grep`)
@@ -295,87 +234,14 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - Codacy analysis integration
 - WebFetch for specific domains (github.com, mcpcat.io, apidog.com)
 
-## Development Workflow
-
-### Test-Driven Development (TDD)
-When fixing bugs or adding features, follow the TDD pattern:
-
-1. **Write failing test first**:
-   ```python
-   # test_feature.py
-   import importlib.util
-   spec = importlib.util.spec_from_file_location("mcp_manager", "mcp-manager.py")
-   mcp_manager = importlib.util.module_from_spec(spec)
-   spec.loader.exec_module(mcp_manager)
-   
-   # Test that reproduces the issue
-   def test_feature():
-       # Arrange
-       config = mcp_manager.MCPConfig(test_config)
-       # Act & Assert
-       assert config.feature_works()
-   ```
-
-2. **Verify test fails** with expected error
-3. **Implement minimal fix** to make test pass
-4. **Run test again** to verify fix
-5. **Test with actual command** to confirm real-world behavior
-6. **Run Codacy analysis** on modified files
-
-### Import Pattern for Hyphenated Files
-```python
-import importlib.util
-spec = importlib.util.spec_from_file_location("module_name", "file-name.py")
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
-```
-
-## Project Configuration
-
-### Codacy Tools Available
-The repository includes `.codacy/codacy.yaml` with the following analysis tools:
-- **dartanalyzer@3.7.2**: Dart static analysis
-- **eslint@8.57.0**: JavaScript/TypeScript linting
-- **lizard@1.17.31**: Code complexity analysis
-- **pmd@7.11.0**: Java source code analyzer
-- **pylint@3.3.6**: Python code analysis
-- **revive@1.7.0**: Go linting
-- **semgrep@1.78.0**: Pattern-based static analysis
-- **trivy@0.65.0**: Security vulnerability scanner
-
-### Required Runtimes
-- Dart 3.7.2
-- Go 1.22.3
-- Java 17.0.10
-- Node 22.2.0
-- Python 3.11.11
-
-## Troubleshooting
-
-### Python Execution
-- **Use system Python directly**: `/usr/bin/python3 mcp-manager.py`
-- **Alternative execution**: `python3 mcp-manager.py` or `./mcp-manager.py`
-- **Skip virtual environment**: Tool uses only standard library modules
-- **Module import errors**: When importing mcp-manager.py in tests, use `importlib.util.spec_from_file_location()` due to hyphen in filename
-
-### Common Issues
-- **VS Code task disabled**: The `.vscode/tasks.json` sync task has been disabled
-  - Previously tried to run `~/bin/sync-mcp.sh` on folder open 
-  - Now uses platform-specific `mcp-manager.py` operations instead
-  - Task is commented out to prevent startup errors
+## Common Issues & Solutions
 - **Permission errors**: Run `chmod +x mcp-manager.py`
-- **Credential failures**: Check GUIDE-CREDENTIALS.md for platform-specific setup
-- **Platform not found**: Use `--status` to see available platforms, or specify different platform with `--platform`
-- **Auto-detection issues**: Explicitly specify target platform with `--platform <name>` if auto-detection fails
-- **No servers shown**: Ensure you're targeting the correct platform where servers are configured
+- **Module import errors**: Use `importlib.util.spec_from_file_location()` pattern due to hyphenated filename
+- **Platform not found**: Use `--status` to see available platforms or specify `--platform <name>`
+- **Auto-detection issues**: Explicitly specify target platform with `--platform <name>`
+- **VS Code task disabled**: The `.vscode/tasks.json` sync task is commented out to prevent startup errors
 
-### Recently Fixed Issues
-- **AttributeError in deduplication**: Fixed in remove_duplicate_servers method
-  - Changed `self.config` → `self.data`
-  - Changed `self.platform_name` → `self.name`  
-  - Changed `self.server_key` → `'mcpServers'`
-  - Changed method calls from `backup_config()` → `backup()` and `save_config()` → `save()`
-- **All MCP servers removed**: Clean slate state as of 2025-09-12
-  - All platforms now have 0 active servers
-  - Backups preserved in `ARCHIVED/` with UTC timestamps
-  - Platform-specific management ready for selective server addition
+## Current State (as of 2025-09-12)
+- **All MCP servers removed** from all platforms (clean slate)
+- **Backups preserved** in `ARCHIVED/` with UTC timestamps  
+- **Platform-specific management** ready for selective server addition

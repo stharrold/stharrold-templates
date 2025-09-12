@@ -1,10 +1,13 @@
 ---
 title: Secure Credentials Management for MCP Servers
-version: 2.0
-updated: 2025-01-11
+version: 3.0
+updated: 2025-09-12
 changelog:
-  - Updated for enhanced security requirements
-  - Maintained focus on credential security practices
+  - Merged Claude Code enterprise authentication patterns
+  - Added SSO integration and role-based permissions management
+  - Enhanced security review requirements for AI-generated code
+  - Added model-specific pricing and API billing options
+  - Updated vulnerability statistics and security best practices
 ---
 
 # Secure Credentials Management for MCP Servers
@@ -20,6 +23,54 @@ Proper credential management is critical for MCP server security. This guide emp
 - **Principle of least privilege** for all tokens
 
 Using plaintext credentials in configuration files is a severe security risk that can expose your entire development infrastructure.
+
+## Enterprise Authentication & SSO Integration
+
+### Centralized Authentication Management
+
+Enterprise teams can leverage centralized authentication through SSO and domain capture, ensuring consistent access management across development teams. This approach provides:
+
+**SSO Integration Benefits:**
+- Single sign-on across all Claude Code instances
+- Centralized user provisioning and deprovisioning
+- Compliance with enterprise identity management policies
+- Audit trail integration with existing security systems
+
+**Domain Capture Configuration:**
+```bash
+# Enterprise administrators can configure domain-wide settings
+claude config set-enterprise-domain company.com
+claude config set-sso-provider okta  # or azure-ad, ping, etc.
+```
+
+**Role-Based Permissions Management:**
+- Developer roles with limited MCP server access
+- Admin roles with full configuration capabilities
+- Audit roles with read-only access to usage data
+- Project-specific permissions for fine-grained control
+
+### API Billing & Cost Management
+
+**Pay-Per-Use API Billing Options:**
+- **Claude Sonnet 4**: $3/million input tokens (optimal for 80% of development tasks)
+- **Claude Opus 4**: $15/million input tokens (complex architectural decisions)
+- **Claude Haiku**: $0.80/million input tokens (simple, repetitive tasks)
+
+**Cost Optimization Strategies:**
+- **Prompt Caching**: 90% cost reduction for repeated patterns
+- **Cache Hits**: $0.30/million tokens versus $3.00/million for fresh calls
+- **Batch Processing**: 50% discount for headless mode operations
+- **Strategic Model Selection**: Dynamic switching based on task complexity
+
+```bash
+# Monitor real-time costs
+claude /cost
+
+# Switch models based on task requirements
+claude /model sonnet-4    # For most development tasks
+claude /model opus-4      # For complex architecture work
+claude /model haiku       # For simple operations
+```
 
 ## macOS - Keychain Method
 
@@ -310,6 +361,37 @@ $env:AZURE_DEVOPS_PAT.Substring(0,10)
 - **Impact**: Potential for arbitrary SQL execution
 - **Mitigation**: Use parameterized queries and read-only database users
 - **Best Practice**: Create dedicated MCP database users with minimal permissions
+
+### AI-Generated Code Security Review Requirements
+
+**Critical Security Statistics:**
+- Research indicates **27-50% of AI-generated code contains vulnerabilities**
+- Security review is **mandatory rather than optional** for all AI-generated code
+- Teams must implement **tiered review processes** where code touching authentication, payments, or sensitive data requires additional scrutiny
+
+**Security Review Implementation:**
+```bash
+# All AI-generated code must be clearly labeled
+git commit -m "feat: add user authentication
+  
+AI-Generated: Claude Code assisted implementation
+Security-Review: Required for authentication logic"
+```
+
+**Mandatory Security Practices:**
+1. **Code Labeling**: All AI-generated code must be clearly marked in comments and commits
+2. **Automated Scanning**: Static analysis tools run automatically on Claude-generated code
+3. **Dynamic Testing**: Runtime behavior validation for all AI contributions
+4. **Multi-Model Review**: Different AI models for generation versus review to avoid blind spots
+5. **Human Oversight**: "Never trust, always verify" principle - treat AI code as untested contributions
+
+**Integration with Security Platforms:**
+- Codacy MCP Server: Required for all file edits per repository guidelines
+- Sentry integration: Error tracking and security incident detection
+- SSO integration and role-based permissions
+- Detailed audit logging with programmatic access via Compliance API
+
+**For implementation strategy and competitive analysis, see [GUIDE-IMPLEMENTATION.md](./GUIDE-IMPLEMENTATION.md).**
 
 ### Token Security Best Practices
 
