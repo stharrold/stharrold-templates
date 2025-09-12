@@ -1,6 +1,6 @@
 ---
 title: MCP (Model Context Protocol) Setup Guide
-version: 3.0
+version: 3.1
 updated: 2025-09-12
 changelog:
   - Merged Claude Code development workflow best practices
@@ -9,6 +9,7 @@ changelog:
   - Added multi-instance orchestration and Plan Mode workflows
   - Updated productivity metrics with real-world deployment data
   - Added advanced context management and performance optimization
+  - Added enterprise search architecture and RAG patterns from Graph RAG Kuzu report
 ---
 
 # MCP (Model Context Protocol) Setup Guide
@@ -42,7 +43,7 @@ MCP servers enable AI assistants to interact with external tools and data source
 - **Context Efficiency**: 30-40% reduction in per-session token consumption with proper CLAUDE.md structuring
 - **Legacy Modernization**: Excels at complex architectural changes requiring specialized expertise
 
-**Important**: Many MCP servers require API tokens. See [GUIDE-CREDENTIALS.md](./GUIDE-CREDENTIALS.md) for secure credential setup before configuring servers.
+**Important**: Many MCP servers require API tokens. See [GUIDE-CREDENTIALS.md](./GUIDE-CREDENTIALS.md) for secure credential setup before configuring servers, including enterprise search security considerations.
 
 ## Quick Start Workflow
 
@@ -51,7 +52,7 @@ MCP servers enable AI assistants to interact with external tools and data source
 3. **Validate Setup**: Run `mcp-manager.py --check-credentials` and `mcp-manager.py --list`
 4. **Test**: Use `/mcp` in Claude Code to verify servers are working
 
-**For detailed implementation phases, see [GUIDE-IMPLEMENTATION.md](./GUIDE-IMPLEMENTATION.md)**
+**For detailed implementation phases, see [GUIDE-IMPLEMENTATION.md](./GUIDE-IMPLEMENTATION.md), including enterprise search and RAG implementation strategies**
 
 ## Claude Code Installation & Setup
 
@@ -147,6 +148,132 @@ CLAUDE.md files serve as markdown-based "project constitutions" that AI coding a
 - **Dynamic Context Loading**: Runtime file references and modular organization to prevent instruction bleeding
 - **Team-Wide Standards**: Consistent formatting and structure across team members
 - **Token Optimization**: Balance comprehensive coverage with token efficiency, typically maintaining core context under 50,000 tokens while referencing extended documentation for on-demand loading
+
+## Enterprise Search Architecture with MCP
+
+### Data Quality Foundations
+
+Enterprise search effectiveness depends fundamentally on data quality, not just AI model sophistication. Unlike public web content with clear URLs and ownership, enterprise information lacks governance and structure, creating critical challenges:
+
+**The Foundational Problem:**
+- **Version Ambiguity**: Multiple versions of documents (draft in shared drive, outdated wiki page, final PDF in email)
+- **Shadow Documents**: Employees create duplicates when they can't find originals
+- **Staleness**: Information becomes outdated without clear update cycles
+- **Ownership Gaps**: No clear data stewards or maintenance responsibility
+
+**Solution: Data Census Approach**
+```bash
+# Use MCP servers to inventory critical knowledge sources
+claude mcp add data-census "python -m data_census" \
+  --env DATA_SOURCES="confluence,sharepoint,wikis,gdrive"
+
+# Regular data quality audits
+claude mcp add data-audit "python -m audit_knowledge_base" \
+  --schedule weekly
+```
+
+### Hybrid Retrieval Architecture
+
+Enterprise environments lack web search signals (PageRank, click-through rates, backlinks), requiring sophisticated multi-faceted retrieval:
+
+**Three-Layer Retrieval System:**
+1. **BM25 for Exact Phrase Matching** - Essential for finding specific contract clauses, policy numbers
+2. **Dense Embeddings for Conceptual Similarity** - When users don't know exact terminology
+3. **Knowledge Graph Traversal** - Authority-based discovery through trusted authors, recent approvals
+
+**MCP Implementation:**
+```bash
+# Configure hybrid retrieval MCP server
+claude mcp add enterprise-search "uvx enterprise-search-server" \
+  --env SEARCH_METHODS="bm25,embeddings,graph" \
+  --env RERANK_MODEL="cross-encoder/ms-marco-MiniLM-L-12-v2"
+
+# Knowledge graph server for entity relationships
+claude mcp add knowledge-graph "python -m knowledge_graph_server" \
+  --env GRAPH_DB="neo4j://localhost:7687" \
+  --env SCHEMA_PATH="./enterprise_ontology.json"
+```
+
+### RAG 2.0 Architecture Patterns
+
+Traditional RAG fails when wrong documents are retrieved initially. Enterprise RAG requires robust architecture:
+
+**RAG 2.0 Pipeline Components:**
+1. **Document Intelligence**: Layout-aware parsing, section hierarchy, provenance tracking
+2. **Mixture of Retrievers**: Multiple retrieval methods to maximize recall
+3. **Strong Reranker**: Business logic enforcement and relevance scoring
+4. **Grounded Generation**: Source citation requirements and trained "I don't know" responses
+5. **Curated FAQ Bank**: Common queries bypass brittle retrieval entirely
+
+**Implementation Pattern:**
+```bash
+# Document processing pipeline
+claude mcp add doc-intelligence "python -m document_processor" \
+  --env PARSE_LAYOUT="true" \
+  --env EXTRACT_METADATA="true" \
+  --env TRACK_PROVENANCE="true"
+
+# Instructable reranker with business rules
+claude mcp add reranker "python -m business_reranker" \
+  --config rerank_rules.yaml
+```
+
+### Knowledge Graph Integration
+
+Graphs provide the reliable signals missing from unstructured text by identifying entities and mapping relationships:
+
+**Graph-Based Signals:**
+- **Authority Relationships**: "Engineer A owns Jira Ticket B"
+- **Recency Tracking**: "Document C was approved by Legal on Date D"
+- **Expertise Networks**: "Person E is the SME for Technology F"
+
+**MCP Graph Server Configuration:**
+```bash
+# Knowledge graph with entity extraction
+claude mcp add kuzu-graph "python -m kuzu_graph_server" \
+  --env GRAPH_PATH="./enterprise_knowledge.db" \
+  --env ENTITY_TYPES="person,project,document,policy"
+
+# Automated relationship extraction
+claude mcp add relation-extractor "python -m extract_relations" \
+  --env SOURCE_TYPES="email,slack,confluence,jira"
+```
+
+### Instructable Reranking Systems
+
+Transform ranking from opaque algorithms into configurable business tools:
+
+**Business Logic Examples:**
+- **Pharmaceutical**: Always prioritize FDA-approved documents over internal research
+- **Legal**: Boost documents by authoring partner seniority
+- **Engineering**: Prefer recently updated technical specifications
+
+**Configuration Pattern:**
+```yaml
+# rerank_rules.yaml
+rules:
+  - condition: "document_type == 'FDA_APPROVED'"
+    boost: 2.0
+    priority: 1
+  - condition: "author_role == 'senior_partner'"
+    boost: 1.5
+  - condition: "last_updated > 30_days_ago"
+    boost: 1.2
+```
+
+### Enterprise-Specific Answer Engines
+
+Instead of monolithic enterprise search, build multiple curated "answer engines" for specific domains:
+
+**Domain-Specific Approach:**
+- **HR Engine**: Vetted policy documents only, cite-required responses
+- **IT Support**: Technical documentation with step-by-step procedures
+- **Legal Compliance**: Regulatory documents with audit trails
+- **Engineering**: Code repositories with architectural decision records
+
+This approach treats search as building trustworthy, predictable systems where understood failure modes are more valuable than unpredictable brilliance.
+
+**For comprehensive enterprise search implementation phases and detailed KPIs, see the [Enterprise Search & RAG Implementation section in GUIDE-IMPLEMENTATION.md](./GUIDE-IMPLEMENTATION.md#enterprise-search--rag-implementation).**
 
 ## Command System & Workflow Optimization
 

@@ -1,6 +1,6 @@
 ---
 title: MCP Implementation Strategy Guide
-version: 3.0
+version: 3.1
 updated: 2025-09-12
 changelog:
   - Merged comprehensive Claude Code development workflow strategies
@@ -10,11 +10,12 @@ changelog:
   - Integrated competitive analysis and project-specific implementation strategies
   - Added future developments and industry transformation implications
   - Enhanced anti-patterns with real-world failure modes and alternative approaches
+  - Added enterprise search and RAG implementation phases from Graph RAG Kuzu report
 ---
 
 # MCP Implementation Strategy Guide
 
-This guide provides a phased approach to implementing MCP servers for agentic development workflows. For configuration details, see [GUIDE-MCP.md](./GUIDE-MCP.md). For credential setup, see [GUIDE-CREDENTIALS.md](./GUIDE-CREDENTIALS.md).
+This guide provides a phased approach to implementing MCP servers for agentic development workflows, including enterprise search and RAG capabilities. For configuration details, see [GUIDE-MCP.md](./GUIDE-MCP.md). For credential setup, see [GUIDE-CREDENTIALS.md](./GUIDE-CREDENTIALS.md).
 
 ## Overview
 
@@ -220,6 +221,234 @@ Expand capabilities with monitoring, infrastructure, and testing tools.
 - Link Sentry errors to GitHub issues
 - Use PostHog data for feature prioritization
 - Automate infrastructure provisioning workflows
+
+## Enterprise Search & RAG Implementation
+
+This section provides a systematic approach to implementing enterprise search and RAG capabilities using MCP servers, addressing the unique challenges of enterprise data environments.
+
+### Phase 1: Data Census & Governance Foundation
+
+**Objective**: Establish data quality foundation before implementing any retrieval systems.
+
+**Critical First Step: Data Inventory**
+```bash
+# Deploy data census MCP server
+claude mcp add data-census "python -m enterprise_data_census" \
+  --env SCAN_SOURCES="confluence,sharepoint,wikis,gdrive,slack" \
+  --env OUTPUT_FORMAT="knowledge_graph"
+
+# Generate comprehensive data map
+claude /task "Run complete data census and generate ownership matrix"
+```
+
+**Data Quality Assessment:**
+1. **Version Control Analysis**: Identify multiple versions of critical documents
+2. **Ownership Mapping**: Assign data stewards to each knowledge domain
+3. **Staleness Detection**: Flag outdated content based on last-modified dates
+4. **Shadow Document Discovery**: Find employee-created duplicates and consolidate
+
+**Governance Framework:**
+- **Knowledge Managers**: Dedicated roles for critical information curation
+- **Update Cadences**: Regular refresh cycles for time-sensitive content
+- **Access Controls**: Fine-grained permissions respecting source systems
+- **Quality Metrics**: Measurable standards for information accuracy and completeness
+
+### Phase 2: Hybrid Retrieval Infrastructure
+
+**Objective**: Build robust multi-method retrieval system that overcomes enterprise signal poverty.
+
+**Three-Layer Architecture Implementation:**
+```bash
+# Layer 1: BM25 for exact matching
+claude mcp add bm25-search "python -m bm25_server" \
+  --env INDEX_PATH="./enterprise_bm25.index" \
+  --env TOKENIZER="enterprise_specific"
+
+# Layer 2: Dense embeddings for semantic similarity
+claude mcp add vector-search "python -m vector_search_server" \
+  --env MODEL="sentence-transformers/all-MiniLM-L6-v2" \
+  --env VECTOR_DB="pinecone://enterprise-embeddings"
+
+# Layer 3: Knowledge graph traversal
+claude mcp add graph-traversal "python -m kuzu_graph_server" \
+  --env GRAPH_PATH="./enterprise_knowledge.db" \
+  --env TRAVERSAL_DEPTH="3"
+```
+
+**Instructable Reranker Configuration:**
+```yaml
+# enterprise_rerank_rules.yaml
+business_logic:
+  pharmaceutical:
+    - condition: "document_type == 'FDA_APPROVED'"
+      boost: 2.0
+      priority: 1
+  legal:
+    - condition: "author_role == 'senior_partner'"
+      boost: 1.5
+  engineering:
+    - condition: "last_updated < 30_days"
+      boost: 1.2
+    - condition: "has_code_examples == true"
+      boost: 1.3
+```
+
+**Hard-Negative Mining Setup:**
+```bash
+# Improve disambiguation between similar documents
+claude mcp add hard-negative-miner "python -m hard_negative_trainer" \
+  --env TRAINING_DATA="./enterprise_query_pairs.json" \
+  --env MODEL_PATH="./custom_enterprise_embeddings"
+```
+
+### Phase 3: Curated Answer Engine Development
+
+**Objective**: Build domain-specific, trustworthy answer systems with predictable failure modes.
+
+**Domain-Specific Engine Architecture:**
+
+**HR Policy Engine:**
+```bash
+claude mcp add hr-answer-engine "python -m domain_answer_engine" \
+  --env DOMAIN="hr" \
+  --env SOURCES="hr_policies,employee_handbook,benefits_guide" \
+  --env REQUIRE_CITATIONS="true" \
+  --env UNKNOWN_RESPONSE="enabled"
+```
+
+**IT Support Engine:**
+```bash
+claude mcp add it-support-engine "python -m domain_answer_engine" \
+  --env DOMAIN="it_support" \
+  --env SOURCES="technical_docs,troubleshooting_guides,system_manuals" \
+  --env STEP_BY_STEP="true" \
+  --env ESCALATION_TRIGGERS="./it_escalation_rules.json"
+```
+
+**Legal Compliance Engine:**
+```bash
+claude mcp add legal-engine "python -m domain_answer_engine" \
+  --env DOMAIN="legal" \
+  --env SOURCES="regulatory_docs,compliance_guides,audit_reports" \
+  --env AUDIT_TRAIL="required" \
+  --env CONFIDENCE_THRESHOLD="0.95"
+```
+
+**Implementation Pattern for Each Engine:**
+1. **Curated Source Corpus**: Vetted, up-to-date documents only
+2. **Citation Requirements**: All responses must include source references
+3. **"I Don't Know" Training**: Explicit training to refuse when uncertain
+4. **FAQ Bank Integration**: Pre-written expert answers for common queries
+5. **Confidentiality Filters**: Prevent sensitive data leakage
+
+### Phase 4: Agentic Workflow Implementation
+
+**Objective**: Enable multi-hop reasoning and complex task automation using enterprise knowledge.
+
+**Multi-Hop Architecture:**
+```bash
+# Agent orchestrator with retrieval tools
+claude mcp add enterprise-agent "python -m agentic_orchestrator" \
+  --env TOOLS="search,graph_query,document_parse,synthesize" \
+  --env WORKFLOW_GRAPHS="./enterprise_workflows/"
+  --env HUMAN_CHECKPOINTS="true"
+```
+
+**Example Workflow: Q3 Planning Analysis**
+```yaml
+# q3_planning_workflow.yaml
+workflow:
+  name: "Q3 Planning Analysis"
+  steps:
+    - name: "gather_meeting_notes"
+      tool: "search"
+      query: "Q3 planning meetings product roadmap"
+      filters: ["meeting_notes", "last_30_days"]
+    
+    - name: "cross_reference_slack"
+      tool: "slack_search" 
+      query: "Q3 product decisions architecture changes"
+      channels: ["#product", "#engineering"]
+    
+    - name: "check_project_tickets"
+      tool: "jira_query"
+      jql: "project = PRODUCT AND labels = Q3"
+    
+    - name: "synthesize_narrative"
+      tool: "llm_synthesis"
+      context: ["meeting_notes", "slack_discussions", "project_tickets"]
+      output: "risk_and_decision_summary"
+
+  checkpoints:
+    - after: "gather_meeting_notes"
+      action: "human_review"
+    - after: "synthesize_narrative" 
+      action: "stakeholder_approval"
+```
+
+**DAG Encoding for Reliability:**
+```python
+# Enterprise workflow DAG
+from enterprise_workflows import WorkflowDAG
+
+dag = WorkflowDAG("enterprise_search_workflow")
+dag.add_node("data_retrieval", tools=["search", "graph_query"])
+dag.add_node("content_analysis", depends_on=["data_retrieval"])
+dag.add_node("synthesis", depends_on=["content_analysis"])
+dag.add_human_checkpoint(after="content_analysis")
+```
+
+### Implementation KPIs and Success Metrics
+
+**Data Quality Metrics:**
+- **Coverage Rate**: Percentage of critical business questions answerable
+- **Staleness Index**: Average age of information in active corpus  
+- **Duplication Ratio**: Number of shadow documents vs. authoritative sources
+- **Ownership Coverage**: Percentage of documents with assigned stewards
+
+**Retrieval Performance:**
+- **Precision@10**: Relevant documents in top 10 results
+- **Recall**: Percentage of relevant documents retrieved
+- **NDCG (Normalized Discounted Cumulative Gain)**: Ranking quality measure
+- **Mean Reciprocal Rank**: Position of first relevant result
+
+**Enterprise-Specific Metrics:**
+- **Citation Accuracy**: Percentage of responses with correct source attribution
+- **"I Don't Know" Rate**: Frequency of appropriate uncertainty responses
+- **Query Resolution Time**: Average time from question to trusted answer
+- **Business Impact**: Reduction in time spent searching for information
+
+**Security and Compliance:**
+- **Access Control Violations**: Failed attempts to access restricted information
+- **Data Classification Accuracy**: Correct identification of sensitive content
+- **Audit Trail Completeness**: Percentage of queries with full logging
+- **External Lookup Leakage**: Incidents of sensitive data in external requests
+
+### Measurement and Evaluation Framework
+
+**Internal Benchmark Development:**
+```bash
+# Build enterprise-specific evaluation suite
+claude mcp add eval-framework "python -m enterprise_eval" \
+  --env GOLD_STANDARD="./versioned_knowledge_snapshot/" \
+  --env EVAL_TYPES="answerable,unanswerable,multimodal" \
+  --env COMPARISON_METHOD="pairwise_llm_judge"
+```
+
+**Evaluation Categories:**
+1. **Answerable Questions**: Standard information retrieval queries
+2. **Intentionally Unanswerable**: Questions designed to test "I don't know" responses
+3. **Multi-hop Reasoning**: Questions requiring synthesis across multiple sources
+4. **Procedural Queries**: Step-by-step process questions
+5. **Contextual Disambiguation**: Questions where context determines meaning
+
+**Continuous Improvement Loop:**
+- **Weekly Evaluation Runs**: Automated benchmark testing against knowledge snapshot
+- **User Feedback Integration**: Human rating collection for query quality
+- **Failure Mode Analysis**: Systematic review of incorrect or incomplete responses
+- **Model Retraining**: Periodic updates based on enterprise-specific patterns
+
+This phased approach ensures that enterprise search implementation builds systematically on solid data foundations, addressing the core challenge that enterprise search is fundamentally a data governance problem that happens to use AI, not an AI problem that happens to involve data.
 
 ## Usage Limits Management & Session Optimization
 

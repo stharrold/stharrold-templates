@@ -1,6 +1,6 @@
 ---
 title: Secure Credentials Management for MCP Servers
-version: 3.0
+version: 3.1
 updated: 2025-09-12
 changelog:
   - Merged Claude Code enterprise authentication patterns
@@ -8,11 +8,12 @@ changelog:
   - Enhanced security review requirements for AI-generated code
   - Added model-specific pricing and API billing options
   - Updated vulnerability statistics and security best practices
+  - Added enterprise search security considerations from Graph RAG Kuzu report
 ---
 
 # Secure Credentials Management for MCP Servers
 
-This guide covers secure storage and management of API tokens for MCP servers. See [GUIDE-MCP.md](./GUIDE-MCP.md) for MCP server configuration after setting up credentials.
+This guide covers secure storage and management of API tokens for MCP servers, including enterprise search security considerations. See [GUIDE-MCP.md](./GUIDE-MCP.md) for MCP server configuration after setting up credentials.
 
 ## Security Context
 
@@ -23,6 +24,116 @@ Proper credential management is critical for MCP server security. This guide emp
 - **Principle of least privilege** for all tokens
 
 Using plaintext credentials in configuration files is a severe security risk that can expose your entire development infrastructure.
+
+## Enterprise Search Data Security
+
+Enterprise search systems require additional security considerations beyond standard MCP credential management, particularly when dealing with sensitive corporate knowledge bases and multi-source data integration.
+
+### Multi-Source Credential Management
+
+Enterprise search typically integrates multiple data sources, each requiring secure credential handling:
+
+**Credential Isolation Strategy:**
+- **Separate credential stores per data source** to minimize breach impact
+- **Service-specific tokens** with minimum required permissions
+- **Time-bounded access tokens** with automatic refresh capabilities
+- **Audit logging** for all credential access and usage
+
+```bash
+# Example: Secure multi-source setup
+# Confluence credentials
+security add-generic-password \
+  -a "$USER" \
+  -s "CONFLUENCE_API_TOKEN" \
+  -l "Confluence API Access" \
+  -w "your-confluence-token"
+
+# SharePoint credentials  
+security add-generic-password \
+  -a "$USER" \
+  -s "SHAREPOINT_CLIENT_SECRET" \
+  -l "SharePoint Client Secret" \
+  -w "your-sharepoint-secret"
+
+# Knowledge graph database credentials
+security add-generic-password \
+  -a "$USER" \
+  -s "NEO4J_PASSWORD" \
+  -l "Neo4j Graph Database" \
+  -w "your-neo4j-password"
+```
+
+### Access Control for Sensitive Enterprise Data
+
+**Fine-Grained Permission Management:**
+- **Document-level access controls** that respect source system permissions
+- **Role-based query filtering** based on user identity and clearance level
+- **Confidentiality classification enforcement** (Public, Internal, Confidential, Restricted)
+- **Data sovereignty compliance** for regulatory requirements
+
+**Implementation Pattern:**
+```bash
+# Configure access control MCP server
+claude mcp add access-control "python -m enterprise_acl" \
+  --env USER_DIRECTORY="ldap://company.ldap" \
+  --env CLASSIFICATION_SERVICE="./data_classification.json"
+```
+
+### Confidentiality Filters and External Lookups
+
+Prevent sensitive information leakage when using external enrichment sources:
+
+**Security Gates:**
+1. **Pre-query screening** to identify sensitive terms and entities
+2. **Confidentiality classification** of all retrieved content
+3. **External lookup restrictions** based on data classification
+4. **Audit trail logging** for all external data requests
+
+```yaml
+# confidentiality_rules.yaml
+classification_rules:
+  - pattern: "customer_data|financial_records|employee_info"
+    classification: "confidential"
+    external_lookup: false
+  - pattern: "public_documentation|marketing_content"
+    classification: "public"
+    external_lookup: true
+```
+
+### Audit Trails for Enterprise Knowledge Base Access
+
+**Comprehensive Logging Requirements:**
+- **Query audit logs** with user identity, timestamp, and search terms
+- **Document access tracking** including retrieved content and usage context
+- **Permission escalation alerts** for unusual access patterns
+- **Data export monitoring** to prevent unauthorized knowledge extraction
+
+**Audit MCP Server Configuration:**
+```bash
+# Enterprise audit logging
+claude mcp add audit-logger "python -m enterprise_audit" \
+  --env LOG_LEVEL="detailed" \
+  --env RETENTION_DAYS="2555"  # 7 years for compliance
+  --env ALERT_THRESHOLDS="./security_thresholds.json"
+```
+
+### Data Classification and Retention
+
+**Automated Classification:**
+- **Content scanning** for sensitive patterns (SSN, credit cards, PII)
+- **Metadata-based classification** using document source and author
+- **ML-based sensitivity detection** for unstructured content
+- **Retention policy enforcement** with automatic purging
+
+**Security Monitoring:**
+```bash
+# Data loss prevention monitoring
+claude mcp add dlp-monitor "python -m data_loss_prevention" \
+  --env SCAN_PATTERNS="./pii_patterns.json" \
+  --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook"
+```
+
+This layered security approach ensures that enterprise search capabilities don't compromise organizational data security or regulatory compliance requirements.
 
 ## Enterprise Authentication & SSO Integration
 

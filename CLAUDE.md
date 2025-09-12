@@ -27,10 +27,10 @@ The repository follows a **platform-specific management approach** with a struct
 ### Key Components
 
 - **Platform-Specific MCP Manager**: `mcp-manager.py` handles server management for individual platforms with auto-detection and platform targeting
-- **Three-Guide System**: 
-  - `11_GUIDE-MCP.md` - MCP setup with tiered server categorization (Tier 1-4)
-  - `12_GUIDE-CREDENTIALS.md` - Secure credential management with requirements table
-  - `13_GUIDE-IMPLEMENTATION.md` - Phased rollout strategy and KPIs
+- **Three-Guide System** (recently enhanced with enterprise search capabilities): 
+  - `11_GUIDE-MCP.md` - MCP setup with tiered server categorization plus enterprise search architecture
+  - `12_GUIDE-CREDENTIALS.md` - Secure credential management plus enterprise search security considerations
+  - `13_GUIDE-IMPLEMENTATION.md` - Phased rollout strategy plus comprehensive RAG implementation phases
 - **Schema Harmonization**: Handles differences between Claude Code CLI (`mcpServers`), VS Code (`servers`), and Claude Desktop (`mcpServers`) schemas
 - **Archive System**: UTC-timestamped format `YYYYMMDDTHHMMSSZ_filename.ext`
 
@@ -101,7 +101,7 @@ ls 00_draft-initial/                          # List draft documents
 
 ### Testing and Code Quality
 ```bash
-# Run deduplication test
+# Run deduplication test (tests the critical deduplication fix)
 /usr/bin/python3 test_mcp_deduplication.py
 
 # Import pattern for hyphenated files (due to mcp-manager.py filename)
@@ -112,6 +112,10 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 print('Import successful')
 "
+
+# Project uses uv for dependency management
+uv lock                                   # Update lock file
+uv sync                                   # Sync dependencies
 ```
 
 ## MCP Server Configuration Architecture
@@ -189,9 +193,18 @@ When archiving files:
 - Use `mv` not `cp` to move files
 
 ## Documentation Structure
-- **Active Guides** (`10_draft-merged/`): Three-guide system (MCP, Credentials, Implementation)
-- **Draft Documents** (`00_draft-initial/`): Research awaiting integration  
+
+This repository implements a **structured document lifecycle** that moves content from research through integration to archival:
+
+- **Active Guides** (`10_draft-merged/`): Three-guide system with cross-references and YAML frontmatter
+  - Version-controlled with changelog tracking
+  - Recently merged with enterprise search and RAG implementation content
+- **Draft Documents** (`00_draft-initial/`): Research reports and analysis awaiting integration
+  - Contains 19 specialized reports covering AI agents, embeddings, BAML, AutoGen, DSPy architectures
+  - Research content gets merged into active guides then moved to archive
 - **Archived Documents** (`ARCHIVED/`): Historical documents with UTC timestamps
+  - Preserves evolution of ideas and implementation strategies
+  - Critical for understanding context behind current implementations
 
 ## Critical Implementation Details
 
@@ -245,3 +258,17 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **All MCP servers removed** from all platforms (clean slate)
 - **Backups preserved** in `ARCHIVED/` with UTC timestamps  
 - **Platform-specific management** ready for selective server addition
+- **Active guides enhanced** with enterprise search and RAG implementation patterns
+- **Document merging completed** from Graph RAG Kuzu report into all three guides
+
+## Document Merging Workflow
+
+When integrating reports from `00_draft-initial/` into active guides:
+
+1. **Read source content thoroughly** to understand key concepts and implementation patterns
+2. **Map content to appropriate guides** based on topic alignment (MCP, Credentials, Implementation)  
+3. **Update YAML frontmatter** with version increments and changelog entries
+4. **Insert content at logical locations** maintaining existing structure and flow
+5. **Add cross-references** between guides for comprehensive coverage
+6. **Run quality checks** using Codacy analysis after all edits
+7. **Archive source documents** with UTC timestamps after successful integration
