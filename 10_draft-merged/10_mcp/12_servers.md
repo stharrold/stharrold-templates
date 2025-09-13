@@ -322,8 +322,8 @@ Infrastructure automation with natural language IaC generation.
 
 **Installation:**
 ```bash
-# Docker deployment recommended
-docker run hashicorp/terraform-mcp-server
+# Podman deployment recommended
+podman run hashicorp/terraform-mcp-server
 ```
 
 #### AWS Cloud Control API MCP Server

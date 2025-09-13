@@ -104,7 +104,7 @@ const ExpensiveComponent = React.memo(({ data }) => {
 
 **OpenTelemetry Integration for Claude Code:**
 ```yaml
-# docker-compose.yml for observability stack
+# podman-compose.yml for observability stack
 version: '3.8'
 services:
   otel-collector:

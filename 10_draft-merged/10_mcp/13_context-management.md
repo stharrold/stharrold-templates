@@ -311,7 +311,7 @@ claude /init          # Regenerate CLAUDE.md
 # Project-Specific Commands (example)
 npm run db:migrate    # Run migrations
 npm run db:seed       # Seed database
-docker-compose up     # Start all services
+podman-compose up     # Start all services
 ```
 
 ## Advanced Context Solutions

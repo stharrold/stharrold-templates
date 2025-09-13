@@ -122,7 +122,7 @@ ls 00_draft-initial/
 
 ### Development and Testing
 ```bash
-# Dependency management with UV
+# Dependency management with UV (preferred)
 uv sync                                   # Sync dependencies from uv.lock
 uv lock                                   # Update lock file
 uv add package_name                       # Add new dependency
@@ -131,17 +131,24 @@ uv add package_name                       # Add new dependency
 /usr/bin/python3 test_mcp_deduplication.py    # Test core deduplication functionality
 /usr/bin/python3 mcp_manager.py --validate-all # Validate all platform configurations
 
-# Python virtual environment (if not using uv)
-python3 -m venv .venv
-source .venv/bin/activate                 # Linux/macOS
-.venv\Scripts\activate                    # Windows
+# Run specific tests
+python3 -m pytest test_mcp_deduplication.py::test_function_name  # Single test
+python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Credential validation test
 
-# Test standard module imports (now works with mcp_manager.py)
+# Module import verification (now works with mcp_manager.py)
 python3 -c "
 import mcp_manager
 print('Import successful: MCPConfig available')
-print('Classes:', [name for name in dir(mcp_manager) if name[0].isupper()])
+print('Available classes:', [name for name in dir(mcp_manager) if name[0].isupper()])
+config = mcp_manager.MCPConfig('claude-code')
+print('MCPConfig initialized successfully')
 "
+
+# Python virtual environment (fallback if not using uv)
+python3 -m venv .venv
+source .venv/bin/activate                 # Linux/macOS
+.venv\Scripts\activate                    # Windows
+pip install -e .                         # Install in development mode
 ```
 
 ### Code Quality and Security Analysis
@@ -252,6 +259,37 @@ The tool operates on **one platform at a time** with the following options:
 
 **Complete configuration details in `.github/instructions/codacy.instructions.md`**
 
+## Quick Reference for Development
+
+### Most Common Commands (Copy-Paste Ready)
+```bash
+# Check system status
+/usr/bin/python3 mcp_manager.py --status
+
+# Test core functionality
+/usr/bin/python3 test_mcp_deduplication.py
+
+# Add a new MCP server interactively
+/usr/bin/python3 mcp_manager.py --add
+
+# Validate all credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
+
+# Run code quality analysis after edits
+./.codacy/cli.sh analyze --tool pylint mcp_manager.py
+./.codacy/cli.sh analyze modified_file.py
+
+# Quick backup before major changes
+/usr/bin/python3 mcp_manager.py --backup-only
+```
+
+### Development Workflow
+1. **Check current state**: `--status` to see all platform configurations
+2. **Test before changes**: Run `test_mcp_deduplication.py` to verify base functionality
+3. **Make changes**: Use interactive commands (`--add`, `--remove`, `--disable`)
+4. **Validate changes**: Use `--check-credentials` and re-run tests
+5. **Code quality**: Run Codacy analysis on any modified Python files
+
 ## Important Guidelines
 
 ### File Management
@@ -283,17 +321,30 @@ The tool implements a **platform-specific management architecture** with:
 
 **Core Classes and Functions:**
 - `MCPConfig`: Main configuration management class with platform-specific logic
-- `select_target_platform()`: Auto-detection algorithm for available platforms
-- `validate_credentials()`: Cross-platform credential validation
-- `deduplicate_servers()`: Intelligent duplicate removal with DISABLED_ prefix preservation
+  - `__init__(platform: str, config_path: Optional[Path] = None)`: Initialize for specific platform
+  - `load_config()`: Load platform-specific configuration file
+  - `save_config()`: Save configuration with backup creation
+  - `add_server()`, `remove_server()`: Interactive server management
+  - `disable_server()`, `enable_server()`: DISABLED_ prefix management
+- `select_target_platform()`: Auto-detection algorithm returning first available platform
+- `validate_credentials()`: Cross-platform credential validation for common tokens
+- `deduplicate_servers()`: Intelligent duplicate removal preserving DISABLED_ versions
+- `get_platform_config_paths()`: Cross-platform path resolution for config files
+
+**Platform Detection Logic:**
+1. Checks for existing configuration files in platform-specific paths
+2. Returns first available platform or prompts for selection
+3. Handles macOS, Windows, and Linux path differences automatically
 
 **Standard Python Import**: With the new filename (`mcp_manager.py`), use standard Python import:
 ```python
 import mcp_manager
-# Access classes: mcp_manager.MCPConfig, functions: mcp_manager.select_target_platform()
+# Initialize: config = mcp_manager.MCPConfig('claude-code')
+# Auto-detect: platform = mcp_manager.select_target_platform()
+# Validate: results = mcp_manager.validate_credentials()
 ```
 
-**Testing Pattern**: Standard Python imports now work directly. The updated `test_mcp_deduplication.py` uses `import mcp_manager` for clean, Pythonic module access.
+**Testing Pattern**: Standard Python imports work directly. The `test_mcp_deduplication.py` uses `import mcp_manager` for clean, Pythonic module access and tests core deduplication functionality.
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
@@ -328,6 +379,13 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **CLI not found**: Verify binary cache exists: `ls -la ~/Library/Caches/Codacy/` (macOS)
 - **Analysis fails**: Check file exists and tool supports the file type
 - **No tools support file**: Expected for markdown/text files - tools focus on code analysis
+
+### Python Development Issues
+- **Import errors**: Use `/usr/bin/python3` for system Python or ensure proper virtual environment activation
+- **Missing dependencies**: Run `uv sync` or `pip install -e .` in development mode
+- **Configuration not found**: Check platform-specific paths with `--status` flag
+- **Permission denied**: Run `chmod +x mcp_manager.py` or use `python3 mcp_manager.py` instead of direct execution
+- **Platform detection fails**: Manually specify platform with `--platform <name>` flag
 
 ## Current State (as of 2025-09-13)
 - **All MCP servers removed** from all platforms (clean slate)

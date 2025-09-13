@@ -60,7 +60,7 @@ project_template:
 - **Language:** [e.g., TypeScript 5.x, Python 3.11+]
 - **Framework:** [e.g., Next.js 14, Spring Boot 3.x]
 - **Database:** [e.g., PostgreSQL 15, MongoDB 6]
-- **Infrastructure:** [e.g., AWS, Docker, Kubernetes]
+- **Infrastructure:** [e.g., AWS, Podman, Kubernetes]
 - **Testing:** [e.g., Jest, pytest, React Testing Library]
 - **CI/CD:** [e.g., GitHub Actions, Jenkins]
 </technology>
@@ -79,7 +79,7 @@ tech_stack:
   language: "TypeScript 5.2"
   framework: "Next.js 14"
   database: "PostgreSQL 15"
-  infrastructure: "AWS + Docker"
+  infrastructure: "AWS + Podman"
   testing: "Jest + React Testing Library"
   ci_cd: "GitHub Actions"
 ```

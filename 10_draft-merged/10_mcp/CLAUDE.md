@@ -45,7 +45,7 @@ Model Context Protocol (MCP) setup and configuration for Claude Code development
 Execute in order for comprehensive setup:
 
 1. **[11_setup.md](./11_setup.md)** - Installation, authentication, directory structure
-2. **[12_servers.md](./12_servers.md)** - Available servers by tier (Git, Docker, Database, etc.)
+2. **[12_servers.md](./12_servers.md)** - Available servers by tier (Git, Podman, Database, etc.)
 3. **[13_context-management.md](./13_context-management.md)** - CLAUDE.md workflow optimization patterns
 4. **[14_enterprise-search.md](./14_enterprise-search.md)** - RAG architecture and search patterns
 5. **[15_troubleshooting.md](./15_troubleshooting.md)** - Common issues and maintenance
