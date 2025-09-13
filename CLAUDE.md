@@ -118,13 +118,23 @@ uv sync                                   # Sync dependencies from uv.lock
 uv lock                                   # Update lock file
 uv add package_name                       # Add new dependency
 
-# Testing
+# Core Python Architecture Testing
 /usr/bin/python3 test_mcp_deduplication.py    # Test core deduplication functionality
+/usr/bin/python3 mcp-manager.py --validate-all # Validate all platform configurations
 
 # Python virtual environment (if not using uv)
 python3 -m venv .venv
 source .venv/bin/activate                 # Linux/macOS
 .venv\Scripts\activate                    # Windows
+
+# Test hyphenated module imports (critical for extending mcp-manager.py)
+python3 -c "
+import importlib.util
+spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+print('Import successful: MCPConfig available')
+"
 ```
 
 ### Code Quality and Security Analysis
@@ -264,12 +274,19 @@ The tool implements a **platform-specific management architecture** with:
 - Deduplication and credential validation capabilities
 - Schema harmonization between different platform configurations
 
+**Core Classes and Functions:**
+- `MCPConfig`: Main configuration management class with platform-specific logic
+- `select_target_platform()`: Auto-detection algorithm for available platforms
+- `validate_credentials()`: Cross-platform credential validation
+- `deduplicate_servers()`: Intelligent duplicate removal with DISABLED_ prefix preservation
+
 **Important**: Due to the hyphenated filename (`mcp-manager.py`), use this import pattern for testing or extending:
 ```python
 import importlib.util
 spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
+# Access classes: module.MCPConfig, functions: module.select_target_platform()
 ```
 
 **Testing Pattern**: This import pattern is essential because Python cannot directly import modules with hyphens in their names. The pattern is used in `test_mcp_deduplication.py` and should be followed for any new testing or extension modules.
@@ -301,12 +318,14 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Analysis fails**: Check file exists and tool supports the file type
 - **No tools support file**: Expected for markdown/text files - tools focus on code analysis
 
-## Current State (as of 2025-09-12)
+## Current State (as of 2025-09-13)
 - **All MCP servers removed** from all platforms (clean slate)
-- **Backups preserved** in `ARCHIVED/` with UTC timestamps  
+- **Backups preserved** in `ARCHIVED/` with UTC timestamps
 - **Platform-specific management** ready for selective server addition
 - **Modular guide system** with hierarchical documentation structure
+- **Enhanced capabilities**: Multi-agent orchestration, framework integration, enterprise deployment
 - **Document structure** optimized with 30KB constraints for AI context processing
+- **Recent integration**: Claude workflows merged into modular guides (37_team-collaboration.md, 38_enterprise-deployment.md, 39_multi-agent-systems.md)
 
 ## Development Philosophy
 

@@ -1,7 +1,7 @@
 ---
 title: Implementation Workflow Patterns
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -15,10 +15,12 @@ target_audience: development_teams_and_managers
 related:
   - ./31_paradigm-shift.md
   - ./33_testing-standards.md
+  - ./37_team-collaboration.md
   - ../10_mcp/12_servers.md
   - ../20_credentials/CLAUDE.md
 changelog:
-  - Enhanced with development standards and workflow patterns
+  - 3.2: Added Claude framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
+  - 3.1: Enhanced with development standards and workflow patterns
   - Added template common commands and git workflow integration
   - Integrated project-specific implementation strategies
   - Added migration patterns from existing tools
@@ -418,190 +420,288 @@ claude mcp add azure-devops npx @azure-devops/mcp
 - ✅ **CI/CD integration** with automated deployments and rollback capabilities
 - ✅ **Performance optimization** through data-driven insights and recommendations
 
-## Phase 3: Collaboration Integration (Weeks 5-6)
+## Phase 3: Framework Integration & Advanced Workflows
 
-Enable team collaboration and workflow automation through communication platforms and documentation management.
+### Claude Framework Integration Patterns
 
-### Context Management Rules
+Modern Claude development benefits from integration with established AI frameworks, each offering distinct advantages for different use cases and team structures.
 
-<context_rules>
+#### LangChain Integration
 
-- Use `/clear` between unrelated features
-- Use `/compact` after completing test files
-- Maintain conversation under 10 messages
-- Request Plan Mode (Shift+Tab x2) for architectural changes
-- Include screenshots for UI work
-</context_rules>
+**Native Claude Support via `langchain-anthropic`**
 
-**Context Optimization Strategy:**
-- **Clear conversations** when switching between unrelated tasks to prevent context pollution
-- **Compact responses** after completing large files to reduce token consumption
-- **Session management** to maintain optimal AI performance and cost efficiency
-- **Plan Mode activation** for complex architectural decisions requiring systematic analysis
+LangChain provides rich integration capabilities optimized for Claude's strengths:
 
-**Best Practices for Context Efficiency:**
-```bash
-# Clear conversation history between major tasks
-claude /clear
+```python
+# Installation and setup
+pip install langchain-anthropic
 
-# Compact after large file operations
-claude /compact
+# Basic integration with tool support
+from langchain_anthropic import ChatAnthropic
+from langchain_core.tools import tool
 
-# Use Plan Mode for architectural decisions
-# Shift+Tab x2 to activate, then describe complex changes
+llm = ChatAnthropic(
+    model="claude-3-5-sonnet-20240620",
+    temperature=0,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=2,
+)
+
+@tool
+def complex_calculation(expression: str) -> str:
+    """Execute complex mathematical calculations safely"""
+    # Implementation here
+    return result
+
+# XML-based agent architecture optimized for Claude
+from langchain.agents import XMLAgent
+agent = XMLAgent.from_llm_and_tools(llm, [complex_calculation])
 ```
 
-### Servers to Install
+**Advanced Patterns:**
+- **RAG applications** with comprehensive document analysis using Claude's 200K context window
+- **Citation support** through structured output formatting
+- **XML-based agent architectures** leveraging Claude's XML parsing strengths
+- **Prompt caching integration** for cost optimization on repetitive tasks
 
-#### Communication Platforms
-**Slack MCP Server** - Team messaging integration
-```bash
-# Slack integration via Composio
-npx @composio/mcp@latest setup slack
-claude mcp add slack npx @composio/slack-mcp
-```
-**Capabilities:**
-- Automated team notifications and updates
-- Slack-based code review and deployment workflows
-- Team coordination and status reporting
-- Integration with development events and milestones
+**Best Practices:**
+- Use Claude's context window for large document processing
+- Implement prompt caching for repeated document analysis
+- Leverage XML formatting for structured agent responses
+- Higher token costs require careful optimization strategies
 
-**Notion MCP Server** - Documentation management
-```bash
-claude mcp add notion npx @modelcontextprotocol/server-notion
-```
-**Capabilities:**
-- Automated documentation generation and updates
-- Knowledge base maintenance and organization
-- Meeting notes and decision tracking
-- Project roadmap and planning integration
+#### CrewAI Integration
 
-**Atlassian MCP Server** - Jira and Confluence integration (if applicable)
-```bash
-claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
-```
-**Capabilities:**
-- Automated ticket creation and updates
-- Project tracking and sprint management
-- Documentation synchronization with Confluence
-- Workflow automation between development and project management
+**Multi-Agent Collaboration via LiteLLM**
 
-#### Workflow Automation
-**Zapier MCP Server** - Cross-platform automation
-```bash
-claude mcp add zapier npx @modelcontextprotocol/server-zapier
-```
-**Capabilities:**
-- Multi-platform workflow automation
-- Event-driven task coordination
-- Data synchronization between tools
-- Custom trigger and action configuration
+CrewAI demonstrates excellent Claude compatibility through LiteLLM integration:
 
-**Memory Bank MCP Server** - Session continuity
-```bash
-claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
-```
-**Capabilities:**
-- Persistent context and knowledge retention
-- Cross-session learning and adaptation
-- Team knowledge sharing and preservation
-- Historical decision tracking and rationale
+```python
+# Installation and setup
+pip install crewai
+pip install litellm
 
-### Setup Steps for Phase 3
+# Configure Claude via LiteLLM
+import os
+from crewai import Agent, Task, Crew
+from langchain_anthropic import ChatAnthropic
 
-#### 1. Communication Platforms Configuration
-```bash
-# Slack integration setup
-npx @composio/mcp@latest setup slack
-# Follow OAuth flow for team integration
+# Configure Claude model
+claude_llm = ChatAnthropic(
+    model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY")
+)
 
-# Notion workspace connection
-claude mcp add notion npx @modelcontextprotocol/server-notion
-# Configure with workspace integration token
+# Define specialized agents
+senior_engineer = Agent(
+    role='Senior Software Engineer',
+    goal='Implement complex backend features with high quality',
+    backstory='Expert in system architecture and best practices',
+    llm=claude_llm,
+    verbose=True
+)
 
-# Atlassian integration (if using Jira/Confluence)
-claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
-# Configure with API tokens and workspace URLs
-```
+frontend_specialist = Agent(
+    role='Frontend Specialist',
+    goal='Create responsive, accessible user interfaces',
+    backstory='UI/UX expert with modern frontend framework expertise',
+    llm=claude_llm,
+    verbose=True
+)
 
-#### 2. Automation and Memory Setup
-```bash
-# Zapier for cross-platform automation
-claude mcp add zapier npx @modelcontextprotocol/server-zapier
-# Configure with Zapier API key and automation rules
+# Task delegation with automatic coordination
+backend_task = Task(
+    description='Implement user authentication system with JWT',
+    agent=senior_engineer,
+    expected_output='Complete authentication module with tests'
+)
 
-# Memory Bank for persistent context
-claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
-# Configure with team-specific knowledge persistence settings
+frontend_task = Task(
+    description='Create login/register forms with validation',
+    agent=frontend_specialist,
+    expected_output='React components with form validation'
+)
+
+# Execute coordinated development
+crew = Crew(
+    agents=[senior_engineer, frontend_specialist],
+    tasks=[backend_task, frontend_task],
+    verbose=True
+)
+
+result = crew.kickoff()
 ```
 
-#### 3. Team Onboarding and Guidelines
-- **Document server capabilities** and use cases for team members
-- **Create usage guidelines** and best practices for team collaboration
-- **Setup shared configurations** and standardized workflows
-- **Establish communication protocols** for automated notifications and updates
+**Production Benefits:**
+- **30-40% development time reduction** on complex projects
+- **10+ parallel agents** with conflict resolution
+- **Specialized expertise areas** (frontend, backend, testing, documentation)
+- **Automatic task delegation** based on agent capabilities
+- **Memory systems** for context preservation across tasks
 
-### Success Metrics for Phase 3
-- ✅ **Cross-platform workflow automation** functioning seamlessly
-- ✅ **Team communication** integrated with development workflows
-- ✅ **Documentation auto-generation** and maintenance operational
-- ✅ **Project context retained** across sessions and team members
-- ✅ **Task tracking** automated between development and project management tools
+#### Custom Orchestration Frameworks
 
-### Team Workflow Examples
-- **Auto-create Jira tickets** from Slack discussions and code issues
-- **Generate meeting notes** in Notion from development conversations
-- **Sync GitHub PRs** with project boards and team communication
-- **Automated deployment notifications** to relevant team channels
-- **Cross-team knowledge sharing** through persistent memory and documentation
+**Advanced Multi-Agent Systems**
+
+Leading-edge implementations demonstrate sophisticated orchestration patterns:
+
+**Claude-Flow v2.0 Features:**
+- **87 MCP tools** integrated into hive-mind intelligence
+- **SQLite memory systems** for persistent context
+- **Multi-team project handling** with role-based access
+- **Hierarchical agent architectures** with specialized coordinators
+
+**Claude 007 Agents Architecture:**
+- **112 specialized agents** across 14 domains
+- **Quality assurance** through "Evil Corp" motivation system
+- **Peer-to-peer communication** patterns
+- **Swarm intelligence** for complex problem-solving
+
+```python
+# Example custom orchestration pattern
+class ClaudeOrchestrator:
+    def __init__(self):
+        self.agents = {}
+        self.task_queue = Queue()
+        self.memory_store = SQLiteMemory()
+
+    def add_agent(self, name, role, specialization):
+        """Add specialized agent to orchestration system"""
+        self.agents[name] = ClaudeAgent(
+            role=role,
+            specialization=specialization,
+            memory=self.memory_store.create_context(name)
+        )
+
+    def coordinate_task(self, task_description, requirements):
+        """Intelligently route tasks to appropriate agents"""
+        optimal_agents = self.select_agents(requirements)
+        return self.execute_parallel_tasks(optimal_agents, task_description)
+```
+
+**Architecture Patterns:**
+- **Hierarchical**: Meta-agents coordinating specialist workers
+- **Peer-to-peer**: Direct agent communication for rapid iteration
+- **Pipeline**: Sequential processing with quality gates
+- **Swarm**: Collective intelligence for complex problem-solving
+
+### Ensemble AI Approaches
+
+**Multi-Model Strategy Optimization**
+
+Teams achieve optimal results through intelligent model selection:
+
+```python
+# Intelligent model routing based on task complexity
+class ModelRouter:
+    def route_request(self, task_complexity, urgency, budget):
+        if task_complexity == "high" and urgency == "critical":
+            return "claude-opus-4"  # Complex reasoning, premium cost
+        elif task_complexity == "medium":
+            return "claude-sonnet-4"  # Balanced performance/cost
+        else:
+            return "claude-haiku-3.5"  # Speed optimization
+```
+
+**Specialized Usage Patterns:**
+- **Claude**: Deep analysis, complex reasoning, code architecture
+- **GPT-4**: Quick iterations, API integrations, general completions
+- **Gemini**: Multimodal processing, image analysis, document OCR
+
+**Platform Solutions:**
+- **ChatHub**: Simultaneous access to all models for comparative analysis
+- **Cursor IDE**: Native Claude integration with Command+Esc quick launch
+- **GitHub Copilot**: Claude 3.5 Sonnet achieving 93.7% on HumanEval benchmarks
+
+### IDE and Development Tool Integration
+
+#### Cursor IDE Integration
+
+**Native Claude Support with Advanced Features:**
+
+```bash
+# Quick activation patterns
+Command+Esc              # Quick Claude launch
+Command+Shift+I          # Inline code assistance
+Command+L               # Chat panel toggle
+```
+
+**Advanced Workflow Patterns:**
+- **Automatic context sharing** from active editor
+- **Diff viewing** for proposed changes
+- **Multi-file refactoring** with conflict detection
+- **Screenshot-to-code** workflows with visual feedback
+
+**Team Productivity Results:**
+- **50% reduction in feature implementation time**
+- **Coordinated Cursor-Claude workflows** for complex projects
+- **Pixel-perfect UI implementations** through visual iteration
+
+#### Visual Development Workflows
+
+**Screenshot-Driven Development**
+
+Advanced teams implement visual feedback loops for UI development:
+
+```python
+# Automated visual testing workflow
+from playwright import sync_api
+
+def capture_implementation_screenshot(url):
+    """Capture current implementation state"""
+    with sync_api.sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(url)
+        screenshot = page.screenshot()
+        browser.close()
+        return screenshot
+
+def iterate_until_match(mockup_path, implementation_url):
+    """Iterate implementation until visual match achieved"""
+    mockup = load_image(mockup_path)
+
+    for iteration in range(5):  # Typically achieves match in 2-3 iterations
+        current = capture_implementation_screenshot(implementation_url)
+
+        if visual_similarity(mockup, current) > 0.95:
+            return "Implementation matches mockup"
+
+        # Claude analyzes differences and suggests improvements
+        improvements = claude_analyze_visual_diff(mockup, current)
+        apply_improvements(improvements)
+
+    return "Manual review required"
+```
+
+**Performance Benchmarks:**
+- **Claude 3 Sonnet**: 70.31% accuracy on screenshot-to-code
+- **GPT-4**: 65.10% accuracy (comparative baseline)
+- **Typical workflow**: 2-3 iterations for pixel-perfect results
+
+### Team Collaboration Integration
+
+**Team collaboration patterns have been extracted to a dedicated guide for better organization and maintainability.**
+
+→ **See [37_team-collaboration.md](./37_team-collaboration.md)** for:
+- Communication platform integration (Slack, Notion, Atlassian)
+- Workflow automation patterns
+- Team onboarding and coordination strategies
+- Migration from existing collaboration tools
+- Performance optimization for teams
 
 ## Phase 4: Specialized Requirements (Ongoing)
 
 Add domain-specific servers based on project needs, industry requirements, and custom integrations.
 
-### Industry-Specific Servers
+**Specialized server configurations and custom integrations have been moved to enterprise deployment patterns.**
 
-#### E-commerce and Payments
-```bash
-# Payment processing integration
-claude mcp add stripe npx @modelcontextprotocol/server-stripe
-claude mcp add paypal npx @modelcontextprotocol/server-paypal
-
-# E-commerce platform integration
-claude mcp add shopify npx @modelcontextprotocol/server-shopify
-```
-
-#### Game Development
-```bash
-# Unity game development
-claude mcp add unity npx @modelcontextprotocol/server-unity
-
-# Asset management and optimization
-claude mcp add gamedev-assets npx @modelcontextprotocol/server-gamedev
-```
-
-#### Financial Services
-```bash
-# Financial data integration
-claude mcp add bloomberg npx @modelcontextprotocol/server-bloomberg
-claude mcp add financial-modeling npx @modelcontextprotocol/server-financial
-```
-
-#### Healthcare and Compliance
-```bash
-# HIPAA-compliant integrations
-claude mcp add healthcare npx @modelcontextprotocol/server-healthcare
-claude mcp add hl7-fhir npx @modelcontextprotocol/server-fhir
-```
-
-### Custom Integration Development
-
-For specialized needs not covered by existing servers:
-1. **Review MCP specification** at [modelcontextprotocol.io](https://modelcontextprotocol.io)
-2. **Use TypeScript or Python SDK** for rapid development
-3. **Implement required tools and resources** following MCP standards
-4. **Test thoroughly** before team deployment
-5. **Document comprehensively** for team usage and maintenance
+→ **See [38_enterprise-deployment.md](./38_enterprise-deployment.md)** for:
+- Industry-specific MCP servers (e-commerce, game dev, financial, healthcare)
+- Custom integration development patterns
+- Compliance and regulatory considerations
+- Enterprise-scale deployment strategies
 
 ## Project-Specific Implementation Strategies
 
@@ -633,25 +733,6 @@ For specialized needs not covered by existing servers:
 3. **Incremental Migration** - Gradually replace existing tools with MCP servers
 4. **Full Integration** - Complete migration with comprehensive validation
 
-### Team-Specific Patterns
-
-#### Small Development Teams (2-5 developers)
-- **Focus on Phase 1-2** for immediate productivity gains
-- **Shared configurations** and standardized workflows
-- **Minimal overhead** with essential tools only
-- **Rapid iteration** and feedback cycles
-
-#### Large Development Teams (10+ developers)
-- **Full four-phase implementation** for comprehensive capabilities
-- **Role-based server access** and specialized tooling
-- **Comprehensive documentation** and knowledge management
-- **Advanced coordination** and workflow automation
-
-#### Remote and Distributed Teams
-- **Enhanced communication integration** (Phase 3 priority)
-- **Comprehensive documentation** and knowledge sharing
-- **Asynchronous workflow optimization** with automated notifications
-- **Cross-timezone coordination** through automated status updates
 
 ## Template Development Standards Integration
 
@@ -735,69 +816,6 @@ claude mcp optimize-costs --model-switching=auto
 claude mcp context-cleanup --aggressive
 ```
 
-## Migration from Existing Tools
-
-### Gradual Migration Strategy
-
-#### Phase-by-Phase Tool Replacement
-
-**Phase 1: Core Development Tools**
-1. **Run in parallel** - Keep existing tools while testing MCP equivalents
-2. **Pilot projects** - Start with non-critical projects for validation
-3. **Feature parity validation** - Ensure MCP servers match existing capabilities
-4. **Team training** - Build confidence with new workflows
-
-**Phase 2: Advanced Tooling**
-1. **Infrastructure migration** - Replace infrastructure and monitoring tools
-2. **Testing automation** - Migrate testing frameworks and CI/CD integration
-3. **Data migration planning** - Plan transfer of historical data and configurations
-4. **Performance validation** - Ensure no degradation in critical metrics
-
-**Phase 3: Team Collaboration**
-1. **Communication platform integration** - Connect existing Slack/Teams workflows
-2. **Documentation migration** - Transfer knowledge bases and project documentation
-3. **Project management integration** - Connect Jira/Asana workflows
-4. **Full cutover planning** - Prepare for complete migration
-
-### Integration Points and Compatibility
-
-#### GitHub Integration Preservation
-- **Maintain existing webhooks** and automation rules during transition
-- **Preserve PR templates** and issue workflows
-- **Retain access controls** and repository permissions
-- **Gradual enhancement** of workflows with MCP capabilities
-
-#### Jira and Project Management
-- **Preserve ticket workflows** and custom fields during integration
-- **Maintain reporting** and dashboard configurations
-- **Retain automation rules** while adding MCP enhancements
-- **Ensure data continuity** throughout migration process
-
-#### Slack and Communication
-- **Keep existing bot integrations** operational during transition
-- **Preserve channel configurations** and notification settings
-- **Maintain user permissions** and access controls
-- **Gradual introduction** of MCP-powered automation
-
-#### CI/CD Pipeline Compatibility
-- **Run alongside existing pipelines** during validation period
-- **Preserve deployment processes** and rollback procedures
-- **Maintain environment configurations** and secrets management
-- **Ensure zero-downtime** migration with comprehensive testing
-
-### Data Migration and Continuity
-
-**Historical Data Preservation:**
-- **Export existing configurations** and workflow definitions
-- **Archive important decisions** and technical documentation
-- **Preserve audit trails** and compliance records
-- **Maintain access** to historical data during transition
-
-**Configuration Transfer:**
-- **Map existing tool configurations** to MCP server equivalents
-- **Preserve custom workflows** and automation rules
-- **Transfer user preferences** and personalization settings
-- **Validate functionality** at each migration step
 
 ## Best Practices and Optimization
 
@@ -824,25 +842,6 @@ project_specific:
 - **Use compaction** at natural breakpoints in related work
 - **Monitor token usage** and optimize context loading patterns
 
-### Performance Monitoring and Optimization
-
-**Usage Analytics and Cost Management:**
-```bash
-# Regular performance monitoring
-claude /cost --breakdown-by-model --time-period=weekly
-claude /usage --team-analytics --optimization-recommendations
-
-# Automated optimization
-claude config set-cost-optimization aggressive
-claude config set-model-switching automatic
-claude config set-context-optimization enabled
-```
-
-**Team Performance Metrics:**
-- **Development velocity** tracking across team members
-- **Quality metrics** and error rate monitoring
-- **Cost optimization** and token usage efficiency
-- **Tool adoption** and user satisfaction tracking
 
 ## Next Steps and Continuous Improvement
 
@@ -860,19 +859,6 @@ claude config set-context-optimization enabled
 - **Integration optimization** with existing enterprise systems
 - **Knowledge base enhancement** and team learning acceleration
 
-### Scaling and Enterprise Adoption
-
-**Organizational Scaling Strategy:**
-- **Department-by-department rollout** following successful pilot programs
-- **Center of Excellence** establishment for MCP best practices
-- **Training program development** for broader organizational adoption
-- **Governance framework** for enterprise-wide MCP deployment
-
-**Enterprise Integration Patterns:**
-- **SSO and identity management** integration with existing enterprise systems
-- **Compliance and audit** framework for regulated industries
-- **Cost management** and budgeting for enterprise-scale deployments
-- **Security and risk management** for sensitive development environments
 
 ---
 

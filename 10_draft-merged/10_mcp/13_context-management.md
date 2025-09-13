@@ -1,7 +1,10 @@
 ---
 title: CLAUDE.md Context Management & Optimization
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
+changelog:
+  - 3.2: Added Memory Keeper Server and Claude Context MCP integration patterns
+  - 3.1: Enhanced command system and project template integration
 parent: ./CLAUDE.md
 related:
   - ../CLAUDE.md
@@ -309,6 +312,130 @@ claude /init          # Regenerate CLAUDE.md
 npm run db:migrate    # Run migrations
 npm run db:seed       # Seed database
 docker-compose up     # Start all services
+```
+
+## Advanced Context Solutions
+
+### Memory Keeper Server (MCP)
+
+Persistent state management across Claude sessions using SQLite-based storage:
+
+```bash
+# Install and configure Memory Keeper MCP Server
+npm install -g mcp-memory-keeper
+
+# Configure in Claude Code MCP settings
+{
+  "mcpServers": {
+    "memory-keeper": {
+      "command": "mcp-memory-keeper",
+      "args": ["--database-path", "./claude_memory.db"]
+    }
+  }
+}
+```
+
+**Key Features:**
+- **Key-value storage**: Persistent project state across session resets
+- **Context resumption**: Structured markdown progress tracking
+- **Session handoffs**: Seamless continuation after context resets
+- **Project memory**: Maintains architectural decisions and implementation plans
+
+### Claude Context MCP Server
+
+Advanced vector database integration for semantic code search:
+
+```bash
+# Install Claude Context for large codebase management
+npm install -g claude-context-mcp
+
+# Configure with multiple embedding providers
+{
+  "mcpServers": {
+    "claude-context": {
+      "command": "claude-context-mcp",
+      "args": [
+        "--embedding-provider", "openai",
+        "--chunk-size", "1000",
+        "--overlap", "200"
+      ],
+      "env": {
+        "OPENAI_API_KEY": "${env:OPENAI_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+**Advanced Capabilities:**
+- **Semantic search**: Loads only relevant code based on context similarity
+- **Multi-language support**: Handles complex polyglot codebases
+- **Cost optimization**: Reduces token usage by 60-80% for large projects
+- **Context efficiency**: Enables navigation of projects exceeding context limits
+
+**Usage Patterns:**
+```bash
+# Search for authentication-related code
+claude "Find all authentication middleware implementations"
+
+# Semantic code discovery
+claude "Show me error handling patterns in API routes"
+
+# Architecture exploration
+claude "What are the database connection patterns used?"
+```
+
+### State Synchronization Strategies
+
+**External Memory Systems:**
+- Redis-based task queues for multi-agent coordination
+- SQLite databases for persistent project knowledge
+- File-based state tracking for session resumption
+
+**Handoff Mechanisms:**
+```markdown
+# Session Resume Template
+## Current State
+- **Task**: Authentication system refactoring
+- **Progress**: Completed user model updates, working on JWT implementation
+- **Next Steps**: Test suite updates, integration with frontend
+
+## Context Preservation
+- Architecture decisions documented in `docs/auth-architecture.md`
+- Test coverage: 85% (target: 90%)
+- Dependencies: Updated jwt library to v8.5.1
+```
+
+### Large Codebase Navigation
+
+**Three-Phase Approach for Projects Exceeding Context Limits:**
+
+1. **Summarization Phase**
+   - Generate high-level architecture overview
+   - Identify key components and their relationships
+   - Create navigation map of critical files
+
+2. **Modular Focus Phase**
+   - Work on isolated components within context limits
+   - Use `.claudeignore` for strategic file exclusion
+   - Implement tab-completion references for related code
+
+3. **Integration Phase**
+   - Combine completed modules with reference integration
+   - Validate cross-component interactions
+   - Generate final documentation and deployment guides
+
+**Strategic File Exclusion:**
+```bash
+# .claudeignore patterns for large codebases
+node_modules/
+dist/
+*.log
+*.cache
+test-coverage/
+docs/legacy/
+vendor/
+third-party/
 ```
 
 ## Next Steps

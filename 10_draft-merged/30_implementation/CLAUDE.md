@@ -1,7 +1,7 @@
 ---
 title: Implementation Strategy Context
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ../CLAUDE.md
 template_version: 1.0
 project_template:
@@ -16,6 +16,7 @@ agent_capabilities:
   mcp_enabled: true
   sub_agents: true
   parallel_execution: true
+  multi_agent_orchestration: true
 related:
   - ../10_mcp/CLAUDE.md
   - ../20_credentials/CLAUDE.md
@@ -26,8 +27,12 @@ files:
   - 34_performance-metrics.md
   - 35_project-template.md
   - 36_ai-task-management.md
+  - 37_team-collaboration.md
+  - 38_enterprise-deployment.md
+  - 39_multi-agent-systems.md
 changelog:
-  - Added AI task management and session workflow guide (36_ai-task-management.md)
+  - 3.2: Added enterprise deployment (38), team collaboration (37), and multi-agent systems (39) guides
+  - 3.1: Added AI task management and session workflow guide (36_ai-task-management.md)
   - Integrated CLAUDE.md project context template (v1.0)
   - Restructured from monolithic to hierarchical organization
   - Split 35.8KB file into 4 focused modules under 30KB each
@@ -51,12 +56,18 @@ Comprehensive MCP implementation strategy for agentic development workflows, inc
 
 Execute in recommended order for comprehensive implementation:
 
+### Core Implementation Guides
 1. **[31_paradigm-shift.md](./31_paradigm-shift.md)** - Agentic development concepts and strategic positioning
-2. **[32_workflow-patterns.md](./32_workflow-patterns.md)** - Four-phase implementation and migration patterns
-3. **[33_testing-standards.md](./33_testing-standards.md)** - Validation, anti-patterns, and troubleshooting
-4. **[34_performance-metrics.md](./34_performance-metrics.md)** - Metrics, optimization, and enterprise search
+2. **[32_workflow-patterns.md](./32_workflow-patterns.md)** - Framework integration and advanced workflow patterns
+3. **[33_testing-standards.md](./33_testing-standards.md)** - TDD, screenshot-driven development, and validation
+4. **[34_performance-metrics.md](./34_performance-metrics.md)** - Model selection, caching, and batch optimization
 5. **[35_project-template.md](./35_project-template.md)** - Project configuration template and development standards
 6. **[36_ai-task-management.md](./36_ai-task-management.md)** - AI task management and session workflow patterns
+
+### Advanced Enterprise Guides
+7. **[37_team-collaboration.md](./37_team-collaboration.md)** - Team communication, migration, and coordination patterns
+8. **[38_enterprise-deployment.md](./38_enterprise-deployment.md)** - CI/CD integration, security workflows, and compliance
+9. **[39_multi-agent-systems.md](./39_multi-agent-systems.md)** - Advanced orchestration and swarm intelligence patterns
 
 ## Strategic Overview
 
@@ -96,10 +107,14 @@ Execute in recommended order for comprehensive implementation:
 ### Phase 3: Collaboration Integration (Weeks 5-6)
 **Team servers**: Slack, Notion, Atlassian, Zapier
 **Focus**: Team collaboration and workflow automation
+**Reference**: [37_team-collaboration.md](./37_team-collaboration.md)
 
 ### Phase 4: Specialized Requirements (Ongoing)
 **Domain-specific servers**: Based on project needs
 **Focus**: Custom integrations and optimization
+**References**:
+- [38_enterprise-deployment.md](./38_enterprise-deployment.md) - Industry-specific deployments
+- [39_multi-agent-systems.md](./39_multi-agent-systems.md) - Advanced orchestration patterns
 
 ## Related Concepts
 

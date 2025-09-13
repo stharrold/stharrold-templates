@@ -1,7 +1,7 @@
 ---
 title: Project Context Orchestrator
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 template_version: 1.0
 context_constraints:
   max_file_size_bytes: 30000
@@ -12,6 +12,9 @@ agent_capabilities:
   mcp_enabled: true
   sub_agents: true
   parallel_execution: true
+  multi_agent_orchestration: true
+  framework_integration: true
+  enterprise_deployment: true
 project_template:
   name: "PROJECT_NAME"
   type: "web_application"
@@ -39,7 +42,8 @@ hierarchy:
     - 20_credentials/CLAUDE.md
     - 30_implementation/CLAUDE.md
 changelog:
-  - Integrated CLAUDE.md project context template (v1.0)
+  - 3.2: Enhanced with multi-agent orchestration, framework integration, and enterprise deployment capabilities
+  - 3.1: Integrated CLAUDE.md project context template (v1.0)
   - Restructured monolithic guides into hierarchical modular structure
   - Defined universal context constraints (30KB file limit)
   - Added cross-referencing system for related concepts
@@ -67,7 +71,7 @@ Secure storage, authentication patterns, and enterprise security considerations.
 → Start here: [20_credentials/CLAUDE.md](./20_credentials/CLAUDE.md)
 
 ### **30_implementation/**: Development Strategy & Patterns
-Implementation approaches, workflow patterns, and development paradigms.
+Implementation approaches, workflow patterns, development paradigms, framework integration, team collaboration, enterprise deployment, and multi-agent orchestration.
 → Start here: [30_implementation/CLAUDE.md](./30_implementation/CLAUDE.md)
 
 ## Navigation Strategy
