@@ -401,25 +401,25 @@ The sync script (`sync-mcp.sh`) automatically adds appropriate `type` fields whe
 
 ## Unified MCP Management Workflow
 
-### Using mcp-manager.py (Recommended)
+### Using mcp_manager.py (Recommended)
 
 Cross-platform management of all MCP configurations:
 
 ```bash
 # List all servers across all platforms
-/usr/bin/python3 mcp-manager.py --list
+/usr/bin/python3 mcp_manager.py --list
 
-# Add a new server interactively  
-/usr/bin/python3 mcp-manager.py --add
+# Add a new server interactively
+/usr/bin/python3 mcp_manager.py --add
 
 # Validate credentials
-/usr/bin/python3 mcp-manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
 
 # Remove servers interactively
-/usr/bin/python3 mcp-manager.py --remove
+/usr/bin/python3 mcp_manager.py --remove
 
 # Create backups
-/usr/bin/python3 mcp-manager.py --backup-only
+/usr/bin/python3 mcp_manager.py --backup-only
 ```
 
 ### Using Claude Code CLI
@@ -443,15 +443,15 @@ claude mcp remove github
 # macOS: Follow ../20_credentials/CLAUDE.md keychain setup
 # Windows: Follow ../20_credentials/CLAUDE.md credential manager setup
 
-# 2. Add GitHub server using mcp-manager.py
-/usr/bin/python3 mcp-manager.py --add
+# 2. Add GitHub server using mcp_manager.py
+/usr/bin/python3 mcp_manager.py --add
 # Enter: github, 1 (NPX), @modelcontextprotocol/server-github
 # Add GITHUB_TOKEN env var: ${env:GITHUB_TOKEN}
 # Choose: All configurations
 
 # 3. Validate everything is working
-/usr/bin/python3 mcp-manager.py --check-credentials
-/usr/bin/python3 mcp-manager.py --list
+/usr/bin/python3 mcp_manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --list
 
 # 4. Test in Claude Code
 # Type: /mcp

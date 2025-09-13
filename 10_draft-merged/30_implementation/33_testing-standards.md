@@ -268,7 +268,7 @@ claude mcp health-check --all --detailed
 **Credential Validation:**
 ```bash
 # Verify all credentials are accessible and valid
-/usr/bin/python3 mcp-manager.py --check-credentials --verbose
+/usr/bin/python3 mcp_manager.py --check-credentials --verbose
 
 # Cross-platform credential verification:
 # macOS: security find-generic-password -a "$USER" -s "GITHUB_TOKEN"
@@ -339,7 +339,7 @@ claude mcp analyze-performance --time-period=week --include-recommendations
 claude audit --security-review --compliance-check
 
 # Credential rotation check
-/usr/bin/python3 mcp-manager.py --check-expiration --alert-threshold=30-days
+/usr/bin/python3 mcp_manager.py --check-expiration --alert-threshold=30-days
 ```
 
 **Team Productivity Assessment:**

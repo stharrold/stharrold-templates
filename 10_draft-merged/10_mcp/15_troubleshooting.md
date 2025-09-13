@@ -25,7 +25,7 @@ Comprehensive troubleshooting guide for MCP server issues, security consideratio
 **Diagnosis:**
 ```bash
 # List all configurations to see what's available
-/usr/bin/python3 mcp-manager.py --list
+/usr/bin/python3 mcp_manager.py --list
 
 # Check specific config file
 cat ~/.claude.json | jq .mcpServers
@@ -37,7 +37,7 @@ claude mcp list
 **Solutions:**
 ```bash
 # Add server using unified tool
-/usr/bin/python3 mcp-manager.py --add
+/usr/bin/python3 mcp_manager.py --add
 
 # Or add using Claude CLI directly
 claude mcp add test npx @modelcontextprotocol/server-filesystem /tmp
@@ -56,7 +56,7 @@ claude mcp add test npx @modelcontextprotocol/server-filesystem /tmp
 **Diagnosis:**
 ```bash
 # Validate credentials first
-/usr/bin/python3 mcp-manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
 
 # Test server manually
 npx @modelcontextprotocol/server-filesystem /path
@@ -255,7 +255,7 @@ echo "=== MCP Health Check $(date) ==="
 claude mcp list | grep -q "filesystem" || echo "WARNING: filesystem server missing"
 
 # Check credentials
-/usr/bin/python3 mcp-manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
 
 # Check sync service (macOS)
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -375,7 +375,7 @@ claude mcp remove unused-server-name
 2. **Least Privilege**: Limit filesystem and network access to minimum required
 3. **Regular Testing**: Use `/mcp` in Claude Code to verify server functionality
 4. **Automated Backups**: Sync script creates timestamped configuration backups
-5. **Credential Validation**: Use `mcp-manager.py --check-credentials` regularly
+5. **Credential Validation**: Use `mcp_manager.py --check-credentials` regularly
 6. **Staged Rollouts**: Test configuration changes in development before production
 7. **Performance Monitoring**: Track server response times and resource usage
 8. **Documentation**: Maintain current documentation for team configurations

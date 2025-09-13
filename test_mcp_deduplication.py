@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test script to verify the deduplication fix for mcp-manager.py"""
+"""Test script to verify the deduplication fix for mcp_manager.py"""
 
 import json
 import tempfile
@@ -7,18 +7,14 @@ from pathlib import Path
 import sys
 import os
 
-# Add the current directory to the path to import mcp-manager
+# Add the current directory to the path to import mcp_manager
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def test_remove_duplicate_servers():
     """Test the remove_duplicate_servers method to reproduce and verify the fix."""
     
-    # Import MCPConfig after adding to path
-    # Import from the actual file
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("mcp_manager", "mcp-manager.py")
-    mcp_manager = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mcp_manager)
+    # Import MCPConfig using standard Python import
+    import mcp_manager
     MCPConfig = mcp_manager.MCPConfig
     
     # Create a temporary config file with duplicates

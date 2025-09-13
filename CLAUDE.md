@@ -13,7 +13,7 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 The repository follows a **platform-specific management approach** with a structured document lifecycle:
 
 **Management Tool Architecture:**
-1. **`mcp-manager.py`** - Central platform-targeted management tool with auto-detection
+1. **`mcp_manager.py`** - Central platform-targeted management tool with auto-detection
    - Single-platform operations (not cross-platform synchronization)
    - MCPConfig class handles individual platform operations
    - Platform selection via `select_target_platform()` with auto-detection
@@ -35,7 +35,7 @@ Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for
 
 ### Key Components
 
-- **Platform-Specific MCP Manager**: `mcp-manager.py` handles server management for individual platforms with auto-detection and platform targeting
+- **Platform-Specific MCP Manager**: `mcp_manager.py` handles server management for individual platforms with auto-detection and platform targeting
 - **Modular Guide System**: Hierarchical documentation with context optimization:
   - `10_mcp/` - MCP setup and configuration guides
   - `20_credentials/` - Security and credential management guides
@@ -50,30 +50,30 @@ Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for
 # Always use system Python to avoid virtual environment issues
 
 # Platform Status and Detection
-/usr/bin/python3 mcp-manager.py --status         # Show all platform statuses
-/usr/bin/python3 mcp-manager.py                  # Auto-detect first available platform
-/usr/bin/python3 mcp-manager.py --list           # List servers from auto-detected platform
+/usr/bin/python3 mcp_manager.py --status         # Show all platform statuses
+/usr/bin/python3 mcp_manager.py                  # Auto-detect first available platform
+/usr/bin/python3 mcp_manager.py --list           # List servers from auto-detected platform
 
 # Platform-Specific Operations
-/usr/bin/python3 mcp-manager.py --platform claude-code --list      # List Claude Code CLI servers
-/usr/bin/python3 mcp-manager.py --platform vscode --add           # Add server to VS Code MCP
-/usr/bin/python3 mcp-manager.py --platform claude-desktop --remove # Remove from Claude Desktop
+/usr/bin/python3 mcp_manager.py --platform claude-code --list      # List Claude Code CLI servers
+/usr/bin/python3 mcp_manager.py --platform vscode --add           # Add server to VS Code MCP
+/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove # Remove from Claude Desktop
 
 # Server Management (works with auto-detected or specified platform)
-/usr/bin/python3 mcp-manager.py --add            # Interactive server addition
-/usr/bin/python3 mcp-manager.py --remove         # Interactive server removal
-/usr/bin/python3 mcp-manager.py --disable        # Temporarily disable servers
-/usr/bin/python3 mcp-manager.py --enable         # Re-enable disabled servers
-/usr/bin/python3 mcp-manager.py --deduplicate     # Remove duplicate servers (keeps DISABLED_ versions)
+/usr/bin/python3 mcp_manager.py --add            # Interactive server addition
+/usr/bin/python3 mcp_manager.py --remove         # Interactive server removal
+/usr/bin/python3 mcp_manager.py --disable        # Temporarily disable servers
+/usr/bin/python3 mcp_manager.py --enable         # Re-enable disabled servers
+/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicate servers (keeps DISABLED_ versions)
 
 # Cross-Platform Features
-/usr/bin/python3 mcp-manager.py --check-credentials  # Validate credential setup
-/usr/bin/python3 mcp-manager.py --backup-only    # Create configuration backups
-/usr/bin/python3 mcp-manager.py --file ~/.claude.json  # Work with specific config file
+/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credential setup
+/usr/bin/python3 mcp_manager.py --backup-only    # Create configuration backups
+/usr/bin/python3 mcp_manager.py --file ~/.claude.json  # Work with specific config file
 
 # Deduplication Examples
-/usr/bin/python3 mcp-manager.py --deduplicate    # Auto-detect platform and remove duplicates
-/usr/bin/python3 mcp-manager.py --platform claude-code --deduplicate  # Target specific platform
+/usr/bin/python3 mcp_manager.py --deduplicate    # Auto-detect platform and remove duplicates
+/usr/bin/python3 mcp_manager.py --platform claude-code --deduplicate  # Target specific platform
 
 # Alternative Claude Code CLI commands
 claude mcp list                                   # List configured servers
@@ -120,20 +120,18 @@ uv add package_name                       # Add new dependency
 
 # Core Python Architecture Testing
 /usr/bin/python3 test_mcp_deduplication.py    # Test core deduplication functionality
-/usr/bin/python3 mcp-manager.py --validate-all # Validate all platform configurations
+/usr/bin/python3 mcp_manager.py --validate-all # Validate all platform configurations
 
 # Python virtual environment (if not using uv)
 python3 -m venv .venv
 source .venv/bin/activate                 # Linux/macOS
 .venv\Scripts\activate                    # Windows
 
-# Test hyphenated module imports (critical for extending mcp-manager.py)
+# Test standard module imports (now works with mcp_manager.py)
 python3 -c "
-import importlib.util
-spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
+import mcp_manager
 print('Import successful: MCPConfig available')
+print('Classes:', [name for name in dir(mcp_manager) if name[0].isupper()])
 "
 ```
 
@@ -212,7 +210,7 @@ After ANY file edit:
 - **VS Code MCP**: Uses `servers` key  
 - **Claude Desktop**: Uses `mcpServers` key
 
-The `mcp-manager.py` tool handles these schema differences automatically.
+The `mcp_manager.py` tool handles these schema differences automatically.
 
 ### Credential Management
 Common environment variables validated:
@@ -229,9 +227,9 @@ The tool operates on **one platform at a time** with the following options:
 
 ```bash
 # Platform detection examples
-/usr/bin/python3 mcp-manager.py --status     # Shows all platforms with server counts
-/usr/bin/python3 mcp-manager.py              # Auto-detects first available platform
-/usr/bin/python3 mcp-manager.py --platform vscode --list  # Targets VS Code only
+/usr/bin/python3 mcp_manager.py --status     # Shows all platforms with server counts
+/usr/bin/python3 mcp_manager.py              # Auto-detects first available platform
+/usr/bin/python3 mcp_manager.py --platform vscode --list  # Targets VS Code only
 ```
 
 ## CRITICAL: Code Quality Requirements (Codacy Integration)
@@ -266,7 +264,7 @@ This repository implements a **structured document lifecycle** that moves conten
   - Preserves evolution of ideas and implementation strategies
   - Critical for understanding context behind current implementations
 
-### mcp-manager.py Architecture
+### mcp_manager.py Architecture
 The tool implements a **platform-specific management architecture** with:
 - Auto-detection of available MCP platforms (Claude Code CLI, VS Code MCP, Claude Desktop)
 - Platform-specific operations without cross-platform synchronization
@@ -280,16 +278,13 @@ The tool implements a **platform-specific management architecture** with:
 - `validate_credentials()`: Cross-platform credential validation
 - `deduplicate_servers()`: Intelligent duplicate removal with DISABLED_ prefix preservation
 
-**Important**: Due to the hyphenated filename (`mcp-manager.py`), use this import pattern for testing or extending:
+**Standard Python Import**: With the new filename (`mcp_manager.py`), use standard Python import:
 ```python
-import importlib.util
-spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
-# Access classes: module.MCPConfig, functions: module.select_target_platform()
+import mcp_manager
+# Access classes: mcp_manager.MCPConfig, functions: mcp_manager.select_target_platform()
 ```
 
-**Testing Pattern**: This import pattern is essential because Python cannot directly import modules with hyphens in their names. The pattern is used in `test_mcp_deduplication.py` and should be followed for any new testing or extension modules.
+**Testing Pattern**: Standard Python imports now work directly. The updated `test_mcp_deduplication.py` uses `import mcp_manager` for clean, Pythonic module access.
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
@@ -308,7 +303,7 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 ## Common Issues & Solutions
 
 ### MCP Manager Issues
-- **Permission errors**: Run `chmod +x mcp-manager.py`
+- **Permission errors**: Run `chmod +x mcp_manager.py`
 - **Platform not found**: Use `--status` to see available platforms or specify `--platform <name>`
 - **Auto-detection issues**: Explicitly specify target platform with `--platform <name>`
 

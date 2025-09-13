@@ -77,7 +77,7 @@ Execute in recommended order for comprehensive security:
 ### Using MCP Manager
 ```bash
 # Validate all credentials at once
-/usr/bin/python3 mcp-manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
 ```
 
 ## Prerequisites
@@ -126,7 +126,7 @@ This directory implements credential management template patterns:
 ## Next Steps After Credential Setup
 
 1. Configure MCP servers using [../10_mcp/CLAUDE.md](../10_mcp/CLAUDE.md)
-2. Use `mcp-manager.py --check-credentials` to validate setup
+2. Use `mcp_manager.py --check-credentials` to validate setup
 3. Test servers with `/mcp` command in Claude Code
 4. Review [../30_implementation/CLAUDE.md](../30_implementation/CLAUDE.md) for phased rollout strategy
 5. Set up credential rotation reminders

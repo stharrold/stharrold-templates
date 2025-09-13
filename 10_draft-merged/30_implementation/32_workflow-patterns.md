@@ -217,10 +217,10 @@ claude mcp list
 #### 3. Validation and Testing
 ```bash
 # Verify credential access
-/usr/bin/python3 mcp-manager.py --check-credentials
+/usr/bin/python3 mcp_manager.py --check-credentials
 
 # Test server connectivity
-/usr/bin/python3 mcp-manager.py --list
+/usr/bin/python3 mcp_manager.py --list
 
 # Functional testing in Claude Code
 # Type: /mcp

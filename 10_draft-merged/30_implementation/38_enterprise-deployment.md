@@ -145,8 +145,8 @@ jobs:
 
       - name: MCP Configuration Validation
         run: |
-          /usr/bin/python3 mcp-manager.py --validate-config --enterprise-mode
-          /usr/bin/python3 mcp-manager.py --security-audit --comprehensive
+          /usr/bin/python3 mcp_manager.py --validate-config --enterprise-mode
+          /usr/bin/python3 mcp_manager.py --security-audit --comprehensive
 
   deployment-staging:
     needs: security-scan
