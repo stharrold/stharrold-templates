@@ -140,17 +140,19 @@ Add these servers once core development workflow is established.
 
 ### Code Quality & Security
 
-#### Codacy MCP Server
-Integrated code quality analysis with SAST and secrets detection.
+#### Code Quality Analysis
+For code quality analysis, this repository uses a local Codacy CLI instead of an MCP server.
 
-**Features:**
-- Code quality analysis with SAST
-- Secrets detection and security scanning
-- Required by repository guidelines for all file edits
+**Local CLI Features:**
+- Code quality analysis with multiple tools (pylint, eslint, etc.)
+- Security scanning with Trivy and Semgrep
+- No MCP server dependency required
 
-**Installation:**
+**Usage:**
 ```bash
-claude mcp add codacy npx @codacy/codacy-mcp
+# Local analysis (no MCP server needed)
+./.codacy/cli.sh analyze --tool pylint file.py
+./.codacy/cli.sh analyze --tool trivy .
 ```
 
 #### Sentry MCP Server

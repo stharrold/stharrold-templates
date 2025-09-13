@@ -25,7 +25,9 @@ files:
   - 33_testing-standards.md
   - 34_performance-metrics.md
   - 35_project-template.md
+  - 36_ai-task-management.md
 changelog:
+  - Added AI task management and session workflow guide (36_ai-task-management.md)
   - Integrated CLAUDE.md project context template (v1.0)
   - Restructured from monolithic to hierarchical organization
   - Split 35.8KB file into 4 focused modules under 30KB each
@@ -54,6 +56,7 @@ Execute in recommended order for comprehensive implementation:
 3. **[33_testing-standards.md](./33_testing-standards.md)** - Validation, anti-patterns, and troubleshooting
 4. **[34_performance-metrics.md](./34_performance-metrics.md)** - Metrics, optimization, and enterprise search
 5. **[35_project-template.md](./35_project-template.md)** - Project configuration template and development standards
+6. **[36_ai-task-management.md](./36_ai-task-management.md)** - AI task management and session workflow patterns
 
 ## Strategic Overview
 
@@ -86,7 +89,7 @@ Execute in recommended order for comprehensive implementation:
 **Essential servers**: GitHub, Filesystem, Sequential Thinking, Codacy
 **Focus**: Basic development capabilities and security
 
-### Phase 2: Productivity Enhancement (Weeks 3-4)  
+### Phase 2: Productivity Enhancement (Weeks 3-4)
 **Additional servers**: Monitoring, Infrastructure, Testing, CI/CD
 **Focus**: Advanced workflows and automation
 
@@ -130,7 +133,7 @@ This directory implements implementation strategy template patterns:
 
 ### Development Velocity Targets
 - **Code generation speed**: 40-60% improvement
-- **PR creation time**: 50% reduction  
+- **PR creation time**: 50% reduction
 - **Bug fix time**: 30% reduction
 
 ### Quality Metrics

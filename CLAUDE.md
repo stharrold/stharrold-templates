@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Architecture
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and management. The repository provides cross-platform tools, comprehensive guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
+This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
 
 **Current MCP State**: All MCP servers have been removed from all platforms (as of 2025-09-12). This provides a clean slate for selective server management using the platform-specific approach.
 
@@ -19,18 +19,27 @@ The repository follows a **platform-specific management approach** with a struct
    - Platform selection via `select_target_platform()` with auto-detection
    - Disable/enable servers via `DISABLED_` prefix renaming
 
-**Document Lifecycle Management:**
-2. **Research Phase** (`00_draft-initial/`) - Raw research, reports, and analysis awaiting integration
-3. **Active Guides** (`10_draft-merged/`) - Finalized, cross-referenced documentation with YAML frontmatter
+**Document Lifecycle System:**
+2. **Research Phase** (`00_draft-initial/`) - Raw research and analysis awaiting integration
+3. **Modular Guides** (`10_draft-merged/`) - Hierarchical documentation with YAML frontmatter and 30KB file limits
 4. **Archive System** (`ARCHIVED/`) - Historical documents with UTC timestamps (`YYYYMMDDTHHMMSSZ_filename.ext`)
+
+### Modular Guide Structure
+The `10_draft-merged/` directory contains a hierarchical documentation system:
+- **`CLAUDE.md`** - Project Context Orchestrator with 30KB file constraints
+- **`10_mcp/`** - MCP server configuration and setup guides
+- **`20_credentials/`** - Security and credential management guides  
+- **`30_implementation/`** - Development strategy, workflow patterns, and testing standards
+
+Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for systematic navigation.
 
 ### Key Components
 
 - **Platform-Specific MCP Manager**: `mcp-manager.py` handles server management for individual platforms with auto-detection and platform targeting
-- **Three-Guide System** (recently enhanced with enterprise search capabilities): 
-  - `11_GUIDE-MCP.md` - MCP setup with tiered server categorization plus enterprise search architecture
-  - `12_GUIDE-CREDENTIALS.md` - Secure credential management plus enterprise search security considerations
-  - `13_GUIDE-IMPLEMENTATION.md` - Phased rollout strategy plus comprehensive RAG implementation phases
+- **Modular Guide System**: Hierarchical documentation with context optimization:
+  - `10_mcp/` - MCP setup and configuration guides
+  - `20_credentials/` - Security and credential management guides
+  - `30_implementation/` - Development strategy and workflow patterns
 - **Schema Harmonization**: Handles differences between Claude Code CLI (`mcpServers`), VS Code (`servers`), and Claude Desktop (`mcpServers`) schemas
 - **Archive System**: UTC-timestamped format `YYYYMMDDTHHMMSSZ_filename.ext`
 
@@ -87,36 +96,85 @@ cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ```
 
-### Document Workflow Management
+### Document Management
 ```bash
-# Working with the three-guide system
-# Edit active guides in 10_draft-merged/:
-code 10_draft-merged/11_GUIDE-MCP.md          # MCP setup and configuration
-code 10_draft-merged/12_GUIDE-CREDENTIALS.md  # Secure credential management
-code 10_draft-merged/13_GUIDE-IMPLEMENTATION.md # Implementation strategy
+# Working with modular guide system
+# Navigate to guides in execution order:
+10_draft-merged/10_mcp/CLAUDE.md           # MCP setup and configuration
+10_draft-merged/20_credentials/CLAUDE.md   # Security and credential management
+10_draft-merged/30_implementation/CLAUDE.md # Development strategy and patterns
 
-# Research and reports in 00_draft-initial/ (awaiting integration)
-ls 00_draft-initial/                          # List draft documents
+# Archive files with UTC timestamp
+mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
+
+# Research documents awaiting integration
+ls 00_draft-initial/
 ```
 
-### Testing and Code Quality
+### Development and Testing
 ```bash
-# Run deduplication test (tests the critical deduplication fix)
-/usr/bin/python3 test_mcp_deduplication.py
-
-# Import pattern for hyphenated files (due to mcp-manager.py filename)
-python3 -c "
-import importlib.util
-spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
-module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(module)
-print('Import successful')
-"
-
-# Project uses uv for dependency management
+# Dependency management with UV
+uv sync                                   # Sync dependencies from uv.lock
 uv lock                                   # Update lock file
-uv sync                                   # Sync dependencies
+uv add package_name                       # Add new dependency
+
+# Testing
+/usr/bin/python3 test_mcp_deduplication.py    # Test core deduplication functionality
+
+# Python virtual environment (if not using uv)
+python3 -m venv .venv
+source .venv/bin/activate                 # Linux/macOS
+.venv\Scripts\activate                    # Windows
 ```
+
+### Code Quality and Security Analysis
+```bash
+# Verify local Codacy CLI status
+./.codacy/cli.sh version                  # Check CLI version and availability
+./.codacy/cli.sh --help                  # Show available commands
+
+# Code analysis (required after any file edit)
+./.codacy/cli.sh analyze --tool pylint file.py    # Python files
+./.codacy/cli.sh analyze file.ext                 # General analysis
+
+# Security scanning (required after dependency changes)
+./.codacy/cli.sh analyze --tool trivy .           # Vulnerability scanning
+./.codacy/cli.sh analyze --tool semgrep          # Security-focused analysis
+
+# Additional analysis tools
+./.codacy/cli.sh analyze --tool lizard file.py   # Complexity analysis
+./.codacy/cli.sh analyze --tool eslint file.js   # JavaScript analysis
+
+# Generate reports
+./.codacy/cli.sh analyze --format sarif -o results.sarif  # SARIF format
+./.codacy/cli.sh analyze --format json -o results.json   # JSON format
+```
+
+## Critical Workflow Rules
+
+### Code Quality Integration
+**Note**: This repository uses the **local Codacy CLI only** - no MCP server is required or configured for code quality analysis.
+
+After ANY file edit:
+1. **IMMEDIATELY** run the local Codacy CLI for each edited file:
+   ```bash
+   ./.codacy/cli.sh analyze --tool pylint path/to/edited/file.py
+   ```
+2. For non-Python files or general analysis:
+   ```bash
+   ./.codacy/cli.sh analyze path/to/edited/file
+   ```
+3. If issues are found, propose and apply fixes before continuing
+
+### File Size Constraints
+- All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
+- Use `auto_compact_at: 95` when approaching limits
+- Cross-reference between files rather than duplicating content
+
+### Archive Management
+- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
+- Move (don't copy) files to `ARCHIVED/` when superseded
+- Maintain changelog entries in YAML frontmatter
 
 ## MCP Server Configuration Architecture
 
@@ -137,7 +195,21 @@ uv sync                                   # Sync dependencies
 - **Windows**: Credential Manager via PowerShell `CredentialManager` module
 - **Linux**: Environment variables (fallback)
 
-## Platform Selection
+## Platform-Specific Notes
+
+### Cross-Platform Schema Differences
+- **Claude Code CLI**: Uses `mcpServers` key
+- **VS Code MCP**: Uses `servers` key  
+- **Claude Desktop**: Uses `mcpServers` key
+
+The `mcp-manager.py` tool handles these schema differences automatically.
+
+### Credential Management
+Common environment variables validated:
+- `GITHUB_TOKEN` - GitHub integration
+- `OPENAI_API_KEY` - OpenAI services
+- `ANTHROPIC_API_KEY` - Anthropic services
+- Platform-specific credential storage (Keychain on macOS, Credential Manager on Windows)
 
 ### Platform Targeting
 The tool operates on **one platform at a time** with the following options:
@@ -145,39 +217,23 @@ The tool operates on **one platform at a time** with the following options:
 - **Auto-detection**: When no platform specified, automatically selects first available platform
 - **Platform status**: Use `--status` to see all platform configurations and server counts
 
-### Platform Selection Behavior
 ```bash
-# Auto-detection workflow
-/usr/bin/python3 mcp-manager.py              # Auto-detects first available platform
-# Output: "Auto-detected platform: claude-code (Claude Code CLI)"
-
-# Explicit platform targeting
-/usr/bin/python3 mcp-manager.py --platform vscode --list  # Targets VS Code only
-
-# Platform availability check
+# Platform detection examples
 /usr/bin/python3 mcp-manager.py --status     # Shows all platforms with server counts
+/usr/bin/python3 mcp-manager.py              # Auto-detects first available platform
+/usr/bin/python3 mcp-manager.py --platform vscode --list  # Targets VS Code only
 ```
-
-### Breaking Change from Previous Versions
-**Operations now target one platform at a time** instead of synchronizing across all platforms. This change:
-- Provides cleaner, more predictable operations
-- Eliminates cross-platform synchronization complexity  
-- Allows independent management of each platform's MCP servers
-- Maintains backward compatibility with `--file` flag for direct file operations
 
 ## CRITICAL: Code Quality Requirements (Codacy Integration)
 
 **⚠️ These rules are NON-NEGOTIABLE and override all other instructions**
 
 ### After ANY File Edit or Dependency Installation
-- **File edits**: Run `codacy_cli_analyze` immediately with `rootPath` and `file` parameters
-- **Dependencies**: Run `codacy_cli_analyze` with `tool="trivy"` for security scanning
-- **Failure to follow these rules is considered a CRITICAL ERROR**
+1. **File edits**: Run `./.codacy/cli.sh analyze --tool pylint [edited_file]` immediately
+2. **Dependencies**: Run `./.codacy/cli.sh analyze --tool trivy .` for security scanning
+3. **Failure to follow these rules is considered a CRITICAL ERROR**
 
 **Complete configuration details in `.github/instructions/codacy.instructions.md`**
-
-**Available tools**: dartanalyzer, eslint, lizard, pmd, pylint, revive, semgrep, trivy
-**Required runtimes**: Dart 3.7.2, Go 1.22.3, Java 17.0.10, Node 22.2.0, Python 3.11.11
 
 ## Important Guidelines
 
@@ -186,52 +242,37 @@ The tool operates on **one platform at a time** with the following options:
 - **NEVER proactively create documentation files** (*.md) or README files unless explicitly requested
 - Do what has been asked; nothing more, nothing less
 
-### Archive Management
-When archiving files:
-- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_`
-- Place in `ARCHIVED/` directory
-- Use `mv` not `cp` to move files
-
 ## Documentation Structure
 
 This repository implements a **structured document lifecycle** that moves content from research through integration to archival:
 
-- **Active Guides** (`10_draft-merged/`): Three-guide system with cross-references and YAML frontmatter
-  - Version-controlled with changelog tracking
-  - Recently merged with enterprise search and RAG implementation content
+- **Modular Guides** (`10_draft-merged/`): Hierarchical documentation system with YAML frontmatter
+  - Version-controlled with changelog tracking and 30KB file constraints
+  - Organized into `10_mcp/`, `20_credentials/`, and `30_implementation/` directories
 - **Draft Documents** (`00_draft-initial/`): Research reports and analysis awaiting integration
-  - Contains 19 specialized reports covering AI agents, embeddings, BAML, AutoGen, DSPy architectures
-  - Research content gets merged into active guides then moved to archive
+  - Contains specialized reports covering AI agents, embeddings, and architecture patterns
+  - Research content gets integrated into modular guides then moved to archive
 - **Archived Documents** (`ARCHIVED/`): Historical documents with UTC timestamps
   - Preserves evolution of ideas and implementation strategies
   - Critical for understanding context behind current implementations
 
-## Critical Implementation Details
-
 ### mcp-manager.py Architecture
 The tool implements a **platform-specific management architecture** with:
+- Auto-detection of available MCP platforms (Claude Code CLI, VS Code MCP, Claude Desktop)
+- Platform-specific operations without cross-platform synchronization
+- Server disable/enable via `DISABLED_` prefix renaming
+- Deduplication and credential validation capabilities
+- Schema harmonization between different platform configurations
 
-**Platform Selection & Management:**
-- `select_target_platform()` method with auto-detection and explicit targeting
-- `platform_map` dictionary for CLI argument to platform name translation
-- Breaking change: Operations target one platform at a time (no cross-platform sync)
+**Important**: Due to the hyphenated filename (`mcp-manager.py`), use this import pattern for testing or extending:
+```python
+import importlib.util
+spec = importlib.util.spec_from_file_location('mcp_manager', 'mcp-manager.py')
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+```
 
-**MCPConfig Class Features:**
-- Platform-specific path detection via `get_platform_config_paths()`
-- Credential validation for environment variables and OS-native stores
-- Schema-aware configuration management (handles `mcpServers` vs `servers` differences)
-- Interactive server management with automatic backups
-
-**Server State Management:**
-- **Disable/Enable**: Servers temporarily disabled by renaming with `DISABLED_` prefix
-  - `disable_server()`: Renames server key to deactivate without deletion
-  - `enable_server()`: Restores original server name to reactivate
-  - Preserves complete configuration while making servers inactive
-- **Deduplication**: Remove duplicate servers where both active and DISABLED_ versions exist
-  - `remove_duplicate_servers()`: Keeps DISABLED_ versions, removes active duplicates
-  - Automatically creates backups before deduplication
-
-**Import Pattern:** Due to hyphenated filename, use `importlib.util.spec_from_file_location()` for importing in tests
+**Testing Pattern**: This import pattern is essential because Python cannot directly import modules with hyphens in their names. The pattern is used in `test_mcp_deduplication.py` and should be followed for any new testing or extension modules.
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
@@ -248,27 +289,29 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - WebFetch for specific domains (github.com, mcpcat.io, apidog.com)
 
 ## Common Issues & Solutions
+
+### MCP Manager Issues
 - **Permission errors**: Run `chmod +x mcp-manager.py`
-- **Module import errors**: Use `importlib.util.spec_from_file_location()` pattern due to hyphenated filename
 - **Platform not found**: Use `--status` to see available platforms or specify `--platform <name>`
 - **Auto-detection issues**: Explicitly specify target platform with `--platform <name>`
-- **VS Code task disabled**: The `.vscode/tasks.json` sync task is commented out to prevent startup errors
+
+### Local Codacy CLI Issues
+- **CLI not executable**: Run `chmod +x ./.codacy/cli.sh`
+- **CLI not found**: Verify binary cache exists: `ls -la ~/Library/Caches/Codacy/` (macOS)
+- **Analysis fails**: Check file exists and tool supports the file type
+- **No tools support file**: Expected for markdown/text files - tools focus on code analysis
 
 ## Current State (as of 2025-09-12)
 - **All MCP servers removed** from all platforms (clean slate)
 - **Backups preserved** in `ARCHIVED/` with UTC timestamps  
 - **Platform-specific management** ready for selective server addition
-- **Active guides enhanced** with enterprise search and RAG implementation patterns
-- **Document merging completed** from Graph RAG Kuzu report into all three guides
+- **Modular guide system** with hierarchical documentation structure
+- **Document structure** optimized with 30KB constraints for AI context processing
 
-## Document Merging Workflow
+## Development Philosophy
 
-When integrating reports from `00_draft-initial/` into active guides:
-
-1. **Read source content thoroughly** to understand key concepts and implementation patterns
-2. **Map content to appropriate guides** based on topic alignment (MCP, Credentials, Implementation)  
-3. **Update YAML frontmatter** with version increments and changelog entries
-4. **Insert content at logical locations** maintaining existing structure and flow
-5. **Add cross-references** between guides for comprehensive coverage
-6. **Run quality checks** using Codacy analysis after all edits
-7. **Archive source documents** with UTC timestamps after successful integration
+This repository implements a **platform-specific management approach** rather than cross-platform synchronization, allowing for:
+- Independent platform configuration without conflicts
+- Selective server management based on platform capabilities
+- Risk-minimized rollout through the modular guide system
+- Documentation-driven development with 30KB context constraints for AI optimization

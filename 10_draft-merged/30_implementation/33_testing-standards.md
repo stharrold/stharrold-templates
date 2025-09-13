@@ -108,7 +108,7 @@ claude mcp health-check --all --detailed
 # Expected output validation:
 # ✅ GitHub MCP Server: Connected, API rate limit 4,847/5,000
 # ✅ PostgreSQL MCP Server: Connected, query time <50ms
-# ✅ Codacy MCP Server: Connected, last scan 2 minutes ago
+# ✅ Local Codacy CLI: Available, last scan 2 minutes ago
 # ⚠️  Sentry MCP Server: Connected, elevated error rate (review needed)
 # ❌ Slack MCP Server: Connection timeout (requires attention)
 ```
@@ -183,7 +183,7 @@ claude mcp analyze-performance --time-period=week --include-recommendations
 **Security and Compliance Validation:**
 ```bash
 # Security posture assessment
-codacy_cli_analyze --comprehensive-scan --security-focus
+./.codacy/cli.sh analyze --tool trivy .
 claude audit --security-review --compliance-check
 
 # Credential rotation check

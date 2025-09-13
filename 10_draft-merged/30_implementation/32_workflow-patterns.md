@@ -62,6 +62,8 @@ Establish core development capabilities with essential MCP servers that provide 
   - Security-sensitive changes
   - Complex algorithm design
 - Restricts to read-only operations during analysis
+**Task Tracking Integration:**
+For comprehensive task management, priority frameworks, and session workflow patterns, see [36_ai-task-management.md](./36_ai-task-management.md).
 </workflow>
 
 Integrate this tactical execution pattern within the strategic implementation phases outlined below.
@@ -160,9 +162,10 @@ claude mcp add sqlite npx @modelcontextprotocol/server-sqlite
 - Performance analysis and tuning recommendations
 
 #### Security (Required)
-**Codacy MCP Server** - Code quality and security analysis
+**Local Codacy CLI** - Code quality and security analysis via `./.codacy/cli.sh`
 ```bash
-claude mcp add codacy npx @codacy/codacy-mcp
+# No installation needed - uses local CLI wrapper
+./.codacy/cli.sh analyze --tool pylint file.py
 ```
 **Capabilities:**
 - Automated security vulnerability detection
@@ -684,6 +687,9 @@ claude /compact  # At natural breakpoints in related work
 # Project-specific patterns in project/CLAUDE.md
 ```
 
+**AI Task Management Integration:**
+For structured task tracking, priority management, and session continuity patterns, see [36_ai-task-management.md](./36_ai-task-management.md). This includes token budget guidelines, status workflows, and MCP server integration for enhanced productivity.
+
 **Git Workflow Integration:**
 ```bash
 # Enhanced Git workflows with MCP integration
@@ -805,7 +811,7 @@ global_preferences:
   cost_optimization: "enabled"
   security_scanning: "mandatory"
 
-# Project context in project/CLAUDE.md  
+# Project context in project/CLAUDE.md
 project_specific:
   architecture: "microservices"
   database: "postgresql"

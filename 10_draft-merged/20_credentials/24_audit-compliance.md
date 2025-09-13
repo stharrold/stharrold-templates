@@ -315,10 +315,10 @@ def test_authentication_security():
 
 **5. Integration with Security Platforms:**
 
-**Codacy MCP Server (Mandatory per Repository Guidelines):**
+**Local Codacy CLI (Mandatory per Repository Guidelines):**
 ```bash
 # Required after ANY file edit per CLAUDE.md guidelines
-codacy_cli_analyze --rootPath=/path/to/workspace --file=edited_file.py
+./.codacy/cli.sh analyze --tool pylint edited_file.py
 ```
 
 **Sentry Integration for Runtime Security:**
