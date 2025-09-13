@@ -1,6 +1,6 @@
 ---
 title: Performance Metrics & Optimization
-version: 3.2
+version: 4.0
 updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
@@ -19,6 +19,7 @@ related:
   - ../10_mcp/14_enterprise-search.md
   - ../20_credentials/23_enterprise-sso.md
 changelog:
+  - 4.0: BREAKING CHANGE - Added OpenTelemetry observability stack with Prometheus/Grafana/Jaeger configuration and performance optimization patterns
   - 3.2: Added advanced performance optimization including model selection strategies, extended thinking modes, prompt caching, and batch processing
   - 3.1: Enhanced with template performance targets and maintenance tasks
   - Added enterprise search and RAG implementation phases
@@ -95,6 +96,141 @@ const ExpensiveComponent = React.memo(({ data }) => {
   srcSet="image-320w.webp 320w, image-640w.webp 640w"
   sizes="(max-width: 320px) 280px, 640px"
 />
+```
+
+## OpenTelemetry Observability Stack
+
+### Comprehensive Monitoring Architecture
+
+**OpenTelemetry Integration for Claude Code:**
+```yaml
+# docker-compose.yml for observability stack
+version: '3.8'
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    volumes:
+      - ./otel-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "8889:8889"
+      - "4317:4317"
+      - "4318:4318"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+```
+
+**Prometheus Configuration:**
+```yaml
+# prometheus.yml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'claude-mcp-servers'
+    static_configs:
+      - targets: ['localhost:8080', 'localhost:8081']
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['localhost:8889']
+```
+
+**Grafana Dashboard Configuration:**
+```json
+{
+  "dashboard": {
+    "title": "Claude Code Performance Metrics",
+    "panels": [
+      {
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "claude_response_time_seconds",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "title": "Token Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(claude_tokens_consumed_total[5m])",
+            "refId": "B"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Performance Optimization Patterns
+
+**Intelligent Caching Strategy:**
+```python
+# Performance optimization implementation
+class PerformanceOptimizer:
+    def __init__(self):
+        self.cache = TTLCache(maxsize=1000, ttl=3600)
+        self.metrics = OpenTelemetryMetrics()
+
+    @trace_performance
+    def optimize_request(self, request):
+        # Cache hit optimization
+        cache_key = self.generate_cache_key(request)
+        if cached_result := self.cache.get(cache_key):
+            self.metrics.record_cache_hit()
+            return cached_result
+
+        # Request optimization
+        optimized_request = self.optimize_prompt(request)
+        result = self.execute_request(optimized_request)
+
+        # Cache and return
+        self.cache[cache_key] = result
+        self.metrics.record_performance_metrics(request, result)
+        return result
+```
+
+**Monitoring Alerts:**
+```yaml
+# Alert rules for performance degradation
+groups:
+- name: claude-performance
+  rules:
+  - alert: HighResponseTime
+    expr: claude_response_time_seconds > 5
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High response time detected"
+
+  - alert: TokenUsageSpike
+    expr: rate(claude_tokens_consumed_total[5m]) > 1000
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Token usage spike detected"
 ```
 
 ## Usage Limits Management & Session Optimization

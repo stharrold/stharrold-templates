@@ -28,18 +28,27 @@ The repository follows a **platform-specific management approach** with a struct
 The `10_draft-merged/` directory contains a hierarchical documentation system:
 - **`CLAUDE.md`** - Project Context Orchestrator with 30KB file constraints
 - **`10_mcp/`** - MCP server configuration and setup guides
-- **`20_credentials/`** - Security and credential management guides  
+- **`20_credentials/`** - Security and credential management guides
 - **`30_implementation/`** - Development strategy, workflow patterns, and testing standards
+  - **Multi-agent orchestration subcategories**:
+    - `38a_enterprise-migration-timeline.md` - 9-week enterprise migration plan
+    - `39a_langgraph-orchestration.md` - LangGraph TypeScript implementation (18KB)
+    - `39b_state-management.md` - Redis Cluster, Celery, CQRS patterns (12KB)
+    - `39c_workflow-implementation.md` - Complete w00.0-w09.0 workflows (23KB)
 
 Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for systematic navigation.
 
 ### Key Components
 
 - **Platform-Specific MCP Manager**: `mcp_manager.py` handles server management for individual platforms with auto-detection and platform targeting
+- **LangGraph Orchestration**: Production-ready multi-agent coordination with TypeScript integration (replaces Claude-Flow)
+- **Podman Container Management**: Rootless, daemonless container architecture (replaces Docker)
 - **Modular Guide System**: Hierarchical documentation with context optimization:
   - `10_mcp/` - MCP setup and configuration guides
   - `20_credentials/` - Security and credential management guides
   - `30_implementation/` - Development strategy and workflow patterns
+- **OpenTelemetry Observability**: Prometheus/Grafana/Jaeger monitoring stack
+- **Enterprise Migration Framework**: 9-week implementation timeline with validation checkpoints
 - **Schema Harmonization**: Handles differences between Claude Code CLI (`mcpServers`), VS Code (`servers`), and Claude Desktop (`mcpServers`) schemas
 - **Archive System**: UTC-timestamped format `YYYYMMDDTHHMMSSZ_filename.ext`
 
@@ -288,9 +297,16 @@ import mcp_manager
 
 ### MCP Server Tiers
 - **Tier 1**: Essential Core Development (GitHub, Git, Filesystem, Sequential Thinking)
-- **Tier 2**: High-Impact Productivity (Codacy, Sentry, Azure DevOps, Terraform)
-- **Tier 3**: Advanced Collaboration (Slack, Notion, PostHog, Zapier)  
+- **Tier 2**: High-Impact Productivity (Codacy, Sentry, Azure DevOps, Terraform, DeepEval, Hypothesis)
+- **Tier 3**: Advanced Collaboration (Slack, Notion, PostHog, Zapier)
 - **Tier 4**: Specialized Domain (MongoDB, Figma, Apidog)
+
+### Key Technologies (v4.0+)
+- **LangGraph**: Multi-agent orchestration with TypeScript integration
+- **Podman**: Rootless container management (replaces Docker)
+- **OpenTelemetry**: Observability stack (Prometheus/Grafana/Jaeger)
+- **Redis Cluster + Celery**: Distributed state management and task queues
+- **DeepEval + Hypothesis**: LLM-specific testing and property-based testing
 
 ## Local Permissions
 Claude Code permissions configured in `.claude/settings.local.json`:
@@ -318,9 +334,15 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Backups preserved** in `ARCHIVED/` with UTC timestamps
 - **Platform-specific management** ready for selective server addition
 - **Modular guide system** with hierarchical documentation structure
-- **Enhanced capabilities**: Multi-agent orchestration, framework integration, enterprise deployment
+- **v4.0 Breaking Changes Completed**:
+  - **LangGraph orchestration** replaces Claude-Flow completely
+  - **Podman container management** replaces Docker for rootless security
+  - **Multi-agent modular guides**: 39a (LangGraph), 39b (state management), 39c (workflow implementation)
+  - **Enterprise migration timeline**: 38a with 9-week implementation plan
+  - **OpenTelemetry observability** stack with Prometheus/Grafana/Jaeger
+  - **Essential testing tools**: DeepEval and Hypothesis integration
+- **TODO.md Integration Complete**: All 13 tasks completed (100%) with comprehensive agent-orchestrator workflow integration
 - **Document structure** optimized with 30KB constraints for AI context processing
-- **Recent integration**: Claude workflows merged into modular guides (37_team-collaboration.md, 38_enterprise-deployment.md, 39_multi-agent-systems.md)
 
 ## Development Philosophy
 

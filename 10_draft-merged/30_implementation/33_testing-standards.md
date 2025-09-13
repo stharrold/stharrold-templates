@@ -1,6 +1,6 @@
 ---
 title: Testing Standards & Validation
-version: 3.2
+version: 4.0
 updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
@@ -19,6 +19,7 @@ related:
   - ../10_mcp/15_troubleshooting.md
   - ../20_credentials/24_audit-compliance.md
 changelog:
+  - 4.0: BREAKING CHANGE - Added essential LLM testing tools (DeepEval, Hypothesis) for production validation
   - 3.2: Added advanced testing methodologies including TDD with Claude and screenshot-driven development patterns
   - 3.1: Enhanced with template testing requirements and known issues
   - Added error handling patterns and troubleshooting procedures
@@ -286,6 +287,28 @@ claude /cost --daily-breakdown
 # - Token usage within expected ranges
 # - Error rates below 2% for standard operations
 ```
+
+### Essential LLM Testing Tools
+
+**DeepEval for LLM-Specific Testing:**
+```bash
+# LLM evaluation framework for Claude Code workflows
+pip install deepeval
+deepeval test generate --model claude-3-5-sonnet
+```
+
+**Hypothesis for Property-Based Testing:**
+```bash
+# Automated edge case discovery
+pip install hypothesis
+# Generate comprehensive test cases for MCP server interactions
+```
+
+**Testing Pyramid (pytest/Jest/Playwright/Locust):**
+- **Unit**: Individual MCP server functions
+- **Integration**: Server-to-Claude communication
+- **E2E**: Complete workflow validation
+- **Load**: Performance under concurrent usage
 
 ### Functional Validation Tests
 

@@ -1,12 +1,15 @@
 ---
 title: MCP Server Configurations
-version: 3.1
-updated: 2025-09-12
+version: 4.0
+updated: 2025-09-13
 parent: ./CLAUDE.md
 related:
   - ./11_setup.md
   - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
+changelog:
+  - 4.0: BREAKING CHANGE - Added MCP hybrid architecture, OAuth 2.1 authentication, and health monitoring
+  - 3.1: Previous version baseline
 ---
 
 # MCP Server Configurations
@@ -24,6 +27,129 @@ Choose servers based on your project needs and development phase:
 
 **Prerequisites**: Many servers require API tokens. Configure credentials first:
 → [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
+
+## MCP Hybrid Architecture
+
+### Enterprise-Grade MCP Integration
+
+**Hybrid Architecture Design:**
+The Model Context Protocol supports both local and remote server configurations, enabling flexible deployment strategies optimized for security, performance, and scalability requirements.
+
+```javascript
+// MCP Architecture Configuration
+MCP_Architecture: {
+  Local_Servers: {
+    transport: "stdio",
+    use_cases: ["file_system", "database", "development_tools"],
+    security: "host_isolated",
+    performance: "low_latency"
+  },
+  Remote_Servers: {
+    transport: "HTTP+SSE",
+    use_cases: ["github_api", "cloud_services", "external_integrations"],
+    security: "oauth_2_1",
+    performance: "scalable"
+  }
+}
+```
+
+### OAuth 2.1 Authentication Setup
+
+**Enterprise OAuth Integration:**
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_OAUTH_TOKEN}"
+      },
+      "oauth": {
+        "provider": "github",
+        "scopes": ["repo", "read:org", "workflow"],
+        "refresh_strategy": "automatic",
+        "token_endpoint": "https://github.com/login/oauth/access_token"
+      }
+    },
+    "remote-api": {
+      "transport": {
+        "type": "http",
+        "url": "https://api.company.com/mcp",
+        "headers": {
+          "Authorization": "Bearer ${OAUTH_ACCESS_TOKEN}",
+          "X-Client-Version": "mcp-v1.0"
+        }
+      }
+    }
+  }
+}
+```
+
+**OAuth Token Management:**
+```bash
+# Automated token refresh workflow
+claude oauth refresh --provider github --force-rotation
+claude oauth validate --all-providers --health-check
+
+# Enterprise SSO integration
+claude oauth configure-sso --provider okta --domain company.okta.com
+```
+
+### Health Monitoring Endpoints
+
+**Comprehensive Health Monitoring:**
+```javascript
+// Health check implementation
+class MCPHealthMonitor {
+  async checkServerHealth(serverId) {
+    const healthEndpoint = `/mcp/health/${serverId}`;
+    const response = await fetch(healthEndpoint, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    return {
+      server_id: serverId,
+      status: response.status === 200 ? 'healthy' : 'unhealthy',
+      response_time: Date.now() - startTime,
+      last_check: new Date().toISOString(),
+      capabilities: await this.getServerCapabilities(serverId)
+    };
+  }
+}
+```
+
+**Monitoring Configuration:**
+```yaml
+# MCP monitoring configuration
+mcp_monitoring:
+  health_checks:
+    interval: 30s
+    timeout: 5s
+    failure_threshold: 3
+    recovery_threshold: 2
+
+  metrics:
+    - response_time
+    - request_count
+    - error_rate
+    - token_usage
+
+  alerts:
+    - condition: response_time > 5s
+      severity: warning
+    - condition: error_rate > 0.05
+      severity: critical
+```
+
+**Health Dashboard Integration:**
+```bash
+# Health monitoring commands
+claude mcp health-check --all-servers --detailed
+claude mcp monitor --dashboard --real-time
+claude mcp alerts configure --webhook https://monitoring.company.com/alerts
+```
 
 ## Tier 1: Essential Core Development Servers
 

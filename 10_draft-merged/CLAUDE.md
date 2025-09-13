@@ -27,11 +27,11 @@ project_template:
 tech_stack:
   languages: ["python", "javascript", "sql"]
   frameworks: ["django", "react", "tailwind"]
-  tools: ["docker", "redis", "nginx"]
+  tools: ["podman", "redis", "nginx"]
   services: ["aws", "stripe", "sendgrid"]
   testing: ["jest", "pytest", "react_testing_library"]
   ci_cd: ["github_actions", "jenkins"]
-  infrastructure: ["aws", "docker", "kubernetes"]
+  infrastructure: ["aws", "podman", "kubernetes"]
 hierarchy:
   subdirectories:
     - 10_mcp/

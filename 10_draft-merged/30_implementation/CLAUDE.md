@@ -67,7 +67,11 @@ Execute in recommended order for comprehensive implementation:
 ### Advanced Enterprise Guides
 7. **[37_team-collaboration.md](./37_team-collaboration.md)** - Team communication, migration, and coordination patterns
 8. **[38_enterprise-deployment.md](./38_enterprise-deployment.md)** - CI/CD integration, security workflows, and compliance
-9. **[39_multi-agent-systems.md](./39_multi-agent-systems.md)** - Advanced orchestration and swarm intelligence patterns
+9. **[38a_enterprise-migration-timeline.md](./38a_enterprise-migration-timeline.md)** - 9-week enterprise migration plan
+10. **[39_multi-agent-systems.md](./39_multi-agent-systems.md)** - Multi-agent orchestration overview and strategy
+    - **[39a_langgraph-orchestration.md](./39a_langgraph-orchestration.md)** - LangGraph TypeScript implementation
+    - **[39b_state-management.md](./39b_state-management.md)** - Redis Cluster, Celery, and distributed coordination
+    - **[39c_workflow-implementation.md](./39c_workflow-implementation.md)** - Complete w00.0-w09.0 workflow implementation
 
 ## Strategic Overview
 

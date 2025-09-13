@@ -1,6 +1,6 @@
 ---
 title: Implementation Workflow Patterns
-version: 3.2
+version: 4.0
 updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
@@ -19,6 +19,7 @@ related:
   - ../10_mcp/12_servers.md
   - ../20_credentials/CLAUDE.md
 changelog:
+  - 4.0: BREAKING CHANGE - Replaced Docker with Podman for container management, added automated tool discovery pipeline, LangGraph orchestration
   - 3.2: Added Claude framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
   - 3.1: Enhanced with development standards and workflow patterns
   - Added template common commands and git workflow integration
@@ -426,50 +427,60 @@ claude mcp add azure-devops npx @azure-devops/mcp
 
 Modern Claude development benefits from integration with established AI frameworks, each offering distinct advantages for different use cases and team structures.
 
-#### LangChain Integration
+### Container Orchestration with Podman
 
-**Native Claude Support via `langchain-anthropic`**
+**Podman Architecture for Secure Container Management**
 
-LangChain provides rich integration capabilities optimized for Claude's strengths:
+Podman provides superior security through daemonless, rootless architecture, making it ideal for Claude Code's container management needs:
 
-```python
-# Installation and setup
-pip install langchain-anthropic
-
-# Basic integration with tool support
-from langchain_anthropic import ChatAnthropic
-from langchain_core.tools import tool
-
-llm = ChatAnthropic(
-    model="claude-3-5-sonnet-20240620",
-    temperature=0,
-    max_tokens=1024,
-    timeout=None,
-    max_retries=2,
-)
-
-@tool
-def complex_calculation(expression: str) -> str:
-    """Execute complex mathematical calculations safely"""
-    # Implementation here
-    return result
-
-# XML-based agent architecture optimized for Claude
-from langchain.agents import XMLAgent
-agent = XMLAgent.from_llm_and_tools(llm, [complex_calculation])
+```yaml
+Container Management Layer:
+├── Podman (rootless containers)
+├── Dev Container CLI (configuration management)
+├── Testcontainers (automated testing)
+└── Container Registry (image management)
 ```
 
-**Advanced Patterns:**
-- **RAG applications** with comprehensive document analysis using Claude's 200K context window
-- **Citation support** through structured output formatting
-- **XML-based agent architectures** leveraging Claude's XML parsing strengths
-- **Prompt caching integration** for cost optimization on repetitive tasks
+**Security Benefits:**
+- **Rootless operation** eliminates privileged daemon requirements
+- **User attribution** in audit logs for compliance
+- **SystemD integration** for Linux service management
+- **Pod support** for grouping related containers
 
-**Best Practices:**
-- Use Claude's context window for large document processing
-- Implement prompt caching for repeated document analysis
-- Leverage XML formatting for structured agent responses
-- Higher token costs require careful optimization strategies
+**Podman Commands for Claude Code Integration:**
+```bash
+# Container lifecycle management
+podman run --rm -d --name claude-workspace alpine:latest
+podman exec claude-workspace /bin/sh -c "command"
+podman pod create --name development-environment
+
+# Volume and network management
+podman volume create workspace-data
+podman network create secure-dev-network
+
+# Security and compliance
+podman run --security-opt label=level:s0 --user 1000:1000
+```
+
+### Automated Tool Discovery Pipeline
+
+**Multi-Tier Discovery Framework**
+
+A systematic approach to tool discovery ensures quality and security:
+
+**Discovery Pipeline:**
+1. **Repository Scanning**: Parse awesome-claude-code, awesome-mcp-servers
+2. **Metadata Extraction**: Analyze package.json, README.md, LICENSE files
+3. **Security Scanning**: Integrate vulnerability detection
+4. **Capability Detection**: Automated API endpoint discovery
+5. **Performance Profiling**: Response time and resource utilization
+
+**Implementation Pattern:**
+```bash
+# Automated tool evaluation workflow
+podman run --rm -v $(pwd):/workspace tool-discovery:latest \
+  --scan-repos --security-check --performance-profile
+```
 
 #### CrewAI Integration
 
@@ -546,11 +557,11 @@ result = crew.kickoff()
 
 Leading-edge implementations demonstrate sophisticated orchestration patterns:
 
-**Claude-Flow v2.0 Features:**
-- **87 MCP tools** integrated into hive-mind intelligence
-- **SQLite memory systems** for persistent context
-- **Multi-team project handling** with role-based access
-- **Hierarchical agent architectures** with specialized coordinators
+**LangGraph v4.0+ Features:**
+- **Graph-based workflow definition** with TypeScript integration
+- **Built-in state persistence** with automatic checkpointing
+- **Streaming capabilities** for real-time monitoring
+- **Human-in-the-loop** support for validation workflows
 
 **Claude 007 Agents Architecture:**
 - **112 specialized agents** across 14 domains

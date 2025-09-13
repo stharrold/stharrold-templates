@@ -1,6 +1,6 @@
 ---
 title: Enterprise Deployment & CI/CD Integration
-version: 1.0
+version: 4.0
 updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
@@ -19,6 +19,7 @@ related:
   - ../20_credentials/23_enterprise-sso.md
   - ../10_mcp/12_servers.md
 changelog:
+  - 4.0: BREAKING CHANGE - Added Kubernetes resource management, production deployment manifests, and scalability patterns
   - 1.0: Initial enterprise deployment guide with CI/CD integration and security workflows
 ---
 
@@ -253,6 +254,70 @@ module "claude_enterprise" {
 }
 ```
 
+### Kubernetes Resource Management
+
+**Production-Grade Kubernetes Deployment:**
+```yaml
+# claude-code-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claude-mcp-orchestrator
+  namespace: claude-production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: claude-mcp
+  template:
+    metadata:
+      labels:
+        app: claude-mcp
+    spec:
+      containers:
+      - name: mcp-server
+        image: claude-mcp:v4.0
+        resources:
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        env:
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: claude-secrets
+              key: github-token
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claude-mcp-service
+spec:
+  selector:
+    app: claude-mcp
+  ports:
+  - port: 8080
+    targetPort: 8080
+  type: LoadBalancer
+```
+
+**Resource Management Patterns:**
+- **Resource quotas** preventing overutilization
+- **Horizontal Pod Autoscaling** for demand management
+- **Network policies** for secure service communication
+- **Persistent volumes** for state management
+
+**Production Environment Setup:**
+```bash
+# Complete production deployment
+kubectl apply -f k8s/production/
+kubectl rollout status deployment/claude-mcp-orchestrator
+kubectl get pods -l app=claude-mcp
+```
+
 ## Security Workflows and Compliance
 
 ### Enterprise Security Integration
@@ -339,6 +404,43 @@ claude security compliance-report \
   --remediation-plans=automated \
   --risk-assessment=quantified
 ```
+
+### Security and Scalability Patterns
+
+**Auto-Scaling Configuration:**
+```yaml
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: claude-mcp-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: claude-mcp-orchestrator
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+```
+
+**Performance Optimization:**
+- **Resource limits** for consistent performance
+- **Load balancing** across multiple instances
+- **Circuit breakers** for resilient service calls
+- **Caching layers** for frequently accessed data
 
 ## Industry-Specific Server Configurations
 
