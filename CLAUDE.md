@@ -8,6 +8,8 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 **Current MCP State**: All MCP servers have been removed from all platforms (as of 2025-09-12). This provides a clean slate for selective server management using the platform-specific approach.
 
+**Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
+
 ### Core Architecture
 
 The repository follows a **platform-specific management approach** with a structured document lifecycle:
@@ -92,16 +94,19 @@ claude mcp remove <name>                         # Remove server
 
 ### Git Operations
 ```bash
-# Repository is now initialized with git
-git status
-git add --all
-git commit -m "type: message"
-git log --oneline
+# Repository connected to GitHub (contrib/stharrold is default branch)
+git status                                    # Check current status
+git add --all                                # Stage all changes
+git commit -m "type: message"                # Commit with message
+git push                                      # Push to current branch
+git log --oneline                             # View commit history
+
+# Branch management
+git checkout main                             # Switch to main branch
+git checkout develop                          # Switch to develop branch
+git checkout contrib/stharrold               # Switch back to contrib branch
 
 # Archive files with UTC timestamp
-cp file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-
-# Move files to archive (preferred over copy)
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ```
 
@@ -289,6 +294,7 @@ The tool operates on **one platform at a time** with the following options:
 3. **Make changes**: Use interactive commands (`--add`, `--remove`, `--disable`)
 4. **Validate changes**: Use `--check-credentials` and re-run tests
 5. **Code quality**: Run Codacy analysis on any modified Python files
+6. **Git workflow**: Work on `contrib/stharrold`, create PRs to `develop` or `main` as needed
 
 ## Important Guidelines
 
@@ -387,20 +393,24 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Permission denied**: Run `chmod +x mcp_manager.py` or use `python3 mcp_manager.py` instead of direct execution
 - **Platform detection fails**: Manually specify platform with `--platform <name>` flag
 
+### Git Workflow Issues
+- **Branch confusion**: Default branch is `contrib/stharrold`, not `main`
+- **Push failures**: Ensure you're on the correct branch before pushing
+- **PR creation**: Use GitHub web interface or `gh pr create` for pull requests
+
 ## Current State (as of 2025-09-13)
 - **All MCP servers removed** from all platforms (clean slate)
-- **Backups preserved** in `ARCHIVED/` with UTC timestamps
-- **Platform-specific management** ready for selective server addition
-- **Modular guide system** with hierarchical documentation structure
-- **v4.0 Breaking Changes Completed**:
+- **Default branch**: `contrib/stharrold` for active development
+- **GitHub integration**: Repository connected with minimal branch protection
+- **v4.0 Breaking Changes Complete (100%)**:
   - **LangGraph orchestration** replaces Claude-Flow completely
   - **Podman container management** replaces Docker for rootless security
   - **Multi-agent modular guides**: 39a (LangGraph), 39b (state management), 39c (workflow implementation)
   - **Enterprise migration timeline**: 38a with 9-week implementation plan
   - **OpenTelemetry observability** stack with Prometheus/Grafana/Jaeger
   - **Essential testing tools**: DeepEval and Hypothesis integration
-- **TODO.md Integration Complete**: All 13 tasks completed (100%) with comprehensive agent-orchestrator workflow integration
 - **Document structure** optimized with 30KB constraints for AI context processing
+- **Git workflow**: Simplified single-directory structure (no worktrees)
 
 ## Development Philosophy
 
