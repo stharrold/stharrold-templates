@@ -3,3 +3,9 @@
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
 __pycache__/
+
+# BMAD Framework Installation (exclude installation, keep utilities)
+.bmad-install/
+.bmad-flattened.xml
+.bmad-flattened.stats.md
+.bmad-flattenignore
