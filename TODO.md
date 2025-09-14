@@ -22,10 +22,32 @@ Last sync: 2025-09-14
 - [ ] Set up Prometheus/Grafana monitoring stack (#10)
 - [ ] Configure OpenTelemetry distributed tracing (#11)
 
+## Document Integration (Priority: Sequential Merge)
+
+### High Priority - Security & State Management
+- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12)
+- [ ] Integrate 20_claude-preserve-state-todo-compact.md into state management (#19)
+
+### Medium Priority - Core Development Tools
+- [ ] Integrate 11_report-embedding-model.md into AI/ML tools (#13)
+- [ ] Integrate 19_jupyter-to-marimo-conversion-guide.md into development tools (#14)
+- [ ] Integrate 12_report-baml-documentation-extractor.md into documentation patterns (#15)
+- [ ] Integrate 13_report-baml-kuzu-graph-schema.md into database patterns (#16)
+- [ ] Integrate 18_prompt-complexity-quantification.md into AI optimization (#17)
+- [ ] Integrate 18-1_prompt-complexity-routing-claude-model.md into AI optimization (#18)
+- [ ] Integrate 17_ai-model-lifecycle-directory-structure.md into project structures (#21)
+
+### Low Priority - Complex Agent Architectures (Requires Splitting)
+- [ ] Integrate 16_report-agent-20-30-confit-setup-train-serve.md into agent architectures (#20)
+- [ ] Integrate 15_report-ai-agent-workflow-architecture-optimization.md into agent architectures (#22)
+- [ ] Integrate 14_report-agents-autogen-bmad-speckit-dspy-baml.md into agent architectures (#23)
+- [ ] Integrate 10_report-autogen-dspy-architecture.md into agent architectures (#24)
+
 ## Completed Tasks
 See `ARCHIVED/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
 
 ## Sync Status
-- **GitHub Issues**: 9 open (#3-#11)
-- **TODO Items**: 9 pending
+- **GitHub Issues**: 22 open (#3-#24)
+- **TODO Items**: 22 pending (9 enhancements + 13 document integrations)
 - **Action**: ✅ Synchronized
+- **Next Priority**: Sequential document integration starting with security (#12, #19)
