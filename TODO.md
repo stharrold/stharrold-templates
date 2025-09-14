@@ -1,7 +1,7 @@
 # TODO
 
 ## GitHub Issue Sync
-Last sync: 2025-09-14 (verified complete - all 22 issues synchronized)
+Last sync: 2025-09-14 13:35 UTC (verified complete - all 22 issues open pending merge to main)
 
 ## Active Tasks
 
@@ -25,7 +25,7 @@ Last sync: 2025-09-14 (verified complete - all 22 issues synchronized)
 ## Document Integration (Priority: Sequential Merge)
 
 ### High Priority - Security & State Management
-- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12) → [Detailed Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md)
+- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12) → [Detailed Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md) | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (in progress)] | [Speckit Worktree: feat/12-integrate-workflow-secrets (completed, awaiting merge)]
 - [ ] Integrate 20_claude-preserve-state-todo-compact.md into state management (#19)
 
 ### Medium Priority - Core Development Tools
@@ -47,7 +47,8 @@ Last sync: 2025-09-14 (verified complete - all 22 issues synchronized)
 See `ARCHIVED/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
 
 ## Sync Status
-- **GitHub Issues**: 22 open (#3-#24)
+- **GitHub Issues**: 22 open (#3-#24) - all pending merge to main
 - **TODO Items**: 22 pending (9 enhancements + 13 document integrations)
 - **Action**: ✅ Synchronized
-- **Next Priority**: Sequential document integration starting with security (#12, #19)
+- **Work in Progress**: Issue #12 has two worktree implementations
+- **Next Priority**: Complete and merge #12, then proceed with #19
