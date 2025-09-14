@@ -1,10 +1,10 @@
 ---
-title: "Integration Plan: Workflow Secrets MCP (Speckit Implementation)"
+title: "Integration Plan: Workflow Secrets MCP (Flow Implementation)"
 issue: 12
 priority: high
-status: completed
-worktree_name: feat/12-integrate-workflow-secrets
-branch_name: feat/12-integrate-workflow-secrets
+status: pending
+worktree_name: feat/12-integrate-workflow-secrets-flow
+branch_name: feat/12-integrate-workflow-secrets-flow
 github_issue: https://github.com/stharrold/stharrold-templates/issues/12
 estimated_effort: "2-3 hours"
 created: 2025-09-14
@@ -37,18 +37,18 @@ success_criteria:
   - GitHub issue #12 closed
 ---
 
-# TODO: Integrate Workflow Secrets MCP (#12) - Speckit Implementation
+# TODO: Integrate Workflow Secrets MCP (#12) - Flow Implementation
 
 ## Overview
 Integrate practical security workflow examples from `09_workflow-secrets-mcp.md` into the existing `25_mcp-security-tools.md` file to enhance security patterns documentation.
 
-**Implementation Approach**: This is the GitHub Speckit implementation (PR #25). For Claude approach, see TODO_FOR_feat-12-integrate-workflow-secrets-claude.md
+**Implementation Approach**: This is the Claude Flow implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit), TODO_FOR_feat-12-integrate-workflow-secrets-claude.md (Claude), and TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md (BMAD).
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
-**Worktree Location**: Work completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets/`
+**Worktree Location**: Work will be completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow/`
 
-**Implementation Notes**: This task was completed using GitHub Speckit approach. See [TODO.md line 28](TODO.md#L28) for tracking.
+**Implementation Notes**: This task uses the Claude Flow approach. See [TODO.md line 28](TODO.md#L28) for tracking.
 
 ## Pre-Integration Analysis
 
@@ -72,15 +72,15 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 
 ## Content Integration
 
-### [✅] 4. Create worktree and branch
-**Note**: Work was completed using GitHub Speckit approach in dedicated worktree.
+### [ ] 4. Create worktree and branch
+**Note**: Work will be completed using Claude Flow approach in dedicated worktree.
 
 ```bash
-git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets -b feat/12-integrate-workflow-secrets
-cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
+git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow -b feat/12-integrate-workflow-secrets-flow
+cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow
 ```
 
-**Completed Status**: ✅ Worktree created and work completed (PR #25 - OPEN for review)
+**Status**: Pending - Ready for Claude Flow implementation
 
 ### [ ] 5. Enhance target file
 - [ ] Add step-by-step installation workflows
@@ -130,20 +130,20 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
 - [ ] Commit with descriptive message:
   ```bash
   git add --all
-  git commit -m "feat: integrate workflow secrets patterns into security tools (Speckit implementation)
+  git commit -m "feat: integrate workflow secrets patterns into security tools (Flow implementation)
 
   - Enhanced 25_mcp-security-tools.md with practical workflow examples
   - Added mcp-secrets-plugin installation and usage patterns
   - Included mcpauth OAuth 2.1 server deployment workflow
   - Added platform-specific credential verification steps
   - Archived source document with UTC timestamp
-  - GitHub Speckit implementation approach
+  - Claude Flow implementation approach
 
   Closes #12
 
-  🤖 Generated with GitHub Speckit
+  🤖 Generated with Claude Flow
 
-  Co-Authored-By: GitHub Speckit <noreply@github.com>"
+  Co-Authored-By: Claude Flow <noreply@anthropic.com>"
   ```
 
 ### [ ] 12. Update tracking
