@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. See feature/08_merge branch for detailed security enhancements.
+**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. BMAD framework integrated for agentic development workflows with full agent persona support and advanced task orchestration.
 
 ## CRITICAL: Code Quality Requirements
 
@@ -23,11 +23,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Architecture
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
+This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop, plus BMAD framework integration for advanced agentic development.
 
 **Current MCP State**: All MCP servers have been removed from all platforms (as of 2025-09-12). This provides a clean slate for selective server management using the platform-specific approach.
 
 **Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
+
+## BMAD Framework Integration
+
+This repository includes the **BMAD-METHOD™ (Breakthrough Method of Agile AI-Driven Development)** framework for advanced agentic development workflows. BMAD provides specialized AI agent personas, task orchestration, and comprehensive development templates.
+
+### BMAD Agent Personas Available
+- **Architect** (`/BMad:agents:architect`) - System design, architecture documents, technology selection
+- **Analyst** (`/BMad:agents:analyst`) - Requirements analysis, research, stakeholder interviews
+- **PM** (`/BMad:agents:pm`) - Project management, roadmaps, resource planning
+- **Dev** (`/BMad:agents:dev`) - Code implementation, technical execution
+- **QA** (`/BMad:agents:qa`) - Quality assurance, testing strategies, validation
+- **SM** (`/BMad:agents:sm`) - Scrum Master, story creation, sprint management
+
+### BMAD Configuration
+- **Core Config**: `.bmad-core/core-config.yaml`
+- **Agent Directory**: `.bmad-core/agents/`
+- **Task Templates**: `.bmad-core/tasks/`
+- **Claude Commands**: `.claude/commands/BMad/`
 
 ### Core Architecture
 
@@ -70,6 +88,23 @@ initial/    merged/     (UTC timestamps)
 
 ## Essential Development Commands
 
+### BMAD Agent Commands
+```bash
+# Activate BMAD agent personas (use in Claude Code CLI)
+/BMad:agents:architect     # System architecture and design
+/BMad:agents:analyst       # Requirements and research
+/BMad:agents:pm           # Project management
+/BMad:agents:dev          # Development and implementation
+/BMad:agents:qa           # Quality assurance and testing
+/BMad:agents:sm           # Scrum Master and story management
+
+# BMAD task execution examples
+/BMad:tasks:document-project           # Document existing project architecture
+/BMad:tasks:create-doc                # Create documentation with templates
+/BMad:tasks:create-next-story         # Generate development stories
+/BMad:tasks:review-story              # Review and validate stories
+```
+
 ### MCP Manager Operations
 ```bash
 # System status and platform detection
@@ -104,18 +139,18 @@ python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manage
 claude mcp list                                   # List configured servers
 ```
 
-### Code Quality Workflow (MANDATORY)
+### Code Quality Workflow (RECOMMENDED)
 ```bash
-# CRITICAL: Run after EVERY file edit
-./.codacy/cli.sh analyze --tool pylint edited_file.py    # Python files
-./.codacy/cli.sh analyze edited_file                     # Other files
+# Python code quality (when available)
+python3 -m pylint mcp_manager.py                        # Lint main Python files
+python3 -m flake8 mcp_manager.py                       # Style checking
 
-# CRITICAL: Run after dependency changes
-./.codacy/cli.sh analyze --tool trivy .                  # Security vulnerability scan
+# Manual validation
+python3 test_mcp_deduplication.py                      # Run deduplication tests
+python3 -c "import mcp_manager; print('Import successful')"  # Module validation
 
-# Additional analysis tools
-./.codacy/cli.sh analyze --tool semgrep                  # Security-focused analysis
-./.codacy/cli.sh version                                 # Check CLI status
+# BMAD quality assurance
+/BMad:agents:qa                                         # Activate QA agent for review
 ```
 
 ### Document Integration Workflow
@@ -219,11 +254,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ## Integration Priority System
 
 Current priorities (from TODO.md):
-1. **High Priority**: Issue #12 (security workflow integration) - multiple implementations
-2. **High Priority**: Issue #19 (state management integration)
+1. **Completed**: Issue #12 (security workflow integration) - BMAD implementation ✅
+2. **High Priority**: Issue #19 (state management integration) - Next priority
 3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
 4. **Medium Priority**: Document integrations (#13-18, #21)
 5. **Infrastructure**: Testing and monitoring setup (#8-11)
+
+### BMAD-Specific Workflows
+- Use `/BMad:agents:pm` for roadmap planning and prioritization
+- Use `/BMad:agents:analyst` for requirements analysis on new features
+- Use `/BMad:tasks:create-next-story` for implementing TODO items
 
 ## Common Issues & Solutions
 
@@ -232,10 +272,11 @@ Current priorities (from TODO.md):
 - **Platform not found**: Use `--status` to see available platforms
 - **Auto-detection issues**: Explicitly specify `--platform <name>`
 
-### Codacy CLI Issues
-- **CLI not executable**: Run `chmod +x ./.codacy/cli.sh`
-- **Analysis fails**: Check file exists and tool supports the file type
-- **No tools support file**: Expected for markdown/text files
+### BMAD Framework Issues
+- **Agent commands not found**: Ensure you're using Claude Code CLI with `/BMad:` prefix
+- **Agent not responding correctly**: Check `.bmad-core/core-config.yaml` for configuration
+- **Task execution fails**: Verify task dependencies in `.bmad-core/tasks/` directory
+- **Missing BMAD files**: Run `ls .bmad-core/` to verify installation integrity
 
 ### Python Development Issues
 - **Import errors**: Use `/usr/bin/python3` for system Python
@@ -243,9 +284,11 @@ Current priorities (from TODO.md):
 
 ## Critical Guidelines
 
-- **ALWAYS run Codacy analysis** after any file edit (non-negotiable)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
 - Follow the document lifecycle: Research → Integration → Archive
 - Maintain bidirectional references between TODO.md and TODO_FOR files
 - Use platform-specific MCP management approach (no cross-platform sync)
+- **Use BMAD agents for complex tasks**: Activate appropriate personas for specialized work
+- **Leverage BMAD task templates**: Use existing tasks in `.bmad-core/tasks/` for consistency
+- **Document BMAD workflows**: When using BMAD agents, document the persona and reasoning

@@ -151,9 +151,9 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad
   ```
   **Archived as**: `ARCHIVED/20250914T225229Z_09_workflow-secrets-mcp.md`
 
-### [ ] 11. Commit changes
-- [ ] Stage all changes
-- [ ] Commit with descriptive message:
+### [x] 11. Commit changes
+- [x] Stage all changes
+- [x] Commit with descriptive message:
   ```bash
   git add --all
   git commit -m "feat: integrate workflow secrets patterns into security tools (BMAD implementation)
