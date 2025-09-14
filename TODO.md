@@ -25,9 +25,9 @@ Last sync: 2025-09-14 13:35 UTC (verified complete - all 22 issues open pending 
 ## Document Integration (Priority: Sequential Merge)
 
 ### High Priority - Security & State Management
-- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12)
+- [x] Integrate 09_workflow-secrets-mcp.md into security tools (#12)
       → [Speckit Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md) | [Claude Plan](TODO_FOR_feat-12-integrate-workflow-secrets-claude.md)
-      | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (in progress)]
+      | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (✅ completed)]
       | [Speckit Worktree: feat/12-integrate-workflow-secrets (completed, PR #25)]
 - [ ] Integrate 20_claude-preserve-state-todo-compact.md into state management (#19)
 
@@ -50,8 +50,8 @@ Last sync: 2025-09-14 13:35 UTC (verified complete - all 22 issues open pending 
 See `ARCHIVED/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
 
 ## Sync Status
-- **GitHub Issues**: 22 open (#3-#24) - all pending merge to main
-- **TODO Items**: 22 pending (9 enhancements + 13 document integrations)
+- **GitHub Issues**: 21 open (#3-#11, #13-#24) - #12 completed, pending merge to main
+- **TODO Items**: 21 pending (9 enhancements + 12 document integrations)
 - **Action**: ✅ Synchronized
-- **Work in Progress**: Issue #12 has two worktree implementations
-- **Next Priority**: Complete and merge #12, then proceed with #19
+- **Work in Progress**: Issue #12 Claude implementation completed
+- **Next Priority**: Issue #19 (state management integration)
