@@ -46,7 +46,9 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
-**Worktree Implementation**: This task is being completed in Claude-specific worktree `feat/12-integrate-workflow-secrets-claude` to differentiate from GitHub Speckit approach. See [TODO.md line 28](TODO.md#L28) for tracking.
+**Worktree Location**: Work is being completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude/`
+
+**Implementation Notes**: This task is being completed using Claude-specific approach to differentiate from GitHub Speckit approach. See [TODO.md line 28](TODO.md#L28) for tracking.
 
 ## Pre-Integration Analysis
 

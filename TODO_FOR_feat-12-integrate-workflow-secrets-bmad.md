@@ -1,10 +1,10 @@
 ---
-title: "Integration Plan: Workflow Secrets MCP (Speckit Implementation)"
+title: "Integration Plan: Workflow Secrets MCP (BMAD Implementation)"
 issue: 12
 priority: high
-status: completed
-worktree_name: feat/12-integrate-workflow-secrets
-branch_name: feat/12-integrate-workflow-secrets
+status: pending
+worktree_name: feat/12-integrate-workflow-secrets-bmad
+branch_name: feat/12-integrate-workflow-secrets-bmad
 github_issue: https://github.com/stharrold/stharrold-templates/issues/12
 estimated_effort: "2-3 hours"
 created: 2025-09-14
@@ -37,18 +37,18 @@ success_criteria:
   - GitHub issue #12 closed
 ---
 
-# TODO: Integrate Workflow Secrets MCP (#12) - Speckit Implementation
+# TODO: Integrate Workflow Secrets MCP (#12) - BMAD Implementation
 
 ## Overview
 Integrate practical security workflow examples from `09_workflow-secrets-mcp.md` into the existing `25_mcp-security-tools.md` file to enhance security patterns documentation.
 
-**Implementation Approach**: This is the GitHub Speckit implementation (PR #25). For Claude approach, see TODO_FOR_feat-12-integrate-workflow-secrets-claude.md
+**Implementation Approach**: This is the BMAD method implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit) and TODO_FOR_feat-12-integrate-workflow-secrets-claude.md (Claude).
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
-**Worktree Location**: Work completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets/`
+**Worktree Location**: Work will be completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad/`
 
-**Implementation Notes**: This task was completed using GitHub Speckit approach. See [TODO.md line 28](TODO.md#L28) for tracking.
+**Implementation Notes**: This task uses the BMAD method approach. See [TODO.md line 28](TODO.md#L28) for tracking.
 
 ## Pre-Integration Analysis
 
@@ -72,15 +72,15 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 
 ## Content Integration
 
-### [✅] 4. Create worktree and branch
-**Note**: Work was completed using GitHub Speckit approach in dedicated worktree.
+### [ ] 4. Create worktree and branch
+**Note**: Work will be completed using BMAD method approach in dedicated worktree.
 
 ```bash
-git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets -b feat/12-integrate-workflow-secrets
-cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
+git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad -b feat/12-integrate-workflow-secrets-bmad
+cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad
 ```
 
-**Completed Status**: ✅ Worktree created and work completed (PR #25)
+**Status**: Pending - BMAD method worktree to be created
 
 ### [ ] 5. Enhance target file
 - [ ] Add step-by-step installation workflows
@@ -130,20 +130,20 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
 - [ ] Commit with descriptive message:
   ```bash
   git add --all
-  git commit -m "feat: integrate workflow secrets patterns into security tools (Speckit implementation)
+  git commit -m "feat: integrate workflow secrets patterns into security tools (BMAD implementation)
 
   - Enhanced 25_mcp-security-tools.md with practical workflow examples
   - Added mcp-secrets-plugin installation and usage patterns
   - Included mcpauth OAuth 2.1 server deployment workflow
   - Added platform-specific credential verification steps
   - Archived source document with UTC timestamp
-  - GitHub Speckit implementation approach
+  - BMAD method implementation approach
 
   Closes #12
 
-  🤖 Generated with GitHub Speckit
+  🤖 Generated with BMAD Method
 
-  Co-Authored-By: GitHub Speckit <noreply@github.com>"
+  Co-Authored-By: BMAD Method <noreply@bmad.com>"
   ```
 
 ### [ ] 12. Update tracking
