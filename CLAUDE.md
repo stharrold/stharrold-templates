@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. See feature/08_merge branch for detailed security enhancements.
+
 ## Repository Architecture
 
 This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
@@ -177,6 +179,26 @@ pip install -e .                         # Install in development mode
 # Generate reports
 ./.codacy/cli.sh analyze --format sarif -o results.sarif  # SARIF format
 ./.codacy/cli.sh analyze --format json -o results.json   # JSON format
+```
+
+### Security Tools and Emergency Response
+```bash
+# Deploy production security tools (see 10_draft-merged/20_credentials/25_mcp-security-tools.md)
+pip install mcp-secrets-plugin           # Cross-platform credential storage
+npx create-mcpauth-app                   # OAuth 2.1 server deployment
+npm install @auth0/mcp-server           # Enterprise Auth0 integration
+
+# Emergency credential management
+mcp-secrets set github token             # Store credentials securely
+mcp-secrets get github token             # Retrieve credentials
+mcp-secrets list                         # List stored services
+
+# Emergency response (kill switch capabilities)
+python3 -c "from emergency_cred_manager import EmergencyCredentialManager; EmergencyCredentialManager().emergencyRevocation('Security breach detected', 'ALL')"
+
+# OAuth 2.1 compliance validation
+claude oauth validate --all-providers --health-check
+claude oauth refresh --provider github --force-rotation
 ```
 
 ## Critical Workflow Rules
@@ -398,7 +420,7 @@ Claude Code permissions configured in `.claude/settings.local.json`:
 - **Push failures**: Ensure you're on the correct branch before pushing
 - **PR creation**: Use GitHub web interface or `gh pr create` for pull requests
 
-## Current State (as of 2025-09-13)
+## Current State (as of 2025-09-14)
 - **All MCP servers removed** from all platforms (clean slate)
 - **Default branch**: `contrib/stharrold` for active development
 - **GitHub integration**: Repository connected with minimal branch protection
@@ -411,10 +433,28 @@ Claude Code permissions configured in `.claude/settings.local.json`:
   - **Essential testing tools**: DeepEval and Hypothesis integration
 - **Document structure** optimized with 30KB constraints for AI context processing
 - **Git workflow**: Simplified single-directory structure (no worktrees)
+- **Security Enhancements Complete (v4.1)**:
+  - **OAuth 2.1 implementation** with PKCE, resource indicators, and vulnerability mitigations
+  - **Production security tools** integration (mcp-secrets-plugin, mcpauth, Auth0 MCP Server)
+  - **Layered storage architecture** for credential management with graceful degradation
+  - **Comprehensive monitoring** with anomaly detection and emergency response capabilities
+  - **Trail of Bits vulnerability mitigations** addressing confused deputy, token passthrough, and session hijacking
 
 ## Development Philosophy
 
-This repository implements a **platform-specific management approach** rather than cross-platform synchronization, allowing for:
+### Security-First Development Approach
+
+This repository implements **comprehensive security patterns** for MCP deployments, addressing critical vulnerabilities identified in early MCP implementations:
+
+- **Zero-trust credential management** with OS-native secure storage (Keychain/Credential Manager)
+- **OAuth 2.1 compliance** with mandatory PKCE, resource indicators, and dynamic client registration
+- **Vulnerability prevention** for confused deputy attacks, token passthrough vulnerabilities, and session hijacking
+- **Production-ready security tools** providing immediate protection against plaintext credential exposure
+- **Comprehensive audit trails** with anomaly detection and automated incident response
+
+### Platform-Specific Management Approach
+
+The repository maintains a **platform-specific management approach** rather than cross-platform synchronization, allowing for:
 - Independent platform configuration without conflicts
 - Selective server management based on platform capabilities
 - Risk-minimized rollout through the modular guide system

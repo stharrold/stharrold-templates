@@ -1,7 +1,7 @@
 ---
 title: Enterprise SSO & Authentication
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -18,6 +18,7 @@ related:
   - ./24_audit-compliance.md
   - ../30_implementation/32_workflow-patterns.md
 changelog:
+  - Enhanced with OAuth 2.1 security implementation and vulnerability mitigation patterns
   - Enhanced with enterprise search security considerations
   - Added multi-source credential management patterns
   - Integrated template security guidelines and sensitive areas
@@ -145,6 +146,242 @@ claude mcp add dlp-monitor "python -m data_loss_prevention" \
   --env SCAN_PATTERNS="./pii_patterns.json" \
   --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook" \
   --env COMPLIANCE_OFFICER="security@company.com"
+```
+
+## OAuth 2.1 Security Implementation
+
+### MCP OAuth 2.1 Compliance Requirements
+
+The Model Context Protocol mandates OAuth 2.1 for HTTP-based servers with specific security requirements that address common vulnerabilities in enterprise environments:
+
+**Mandatory Security Features:**
+- **PKCE Implementation**: Proof Key for Code Exchange with dynamically generated code verifiers
+- **Resource Indicators**: Token binding to specific MCP servers per RFC 8707
+- **Dynamic Client Registration**: Eliminates manual configuration overhead and reduces attack surface
+- **Token Audience Validation**: Prevents token confusion attacks across MCP server instances
+- **Automatic Token Refresh**: Seamless credential renewal without service interruption
+
+### Critical Vulnerability Prevention
+
+#### Confused Deputy Problem Mitigation
+
+MCP proxy servers acting as single OAuth clients create the **confused deputy vulnerability** where malicious clients can abuse server privileges:
+
+```javascript
+// SECURE: Per-client OAuth registration
+class SecureMCPProxy {
+  async registerClient(clientRequest) {
+    // Each client gets unique OAuth registration
+    const clientId = await this.oauthProvider.createClient({
+      name: `MCP-Client-${uuidv4()}`,
+      redirectUris: [clientRequest.redirectUri],
+      scopes: clientRequest.requestedScopes
+    });
+
+    // Require explicit consent for new redirect URIs
+    return { clientId, requiresConsent: true };
+  }
+
+  // NEVER allow silent consent skips
+  async handleAuthRequest(clientId, redirectUri) {
+    const client = await this.getClient(clientId);
+    if (!client.redirectUris.includes(redirectUri)) {
+      throw new SecurityError('Redirect URI not registered for client');
+    }
+    // Force user consent even for previously authorized URIs
+    return this.showConsentScreen(clientId, redirectUri);
+  }
+}
+```
+
+#### Token Passthrough Prevention
+
+**Vulnerability**: Servers blindly forwarding client-provided tokens enable privilege escalation.
+
+```javascript
+// SECURE: Token audience validation and exchange
+class SecureTokenHandler {
+  async validateAndExchangeToken(incomingToken, targetService) {
+    // Verify token audience matches this server
+    const decoded = jwt.verify(incomingToken, publicKey);
+    if (decoded.aud !== this.serverId) {
+      throw new SecurityError('Token audience mismatch');
+    }
+
+    // Use OAuth 2.0 Token Exchange (RFC 8644) for downstream access
+    const exchangedToken = await this.oauthClient.tokenExchange({
+      subjectToken: incomingToken,
+      audience: targetService,
+      scope: 'mcp:read mcp:write'
+    });
+
+    return exchangedToken;
+  }
+}
+```
+
+#### Session Hijacking Prevention
+
+**Security Pattern**: Non-deterministic session management with user binding.
+
+```javascript
+// SECURE: Session security implementation
+class SecureSessionManager {
+  createSession(userId, clientId) {
+    const sessionId = crypto.randomUUID();
+    const boundSession = `${userId}:${sessionId}:${crypto.randomBytes(16).toString('hex')}`;
+
+    return {
+      sessionId: boundSession,
+      expires: Date.now() + (8 * 60 * 60 * 1000), // 8 hours
+      userId,
+      clientId,
+      createdAt: Date.now()
+    };
+  }
+
+  rotateOnPrivilegeEscalation(session, newPrivileges) {
+    // Force session rotation when permissions change
+    this.invalidateSession(session.sessionId);
+    return this.createSession(session.userId, session.clientId);
+  }
+
+  enforceAbsoluteTimeout(session) {
+    const maxSession = 24 * 60 * 60 * 1000; // 24 hours absolute
+    if (Date.now() - session.createdAt > maxSession) {
+      this.invalidateSession(session.sessionId);
+      throw new SecurityError('Session exceeded absolute timeout');
+    }
+  }
+}
+```
+
+### Production Deployment Security
+
+#### Container Security Hardening
+
+MCP servers in production require comprehensive security hardening:
+
+```dockerfile
+# Secure container deployment
+FROM node:18-alpine
+
+# Create non-root user with specific UID
+RUN adduser -S mcpuser -u 1001 && \
+    addgroup -S mcpgroup && \
+    adduser mcpuser mcpgroup
+
+# Use read-only root filesystem
+USER mcpuser
+WORKDIR /app
+COPY --chown=mcpuser:mcpgroup package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+COPY --chown=mcpuser:mcpgroup . .
+
+# Remove package managers and unnecessary tools
+USER root
+RUN apk del npm && rm -rf /var/cache/apk/*
+USER mcpuser
+
+# Health check with proper timeouts
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node healthcheck.js || exit 1
+
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+#### Network Isolation and Service Mesh
+
+```yaml
+# Kubernetes NetworkPolicy for MCP server isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-server-isolation
+spec:
+  podSelector:
+    matchLabels:
+      app: mcp-server
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: claude-code
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to: []  # Allow external API calls with explicit rules
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS only
+```
+
+### Inter-Process Communication Security
+
+#### Unix Domain Sockets (Preferred)
+
+```javascript
+// Secure IPC via Unix domain sockets
+const net = require('net');
+const fs = require('fs');
+
+const socket = net.createServer((client) => {
+  // Verify client process ownership
+  const stats = fs.statSync(`/proc/${client.pid}`);
+  if (stats.uid !== process.getuid()) {
+    client.destroy();
+    return;
+  }
+
+  // Handle secure communication
+  client.on('data', (data) => {
+    // Process encrypted/authenticated messages
+  });
+});
+
+const socketPath = '/tmp/mcp-secure.sock';
+socket.listen(socketPath);
+
+// Set owner-only permissions
+fs.chmod(socketPath, 0o600);
+```
+
+#### Mutual TLS for Network IPC
+
+```javascript
+// mTLS implementation for network-based IPC
+const tls = require('tls');
+const crypto = require('crypto');
+
+const options = {
+  key: fs.readFileSync('server-key.pem'),
+  cert: fs.readFileSync('server-cert.pem'),
+  ca: fs.readFileSync('ca-cert.pem'),
+  requestCert: true,
+  rejectUnauthorized: true,
+  // Certificate pinning
+  checkServerIdentity: (hostname, cert) => {
+    const expectedFingerprint = process.env.EXPECTED_CERT_FINGERPRINT;
+    const actualFingerprint = crypto
+      .createHash('sha256')
+      .update(cert.raw)
+      .digest('hex');
+
+    if (expectedFingerprint !== actualFingerprint) {
+      throw new Error('Certificate pinning failure');
+    }
+  }
+};
+
+const server = tls.createServer(options, (socket) => {
+  // Secure authenticated communication
+});
 ```
 
 ## Enterprise Authentication & SSO Integration
