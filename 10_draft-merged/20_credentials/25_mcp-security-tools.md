@@ -20,6 +20,7 @@ related:
   - ../10_mcp/11_setup.md
   - ../10_mcp/12_servers.md
 changelog:
+  - 1.1: Enhanced with practical workflow examples and troubleshooting guides
   - 1.0: Initial version with production-ready MCP security tool implementations
 ---
 
@@ -57,6 +58,11 @@ pip install mcp-secrets-plugin
 
 # Or with pipx for isolated installation
 pipx install mcp-secrets-plugin
+
+# Or clone and install from GitHub
+git clone https://github.com/amirshk/mcp-secrets-plugin.git
+cd mcp-secrets-plugin
+pip install -e .
 ```
 
 **Basic Usage:**
@@ -78,12 +84,46 @@ stored_creds = secrets.list_secrets()
 print(f"Stored credentials: {stored_creds}")
 ```
 
+**Discovering Required Credentials:**
+
+Before storing credentials, you need to identify what environment variables your MCP servers require:
+
+**Method 1: Run without credentials to see error**
+```bash
+$ npx @modelcontextprotocol/server-github
+Error: GITHUB_PERSONAL_ACCESS_TOKEN environment variable is required
+```
+
+**Method 2: Check documentation**
+```bash
+# View NPM package info
+npm info @modelcontextprotocol/server-github
+
+# Check GitHub README
+open https://github.com/modelcontextprotocol/servers/tree/main/src/github
+```
+
+**Method 3: Inspect source code**
+```bash
+# Search for environment variable usage
+grep -r "process.env" node_modules/@modelcontextprotocol/server-github/
+# Output: process.env.GITHUB_PERSONAL_ACCESS_TOKEN
+
+# Or for Python MCPs
+grep -r "os.environ" /path/to/mcp-server/
+```
+
 **CLI Management:**
 
 ```bash
-# Store credentials via CLI
-mcp-secrets set github token
-# Prompts securely for the token value
+# Store credentials via CLI (interactive, input is masked)
+mcp-secrets set github_token
+Enter value for 'github_token': ************************************
+✓ Credential stored in system keychain
+
+# Alternative: Set with a single command
+mcp-secrets set github_token --value "ghp_xxxxxxxxxxxxxxxxxxxx"
+✓ Credential stored in system keychain
 
 # Retrieve credentials
 mcp-secrets get github token
@@ -103,19 +143,33 @@ mcp-secrets export --format env > .env.secure
 ```json
 {
   "mcpServers": {
-    "github": {
+    "mcp-secrets": {
       "command": "python",
-      "args": ["-c", "
-        from mcp_secrets import SecretManager;
-        import os;
-        secrets = SecretManager();
-        os.environ['GITHUB_TOKEN'] = secrets.get_secret('github', 'token');
-        exec(open('mcp_github_server.py').read())
-      "]
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${SECRET:github_token}"
+      }
     }
   }
 }
 ```
+
+**Value Pattern Discovery:**
+
+Different credential managers use different patterns:
+
+| Manager | Pattern | Example |
+|---------|---------|---------|
+| mcp-secrets-plugin | `${SECRET:name}` | `${SECRET:github_token}` |
+| System environment | Direct value or `${VAR}` | `${GITHUB_TOKEN}` |
+| mcpauth | `${OAUTH:service}` | `${OAUTH:github}` |
+| keytar-mcp | `${KEYTAR:service/account}` | `${KEYTAR:github/api}` |
+| No manager | Plaintext (insecure) | `"ghp_xxxxx"` |
 
 **Team Setup Script:**
 
@@ -528,6 +582,173 @@ auth0_tenants:
 - Network isolation and service mesh integration
 - Comprehensive security testing and validation
 
+## Practical Implementation Workflows
+
+### Complete Installation Example: GitHub MCP with Secure Credentials
+
+**Step 1: Install the credential manager MCP**
+
+```bash
+# Install mcp-secrets-plugin globally
+npm install -g mcp-secrets-plugin
+
+# Or clone and install from GitHub
+git clone https://github.com/amirshk/mcp-secrets-plugin.git
+cd mcp-secrets-plugin
+npm install
+npm link
+```
+
+**Step 2: Configure mcp-secrets-plugin in Claude**
+
+Add to Claude's configuration file (`.claude.json` or `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    }
+  }
+}
+```
+
+**Step 3: Install the target MCP server**
+
+```bash
+# Example: Install GitHub integration MCP
+npm install -g @modelcontextprotocol/server-github
+```
+
+**Step 4: Store credentials securely**
+
+```bash
+# Using mcp-secrets-plugin CLI (interactive, masked input)
+$ mcp-secrets set github_token
+Enter value for 'github_token': ************************************
+✓ Credential stored in system keychain
+
+# Alternative: Set with command line
+$ mcp-secrets set github_token --value "ghp_xxxxxxxxxxxxxxxxxxxx"
+✓ Credential stored in system keychain
+```
+
+**Step 5: Configure the target MCP with credentials**
+
+Update Claude's configuration to use the stored secret:
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${SECRET:github_token}"
+      }
+    }
+  }
+}
+```
+
+**Step 6: Verification and testing**
+
+```bash
+# List stored secrets
+$ mcp-secrets list
+Available secrets:
+  - github_token (stored 2025-01-15)
+
+# Test credential retrieval
+$ mcp-secrets get github_token
+ghp_xxxxxxxxxxxxxxxxxxxx
+
+# Verify MCP is working
+$ claude-desktop --test-mcp github
+✓ MCP server started successfully
+✓ Authentication verified
+✓ GitHub API accessible
+```
+
+### Platform-Specific Credential Verification
+
+#### macOS Keychain Storage
+
+```bash
+# View stored credential (requires user password)
+$ security find-generic-password -s "mcp-secrets" -a "github_token" -w
+[Keychain Access prompt appears]
+
+# Credential is stored at:
+# ~/Library/Keychains/login.keychain-db
+```
+
+#### Windows Credential Manager Storage
+
+```powershell
+# View stored credential
+PS> cmdkey /list:mcp-secrets:github_token
+
+# Credential is stored at:
+# Control Panel > User Accounts > Credential Manager > Windows Credentials
+```
+
+#### Linux libsecret Storage
+
+```bash
+# View stored credential
+$ secret-tool lookup service mcp-secrets account github_token
+
+# Credential is stored in:
+# GNOME Keyring or KDE Wallet
+```
+
+### Credential Lifecycle Management
+
+#### Credential Rotation
+
+```bash
+$ mcp-secrets update github_token
+⚠ This will replace the existing token
+Enter new value: ************************************
+✓ Credential updated in system keychain
+✓ All MCPs using this credential will get the new token
+```
+
+#### Credential Removal
+
+```bash
+$ mcp-secrets delete github_token
+⚠ This will remove the credential permanently
+Continue? (y/N): y
+
+✓ Removed from system keychain
+✓ MCPs using this credential will fail at runtime
+```
+
+#### Direct Keyring Access (Python)
+
+```python
+# You can also interact with mcp-secrets-plugin programmatically
+import keyring
+
+# Store a secret
+keyring.set_password("mcp-secrets", "api_key", "secret_value")
+
+# Retrieve a secret
+api_key = keyring.get_password("mcp-secrets", "api_key")
+
+# Delete a secret
+keyring.delete_password("mcp-secrets", "api_key")
+```
+
 ## Integration Patterns
 
 ### Hybrid Tool Deployment
@@ -602,6 +823,269 @@ class MCPSecurityStack {
     }
   }
 }
+```
+
+## Troubleshooting & Error Handling
+
+### Common Error Patterns and Solutions
+
+#### Credential Retrieval Failures
+
+If credential retrieval fails, implement graceful fallback patterns:
+
+```python
+# Example error handling for Python-based MCP server
+import os
+import sys
+import keyring
+
+class GitHubMCP:
+    def __init__(self):
+        # Try environment variable first
+        self.token = os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN')
+
+        # Fall back to keyring
+        if not self.token:
+            try:
+                self.token = keyring.get_password("mcp-secrets", "github_token")
+            except Exception as e:
+                print(f"Failed to retrieve GitHub token: {e}", file=sys.stderr)
+                print("Run: mcp-secrets set github_token", file=sys.stderr)
+                sys.exit(1)
+
+        if not self.token:
+            print("No GitHub token found in environment or keychain", file=sys.stderr)
+            print("Run: mcp-secrets set github_token", file=sys.stderr)
+            sys.exit(1)
+```
+
+#### Cross-Platform Keyring Issues
+
+**macOS: Keychain Access Denied**
+```bash
+# Grant terminal access to keychain
+security add-trusted-app -d "$(which python3)" login.keychain
+
+# Or reset keychain permissions
+security delete-keychain login.keychain
+security create-keychain -p "" login.keychain
+```
+
+**Windows: Credential Manager Not Accessible**
+```powershell
+# Check credential manager service status
+Get-Service -Name "VaultSvc"
+
+# Restart if stopped
+Start-Service -Name "VaultSvc"
+```
+
+**Linux: Secret Service Unavailable**
+```bash
+# Install required packages for GNOME
+sudo apt-get install gnome-keyring python3-secretstorage
+
+# For KDE environments
+sudo apt-get install kwalletmanager python3-keyring
+
+# Start secret service if needed
+gnome-keyring-daemon --start --components=secrets
+```
+
+#### MCP Server Startup Failures
+
+**Missing Dependencies**
+```bash
+# Check if mcp-secrets-plugin is properly installed
+python -c "import mcp_secrets; print('✓ mcp-secrets available')"
+
+# Check keyring backend
+python -c "import keyring; print('Backend:', keyring.get_keyring())"
+
+# Verify credential exists
+mcp-secrets list | grep github_token || echo "❌ Credential not found"
+```
+
+**Configuration Syntax Errors**
+```bash
+# Validate JSON configuration
+python -m json.tool ~/.claude.json > /dev/null && echo "✓ Valid JSON" || echo "❌ Invalid JSON"
+
+# Check for common configuration issues
+grep -n "SECRET:" ~/.claude.json | head -5
+```
+
+#### Runtime Authentication Failures
+
+**Token Expired or Invalid**
+```bash
+# Test token validity
+curl -H "Authorization: token $(mcp-secrets get github_token)" https://api.github.com/user
+
+# Update expired token
+mcp-secrets update github_token
+```
+
+**Scope Insufficient**
+```bash
+# Check current token scopes
+curl -H "Authorization: token $(mcp-secrets get github_token)" https://api.github.com/user \
+  -I | grep -i x-oauth-scopes
+
+# Required scopes for GitHub MCP:
+# repo, workflow, read:org, user
+```
+
+### Diagnostic Commands
+
+#### System Health Check
+
+```bash
+#!/bin/bash
+# MCP Security Health Check Script
+
+echo "🔍 MCP Security Diagnostic Report"
+echo "================================="
+
+# Check mcp-secrets-plugin installation
+echo "1. mcp-secrets-plugin status:"
+python -c "import mcp_secrets; print('✓ Installed')" 2>/dev/null || echo "❌ Not installed"
+
+# Check keyring backend
+echo "2. Keyring backend:"
+python -c "import keyring; print(f'✓ {keyring.get_keyring()}')"
+
+# List stored credentials
+echo "3. Stored credentials:"
+mcp-secrets list 2>/dev/null || echo "❌ mcp-secrets command not available"
+
+# Check Claude configuration
+echo "4. Claude configuration:"
+if [ -f ~/.claude.json ]; then
+    echo "✓ Configuration file exists"
+    python -m json.tool ~/.claude.json > /dev/null && echo "✓ Valid JSON" || echo "❌ Invalid JSON"
+else
+    echo "❌ No Claude configuration found"
+fi
+
+# Test credential retrieval
+echo "5. Credential retrieval test:"
+mcp-secrets get github_token > /dev/null 2>&1 && echo "✓ GitHub token retrievable" || echo "❌ Cannot retrieve GitHub token"
+
+echo "================================="
+echo "🏁 Diagnostic complete"
+```
+
+#### Performance Monitoring
+
+```python
+# Monitor credential retrieval performance
+import time
+import keyring
+from statistics import mean
+
+def benchmark_credential_retrieval(service, account, iterations=10):
+    """Benchmark credential retrieval performance"""
+    times = []
+
+    for i in range(iterations):
+        start = time.time()
+        try:
+            keyring.get_password(service, account)
+            end = time.time()
+            times.append(end - start)
+        except Exception as e:
+            print(f"Error in iteration {i}: {e}")
+            continue
+
+    if times:
+        avg_time = mean(times)
+        print(f"Average retrieval time: {avg_time:.3f}s")
+        if avg_time > 1.0:
+            print("⚠️  Slow credential retrieval detected")
+        else:
+            print("✓ Credential retrieval performance OK")
+
+    return times
+
+# Usage
+benchmark_credential_retrieval("mcp-secrets", "github_token")
+```
+
+### Emergency Response Procedures
+
+#### Credential Compromise Response
+
+```bash
+#!/bin/bash
+# Emergency credential rotation script
+
+echo "🚨 EMERGENCY: Rotating compromised credentials"
+
+# 1. Immediately revoke old token (if possible)
+# For GitHub, revoke at: https://github.com/settings/tokens
+
+# 2. Generate new token
+echo "1. Generate new token at provider (GitHub, etc.)"
+echo "2. Update stored credential:"
+mcp-secrets update github_token
+
+# 3. Verify new token works
+echo "3. Testing new credential..."
+curl -H "Authorization: token $(mcp-secrets get github_token)" https://api.github.com/user > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "✅ New credential verified"
+else
+    echo "❌ New credential failed verification"
+fi
+
+# 4. Restart dependent services
+echo "4. Restart Claude Desktop to pick up new credentials"
+
+echo "🔒 Emergency rotation complete"
+```
+
+#### Security Incident Logging
+
+```python
+# Security event logging for MCP credentials
+import logging
+from datetime import datetime
+import keyring
+
+# Configure security logger
+security_logger = logging.getLogger('mcp_security')
+security_logger.setLevel(logging.INFO)
+
+# Create handler for security events
+handler = logging.FileHandler('mcp_security.log')
+formatter = logging.Formatter(
+    '%(asctime)s - %(levelname)s - %(message)s'
+)
+handler.setFormatter(formatter)
+security_logger.addHandler(handler)
+
+class SecureCredentialManager:
+    def get_credential(self, service, account):
+        try:
+            credential = keyring.get_password(service, account)
+            if credential:
+                security_logger.info(f"Credential retrieved: {service}/{account}")
+                return credential
+            else:
+                security_logger.warning(f"Credential not found: {service}/{account}")
+                return None
+        except Exception as e:
+            security_logger.error(f"Credential retrieval failed: {service}/{account} - {str(e)}")
+            raise
+
+    def set_credential(self, service, account, credential):
+        try:
+            keyring.set_password(service, account, credential)
+            security_logger.info(f"Credential updated: {service}/{account}")
+        except Exception as e:
+            security_logger.error(f"Credential update failed: {service}/{account} - {str(e)}")
+            raise
 ```
 
 ## Next Steps

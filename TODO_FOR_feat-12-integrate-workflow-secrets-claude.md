@@ -50,23 +50,23 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 
 ## Pre-Integration Analysis
 
-### [ ] 1. Read and analyze source document
-- [ ] Review `00_draft-initial/09_workflow-secrets-mcp.md` content
-- [ ] Identify unique workflow examples not in target
-- [ ] Note key sections: mcp-secrets-plugin, mcpauth, platform-specific storage
-- [ ] Extract reusable patterns and code examples
+### [x] 1. Read and analyze source document
+- [x] Review `00_draft-initial/09_workflow-secrets-mcp.md` content
+- [x] Identify unique workflow examples not in target
+- [x] Note key sections: mcp-secrets-plugin, mcpauth, platform-specific storage
+- [x] Extract reusable patterns and code examples
 
-### [ ] 2. Read current target file
-- [ ] Review `10_draft-merged/20_credentials/25_mcp-security-tools.md` structure
-- [ ] Check current file size (must stay under 30KB)
-- [ ] Identify integration points for new content
-- [ ] Assess overlap with existing content
+### [x] 2. Read current target file
+- [x] Review `10_draft-merged/20_credentials/25_mcp-security-tools.md` structure
+- [x] Check current file size (must stay under 30KB) - Currently 16.8KB
+- [x] Identify integration points for new content
+- [x] Assess overlap with existing content
 
-### [ ] 3. Plan integration strategy
-- [ ] Map source sections to target locations
-- [ ] Identify unique content to add
-- [ ] Plan workflow examples placement
-- [ ] Ensure no content duplication
+### [x] 3. Plan integration strategy
+- [x] Map source sections to target locations
+- [x] Identify unique content to add
+- [x] Plan workflow examples placement
+- [x] Ensure no content duplication
 
 ## Content Integration
 
