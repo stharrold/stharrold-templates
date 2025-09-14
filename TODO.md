@@ -25,7 +25,10 @@ Last sync: 2025-09-14 13:35 UTC (verified complete - all 22 issues open pending 
 ## Document Integration (Priority: Sequential Merge)
 
 ### High Priority - Security & State Management
-- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12) → [Detailed Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md) | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (in progress)] | [Speckit Worktree: feat/12-integrate-workflow-secrets (completed, awaiting merge)]
+- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12)
+      → [Speckit Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md) | [Claude Plan](TODO_FOR_feat-12-integrate-workflow-secrets-claude.md)
+      | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (in progress)]
+      | [Speckit Worktree: feat/12-integrate-workflow-secrets (completed, PR #25)]
 - [ ] Integrate 20_claude-preserve-state-todo-compact.md into state management (#19)
 
 ### Medium Priority - Core Development Tools
