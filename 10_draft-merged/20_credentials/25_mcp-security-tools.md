@@ -52,11 +52,38 @@ The MCP ecosystem has evolved to provide mature security solutions that address 
 **Installation and Setup:**
 
 ```bash
-# Install the plugin
+# Method 1: Install via pip
 pip install mcp-secrets-plugin
 
-# Or with pipx for isolated installation
+# Method 2: Install with pipx for isolated installation (recommended)
 pipx install mcp-secrets-plugin
+
+# Method 3: Install from GitHub source
+git clone https://github.com/amirshk/mcp-secrets-plugin.git
+cd mcp-secrets-plugin
+npm install
+npm link
+```
+
+**Credential Discovery Methods:**
+
+Before storing credentials, you need to identify the required environment variables:
+
+```bash
+# Method 1: Run without credentials to see error
+npx @modelcontextprotocol/server-github
+# Output: Error: GITHUB_PERSONAL_ACCESS_TOKEN environment variable is required
+
+# Method 2: Check documentation
+npm info @modelcontextprotocol/server-github
+
+# Method 3: Inspect source code
+grep -r "process.env" node_modules/@modelcontextprotocol/server-github/
+# Or for Python MCPs
+grep -r "os.environ" /path/to/mcp-server/
+
+# Method 4: Check MCP manifest (if available)
+cat node_modules/@modelcontextprotocol/server-github/mcp.json
 ```
 
 **Basic Usage:**
@@ -81,22 +108,50 @@ print(f"Stored credentials: {stored_creds}")
 **CLI Management:**
 
 ```bash
-# Store credentials via CLI
-mcp-secrets set github token
-# Prompts securely for the token value
+# Store credentials via CLI (interactive with masked input)
+$ mcp-secrets set github token
+Enter value for 'github token': ************************************
+✓ Credential stored in system keychain
+
+# Alternative: Set with a single command
+$ mcp-secrets set github token --value "ghp_xxxxxxxxxxxxxxxxxxxx"
+✓ Credential stored in system keychain
 
 # Retrieve credentials
 mcp-secrets get github token
 
-# List all stored services
-mcp-secrets list
+# List all stored services with timestamps
+$ mcp-secrets list
+Available secrets:
+  - github token (stored 2025-09-14)
+  - azure-devops pat (stored 2025-09-13)
+
+# Update existing credentials
+$ mcp-secrets update github token
+⚠ This will replace the existing token
+Enter new value: ************************************
+✓ Credential updated in system keychain
 
 # Delete old credentials
-mcp-secrets delete azure-devops token
+$ mcp-secrets delete azure-devops token
+⚠ This will remove the credential permanently
+Continue? (y/N): y
+✓ Removed from system keychain
 
 # Export configuration for MCP servers
 mcp-secrets export --format env > .env.secure
 ```
+
+**Behind the Scenes:**
+
+When you store credentials, `mcp-secrets-plugin` uses Python's `keyring` library:
+
+1. User inputs the token (masked with asterisks if interactive)
+2. The plugin stores the credential using OS-native storage:
+   - **macOS**: Keychain Access via Security Framework
+   - **Windows**: Windows Credential Manager via Win32 API
+   - **Linux**: Secret Service API (GNOME Keyring/KWallet)
+3. Credential is encrypted at rest by the OS
 
 **MCP Integration Pattern:**
 
@@ -141,6 +196,172 @@ mcp-secrets set database url
 echo "✅ Secure credential setup complete!"
 echo "💡 Credentials are stored in your system's secure credential store"
 echo "🔄 Run 'mcp-secrets list' to view configured services"
+```
+
+### Practical Implementation Workflow
+
+This section provides a complete step-by-step workflow for installing an MCP server that requires secure credential management, using a GitHub Personal Access Token as an example.
+
+#### Step 1: Install the Credential Manager MCP
+
+First, install `mcp-secrets-plugin` to handle secure credential storage:
+
+```bash
+# Install mcp-secrets-plugin globally
+pip install mcp-secrets-plugin
+
+# Or with pipx for isolated installation
+pipx install mcp-secrets-plugin
+```
+
+#### Step 2: Configure mcp-secrets-plugin in Claude
+
+Add the credential manager to Claude's configuration file (`.claude.json` or `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    }
+  }
+}
+```
+
+#### Step 3: Install the Target MCP Server
+
+Install the MCP server that requires credentials:
+
+```bash
+# Example: Install a GitHub integration MCP
+npm install -g @modelcontextprotocol/server-github
+
+# Or any MCP that requires API keys
+npm install -g <mcp-that-needs-key>
+```
+
+#### Step 4: Store Credentials Securely
+
+Use the mcp-secrets-plugin CLI to store your credentials:
+
+```bash
+# Interactive credential storage (recommended)
+$ mcp-secrets set github_token
+Enter value for 'github_token': ************************************
+✓ Credential stored in system keychain
+
+# Alternative: Store with value directly (less secure for shell history)
+$ mcp-secrets set github_token --value "ghp_your_actual_token_here"
+✓ Credential stored in system keychain
+```
+
+#### Step 5: Configure Target MCP with Stored Credentials
+
+Update Claude's configuration to reference the stored secret:
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${SECRET:github_token}"
+      }
+    }
+  }
+}
+```
+
+#### Step 6: Runtime Credential Injection
+
+When Claude starts the GitHub MCP server, the credential injection happens automatically:
+
+```python
+# mcp-secrets-plugin handles credential retrieval internally
+import keyring
+from typing import Dict, Any
+
+class SecretsPlugin:
+    def get_secret(self, secret_name: str) -> str:
+        """Retrieve secret from OS keychain"""
+        return keyring.get_password("mcp-secrets", secret_name)
+
+    def resolve_environment(self, env: Dict[str, Any]) -> Dict[str, Any]:
+        """Replace ${SECRET:name} placeholders with actual values"""
+        resolved = {}
+        for key, value in env.items():
+            if isinstance(value, str) and value.startswith("${SECRET:"):
+                secret_name = value[9:-1]  # Extract name from ${SECRET:name}
+                resolved[key] = self.get_secret(secret_name)
+            else:
+                resolved[key] = value
+        return resolved
+```
+
+#### Step 7: Verification and Usage
+
+Verify your setup is working correctly:
+
+```bash
+# List stored secrets
+$ mcp-secrets list
+Available secrets:
+  - github_token (stored 2025-09-14)
+
+# Test credential retrieval
+$ mcp-secrets get github_token
+ghp_xxxxxxxxxxxxxxxxxxxx
+
+# Verify MCP is working in Claude
+# Use Claude Code CLI: claude mcp list
+# Or test in Claude Desktop interface
+```
+
+Once configured, Claude can use the GitHub MCP securely:
+
+```
+User: "Create an issue in my repo about the bug we discussed"
+Claude: I'll create that issue for you using the GitHub integration...
+```
+
+#### Platform-Specific Verification
+
+Verify credentials are stored securely on each platform:
+
+**macOS Keychain:**
+```bash
+# View stored credential (requires user password)
+$ security find-generic-password -s "mcp-secrets" -a "github_token" -w
+[Keychain Access prompt appears]
+
+# Credential is stored at:
+~/Library/Keychains/login.keychain-db
+```
+
+**Windows Credential Manager:**
+```powershell
+# View stored credential
+PS> cmdkey /list:mcp-secrets:github_token
+
+# Credential is stored at:
+# Control Panel > User Accounts > Credential Manager > Windows Credentials
+```
+
+**Linux libsecret:**
+```bash
+# View stored credential
+$ secret-tool lookup service mcp-secrets account github_token
+
+# Credential is stored in:
+# GNOME Keyring or KDE Wallet
 ```
 
 ### mcpauth: Complete OAuth 2.0 Server
@@ -494,6 +715,222 @@ auth0_tenants:
 3. **Secure Storage**: Credentials encrypted using OS keychain/credential manager
 4. **Template Replacement**: `${user_config.*}` syntax replaced with decrypted values
 5. **Zero Configuration**: Server works immediately without manual setup
+
+## Error Handling & Troubleshooting
+
+### Credential Retrieval Failures
+
+If credential retrieval fails, implement robust fallback patterns:
+
+```python
+# Example from a Python-based MCP server
+import os
+import sys
+import keyring
+
+class GitHubMCP:
+    def __init__(self):
+        # Try environment variable first
+        self.token = os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN')
+
+        # Fall back to keyring
+        if not self.token:
+            try:
+                self.token = keyring.get_password("mcp-secrets", "github_token")
+            except Exception as e:
+                print(f"Failed to retrieve GitHub token: {e}", file=sys.stderr)
+                print("Run: mcp-secrets set github_token", file=sys.stderr)
+                sys.exit(1)
+
+        if not self.token:
+            print("No GitHub token found in environment or keychain", file=sys.stderr)
+            print("Run: mcp-secrets set github_token", file=sys.stderr)
+            sys.exit(1)
+```
+
+### Common Error Scenarios
+
+**Error**: `keyring.errors.NoKeyringError: No suitable keyring backend found`
+```bash
+# Solution: Install appropriate keyring backend
+# macOS: Usually works out of the box
+# Linux: Install required packages
+sudo apt-get install python3-secretstorage  # Ubuntu/Debian
+sudo dnf install python3-keyring           # Fedora/RHEL
+
+# Windows: Install Windows Credential Manager support
+pip install keyring[windows]
+```
+
+**Error**: `Permission denied accessing keychain`
+```bash
+# macOS: Reset keychain permissions
+security unlock-keychain ~/Library/Keychains/login.keychain-db
+
+# Windows: Run as administrator if needed
+# Linux: Check user permissions for secret service
+```
+
+**Error**: `${SECRET:name} not being replaced`
+```bash
+# Check if mcp-secrets-plugin is properly configured
+mcp-secrets list
+
+# Verify the secret name matches exactly
+mcp-secrets get exact_secret_name
+
+# Check MCP configuration syntax
+cat ~/.claude.json | grep -A 5 -B 5 SECRET
+```
+
+### Platform-Specific Debug Commands
+
+**macOS Keychain Debug:**
+```bash
+# List all mcp-secrets entries
+security dump-keychain ~/Library/Keychains/login.keychain-db | grep "mcp-secrets"
+
+# Check keychain status
+security list-keychains
+
+# Reset keychain if corrupted
+security delete-keychain ~/Library/Keychains/login.keychain-db
+security create-keychain login.keychain
+```
+
+**Windows Credential Manager Debug:**
+```powershell
+# List all stored credentials
+cmdkey /list
+
+# Check specific mcp-secrets entries
+cmdkey /list | findstr "mcp-secrets"
+
+# Delete corrupted entries
+cmdkey /delete:mcp-secrets:github_token
+```
+
+**Linux Secret Service Debug:**
+```bash
+# Check if secret service is running
+systemctl --user status gnome-keyring-daemon
+
+# List all stored secrets
+secret-tool search service mcp-secrets
+
+# Clear corrupted secrets
+secret-tool clear service mcp-secrets account github_token
+```
+
+### Emergency Recovery Procedures
+
+**Complete Credential Reset:**
+```bash
+# 1. List all stored credentials
+mcp-secrets list
+
+# 2. Export current credentials (backup)
+mcp-secrets export --format json > credentials_backup.json
+
+# 3. Remove all credentials
+mcp-secrets clear --all
+
+# 4. Re-add credentials interactively
+mcp-secrets set github_token
+mcp-secrets set azure_pat
+# ... repeat for all required credentials
+
+# 5. Verify setup
+mcp-secrets list
+claude mcp list  # Test MCP connectivity
+```
+
+### Cross-Platform Library Usage (Keytar)
+
+For Node.js MCPs, use **keytar** for cross-platform credential management:
+
+```javascript
+// Using keytar for cross-platform credential storage
+const keytar = require("keytar");
+
+async function storeCredential(service, account, password) {
+  try {
+    await keytar.setPassword(service, account, password);
+    console.log("✓ Credential stored in system keychain");
+  } catch (error) {
+    console.error("Failed to store credential:", error.message);
+    throw error;
+  }
+}
+
+async function getCredential(service, account) {
+  try {
+    const password = await keytar.getPassword(service, account);
+    if (!password) {
+      throw new Error(`No credential found for ${service}/${account}`);
+    }
+    return password;
+  } catch (error) {
+    console.error("Failed to retrieve credential:", error.message);
+    throw error;
+  }
+}
+
+// Usage in MCP initialization
+async function initializeMCP() {
+  try {
+    const token = await getCredential("mcp-github", "api-token");
+    process.env.GITHUB_TOKEN = token;
+
+    // Continue with MCP server initialization
+    console.log("✓ MCP initialized with secure credentials");
+  } catch (error) {
+    console.error("❌ MCP initialization failed:", error.message);
+    console.error("Please run: npm run setup-credentials");
+    process.exit(1);
+  }
+}
+
+// Error handling with fallback
+async function getCredentialWithFallback(service, account, envVar) {
+  // Try keytar first
+  try {
+    const credential = await getCredential(service, account);
+    if (credential) return credential;
+  } catch (error) {
+    console.warn(`Keytar failed: ${error.message}`);
+  }
+
+  // Fall back to environment variable
+  const envCredential = process.env[envVar];
+  if (envCredential) {
+    console.warn(`Using environment variable ${envVar} as fallback`);
+    return envCredential;
+  }
+
+  throw new Error(`No credential found in keychain or environment for ${service}/${account}`);
+}
+```
+
+**Keytar Installation and Setup:**
+```bash
+# Install keytar dependency
+npm install keytar
+
+# For Electron applications
+npm install keytar --save-optional
+
+# Platform-specific build tools may be required
+# macOS: Xcode Command Line Tools
+# Windows: Visual Studio Build Tools
+# Linux: build-essential package
+```
+
+**Benefits of Keytar Approach:**
+- **Cross-platform consistency**: Same API across macOS, Windows, and Linux
+- **Native integration**: Uses OS credential stores without Python dependency
+- **Electron compatibility**: Works seamlessly in Electron-based applications
+- **Fallback support**: Can combine with environment variables for flexibility
 
 ## Tool Selection Guidelines
 
