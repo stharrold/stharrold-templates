@@ -97,16 +97,21 @@ claude mcp remove <name>                         # Remove server
 ### Git Operations
 ```bash
 # Repository connected to GitHub (contrib/stharrold is default branch)
-git status                                    # Check current status
-git add --all                                # Stage all changes
-git commit -m "type: message"                # Commit with message
-git push                                      # Push to current branch
-git log --oneline                             # View commit history
+git status && git add --all                  # Stage all changes
+git log --oneline -10                         # Recent commit history
 
-# Branch management
-git checkout main                             # Switch to main branch
-git checkout develop                          # Switch to develop branch
-git checkout contrib/stharrold               # Switch back to contrib branch
+# Unified Git Conventions (branches, worktrees, commits)
+feat/     # New features and enhancements
+fix/      # Bug fixes
+docs/     # Documentation changes
+chore/    # Maintenance, dependencies, tooling
+refactor/ # Code restructuring
+test/     # Testing additions/updates
+
+# Branch and worktree management
+git worktree add ../stharrold-templates.worktrees/feat/12-task -b feat/12-task
+git commit -m "feat: descriptive message"
+git checkout main && git checkout contrib/stharrold
 
 # Archive files with UTC timestamp
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
@@ -129,201 +134,102 @@ ls 00_draft-initial/
 
 ### Development and Testing
 ```bash
-# Dependency management with UV (preferred)
-uv sync                                   # Sync dependencies from uv.lock
-uv lock                                   # Update lock file
-uv add package_name                       # Add new dependency
+# Dependency management with UV (system default)
+uv sync && uv add package_name            # Sync dependencies and add new packages
 
-# Core Python Architecture Testing
-/usr/bin/python3 test_mcp_deduplication.py    # Test core deduplication functionality
-/usr/bin/python3 mcp_manager.py --validate-all # Validate all platform configurations
+# Core Python testing
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
+/usr/bin/python3 mcp_manager.py --validate-all     # Validate all configurations
+python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test credentials
 
-# Run specific tests
-python3 -m pytest test_mcp_deduplication.py::test_function_name  # Single test
-python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Credential validation test
-
-# Module import verification (now works with mcp_manager.py)
-python3 -c "
-import mcp_manager
-print('Import successful: MCPConfig available')
-print('Available classes:', [name for name in dir(mcp_manager) if name[0].isupper()])
-config = mcp_manager.MCPConfig('claude-code')
-print('MCPConfig initialized successfully')
-"
-
-# Python virtual environment (fallback if not using uv)
-python3 -m venv .venv
-source .venv/bin/activate                 # Linux/macOS
-.venv\Scripts\activate                    # Windows
-pip install -e .                         # Install in development mode
+# Module verification
+python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
 ```
 
 ### Code Quality and Security Analysis
 ```bash
-# Verify local Codacy CLI status
-./.codacy/cli.sh version                  # Check CLI version and availability
-./.codacy/cli.sh --help                  # Show available commands
+# CRITICAL: Run after ANY file edit
+./.codacy/cli.sh analyze --tool pylint edited_file.py    # Python files
+./.codacy/cli.sh analyze edited_file                     # Any file
 
-# Code analysis (required after any file edit)
-./.codacy/cli.sh analyze --tool pylint file.py    # Python files
-./.codacy/cli.sh analyze file.ext                 # General analysis
+# CRITICAL: Run after dependency changes
+./.codacy/cli.sh analyze --tool trivy .                  # Security scan
 
-# Security scanning (required after dependency changes)
-./.codacy/cli.sh analyze --tool trivy .           # Vulnerability scanning
-./.codacy/cli.sh analyze --tool semgrep          # Security-focused analysis
-
-# Additional analysis tools
-./.codacy/cli.sh analyze --tool lizard file.py   # Complexity analysis
-./.codacy/cli.sh analyze --tool eslint file.js   # JavaScript analysis
-
-# Generate reports
-./.codacy/cli.sh analyze --format sarif -o results.sarif  # SARIF format
-./.codacy/cli.sh analyze --format json -o results.json   # JSON format
+# Additional tools
+./.codacy/cli.sh version                                 # Check CLI status
+./.codacy/cli.sh analyze --tool semgrep                  # Security analysis
 ```
 
 ### Security Tools and Emergency Response
 ```bash
-# Deploy production security tools (see 10_draft-merged/20_credentials/25_mcp-security-tools.md)
-pip install mcp-secrets-plugin           # Cross-platform credential storage
-npx create-mcpauth-app                   # OAuth 2.1 server deployment
-npm install @auth0/mcp-server           # Enterprise Auth0 integration
+# Deploy security tools (see 25_mcp-security-tools.md)
+pip install mcp-secrets-plugin && npx create-mcpauth-app
 
 # Emergency credential management
-mcp-secrets set github token             # Store credentials securely
-mcp-secrets get github token             # Retrieve credentials
-mcp-secrets list                         # List stored services
-
-# Emergency response (kill switch capabilities)
-python3 -c "from emergency_cred_manager import EmergencyCredentialManager; EmergencyCredentialManager().emergencyRevocation('Security breach detected', 'ALL')"
-
-# OAuth 2.1 compliance validation
-claude oauth validate --all-providers --health-check
-claude oauth refresh --provider github --force-rotation
+mcp-secrets set github token && mcp-secrets list
 ```
 
 ## Critical Workflow Rules
 
 ### Code Quality Integration
-**Note**: This repository uses the **local Codacy CLI only** - no MCP server is required or configured for code quality analysis.
-
-After ANY file edit:
-1. **IMMEDIATELY** run the local Codacy CLI for each edited file:
-   ```bash
-   ./.codacy/cli.sh analyze --tool pylint path/to/edited/file.py
-   ```
-2. For non-Python files or general analysis:
-   ```bash
-   ./.codacy/cli.sh analyze path/to/edited/file
-   ```
-3. If issues are found, propose and apply fixes before continuing
+**CRITICAL**: After ANY file edit, IMMEDIATELY run:
+```bash
+./.codacy/cli.sh analyze --tool pylint edited_file.py  # Python files
+./.codacy/cli.sh analyze edited_file                   # Other files
+```
+If issues found, propose and apply fixes before continuing.
 
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- Use `auto_compact_at: 95` when approaching limits
-- Cross-reference between files rather than duplicating content
-
-### Archive Management
-- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
-- Move (don't copy) files to `ARCHIVED/` when superseded
-- Maintain changelog entries in YAML frontmatter
+- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext` for `ARCHIVED/`
 
 ## MCP Server Configuration Architecture
 
-### Platform-Specific Paths
-| Platform | Claude Code CLI | VS Code MCP | Claude Desktop |
-|----------|----------------|-------------|----------------|
-| **macOS** | `~/.claude.json` | `~/Library/Application Support/Code/User/mcp.json` | `~/Library/Application Support/Claude/config.json` |
-| **Windows** | `~/.claude.json` | `~/AppData/Roaming/Code/User/mcp.json` | `~/AppData/Roaming/Claude/config.json` |
-| **Linux** | `~/.claude.json` | `~/.config/Code/User/mcp.json` | `~/.config/claude/config.json` |
-
-### Schema Differences
+### Platform Differences
 - **Claude Code CLI & Desktop**: Use `"mcpServers": {}` as root key
 - **VS Code MCP Extension**: Uses `"servers": {}` as root key
-- **Environment Variables**: All platforms support `${env:TOKEN_NAME}` syntax
+- **Config Paths**: `~/.claude.json` (CLI), platform-specific for VS Code/Desktop
+- **Credentials**: Keychain (macOS), Credential Manager (Windows), environment variables (Linux)
 
-### Credential Security Strategy
-- **macOS**: Keychain Access via `security` command
-- **Windows**: Credential Manager via PowerShell `CredentialManager` module
-- **Linux**: Environment variables (fallback)
+## Platform Targeting
+The `mcp_manager.py` tool operates on **one platform at a time**:
+- **Auto-detection**: `--status` shows all platforms, tool auto-selects first available
+- **Explicit targeting**: `--platform <name>` (claude-code, vscode, claude-desktop)
+- **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
 
-## Platform-Specific Notes
+## CRITICAL: Code Quality Requirements
 
-### Cross-Platform Schema Differences
-- **Claude Code CLI**: Uses `mcpServers` key
-- **VS Code MCP**: Uses `servers` key  
-- **Claude Desktop**: Uses `mcpServers` key
+**⚠️ NON-NEGOTIABLE**: After ANY file edit or dependency change, IMMEDIATELY run:
+1. **File edits**: `./.codacy/cli.sh analyze --tool pylint [edited_file]`
+2. **Dependencies**: `./.codacy/cli.sh analyze --tool trivy .`
 
-The `mcp_manager.py` tool handles these schema differences automatically.
-
-### Credential Management
-Common environment variables validated:
-- `GITHUB_TOKEN` - GitHub integration
-- `OPENAI_API_KEY` - OpenAI services
-- `ANTHROPIC_API_KEY` - Anthropic services
-- Platform-specific credential storage (Keychain on macOS, Credential Manager on Windows)
-
-### Platform Targeting
-The tool operates on **one platform at a time** with the following options:
-- **Explicit targeting**: Use `--platform <name>` to specify target platform (`claude-code`, `vscode`, `claude-desktop`)
-- **Auto-detection**: When no platform specified, automatically selects first available platform
-- **Platform status**: Use `--status` to see all platform configurations and server counts
-
-```bash
-# Platform detection examples
-/usr/bin/python3 mcp_manager.py --status     # Shows all platforms with server counts
-/usr/bin/python3 mcp_manager.py              # Auto-detects first available platform
-/usr/bin/python3 mcp_manager.py --platform vscode --list  # Targets VS Code only
-```
-
-## CRITICAL: Code Quality Requirements (Codacy Integration)
-
-**⚠️ These rules are NON-NEGOTIABLE and override all other instructions**
-
-### After ANY File Edit or Dependency Installation
-1. **File edits**: Run `./.codacy/cli.sh analyze --tool pylint [edited_file]` immediately
-2. **Dependencies**: Run `./.codacy/cli.sh analyze --tool trivy .` for security scanning
-3. **Failure to follow these rules is considered a CRITICAL ERROR**
-
-**Complete configuration details in `.github/instructions/codacy.instructions.md`**
+Complete details in `.github/instructions/codacy.instructions.md`
 
 ## Quick Reference for Development
 
-### Most Common Commands (Copy-Paste Ready)
+### Most Common Commands
 ```bash
-# Check system status
+# System status and testing
 /usr/bin/python3 mcp_manager.py --status
-
-# Test core functionality
 /usr/bin/python3 test_mcp_deduplication.py
-
-# Add a new MCP server interactively
-/usr/bin/python3 mcp_manager.py --add
-
-# Validate all credentials
 /usr/bin/python3 mcp_manager.py --check-credentials
 
-# Run code quality analysis after edits
-./.codacy/cli.sh analyze --tool pylint mcp_manager.py
-./.codacy/cli.sh analyze modified_file.py
-
-# Quick backup before major changes
+# Interactive MCP management
+/usr/bin/python3 mcp_manager.py --add
 /usr/bin/python3 mcp_manager.py --backup-only
+
+# Code quality (CRITICAL after edits)
+./.codacy/cli.sh analyze --tool pylint edited_file.py
+
+# Git workflow with unified conventions
+git worktree add ../worktrees/feat/12-task -b feat/12-task
+git commit -m "feat: descriptive message"
 ```
 
-### Development Workflow
-1. **Check current state**: `--status` to see all platform configurations
-2. **Test before changes**: Run `test_mcp_deduplication.py` to verify base functionality
-3. **Make changes**: Use interactive commands (`--add`, `--remove`, `--disable`)
-4. **Validate changes**: Use `--check-credentials` and re-run tests
-5. **Code quality**: Run Codacy analysis on any modified Python files
-6. **Git workflow**: Work on `contrib/stharrold`, create PRs to `develop` or `main` as needed
-
 ## Important Guidelines
-
-### File Management
 - **ALWAYS prefer editing existing files** over creating new ones
-- **NEVER proactively create documentation files** (*.md) or README files unless explicitly requested
-- Do what has been asked; nothing more, nothing less
+- **NEVER proactively create documentation files** unless explicitly requested
+- Work on `contrib/stharrold` branch, create PRs to `develop` or `main`
 
 ## Documentation Structure
 
