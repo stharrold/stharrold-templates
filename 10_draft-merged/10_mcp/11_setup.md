@@ -1,7 +1,7 @@
 ---
 title: MCP Installation & Setup
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 related:
   - ./12_servers.md
@@ -190,6 +190,342 @@ Configuration file location:
   }
 }
 ```
+
+## Security Architecture
+
+### Layered Storage Architecture for Credential Management
+
+Production MCP credential managers implement a four-layer architecture for robust, secure credential handling across diverse deployment environments:
+
+```javascript
+// Four-layer credential storage architecture
+class LayeredCredentialManager {
+  constructor() {
+    this.layers = {
+      detection: new StorageDetectionLayer(),
+      abstraction: new UnifiedAPILayer(),
+      storage: new PlatformStorageLayer(),
+      fallback: new FallbackStorageLayer()
+    };
+  }
+
+  async getCredential(service, account) {
+    try {
+      // Layer 1: Detection - Identify available storage backends
+      const availableStorages = await this.layers.detection.detectStorages();
+
+      // Layer 2: Abstraction - Unified API regardless of storage
+      const storageAdapter = this.layers.abstraction.getAdapter(availableStorages[0]);
+
+      // Layer 3: Storage - Platform-specific credential operations
+      const credential = await this.layers.storage.retrieve(storageAdapter, service, account);
+
+      return credential;
+    } catch (error) {
+      // Layer 4: Fallback - Degraded scenarios
+      return await this.layers.fallback.handleFailure(service, account, error);
+    }
+  }
+}
+
+// Layer 1: Detection Layer
+class StorageDetectionLayer {
+  async detectStorages() {
+    const detectedStorages = [];
+
+    // macOS Keychain detection
+    if (process.platform === 'darwin') {
+      try {
+        await execAsync('security -h');
+        detectedStorages.push({ type: 'keychain', priority: 1 });
+      } catch {}
+    }
+
+    // Windows Credential Manager detection
+    if (process.platform === 'win32') {
+      try {
+        await execAsync('powershell Get-Module -ListAvailable -Name CredentialManager');
+        detectedStorages.push({ type: 'credential_manager', priority: 1 });
+      } catch {}
+    }
+
+    // Keytar cross-platform detection
+    try {
+      require.resolve('keytar');
+      detectedStorages.push({ type: 'keytar', priority: 2 });
+    } catch {}
+
+    // Encrypted file fallback always available
+    detectedStorages.push({ type: 'encrypted_file', priority: 3 });
+
+    return detectedStorages.sort((a, b) => a.priority - b.priority);
+  }
+}
+
+// Layer 2: Abstraction Layer
+class UnifiedAPILayer {
+  getAdapter(storageType) {
+    const adapters = {
+      keychain: new KeychainAdapter(),
+      credential_manager: new CredentialManagerAdapter(),
+      keytar: new KeytarAdapter(),
+      encrypted_file: new EncryptedFileAdapter(),
+      memory: new SecureMemoryAdapter()
+    };
+
+    return adapters[storageType.type] || adapters.encrypted_file;
+  }
+}
+
+// Layer 3: Storage Layer - Platform-specific implementations
+class KeychainAdapter {
+  async store(service, account, credential) {
+    const { execAsync } = require('child_process').promisify;
+    await execAsync(`security add-generic-password -a "${account}" -s "${service}" -w "${credential}"`);
+  }
+
+  async retrieve(service, account) {
+    const { execAsync } = require('child_process').promisify;
+    const result = await execAsync(`security find-generic-password -a "${account}" -s "${service}" -w`);
+    return result.stdout.trim();
+  }
+}
+
+class CredentialManagerAdapter {
+  async store(service, account, credential) {
+    // PowerShell CredentialManager implementation
+    const powershell = `
+      $secureString = ConvertTo-SecureString "${credential}" -AsPlainText -Force;
+      New-StoredCredential -Target "${service}" -UserName "${account}" -SecurePassword $secureString -Persist LocalMachine;
+    `;
+    await execAsync(`powershell -Command "${powershell}"`);
+  }
+
+  async retrieve(service, account) {
+    const powershell = `
+      $cred = Get-StoredCredential -Target "${service}";
+      $cred.GetNetworkCredential().Password;
+    `;
+    const result = await execAsync(`powershell -Command "${powershell}"`);
+    return result.stdout.trim();
+  }
+}
+
+// Layer 4: Fallback Layer
+class FallbackStorageLayer {
+  async handleFailure(service, account, error) {
+    console.warn(`Primary storage failed for ${service}:${account}:`, error.message);
+
+    // Try encrypted file storage
+    try {
+      return await this.encryptedFileRetrieve(service, account);
+    } catch (fileError) {
+      console.warn('Encrypted file storage also failed:', fileError.message);
+
+      // Last resort: secure in-memory session storage
+      return await this.sessionStorageRetrieve(service, account);
+    }
+  }
+
+  async encryptedFileRetrieve(service, account) {
+    // AES-256 encrypted file implementation
+    const crypto = require('crypto');
+    const fs = require('fs').promises;
+
+    const credentialsFile = path.join(os.homedir(), '.mcp', 'encrypted_credentials.json');
+    const data = await fs.readFile(credentialsFile);
+
+    // Decrypt using user-derived key
+    const decipher = crypto.createDecipher('aes-256-cbc', this.getUserDerivedKey());
+    const decrypted = decipher.update(data) + decipher.final();
+    const credentials = JSON.parse(decrypted);
+
+    return credentials[`${service}:${account}`];
+  }
+
+  async sessionStorageRetrieve(service, account) {
+    // In-memory session storage as absolute fallback
+    const sessionKey = `${service}:${account}`;
+    return process.env[`SESSION_CRED_${sessionKey.toUpperCase().replace(':', '_')}`];
+  }
+}
+```
+
+### Inter-Process Communication Security
+
+**Unix Domain Sockets (Preferred IPC Method):**
+
+```javascript
+// Secure IPC implementation using Unix domain sockets
+const net = require('net');
+const fs = require('fs');
+const crypto = require('crypto');
+
+class SecureIPCServer {
+  constructor(socketPath = '/tmp/mcp-secure.sock') {
+    this.socketPath = socketPath;
+    this.server = null;
+    this.clients = new Map();
+  }
+
+  async start() {
+    // Remove existing socket file
+    try {
+      await fs.promises.unlink(this.socketPath);
+    } catch {}
+
+    this.server = net.createServer((client) => {
+      this.handleNewClient(client);
+    });
+
+    this.server.listen(this.socketPath);
+
+    // Set owner-only permissions for security
+    await fs.promises.chmod(this.socketPath, 0o600);
+
+    console.log(`Secure MCP IPC server listening on ${this.socketPath}`);
+  }
+
+  handleNewClient(client) {
+    // Generate unique session ID for this client
+    const sessionId = crypto.randomUUID();
+    this.clients.set(sessionId, {
+      socket: client,
+      authenticated: false,
+      connectedAt: new Date(),
+      lastActivity: new Date()
+    });
+
+    // Verify client process ownership
+    this.verifyClientOwnership(client, sessionId);
+
+    client.on('data', (data) => {
+      this.handleClientMessage(sessionId, data);
+    });
+
+    client.on('close', () => {
+      this.clients.delete(sessionId);
+      console.log(`Client ${sessionId} disconnected`);
+    });
+
+    client.on('error', (error) => {
+      console.error(`Client ${sessionId} error:`, error);
+      this.clients.delete(sessionId);
+    });
+  }
+
+  verifyClientOwnership(client, sessionId) {
+    // On Unix systems, verify the connecting process belongs to same user
+    try {
+      const stats = fs.statSync(`/proc/${client.pid}`);
+      if (stats.uid !== process.getuid()) {
+        console.warn(`Rejecting connection from PID ${client.pid} - different user`);
+        client.destroy();
+        this.clients.delete(sessionId);
+        return;
+      }
+
+      // Mark as authenticated after ownership verification
+      const clientInfo = this.clients.get(sessionId);
+      if (clientInfo) {
+        clientInfo.authenticated = true;
+      }
+    } catch (error) {
+      console.error('Failed to verify client ownership:', error);
+      client.destroy();
+      this.clients.delete(sessionId);
+    }
+  }
+
+  handleClientMessage(sessionId, data) {
+    const clientInfo = this.clients.get(sessionId);
+    if (!clientInfo || !clientInfo.authenticated) {
+      console.warn(`Rejecting message from unauthenticated client ${sessionId}`);
+      return;
+    }
+
+    try {
+      const message = JSON.parse(data.toString());
+
+      // Update last activity
+      clientInfo.lastActivity = new Date();
+
+      // Handle the request securely
+      this.processSecureRequest(sessionId, message);
+    } catch (error) {
+      console.error(`Invalid message from client ${sessionId}:`, error);
+    }
+  }
+
+  processSecureRequest(sessionId, message) {
+    // Process authenticated credential requests
+    const { type, service, account } = message;
+
+    if (type === 'get_credential') {
+      this.handleCredentialRequest(sessionId, service, account);
+    } else {
+      console.warn(`Unknown request type: ${type}`);
+    }
+  }
+}
+```
+
+**Mutual TLS for Network-Based IPC:**
+
+```javascript
+// mTLS implementation for remote MCP server communication
+const tls = require('tls');
+const fs = require('fs');
+const crypto = require('crypto');
+
+class SecureMTLSClient {
+  constructor(options) {
+    this.options = {
+      host: options.host,
+      port: options.port,
+      key: fs.readFileSync(options.clientKeyPath),
+      cert: fs.readFileSync(options.clientCertPath),
+      ca: fs.readFileSync(options.caPath),
+      rejectUnauthorized: true,
+      ...options
+    };
+  }
+
+  async connect() {
+    return new Promise((resolve, reject) => {
+      const socket = tls.connect(this.options, () => {
+        // Verify certificate pinning
+        const cert = socket.getPeerCertificate();
+        const expectedFingerprint = process.env.EXPECTED_CERT_FINGERPRINT;
+
+        if (expectedFingerprint) {
+          const actualFingerprint = crypto
+            .createHash('sha256')
+            .update(cert.raw)
+            .digest('hex');
+
+          if (expectedFingerprint !== actualFingerprint) {
+            socket.destroy();
+            reject(new Error('Certificate pinning failure'));
+            return;
+          }
+        }
+
+        console.log('Secure mTLS connection established');
+        resolve(socket);
+      });
+
+      socket.on('error', reject);
+    });
+  }
+}
+```
+
+This layered architecture provides:
+- **Graceful degradation** from OS-native keychains to encrypted file storage
+- **Cross-platform compatibility** with automatic storage detection
+- **Security isolation** through proper IPC mechanisms
+- **Fallback resilience** ensuring MCP functionality even when primary storage fails
 
 ## Auto-Sync Configuration
 

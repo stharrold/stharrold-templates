@@ -1,7 +1,7 @@
 ---
 title: Security Auditing & Compliance
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -22,6 +22,7 @@ related:
   - ./23_enterprise-sso.md
   - ../30_implementation/34_performance-metrics.md
 changelog:
+  - Enhanced with advanced monitoring patterns, anomaly detection, and incident response capabilities
   - Integrated template maintenance tasks for security monitoring
   - Enhanced vulnerability management with CVE tracking
   - Added AI-generated code security review requirements
@@ -43,9 +44,81 @@ Proper credential management is critical for MCP server security and forms the f
 
 ## Audit Trails for Enterprise Knowledge Base Access
 
-### Comprehensive Logging Requirements
+### Structured Logging for Credential Operations
+
+**Advanced Credential Monitoring Patterns:**
+
+Implement comprehensive structured logging for all credential operations with anomaly detection:
+
+```javascript
+// Enhanced credential operation logging
+const logger = require('winston');
+const crypto = require('crypto');
+
+class CredentialAuditLogger {
+  logCredentialAccess(operation) {
+    const auditEvent = {
+      event_type: 'credential_access',
+      timestamp: new Date().toISOString(),
+      user_id: operation.userId,
+      resource_id: operation.resourceId,
+      action: operation.action, // 'retrieved', 'stored', 'deleted', 'rotated'
+      source_ip: operation.sourceIP,
+      user_agent: operation.userAgent,
+      session_id: operation.sessionId,
+      // Hash sensitive identifiers for privacy
+      resource_hash: crypto.createHash('sha256').update(operation.resourceId).digest('hex'),
+      classification: operation.dataClassification,
+      access_method: operation.accessMethod, // 'keychain', 'credential_manager', 'environment'
+      success: operation.success,
+      error_code: operation.errorCode || null,
+      duration_ms: operation.duration
+    };
+
+    logger.info('Credential operation completed', auditEvent);
+
+    // Trigger anomaly detection
+    this.detectAnomalies(auditEvent);
+  }
+
+  detectAnomalies(event) {
+    // Unusual access patterns
+    if (this.isOutsideBusinessHours(event.timestamp)) {
+      this.alertSecurityTeam('after_hours_access', event);
+    }
+
+    // High-frequency access detection
+    const recentAccess = this.getRecentAccessCount(event.user_id, 5); // 5 minutes
+    if (recentAccess > 10) {
+      this.alertSecurityTeam('high_frequency_access', event);
+    }
+
+    // Failed authentication clustering
+    if (!event.success) {
+      const failedAttempts = this.getFailedAttempts(event.user_id, 15); // 15 minutes
+      if (failedAttempts > 5) {
+        this.alertSecurityTeam('credential_brute_force', event);
+      }
+    }
+  }
+
+  alertSecurityTeam(alertType, event) {
+    const alert = {
+      alert_type: alertType,
+      severity: this.calculateSeverity(alertType),
+      timestamp: new Date().toISOString(),
+      details: event,
+      recommended_action: this.getRecommendedAction(alertType)
+    };
+
+    // Send to security team via webhook/SIEM
+    this.sendAlert(alert);
+  }
+}
+```
 
 **Mandatory Audit Events:**
+- **Credential access operations** with user identity, resource hash, and access method
 - **Query audit logs** with user identity, timestamp, search terms, and data classification
 - **Document access tracking** including retrieved content, usage context, and retention period
 - **Permission escalation alerts** for unusual access patterns or privilege changes
@@ -94,6 +167,191 @@ claude mcp add audit-logger "python -m enterprise_audit" \
     "alert_severity": "low"
   }
 }
+```
+
+### Advanced Anomaly Detection Implementation
+
+**Automated Threat Detection Patterns:**
+
+```javascript
+// Comprehensive anomaly detection system
+class SecurityAnomalyDetector {
+  constructor() {
+    this.patterns = {
+      // Time-based anomalies
+      outsideBusinessHours: {
+        businessStart: 9, businessEnd: 17,
+        alertThreshold: 'medium'
+      },
+
+      // Frequency-based anomalies
+      highFrequencyAccess: {
+        timeWindow: 300000, // 5 minutes
+        threshold: 15,
+        alertThreshold: 'high'
+      },
+
+      // Geographic anomalies
+      unusualLocation: {
+        maxDistanceKm: 1000,
+        timeWindow: 3600000, // 1 hour
+        alertThreshold: 'critical'
+      },
+
+      // Behavioral anomalies
+      unusualResourceAccess: {
+        baselineWindow: 30, // 30 days
+        deviationThreshold: 3, // 3 standard deviations
+        alertThreshold: 'medium'
+      }
+    };
+  }
+
+  analyzeAccessPattern(events) {
+    const anomalies = [];
+
+    // Time-based analysis
+    events.forEach(event => {
+      const hour = new Date(event.timestamp).getHours();
+      if (hour < this.patterns.outsideBusinessHours.businessStart ||
+          hour > this.patterns.outsideBusinessHours.businessEnd) {
+        anomalies.push({
+          type: 'outside_business_hours',
+          event: event,
+          severity: 'medium'
+        });
+      }
+    });
+
+    // Frequency analysis
+    const frequencyMap = this.groupByTimeWindow(events, 300000);
+    Object.entries(frequencyMap).forEach(([window, windowEvents]) => {
+      if (windowEvents.length > this.patterns.highFrequencyAccess.threshold) {
+        anomalies.push({
+          type: 'high_frequency_access',
+          events: windowEvents,
+          severity: 'high'
+        });
+      }
+    });
+
+    return anomalies;
+  }
+
+  groupByTimeWindow(events, windowSize) {
+    const groups = {};
+    events.forEach(event => {
+      const windowStart = Math.floor(new Date(event.timestamp).getTime() / windowSize) * windowSize;
+      if (!groups[windowStart]) groups[windowStart] = [];
+      groups[windowStart].push(event);
+    });
+    return groups;
+  }
+}
+```
+
+### Kill Switch and Emergency Response
+
+**Immediate Credential Revocation Capabilities:**
+
+```javascript
+// Emergency credential revocation system
+class EmergencyCredentialManager {
+  constructor() {
+    this.killSwitchEnabled = process.env.KILL_SWITCH_ENABLED === 'true';
+    this.emergencyContacts = process.env.EMERGENCY_CONTACTS?.split(',') || [];
+  }
+
+  async emergencyRevocation(reason, affectedCredentials = 'ALL') {
+    if (!this.killSwitchEnabled) {
+      throw new Error('Kill switch not enabled in this environment');
+    }
+
+    const revocationEvent = {
+      timestamp: new Date().toISOString(),
+      reason: reason,
+      scope: affectedCredentials,
+      initiator: process.env.USER || 'system',
+      session_id: crypto.randomUUID()
+    };
+
+    console.log(`🚨 EMERGENCY REVOCATION INITIATED: ${reason}`);
+
+    try {
+      // Revoke all or specific credentials
+      if (affectedCredentials === 'ALL') {
+        await this.revokeAllCredentials(revocationEvent);
+      } else {
+        await this.revokeSpecificCredentials(affectedCredentials, revocationEvent);
+      }
+
+      // Notify emergency contacts
+      await this.notifyEmergencyContacts(revocationEvent);
+
+      // Trigger automated rotation pipeline
+      await this.initiateCredentialRotation(revocationEvent);
+
+      console.log('✅ Emergency revocation completed successfully');
+
+    } catch (error) {
+      console.error('❌ Emergency revocation failed:', error);
+      await this.escalateToSecurityTeam(revocationEvent, error);
+    }
+  }
+
+  async initiateCredentialRotation(revocationEvent) {
+    // Automated credential refresh pipeline
+    const rotationJobs = [
+      this.rotateGitHubTokens(),
+      this.rotateAWSCredentials(),
+      this.rotateDatabaseCredentials(),
+      this.rotateAPIKeys()
+    ];
+
+    console.log('🔄 Starting automated credential rotation...');
+
+    const results = await Promise.allSettled(rotationJobs);
+    const failures = results.filter(r => r.status === 'rejected');
+
+    if (failures.length > 0) {
+      console.error('❌ Some credential rotations failed:', failures);
+      await this.notifyRotationFailures(failures, revocationEvent);
+    } else {
+      console.log('✅ All credential rotations completed successfully');
+    }
+
+    return results;
+  }
+
+  async rotateGitHubTokens() {
+    // GitHub token rotation implementation
+    const newToken = await this.createNewGitHubToken();
+    await this.updateStoredCredential('GITHUB_TOKEN', newToken);
+    await this.validateNewCredential('GITHUB_TOKEN');
+    return newToken;
+  }
+
+  async validateNewCredential(credentialKey) {
+    // Validation logic specific to each credential type
+    const testCalls = {
+      'GITHUB_TOKEN': () => this.testGitHubAPI(),
+      'AWS_ACCESS_KEY_ID': () => this.testAWSAPI(),
+      'DATABASE_URL': () => this.testDatabaseConnection()
+    };
+
+    const testFunction = testCalls[credentialKey];
+    if (testFunction) {
+      await testFunction();
+      console.log(`✅ ${credentialKey} validated successfully`);
+    }
+  }
+}
+
+// Usage example
+const emergencyManager = new EmergencyCredentialManager();
+
+// Trigger emergency revocation
+// emergencyManager.emergencyRevocation('Security breach detected', 'ALL');
 ```
 
 ### Real-Time Monitoring Integration
