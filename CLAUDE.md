@@ -46,6 +46,8 @@ initial/    merged/     (UTC timestamps)
 1. **TODO-Driven Integration Pipeline:**
    - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
    - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
+   - Dual implementation approaches supported: Speckit vs Claude-specific worktrees
+   - Separate TODO_FOR files for each approach (e.g., `TODO_FOR_*-speckit.md` vs `TODO_FOR_*-claude.md`)
    - Each plan maps source files to target locations with size constraints
    - GitHub issues sync automatically with TODO items
 
@@ -207,6 +209,21 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 # 4. Archive workflow (when moving files to ARCHIVED/)
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
+```
+
+### Worktree Update Workflow
+When main repository changes affect worktrees (dual implementations):
+```bash
+# 1. Commit and push changes from main repository
+git add --all && git commit -m "message" && git push origin contrib/stharrold
+
+# 2. Update worktree with latest changes
+cd ../stharrold-templates.worktrees/[worktree-name]
+git fetch origin
+git rebase origin/contrib/stharrold
+
+# 3. Verify updates applied
+ls -la TODO_FOR*.md && git status
 ```
 
 ## Critical Workflow Rules
