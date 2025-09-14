@@ -23,48 +23,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Architecture
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
+Templates and utilities repository for MCP (Model Context Protocol) server configuration and agentic development workflows. Provides cross-platform tools and modular guides for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
 
-**Current MCP State**: All MCP servers have been removed from all platforms (as of 2025-09-12). This provides a clean slate for selective server management using the platform-specific approach.
+**Current State**: Clean slate (all MCP servers removed as of 2025-09-12). Default branch: `contrib/stharrold`.
 
-**Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
+## Development Prerequisites
+
+```bash
+# Python environment (using system Python)
+/usr/bin/python3 --version  # Requires Python 3.8+
+
+# No dependencies to install - scripts are standalone
+# No package.json, pyproject.toml, or requirements.txt present
+
+# Key executable files
+chmod +x mcp_manager.py  # Ensure executable permissions
+```
 
 ### Core Architecture
 
-This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle** that spans multiple interconnected files:
+**Document Lifecycle:** `00_draft-initial/` → `10_draft-merged/` → `ARCHIVED/` (with UTC timestamps)
 
-#### Document Lifecycle Architecture (Multi-File System)
-```
-Research → Integration → Archive
-   ↓           ↓          ↓
-00_draft-   10_draft-   ARCHIVED/
-initial/    merged/     (UTC timestamps)
-```
+**Key Multi-File Relationships:**
 
-**Key architectural relationships that require reading multiple files:**
-
-1. **TODO-Driven Integration Pipeline:**
-   - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
-   - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
-   - Each plan maps source files to target locations with size constraints
-   - GitHub issues sync automatically with TODO items
+1. **TODO Integration Pipeline:**
+   - `TODO.md` tracks GitHub issues (#3-#24)
+   - `TODO_FOR_*.md` files contain execution plans mapping sources to targets
+   - 30KB file size limit enforced for AI context optimization
 
 2. **Platform-Specific MCP Management:**
-   - `mcp_manager.py` handles 3 platforms: Claude Code CLI, VS Code MCP, Claude Desktop
-   - Each platform uses different schema: `mcpServers` vs `servers` root keys
-   - Platform auto-detection algorithm in `select_target_platform()` function
-   - Credential validation spans OS-native storage (Keychain/Credential Manager)
+   - `mcp_manager.py` handles 3 platforms with different schemas (`mcpServers` vs `servers`)
+   - `select_target_platform()` auto-detection algorithm
+   - OS-native credential validation (Keychain/Credential Manager)
 
 3. **Modular Guide Hierarchy:**
-   - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
-   - Cross-references between `10_mcp/`, `20_credentials/`, `30_implementation/`
-   - 30KB file size limit enforced across all modular guides for AI context optimization
-   - YAML frontmatter tracks version history and cross-references
-
-4. **Security-First Integration:**
-   - Security tools span multiple files: credential setup, OAuth 2.1 patterns, vulnerability scanning
-   - Integration of security workflows from `.github/instructions/codacy.instructions.md`
-   - Production-ready tools integration (mcp-secrets-plugin, mcpauth, Auth0)
+   - `10_draft-merged/10_mcp/` - MCP server configuration
+   - `10_draft-merged/20_credentials/` - Security and credential management
+   - `10_draft-merged/30_implementation/` - Development patterns
 
 #### Management Tool Architecture
 **`mcp_manager.py`** - 39KB Python file with platform-specific logic:
@@ -160,7 +155,11 @@ python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test cred
 # 3. Module verification
 python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
 
-# 4. MCP server connectivity (after server setup)
+# 4. Test specific functions
+python3 -c "import mcp_manager; mcp_manager.select_target_platform()"  # Test platform detection
+python3 -c "import mcp_manager; config = mcp_manager.MCPConfig('claude-code'); config.load_config()"  # Test config loading
+
+# 5. MCP server connectivity (after server setup)
 claude mcp list                                   # List configured servers
 # Use `/mcp` command in Claude Code CLI to test server connectivity
 ```
@@ -237,39 +236,26 @@ The `mcp_manager.py` tool operates on **one platform at a time**:
 - **Explicit targeting**: `--platform <name>` (claude-code, vscode, claude-desktop)
 - **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
 
-## CRITICAL: Code Quality Requirements
 
-**⚠️ NON-NEGOTIABLE**: After ANY file edit or dependency change, IMMEDIATELY run:
-1. **File edits**: `./.codacy/cli.sh analyze --tool pylint [edited_file]`
-2. **Dependencies**: `./.codacy/cli.sh analyze --tool trivy .`
+## Quick Reference
 
-Complete details in `.github/instructions/codacy.instructions.md`
-
-## Quick Reference for Development
-
-### Most Common Commands
+### Essential Commands by Task
 ```bash
-# System status and testing
-/usr/bin/python3 mcp_manager.py --status
-/usr/bin/python3 test_mcp_deduplication.py
-/usr/bin/python3 mcp_manager.py --check-credentials
+# System Status & Testing
+/usr/bin/python3 mcp_manager.py --status                    # Check all platforms
+/usr/bin/python3 test_mcp_deduplication.py                  # Run core tests
+/usr/bin/python3 mcp_manager.py --check-credentials         # Validate credentials
 
-# Interactive MCP management
-/usr/bin/python3 mcp_manager.py --add
-/usr/bin/python3 mcp_manager.py --backup-only
+# MCP Management
+/usr/bin/python3 mcp_manager.py --add                       # Add server interactively
+/usr/bin/python3 mcp_manager.py --platform claude-code --list  # Platform-specific ops
+/usr/bin/python3 mcp_manager.py --backup-only               # Create backups
 
-# Code quality (CRITICAL after edits)
-./.codacy/cli.sh analyze --tool pylint edited_file.py
-
-# Git workflow with unified conventions
-git worktree add ../worktrees/feat/12-task -b feat/12-task
-git commit -m "feat: descriptive message"
+# Code Quality (Required after edits)
+./.codacy/cli.sh analyze --tool pylint edited_file.py       # Python analysis
+./.codacy/cli.sh analyze edited_file                        # General analysis
 ```
 
-## Important Guidelines
-- **ALWAYS prefer editing existing files** over creating new ones
-- **NEVER proactively create documentation files** unless explicitly requested
-- Work on `contrib/stharrold` branch, create PRs to `develop` or `main`
 
 ## Documentation Structure
 
