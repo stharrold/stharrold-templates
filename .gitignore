@@ -8,4 +8,3 @@ __pycache__/
 .bmad-install/
 .bmad-flattened.xml
 .bmad-flattened.stats.md
-.bmad-flattenignore
