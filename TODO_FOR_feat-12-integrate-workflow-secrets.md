@@ -3,8 +3,8 @@ title: "Integration Plan: Workflow Secrets MCP"
 issue: 12
 priority: high
 status: pending
-worktree_name: feat/12-integrate-workflow-secrets
-branch_name: feat/12-integrate-workflow-secrets
+worktree_name: feat/12-integrate-workflow-secrets-claude
+branch_name: feat/12-integrate-workflow-secrets-claude
 github_issue: https://github.com/stharrold/stharrold-templates/issues/12
 estimated_effort: "2-3 hours"
 created: 2025-09-14
@@ -44,6 +44,8 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
+**Worktree Implementation**: This task is being completed in Claude-specific worktree `feat/12-integrate-workflow-secrets-claude` to differentiate from GitHub Speckit approach. See [TODO.md line 28](TODO.md#L28) for tracking.
+
 ## Pre-Integration Analysis
 
 ### [ ] 1. Read and analyze source document
@@ -67,10 +69,14 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 ## Content Integration
 
 ### [ ] 4. Create worktree and branch
+**Note**: Work is being completed in Claude-specific worktree to differentiate from GitHub Speckit approach.
+
 ```bash
-git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets -b feat/12-integrate-workflow-secrets
-cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
+git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude -b feat/12-integrate-workflow-secrets-claude
+cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude
 ```
+
+**Current Status**: ✅ Worktree created at `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude`
 
 ### [ ] 5. Enhance target file
 - [ ] Add step-by-step installation workflows
