@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. See feature/08_merge branch for detailed security enhancements.
+**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. Added practical workflow secrets integration with step-by-step credential management examples, platform-specific verification commands, and error handling patterns. See feature/08_merge branch for detailed security enhancements.
 
 ## Repository Architecture
 
@@ -58,6 +58,25 @@ Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for
 
 ## Common Commands
 
+### Most Frequently Used
+```bash
+# System status and testing
+/usr/bin/python3 mcp_manager.py --status
+/usr/bin/python3 test_mcp_deduplication.py
+/usr/bin/python3 mcp_manager.py --check-credentials
+
+# Interactive MCP management
+/usr/bin/python3 mcp_manager.py --add
+/usr/bin/python3 mcp_manager.py --backup-only
+
+# Code quality (CRITICAL after edits)
+./.codacy/cli.sh analyze --tool pylint edited_file.py
+
+# Git workflow with unified conventions
+git worktree add ../worktrees/feat/12-task -b feat/12-task
+git commit -m "feat: descriptive message"
+```
+
 ### MCP Management
 ```bash
 # Always use system Python to avoid virtual environment issues
@@ -94,7 +113,7 @@ claude mcp add <name> <command> [args...]        # Add server
 claude mcp remove <name>                         # Remove server
 ```
 
-### Git Operations
+### Git & GitHub Operations
 ```bash
 # Repository connected to GitHub (contrib/stharrold is default branch)
 git status && git add --all                  # Stage all changes
@@ -112,6 +131,10 @@ test/     # Testing additions/updates
 git worktree add ../stharrold-templates.worktrees/feat/12-task -b feat/12-task
 git commit -m "feat: descriptive message"
 git checkout main && git checkout contrib/stharrold
+
+# GitHub Issue synchronization
+gh issue comment <number> --body "completion summary"
+gh issue close <number> --comment "resolution notes"
 
 # Archive files with UTC timestamp
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
@@ -132,18 +155,34 @@ mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ls 00_draft-initial/
 ```
 
-### Development and Testing
+### Feature Specification Workflow
 ```bash
-# Dependency management with UV (system default)
-uv sync && uv add package_name            # Sync dependencies and add new packages
+# .specify workflow commands
+.specify/scripts/bash/create-new-feature.sh    # Create new feature spec
+.specify/scripts/bash/setup-plan.sh            # Initialize implementation plan
+.specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
+```
 
-# Core Python testing
+### Testing & Validation
+```bash
+# Documentation validation tests
+./test_file_size.sh              # Verify 30KB constraints
+./test_cross_references.sh       # Check internal links
+./test_content_duplication.sh    # Detect duplicate content
+./test_command_syntax.sh         # Validate bash commands
+./test_yaml_structure.sh         # Check YAML frontmatter
+./validate_documentation.sh      # Comprehensive validation
+
+# Python testing
 /usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
 /usr/bin/python3 mcp_manager.py --validate-all     # Validate all configurations
 python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test credentials
 
 # Module verification
 python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
+
+# Dependency management with UV (system default)
+uv sync && uv add package_name            # Sync dependencies and add new packages
 ```
 
 ### Code Quality and Security Analysis
@@ -171,13 +210,6 @@ mcp-secrets set github token && mcp-secrets list
 
 ## Critical Workflow Rules
 
-### Code Quality Integration
-**CRITICAL**: After ANY file edit, IMMEDIATELY run:
-```bash
-./.codacy/cli.sh analyze --tool pylint edited_file.py  # Python files
-./.codacy/cli.sh analyze edited_file                   # Other files
-```
-If issues found, propose and apply fixes before continuing.
 
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
@@ -205,26 +237,6 @@ The `mcp_manager.py` tool operates on **one platform at a time**:
 
 Complete details in `.github/instructions/codacy.instructions.md`
 
-## Quick Reference for Development
-
-### Most Common Commands
-```bash
-# System status and testing
-/usr/bin/python3 mcp_manager.py --status
-/usr/bin/python3 test_mcp_deduplication.py
-/usr/bin/python3 mcp_manager.py --check-credentials
-
-# Interactive MCP management
-/usr/bin/python3 mcp_manager.py --add
-/usr/bin/python3 mcp_manager.py --backup-only
-
-# Code quality (CRITICAL after edits)
-./.codacy/cli.sh analyze --tool pylint edited_file.py
-
-# Git workflow with unified conventions
-git worktree add ../worktrees/feat/12-task -b feat/12-task
-git commit -m "feat: descriptive message"
-```
 
 ## Important Guidelines
 - **ALWAYS prefer editing existing files** over creating new ones
