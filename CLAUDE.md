@@ -4,6 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. See feature/08_merge branch for detailed security enhancements.
 
+## CRITICAL: Code Quality Requirements
+
+**⚠️ NON-NEGOTIABLE**: After ANY file edit or dependency change, IMMEDIATELY run:
+
+### After File Edits
+```bash
+./.codacy/cli.sh analyze --tool pylint edited_file.py  # Python files
+./.codacy/cli.sh analyze edited_file                   # Other files
+```
+
+### After Dependency Changes
+```bash
+./.codacy/cli.sh analyze --tool trivy .                # Security scan
+```
+
+**If issues found, propose and apply fixes before continuing.** This requirement comes from `.github/instructions/codacy.instructions.md` and is critical for code quality.
+
 ## Repository Architecture
 
 This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, and automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
@@ -14,19 +31,48 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 ### Core Architecture
 
-The repository follows a **platform-specific management approach** with a structured document lifecycle:
+This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle** that spans multiple interconnected files:
 
-**Management Tool Architecture:**
-1. **`mcp_manager.py`** - Central platform-targeted management tool with auto-detection
-   - Single-platform operations (not cross-platform synchronization)
-   - MCPConfig class handles individual platform operations
-   - Platform selection via `select_target_platform()` with auto-detection
-   - Disable/enable servers via `DISABLED_` prefix renaming
+#### Document Lifecycle Architecture (Multi-File System)
+```
+Research → Integration → Archive
+   ↓           ↓          ↓
+00_draft-   10_draft-   ARCHIVED/
+initial/    merged/     (UTC timestamps)
+```
 
-**Document Lifecycle System:**
-2. **Research Phase** (`00_draft-initial/`) - Raw research and analysis awaiting integration
-3. **Modular Guides** (`10_draft-merged/`) - Hierarchical documentation with YAML frontmatter and 30KB file limits
-4. **Archive System** (`ARCHIVED/`) - Historical documents with UTC timestamps (`YYYYMMDDTHHMMSSZ_filename.ext`)
+**Key architectural relationships that require reading multiple files:**
+
+1. **TODO-Driven Integration Pipeline:**
+   - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
+   - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
+   - Each plan maps source files to target locations with size constraints
+   - GitHub issues sync automatically with TODO items
+
+2. **Platform-Specific MCP Management:**
+   - `mcp_manager.py` handles 3 platforms: Claude Code CLI, VS Code MCP, Claude Desktop
+   - Each platform uses different schema: `mcpServers` vs `servers` root keys
+   - Platform auto-detection algorithm in `select_target_platform()` function
+   - Credential validation spans OS-native storage (Keychain/Credential Manager)
+
+3. **Modular Guide Hierarchy:**
+   - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
+   - Cross-references between `10_mcp/`, `20_credentials/`, `30_implementation/`
+   - 30KB file size limit enforced across all modular guides for AI context optimization
+   - YAML frontmatter tracks version history and cross-references
+
+4. **Security-First Integration:**
+   - Security tools span multiple files: credential setup, OAuth 2.1 patterns, vulnerability scanning
+   - Integration of security workflows from `.github/instructions/codacy.instructions.md`
+   - Production-ready tools integration (mcp-secrets-plugin, mcpauth, Auth0)
+
+#### Management Tool Architecture
+**`mcp_manager.py`** - 39KB Python file with platform-specific logic:
+- `MCPConfig` class: Platform-specific configuration management
+- `select_target_platform()`: Auto-detection algorithm for available platforms
+- `validate_credentials()`: Cross-platform credential validation
+- `deduplicate_servers()`: Intelligent duplicate removal preserving DISABLED_ versions
+- Server disable/enable via `DISABLED_` prefix renaming
 
 ### Modular Guide Structure
 The `10_draft-merged/` directory contains a hierarchical documentation system:
@@ -56,51 +102,93 @@ Each directory has its own `CLAUDE.md` orchestrator and numbered guide files for
 - **Schema Harmonization**: Handles differences between Claude Code CLI (`mcpServers`), VS Code (`servers`), and Claude Desktop (`mcpServers`) schemas
 - **Archive System**: UTC-timestamped format `YYYYMMDDTHHMMSSZ_filename.ext`
 
-## Common Commands
+## Workflow-Based Commands
 
-### MCP Management
+### Document Integration Workflow
 ```bash
-# Always use system Python to avoid virtual environment issues
+# 1. Navigate to priority document for integration
+ls 00_draft-initial/                      # Check draft documents awaiting integration
+cat TODO.md                               # Review integration priorities
 
-# Platform Status and Detection
-/usr/bin/python3 mcp_manager.py --status         # Show all platform statuses
-/usr/bin/python3 mcp_manager.py                  # Auto-detect first available platform
-/usr/bin/python3 mcp_manager.py --list           # List servers from auto-detected platform
+# 2. Read source and target files
+head -20 00_draft-initial/source.md       # Preview source content
+ls -la 10_draft-merged/target/             # Check target directory structure
 
-# Platform-Specific Operations
-/usr/bin/python3 mcp_manager.py --platform claude-code --list      # List Claude Code CLI servers
-/usr/bin/python3 mcp_manager.py --platform vscode --add           # Add server to VS Code MCP
-/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove # Remove from Claude Desktop
+# 3. Integrate content (following TODO_FOR_*.md plan)
+# Edit target file to enhance with source content
+# Keep file under 30KB limit
 
-# Server Management (works with auto-detected or specified platform)
-/usr/bin/python3 mcp_manager.py --add            # Interactive server addition
-/usr/bin/python3 mcp_manager.py --remove         # Interactive server removal
-/usr/bin/python3 mcp_manager.py --disable        # Temporarily disable servers
-/usr/bin/python3 mcp_manager.py --enable         # Re-enable disabled servers
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicate servers (keeps DISABLED_ versions)
+# 4. Archive source document
+mv 00_draft-initial/source.md ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_source.md
 
-# Cross-Platform Features
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credential setup
-/usr/bin/python3 mcp_manager.py --backup-only    # Create configuration backups
-/usr/bin/python3 mcp_manager.py --file ~/.claude.json  # Work with specific config file
-
-# Deduplication Examples
-/usr/bin/python3 mcp_manager.py --deduplicate    # Auto-detect platform and remove duplicates
-/usr/bin/python3 mcp_manager.py --platform claude-code --deduplicate  # Target specific platform
-
-# Alternative Claude Code CLI commands
-claude mcp list                                   # List configured servers
-claude mcp add <name> <command> [args...]        # Add server
-claude mcp remove <name>                         # Remove server
+# 5. Update tracking
+# Edit TODO.md to mark task complete
+# Close corresponding GitHub issue
 ```
 
-### Git Operations
+### MCP Server Management Workflow
 ```bash
-# Repository connected to GitHub (contrib/stharrold is default branch)
-git status && git add --all                  # Stage all changes
-git log --oneline -10                         # Recent commit history
+# 1. Check current platform status
+/usr/bin/python3 mcp_manager.py --status         # Show all platform statuses
 
-# Unified Git Conventions (branches, worktrees, commits)
+# 2. Platform-specific operations (Claude Code CLI, VS Code MCP, Claude Desktop)
+/usr/bin/python3 mcp_manager.py --platform claude-code --list      # List servers
+/usr/bin/python3 mcp_manager.py --platform vscode --add           # Add server
+/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove # Remove server
+
+# 3. Interactive server management (auto-detects platform)
+/usr/bin/python3 mcp_manager.py --add            # Add server
+/usr/bin/python3 mcp_manager.py --remove         # Remove server
+/usr/bin/python3 mcp_manager.py --disable        # Disable servers (DISABLED_ prefix)
+/usr/bin/python3 mcp_manager.py --enable         # Re-enable servers
+
+# 4. Maintenance operations
+/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates
+/usr/bin/python3 mcp_manager.py --backup-only    # Create backups
+/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
+```
+
+### Testing Workflow
+```bash
+# 1. Core functionality tests
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
+
+# 2. MCP manager validation
+/usr/bin/python3 mcp_manager.py --validate-all     # Validate all configurations
+python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test credentials
+
+# 3. Module verification
+python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
+
+# 4. MCP server connectivity (after server setup)
+claude mcp list                                   # List configured servers
+# Use `/mcp` command in Claude Code CLI to test server connectivity
+```
+
+### Code Quality Workflow
+```bash
+# 1. CRITICAL: Run after EVERY file edit
+./.codacy/cli.sh analyze --tool pylint edited_file.py    # Python files
+./.codacy/cli.sh analyze edited_file                     # Other files
+
+# 2. CRITICAL: Run after dependency changes
+./.codacy/cli.sh analyze --tool trivy .                  # Security vulnerability scan
+
+# 3. Additional analysis tools
+./.codacy/cli.sh analyze --tool semgrep                  # Security-focused analysis
+./.codacy/cli.sh version                                 # Check CLI status
+
+# 4. Fix any issues found before continuing
+# If issues found: propose fixes, apply them, re-run analysis
+```
+
+### Git Operations Workflow
+```bash
+# 1. Check status and prepare
+git status && git add --all                  # Stage changes
+git log --oneline -10                         # Review recent commits
+
+# 2. Branch naming conventions
 feat/     # New features and enhancements
 fix/      # Bug fixes
 docs/     # Documentation changes
@@ -108,65 +196,17 @@ chore/    # Maintenance, dependencies, tooling
 refactor/ # Code restructuring
 test/     # Testing additions/updates
 
-# Branch and worktree management
-git worktree add ../stharrold-templates.worktrees/feat/12-task -b feat/12-task
-git commit -m "feat: descriptive message"
-git checkout main && git checkout contrib/stharrold
+# 3. Commit with descriptive message
+git commit -m "feat: descriptive message including issue reference
 
-# Archive files with UTC timestamp
+Closes #123
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# 4. Archive workflow (when moving files to ARCHIVED/)
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-```
-
-### Document Management
-```bash
-# Working with modular guide system
-# Navigate to guides in execution order:
-10_draft-merged/10_mcp/CLAUDE.md           # MCP setup and configuration
-10_draft-merged/20_credentials/CLAUDE.md   # Security and credential management
-10_draft-merged/30_implementation/CLAUDE.md # Development strategy and patterns
-
-# Archive files with UTC timestamp
-mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-
-# Research documents awaiting integration
-ls 00_draft-initial/
-```
-
-### Development and Testing
-```bash
-# Dependency management with UV (system default)
-uv sync && uv add package_name            # Sync dependencies and add new packages
-
-# Core Python testing
-/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
-/usr/bin/python3 mcp_manager.py --validate-all     # Validate all configurations
-python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test credentials
-
-# Module verification
-python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
-```
-
-### Code Quality and Security Analysis
-```bash
-# CRITICAL: Run after ANY file edit
-./.codacy/cli.sh analyze --tool pylint edited_file.py    # Python files
-./.codacy/cli.sh analyze edited_file                     # Any file
-
-# CRITICAL: Run after dependency changes
-./.codacy/cli.sh analyze --tool trivy .                  # Security scan
-
-# Additional tools
-./.codacy/cli.sh version                                 # Check CLI status
-./.codacy/cli.sh analyze --tool semgrep                  # Security analysis
-```
-
-### Security Tools and Emergency Response
-```bash
-# Deploy security tools (see 25_mcp-security-tools.md)
-pip install mcp-secrets-plugin && npx create-mcpauth-app
-
-# Emergency credential management
-mcp-secrets set github token && mcp-secrets list
 ```
 
 ## Critical Workflow Rules
