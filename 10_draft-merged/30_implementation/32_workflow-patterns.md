@@ -1,7 +1,7 @@
 ---
 title: Implementation Workflow Patterns
-version: 4.0
-updated: 2025-09-13
+version: 4.1
+updated: 2025-09-15
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -18,7 +18,15 @@ related:
   - ./37_team-collaboration.md
   - ../10_mcp/12_servers.md
   - ../20_credentials/CLAUDE.md
+  - ../20_credentials/25_mcp-security-tools.md
+workflow_integration:
+  source_document: "../00_draft-initial/09_workflow-secrets-mcp.md"
+  integration_method: "Claude2 multi-guide distribution"
+  cross_references:
+    - "25_mcp-security-tools.md: Production security tools and practical examples"
+    - "12_servers.md: MCP server configuration with credential injection"
 changelog:
+  - 4.1: Enhanced with complete 7-step MCP security workflow implementation, OAuth 2.1 patterns, and error handling (Claude2 integration)
   - 4.0: BREAKING CHANGE - Replaced Docker with Podman for container management, added automated tool discovery pipeline, LangGraph orchestration
   - 3.2: Added Claude framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
   - 3.1: Enhanced with development standards and workflow patterns
@@ -201,6 +209,251 @@ New-StoredCredential -Target "GITHUB_TOKEN" -UserName "token" -SecurePassword $g
 ```
 
 **Reference:** For complete credential setup, see [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
+
+### Complete MCP Security Workflow Implementation
+
+**7-Step Implementation Pattern for Secure MCP Setup**
+
+This comprehensive workflow demonstrates best practices for implementing secure credential management with MCP servers, combining multiple security tools for production-ready deployment.
+
+#### Step 1: Install the Credential Manager MCP
+
+```bash
+# Install mcp-secrets-plugin globally
+npm install -g mcp-secrets-plugin
+
+# Or clone and install from GitHub (for latest features)
+git clone https://github.com/amirshk/mcp-secrets-plugin.git
+cd mcp-secrets-plugin
+npm install
+npm link
+```
+
+#### Step 2: Configure MCP-Secrets-Plugin in Claude
+
+Add the credential manager to your Claude configuration:
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    }
+  }
+}
+```
+
+#### Step 3: Environment Variable Discovery Methods
+
+**Method 1: Error-Driven Discovery (Recommended)**
+```bash
+# Run the target MCP without credentials to see requirements
+$ npx @modelcontextprotocol/server-github
+Error: GITHUB_PERSONAL_ACCESS_TOKEN environment variable is required
+```
+
+**Method 2: Documentation Analysis**
+```bash
+# Check NPM package documentation
+npm info @modelcontextprotocol/server-github
+
+# View GitHub README for detailed requirements
+open https://github.com/modelcontextprotocol/servers/tree/main/src/github
+```
+
+**Method 3: Source Code Inspection**
+```bash
+# Search for environment variable usage patterns
+grep -r "process.env" node_modules/@modelcontextprotocol/server-github/
+# Output: process.env.GITHUB_PERSONAL_ACCESS_TOKEN
+
+# For Python MCPs
+grep -r "os.environ" /path/to/mcp-server/
+```
+
+**Method 4: MCP Manifest Checking**
+```bash
+# Check for standardized configuration manifest
+cat node_modules/@modelcontextprotocol/server-github/mcp.json
+```
+```json
+{
+  "requiredEnv": ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+  "optionalEnv": ["GITHUB_API_URL"]
+}
+```
+
+#### Step 4: Credential Value Format Discovery
+
+**Common credential manager patterns:**
+
+| Manager | Pattern | Example |
+|---------|---------|---------|
+| mcp-secrets-plugin | `${SECRET:name}` | `${SECRET:github_token}` |
+| mcpauth | `${OAUTH:service}` | `${OAUTH:github}` |
+| System environment | Direct or `${VAR}` | `${GITHUB_TOKEN}` |
+| No manager (insecure) | Plaintext | `"ghp_xxxxx"` |
+
+#### Step 5: Secure Credential Storage
+
+**Interactive Storage (Recommended):**
+```bash
+# Store GitHub token with masked input
+$ mcp-secrets set github_token
+Enter value for 'github_token': ************************************
+✓ Credential stored in system keychain
+```
+
+**Programmatic Storage:**
+```bash
+# Store credential with command line (less secure)
+$ mcp-secrets set github_token --value "ghp_xxxxxxxxxxxxxxxxxxxx"
+✓ Credential stored in system keychain
+```
+
+**What happens behind the scenes:**
+1. **mcp-secrets-plugin** uses Python's `keyring` library
+2. User input is masked with asterisks during interactive entry
+3. Credential is stored using OS-native storage:
+   - **macOS**: Keychain Access via Security Framework
+   - **Windows**: Windows Credential Manager via Win32 API
+   - **Linux**: Secret Service API (GNOME Keyring/KWallet)
+4. Credential is encrypted at rest by the OS
+
+#### Step 6: MCP Server Configuration with Credentials
+
+Update your Claude configuration to use stored credentials:
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${SECRET:github_token}"
+      }
+    }
+  }
+}
+```
+
+#### Step 7: Verification and Testing
+
+**Credential Verification:**
+```bash
+# List all stored secrets
+$ mcp-secrets list
+Available secrets:
+  - github_token (stored 2025-01-15)
+
+# Test credential retrieval (debugging only)
+$ mcp-secrets get github_token
+ghp_xxxxxxxxxxxxxxxxxxxx
+
+# Verify MCP server functionality
+$ claude-desktop --test-mcp github
+✓ MCP server started successfully
+✓ Authentication verified
+✓ GitHub API accessible
+```
+
+**Claude Usage Verification:**
+Claude can now securely use the GitHub MCP:
+```
+User: "Create an issue in my repo about the authentication improvement"
+Claude: I'll create that issue for you using the secure GitHub integration...
+```
+
+### Alternative: OAuth 2.1 Implementation with mcpauth
+
+For OAuth-based authentication patterns:
+
+```bash
+# Install mcpauth OAuth server
+npm install -g mcpauth
+
+# Initialize OAuth configuration
+mcpauth init
+
+# Configure OAuth server in Claude
+{
+  "mcpServers": {
+    "mcpauth": {
+      "command": "mcpauth",
+      "args": ["server"],
+      "env": {}
+    }
+  }
+}
+
+# Authenticate via OAuth device flow
+$ mcpauth login github
+Opening browser for authentication...
+Please authorize the application.
+
+# After user authorization:
+✓ Authentication successful
+✓ Token stored securely in system keychain
+✓ Refresh token saved for automatic renewal
+```
+
+### Error Handling and Troubleshooting Patterns
+
+**Common Error Patterns:**
+
+```python
+# Example error handling from Python MCP server
+import os
+import sys
+import keyring
+
+class GitHubMCP:
+    def __init__(self):
+        # Try environment variable first
+        self.token = os.environ.get('GITHUB_PERSONAL_ACCESS_TOKEN')
+
+        # Fall back to keyring if environment variable not found
+        if not self.token:
+            try:
+                self.token = keyring.get_password("mcp-secrets", "github_token")
+            except Exception as e:
+                print(f"Failed to retrieve GitHub token: {e}", file=sys.stderr)
+                print("Run: mcp-secrets set github_token", file=sys.stderr)
+                sys.exit(1)
+
+        if not self.token:
+            print("No GitHub token found in environment or keychain", file=sys.stderr)
+            print("Run: mcp-secrets set github_token", file=sys.stderr)
+            sys.exit(1)
+```
+
+**Credential Rotation:**
+```bash
+# Update existing credentials
+$ mcp-secrets update github_token
+⚠ This will replace the existing token
+Enter new value: ************************************
+✓ Credential updated in system keychain
+✓ All MCPs using this credential will get the new token
+```
+
+**Security Features:**
+```bash
+# Remove credentials when no longer needed
+$ mcp-secrets delete github_token
+⚠ This will remove the credential permanently
+Continue? (y/N): y
+✓ Removed from system keychain
+✓ MCPs using this credential will fail at runtime
+```
 
 #### 2. Server Installation and Configuration
 ```bash

@@ -1,13 +1,22 @@
 ---
 title: MCP Server Configurations
-version: 4.0
-updated: 2025-09-13
+version: 4.1
+updated: 2025-09-15
 parent: ./CLAUDE.md
 related:
   - ./11_setup.md
   - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
+  - ../20_credentials/25_mcp-security-tools.md
+  - ../30_implementation/32_workflow-patterns.md
+workflow_integration:
+  source_document: "../00_draft-initial/09_workflow-secrets-mcp.md"
+  integration_method: "Claude2 multi-guide distribution"
+  cross_references:
+    - "25_mcp-security-tools.md: Security tool implementations and workflow examples"
+    - "32_workflow-patterns.md: Complete step-by-step implementation guidance"
 changelog:
+  - 4.1: Enhanced with runtime credential injection implementation and multi-service credential management (Claude2 integration)
   - 4.0: BREAKING CHANGE - Enhanced with resource-based credential sharing, production security patterns, and MCP tool ecosystem integration
   - 3.1: Previous version baseline
 ---
@@ -94,6 +103,80 @@ claude oauth validate --all-providers --health-check
 
 # Enterprise SSO integration
 claude oauth configure-sso --provider okta --domain company.okta.com
+```
+
+### Runtime Credential Injection Implementation
+
+**Secure credential injection at MCP server startup:**
+
+```python
+# Runtime credential injection for MCP servers
+import keyring
+from typing import Dict, Any
+
+class SecretsPlugin:
+    def get_secret(self, secret_name: str) -> str:
+        """Retrieve secret from OS keychain"""
+        return keyring.get_password("mcp-secrets", secret_name)
+
+    def resolve_environment(self, env: Dict[str, Any]) -> Dict[str, Any]:
+        """Replace ${SECRET:name} placeholders with actual values"""
+        resolved = {}
+        for key, value in env.items():
+            if isinstance(value, str) and value.startswith("${SECRET:"):
+                secret_name = value[9:-1]  # Extract name from ${SECRET:name}
+                resolved[key] = self.get_secret(secret_name)
+            else:
+                resolved[key] = value
+        return resolved
+```
+
+**MCP Configuration with Credential Injection:**
+
+```json
+{
+  "mcpServers": {
+    "mcp-secrets": {
+      "command": "python",
+      "args": ["-m", "mcp_secrets_plugin"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${SECRET:github_token}"
+      }
+    },
+    "azure-devops": {
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp"],
+      "env": {
+        "AZURE_DEVOPS_PAT": "${SECRET:azure_pat}",
+        "AZURE_ORG_URL": "${SECRET:azure_org_url}"
+      }
+    }
+  }
+}
+```
+
+**Multi-Service Credential Management:**
+
+```bash
+# Setup multiple service credentials
+mcp-secrets set github_token
+mcp-secrets set azure_pat
+mcp-secrets set database_url
+mcp-secrets set openai_api_key
+
+# Verify all credentials are accessible
+mcp-secrets list
+# Output:
+# Available secrets:
+#   - github_token (stored 2025-09-15)
+#   - azure_pat (stored 2025-09-15)
+#   - database_url (stored 2025-09-15)
+#   - openai_api_key (stored 2025-09-15)
 ```
 
 ### Resource-Based Credential Sharing
