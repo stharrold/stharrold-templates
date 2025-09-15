@@ -1,266 +1,352 @@
-# CLAUDE.md
+# Claude Code Configuration - SPARC Development Environment
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
 
-**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. BMAD framework integrated for agentic development workflows with full agent persona support and advanced task orchestration.
+**ABSOLUTE RULES**:
+1. ALL operations MUST be concurrent/parallel in a single message
+2. **NEVER save working files, text/mds and tests to the root folder**
+3. ALWAYS organize files in appropriate subdirectories
+4. **USE CLAUDE CODE'S TASK TOOL** for spawning agents concurrently, not just MCP
 
-## Repository Architecture
+### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop, plus BMAD framework integration for advanced agentic development.
+**MANDATORY PATTERNS:**
+- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
+- **Task tool (Claude Code)**: ALWAYS spawn ALL agents in ONE message with full instructions
+- **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
+- **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
+- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
 
-**Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
+### 🎯 CRITICAL: Claude Code Task Tool for Agent Execution
 
-## BMAD Framework Integration
-
-This repository includes the **BMAD-METHOD™ (Breakthrough Method of Agile AI-Driven Development)** framework for advanced agentic development workflows. BMAD provides specialized AI agent personas, task orchestration, and comprehensive development templates.
-
-### BMAD Agent Personas Available
-- **Architect** (`/BMad:agents:architect`) - System design, architecture documents, technology selection
-- **Analyst** (`/BMad:agents:analyst`) - Requirements analysis, research, stakeholder interviews
-- **PM** (`/BMad:agents:pm`) - Project management, roadmaps, resource planning
-- **Dev** (`/BMad:agents:dev`) - Code implementation, technical execution
-- **QA** (`/BMad:agents:qa`) - Quality assurance, testing strategies, validation
-- **SM** (`/BMad:agents:sm`) - Scrum Master, story creation, sprint management
-
-### BMAD Configuration
-- **Core Config**: `.bmad-core/core-config.yaml`
-- **Agent Directory**: `.bmad-core/agents/`
-- **Task Templates**: `.bmad-core/tasks/`
-- **Claude Commands**: `.claude/commands/BMad/`
-
-## Core Architecture
-
-This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle**:
-
-### Document Lifecycle Architecture
-```
-Research → Integration → Archive
-   ↓           ↓          ↓
-00_draft-   10_draft-   ARCHIVED/
-initial/    merged/     (UTC timestamps)
+**Claude Code's Task tool is the PRIMARY way to spawn agents:**
+```javascript
+// ✅ CORRECT: Use Claude Code's Task tool for parallel agent execution
+[Single Message]:
+  Task("Research agent", "Analyze requirements and patterns...", "researcher")
+  Task("Coder agent", "Implement core features...", "coder")
+  Task("Tester agent", "Create comprehensive tests...", "tester")
+  Task("Reviewer agent", "Review code quality...", "reviewer")
+  Task("Architect agent", "Design system architecture...", "system-architect")
 ```
 
-### Key architectural relationships:
+**MCP tools are ONLY for coordination setup:**
+- `mcp__claude-flow__swarm_init` - Initialize coordination topology
+- `mcp__claude-flow__agent_spawn` - Define agent types for coordination
+- `mcp__claude-flow__task_orchestrate` - Orchestrate high-level workflows
 
-1. **TODO-Driven Integration Pipeline:**
-   - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
-   - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
-   - Multiple implementation approaches supported: Speckit, Claude, BMAD, and Flow
-   - Each plan maps source files to target locations with size constraints
+### 📁 File Organization Rules
 
-2. **Platform-Specific MCP Management:**
-   - `mcp_manager.py` handles 3 platforms: Claude Code CLI, VS Code MCP, Claude Desktop
-   - Each platform uses different schema: `mcpServers` vs `servers` root keys
-   - Platform auto-detection algorithm in `select_target_platform()` function
+**NEVER save to root folder. Use these directories:**
+- `/src` - Source code files
+- `/tests` - Test files
+- `/docs` - Documentation and markdown files
+- `/config` - Configuration files
+- `/scripts` - Utility scripts
+- `/examples` - Example code
 
-3. **Modular Guide Hierarchy:**
-   - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
-   - 30KB file size limit enforced across all modular guides for AI context optimization
+## Project Overview
 
-## Essential Development Commands
+This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
 
-### BMAD Agent Commands
+## SPARC Commands
+
+### Core Commands
+- `npx claude-flow sparc modes` - List available modes
+- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
+- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
+- `npx claude-flow sparc info <mode>` - Get mode details
+
+### Batchtools Commands
+- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
+- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
+- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
+
+### Build Commands
+- `npm run build` - Build project
+- `npm run test` - Run tests
+- `npm run lint` - Linting
+- `npm run typecheck` - Type checking
+
+## SPARC Workflow Phases
+
+1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
+2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
+3. **Architecture** - System design (`sparc run architect`)
+4. **Refinement** - TDD implementation (`sparc tdd`)
+5. **Completion** - Integration (`sparc run integration`)
+
+## Code Style & Best Practices
+
+- **Modular Design**: Files under 500 lines
+- **Environment Safety**: Never hardcode secrets
+- **Test-First**: Write tests before implementation
+- **Clean Architecture**: Separate concerns
+- **Documentation**: Keep updated
+
+## 🚀 Available Agents (54 Total)
+
+### Core Development
+`coder`, `reviewer`, `tester`, `planner`, `researcher`
+
+### Swarm Coordination
+`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
+
+### Consensus & Distributed
+`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
+
+### Performance & Optimization
+`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
+
+### GitHub & Repository
+`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
+
+### SPARC Methodology
+`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
+
+### Specialized Development
+`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
+
+### Testing & Validation
+`tdd-london-swarm`, `production-validator`
+
+### Migration & Planning
+`migration-planner`, `swarm-init`
+
+## 🎯 Claude Code vs MCP Tools
+
+### Claude Code Handles ALL EXECUTION:
+- **Task tool**: Spawn and run agents concurrently for actual work
+- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
+- Code generation and programming
+- Bash commands and system operations
+- Implementation work
+- Project navigation and analysis
+- TodoWrite and task management
+- Git operations
+- Package management
+- Testing and debugging
+
+### MCP Tools ONLY COORDINATE:
+- Swarm initialization (topology setup)
+- Agent type definitions (coordination patterns)
+- Task orchestration (high-level planning)
+- Memory management
+- Neural features
+- Performance tracking
+- GitHub integration
+
+**KEY**: MCP coordinates the strategy, Claude Code's Task tool executes with real agents.
+
+## 🚀 Quick Setup
+
 ```bash
-# Activate BMAD agent personas (use in Claude Code CLI)
-/BMad:agents:architect     # System architecture and design
-/BMad:agents:analyst       # Requirements and research
-/BMad:agents:pm           # Project management
-/BMad:agents:dev          # Development and implementation
-/BMad:agents:qa           # Quality assurance and testing
-/BMad:agents:sm           # Scrum Master and story management
-
-# BMAD task execution examples
-/BMad:tasks:document-project           # Document existing project architecture
-/BMad:tasks:create-doc                # Create documentation with templates
-/BMad:tasks:create-next-story         # Generate development stories
-/BMad:tasks:review-story              # Review and validate stories
+# Add MCP servers (Claude Flow required, others optional)
+claude mcp add claude-flow npx claude-flow@alpha mcp start
+claude mcp add ruv-swarm npx ruv-swarm mcp start  # Optional: Enhanced coordination
+claude mcp add flow-nexus npx flow-nexus@latest mcp start  # Optional: Cloud features
 ```
 
-### MCP Manager Operations
+## MCP Tool Categories
+
+### Coordination
+`swarm_init`, `agent_spawn`, `task_orchestrate`
+
+### Monitoring
+`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
+
+### Memory & Neural
+`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+
+### GitHub Integration
+`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+
+### System
+`benchmark_run`, `features_detect`, `swarm_monitor`
+
+### Flow-Nexus MCP Tools (Optional Advanced Features)
+Flow-Nexus extends MCP capabilities with 70+ cloud-based orchestration tools:
+
+**Key MCP Tool Categories:**
+- **Swarm & Agents**: `swarm_init`, `swarm_scale`, `agent_spawn`, `task_orchestrate`
+- **Sandboxes**: `sandbox_create`, `sandbox_execute`, `sandbox_upload` (cloud execution)
+- **Templates**: `template_list`, `template_deploy` (pre-built project templates)
+- **Neural AI**: `neural_train`, `neural_patterns`, `seraphina_chat` (AI assistant)
+- **GitHub**: `github_repo_analyze`, `github_pr_manage` (repository management)
+- **Real-time**: `execution_stream_subscribe`, `realtime_subscribe` (live monitoring)
+- **Storage**: `storage_upload`, `storage_list` (cloud file management)
+
+**Authentication Required:**
+- Register: `mcp__flow-nexus__user_register` or `npx flow-nexus@latest register`
+- Login: `mcp__flow-nexus__user_login` or `npx flow-nexus@latest login`
+- Access 70+ specialized MCP tools for advanced orchestration
+
+## 🚀 Agent Execution Flow with Claude Code
+
+### The Correct Pattern:
+
+1. **Optional**: Use MCP tools to set up coordination topology
+2. **REQUIRED**: Use Claude Code's Task tool to spawn agents that do actual work
+3. **REQUIRED**: Each agent runs hooks for coordination
+4. **REQUIRED**: Batch all operations in single messages
+
+### Example Full-Stack Development:
+
+```javascript
+// Single message with all agent spawning via Claude Code's Task tool
+[Parallel Agent Execution]:
+  Task("Backend Developer", "Build REST API with Express. Use hooks for coordination.", "backend-dev")
+  Task("Frontend Developer", "Create React UI. Coordinate with backend via memory.", "coder")
+  Task("Database Architect", "Design PostgreSQL schema. Store schema in memory.", "code-analyzer")
+  Task("Test Engineer", "Write Jest tests. Check memory for API contracts.", "tester")
+  Task("DevOps Engineer", "Setup Docker and CI/CD. Document in memory.", "cicd-engineer")
+  Task("Security Auditor", "Review authentication. Report findings via hooks.", "reviewer")
+  
+  // All todos batched together
+  TodoWrite { todos: [...8-10 todos...] }
+  
+  // All file operations together
+  Write "backend/server.js"
+  Write "frontend/App.jsx"
+  Write "database/schema.sql"
+```
+
+## 📋 Agent Coordination Protocol
+
+### Every Agent Spawned via Task Tool MUST:
+
+**1️⃣ BEFORE Work:**
 ```bash
-# System status and platform detection
-/usr/bin/python3 mcp_manager.py --status
-
-# Interactive MCP management (auto-detects platform)
-/usr/bin/python3 mcp_manager.py --add            # Add server
-/usr/bin/python3 mcp_manager.py --remove         # Remove server
-/usr/bin/python3 mcp_manager.py --disable        # Disable servers (DISABLED_ prefix)
-/usr/bin/python3 mcp_manager.py --enable         # Re-enable servers
-
-# Platform-specific operations
-/usr/bin/python3 mcp_manager.py --platform claude-code --list
-/usr/bin/python3 mcp_manager.py --platform vscode --add
-/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove
-
-# Maintenance operations
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates
-/usr/bin/python3 mcp_manager.py --backup-only    # Create backups
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
+npx claude-flow@alpha hooks pre-task --description "[task]"
+npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
 ```
 
-### Testing and Validation
+**2️⃣ DURING Work:**
 ```bash
-# Core functionality tests
-/usr/bin/python3 test_mcp_deduplication.py       # Test deduplication functionality
-
-# Module verification
-python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
-
-# MCP server connectivity (after setup)
-claude mcp list                                   # List configured servers
+npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
+npx claude-flow@alpha hooks notify --message "[what was done]"
 ```
 
-### Quality Assurance
+**3️⃣ AFTER Work:**
 ```bash
-# Python code quality (when available)
-python3 -m pylint mcp_manager.py                        # Lint main Python files
-python3 -m flake8 mcp_manager.py                       # Style checking
-
-# Manual validation
-python3 test_mcp_deduplication.py                      # Run deduplication tests
-python3 -c "import mcp_manager; print('Import successful')"  # Module validation
-
-# BMAD quality assurance
-/BMad:agents:qa                                         # Activate QA agent for review
+npx claude-flow@alpha hooks post-task --task-id "[task]"
+npx claude-flow@alpha hooks session-end --export-metrics true
 ```
 
-### Document Integration Workflow
-```bash
-# 1. Navigate to priority document for integration
-ls 00_draft-initial/                      # Check draft documents awaiting integration
-cat TODO.md                               # Review integration priorities
+## 🎯 Concurrent Execution Examples
 
-# 2. Read source and target files
-head -20 00_draft-initial/source.md       # Preview source content
-ls -la 10_draft-merged/target/             # Check target directory structure
+### ✅ CORRECT WORKFLOW: MCP Coordinates, Claude Code Executes
 
-# 3. Archive source document after integration
-mv 00_draft-initial/source.md ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_source.md
+```javascript
+// Step 1: MCP tools set up coordination (optional, for complex tasks)
+[Single Message - Coordination Setup]:
+  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
+  mcp__claude-flow__agent_spawn { type: "researcher" }
+  mcp__claude-flow__agent_spawn { type: "coder" }
+  mcp__claude-flow__agent_spawn { type: "tester" }
+
+// Step 2: Claude Code Task tool spawns ACTUAL agents that do the work
+[Single Message - Parallel Agent Execution]:
+  // Claude Code's Task tool spawns real agents concurrently
+  Task("Research agent", "Analyze API requirements and best practices. Check memory for prior decisions.", "researcher")
+  Task("Coder agent", "Implement REST endpoints with authentication. Coordinate via hooks.", "coder")
+  Task("Database agent", "Design and implement database schema. Store decisions in memory.", "code-analyzer")
+  Task("Tester agent", "Create comprehensive test suite with 90% coverage.", "tester")
+  Task("Reviewer agent", "Review code quality and security. Document findings.", "reviewer")
+  
+  // Batch ALL todos in ONE call
+  TodoWrite { todos: [
+    {id: "1", content: "Research API patterns", status: "in_progress", priority: "high"},
+    {id: "2", content: "Design database schema", status: "in_progress", priority: "high"},
+    {id: "3", content: "Implement authentication", status: "pending", priority: "high"},
+    {id: "4", content: "Build REST endpoints", status: "pending", priority: "high"},
+    {id: "5", content: "Write unit tests", status: "pending", priority: "medium"},
+    {id: "6", content: "Integration tests", status: "pending", priority: "medium"},
+    {id: "7", content: "API documentation", status: "pending", priority: "low"},
+    {id: "8", content: "Performance optimization", status: "pending", priority: "low"}
+  ]}
+  
+  // Parallel file operations
+  Bash "mkdir -p app/{src,tests,docs,config}"
+  Write "app/package.json"
+  Write "app/src/server.js"
+  Write "app/tests/server.test.js"
+  Write "app/docs/API.md"
 ```
 
-## Platform-Specific MCP Configuration
-
-### Platform Differences
-- **Claude Code CLI & Desktop**: Use `"mcpServers": {}` as root key
-- **VS Code MCP Extension**: Uses `"servers": {}` as root key
-- **Config Paths**: `~/.claude.json` (CLI), platform-specific for VS Code/Desktop
-- **Credentials**: Keychain (macOS), Credential Manager (Windows), environment variables (Linux)
-
-### Platform Auto-Detection
-The `mcp_manager.py` tool operates on **one platform at a time**:
-- **Auto-detection**: `--status` shows all platforms, tool auto-selects first available
-- **Explicit targeting**: `--platform <name>` (claude-code, vscode, claude-desktop)
-- **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
-
-## Multi-Implementation Architecture
-
-This repository supports multiple implementation approaches for the same task:
-
-### TODO_FOR Files Pattern
-```
-TODO_FOR_feat-{issue}-{task}-{method}.md
+### ❌ WRONG (Multiple Messages):
+```javascript
+Message 1: mcp__claude-flow__swarm_init
+Message 2: Task("agent 1")
+Message 3: TodoWrite { todos: [single todo] }
+Message 4: Write "file.js"
+// This breaks parallel coordination!
 ```
 
-Example for issue #12:
-- `TODO_FOR_feat-12-integrate-workflow-secrets.md` (Speckit method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-claude.md` (Claude method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md` (BMAD method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-flow.md` (Flow method)
+## Performance Benefits
 
-### Worktree Implementation Pattern
-```bash
-# Work completed in separate worktrees
-../stharrold-templates.worktrees/{worktree-name}/
-```
+- **84.8% SWE-Bench solve rate**
+- **32.3% token reduction**
+- **2.8-4.4x speed improvement**
+- **27+ neural models**
 
-Each implementation method uses dedicated worktrees to avoid conflicts.
+## Hooks Integration
 
-## Core Classes and Functions
+### Pre-Operation
+- Auto-assign agents by file type
+- Validate commands for safety
+- Prepare resources automatically
+- Optimize topology by complexity
+- Cache searches
 
-### mcp_manager.py Architecture
-- `MCPConfig`: Main configuration management class with platform-specific logic
-  - `__init__(platform: str, config_path: Optional[Path] = None)`: Initialize for specific platform
-  - `add_server()`, `remove_server()`: Interactive server management
-  - `disable_server()`, `enable_server()`: DISABLED_ prefix management
-- `select_target_platform()`: Auto-detection algorithm returning first available platform
-- `validate_credentials()`: Cross-platform credential validation for common tokens
-- `deduplicate_servers()`: Intelligent duplicate removal preserving DISABLED_ versions
+### Post-Operation
+- Auto-format code
+- Train neural patterns
+- Update memory
+- Analyze performance
+- Track token usage
 
-### Standard Python Import Pattern
-```python
-import mcp_manager
-# Initialize: config = mcp_manager.MCPConfig('claude-code')
-# Auto-detect: platform = mcp_manager.select_target_platform()
-# Validate: results = mcp_manager.validate_credentials()
-```
+### Session Management
+- Generate summaries
+- Persist state
+- Track metrics
+- Restore context
+- Export workflows
 
-## File Size and Context Constraints
+## Advanced Features (v2.0.0)
 
-- All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext` for `ARCHIVED/`
-- YAML frontmatter tracks version history and cross-references in modular guides
+- 🚀 Automatic Topology Selection
+- ⚡ Parallel Execution (2.8-4.4x speed)
+- 🧠 Neural Training
+- 📊 Bottleneck Analysis
+- 🤖 Smart Auto-Spawning
+- 🛡️ Self-Healing Workflows
+- 💾 Cross-Session Memory
+- 🔗 GitHub Integration
 
-## Git Workflow Conventions
+## Integration Tips
 
-### Branch Naming
-- `feat/` - New features and enhancements
-- `fix/` - Bug fixes
-- `docs/` - Documentation changes
-- `chore/` - Maintenance, dependencies, tooling
+1. Start with basic swarm init
+2. Scale agents gradually
+3. Use memory for context
+4. Monitor progress regularly
+5. Train patterns from success
+6. Enable hooks automation
+7. Use GitHub tools first
 
-### Default Branch
-- Work on `contrib/stharrold` branch for active development
-- Create PRs to `develop` or `main` as appropriate
+## Support
 
-### Commit Message Format
-```bash
-git commit -m "feat: descriptive message including issue reference
+- Documentation: https://github.com/ruvnet/claude-flow
+- Issues: https://github.com/ruvnet/claude-flow/issues
+- Flow-Nexus Platform: https://flow-nexus.ruv.io (registration required for cloud features)
 
-Closes #123
+---
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+Remember: **Claude Flow coordinates, Claude Code creates!**
 
-Co-Authored-By: Claude <noreply@anthropic.com>"
-```
-
-## Integration Priority System
-
-Current priorities (from TODO.md):
-1. **Completed**: Issue #12 (security workflow integration) - Multiple implementations ✅
-2. **High Priority**: Issue #19 (state management integration) - Next priority
-3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
-4. **Medium Priority**: Document integrations (#13-18, #21)
-5. **Infrastructure**: Testing and monitoring setup (#8-11)
-
-### BMAD-Specific Workflows
-- Use `/BMad:agents:pm` for roadmap planning and prioritization
-- Use `/BMad:agents:analyst` for requirements analysis on new features
-- Use `/BMad:tasks:create-next-story` for implementing TODO items
-
-## Common Issues & Solutions
-
-### MCP Manager Issues
-- **Permission errors**: Run `chmod +x mcp_manager.py` or use `python3 mcp_manager.py`
-- **Platform not found**: Use `--status` to see available platforms
-- **Auto-detection issues**: Explicitly specify `--platform <name>`
-
-### BMAD Framework Issues
-- **Agent commands not found**: Ensure you're using Claude Code CLI with `/BMad:` prefix
-- **Agent not responding correctly**: Check `.bmad-core/core-config.yaml` for configuration
-- **Task execution fails**: Verify task dependencies in `.bmad-core/tasks/` directory
-- **Missing BMAD files**: Run `ls .bmad-core/` to verify installation integrity
-
-### Python Development Issues
-- **Import errors**: Use `/usr/bin/python3` for system Python
-- **Configuration not found**: Check platform-specific paths with `--status`
-
-## Critical Guidelines
-
-- **ALWAYS prefer editing existing files** over creating new ones
-- **NEVER proactively create documentation files** unless explicitly requested
-- Follow the document lifecycle: Research → Integration → Archive
-- Maintain bidirectional references between TODO.md and TODO_FOR files
-- Use platform-specific MCP management approach (no cross-platform sync)
-- **Use BMAD agents for complex tasks**: Activate appropriate personas for specialized work
-- **Leverage BMAD task templates**: Use existing tasks in `.bmad-core/tasks/` for consistency
-- **Document BMAD workflows**: When using BMAD agents, document the persona and reasoning
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+Never save working files, text/mds and tests to the root folder.
