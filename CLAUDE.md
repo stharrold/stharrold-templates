@@ -2,31 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-14)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and Trail of Bits vulnerability mitigations. BMAD framework integrated for agentic development workflows with full agent persona support and advanced task orchestration.
+**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches.
 
 ## Repository Architecture
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop, plus BMAD framework integration for advanced agentic development.
+This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
 
 **Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
 
-## BMAD Framework Integration
+## Multi-Implementation Architecture
 
-This repository includes the **BMAD-METHOD™ (Breakthrough Method of Agile AI-Driven Development)** framework for advanced agentic development workflows. BMAD provides specialized AI agent personas, task orchestration, and comprehensive development templates.
+This repository supports parallel development using multiple implementation approaches through git worktrees:
 
-### BMAD Agent Personas Available
-- **Architect** (`/BMad:agents:architect`) - System design, architecture documents, technology selection
-- **Analyst** (`/BMad:agents:analyst`) - Requirements analysis, research, stakeholder interviews
-- **PM** (`/BMad:agents:pm`) - Project management, roadmaps, resource planning
-- **Dev** (`/BMad:agents:dev`) - Code implementation, technical execution
-- **QA** (`/BMad:agents:qa`) - Quality assurance, testing strategies, validation
-- **SM** (`/BMad:agents:sm`) - Scrum Master, story creation, sprint management
+### Implementation Methods Available
+- **Speckit** - Traditional systematic approach
+- **Claude** - AI-assisted development patterns
+- **BMAD** - Framework-driven methodology
+- **Claude2** - Multi-guide content distribution
+- **Flow** - Workflow automation approach
 
-### BMAD Configuration
-- **Core Config**: `.bmad-core/core-config.yaml`
-- **Agent Directory**: `.bmad-core/agents/`
-- **Task Templates**: `.bmad-core/tasks/`
-- **Claude Commands**: `.claude/commands/BMad/`
+### Worktree Structure
+- **Main repo**: `/Users/stharrold/Documents/GitHub/stharrold-templates/`
+- **Worktrees**: `../stharrold-templates.worktrees/{feature-branch}/`
+- **Pattern**: Each implementation method uses dedicated worktrees to avoid conflicts
 
 ## Core Architecture
 
@@ -45,7 +43,7 @@ initial/    merged/     (UTC timestamps)
 1. **TODO-Driven Integration Pipeline:**
    - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
    - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
-   - Multiple implementation approaches supported: Speckit, Claude, BMAD, and Flow
+   - Five implementation approaches supported: Speckit, Claude, BMAD, Claude2, and Flow
    - Each plan maps source files to target locations with size constraints
 
 2. **Platform-Specific MCP Management:**
@@ -59,21 +57,22 @@ initial/    merged/     (UTC timestamps)
 
 ## Essential Development Commands
 
-### BMAD Agent Commands
+### Git Worktree Management
 ```bash
-# Activate BMAD agent personas (use in Claude Code CLI)
-/BMad:agents:architect     # System architecture and design
-/BMad:agents:analyst       # Requirements and research
-/BMad:agents:pm           # Project management
-/BMad:agents:dev          # Development and implementation
-/BMad:agents:qa           # Quality assurance and testing
-/BMad:agents:sm           # Scrum Master and story management
+# List all worktrees
+git worktree list
 
-# BMAD task execution examples
-/BMad:tasks:document-project           # Document existing project architecture
-/BMad:tasks:create-doc                # Create documentation with templates
-/BMad:tasks:create-next-story         # Generate development stories
-/BMad:tasks:review-story              # Review and validate stories
+# Create new worktree for feature implementation
+git worktree add ../stharrold-templates.worktrees/{feature-name} -b {branch-name}
+
+# Switch to worktree
+cd ../stharrold-templates.worktrees/{feature-name}
+
+# Remove completed worktree
+git worktree remove ../stharrold-templates.worktrees/{feature-name}
+
+# Prune deleted worktrees
+git worktree prune
 ```
 
 ### MCP Manager Operations
@@ -112,16 +111,16 @@ claude mcp list                                   # List configured servers
 
 ### Quality Assurance
 ```bash
-# Python code quality (when available)
-python3 -m pylint mcp_manager.py                        # Lint main Python files
-python3 -m flake8 mcp_manager.py                       # Style checking
+# Codacy analysis (configured in repository)
+./.codacy/cli.sh analyze {file_path}                   # Analyze specific file
+./.codacy/cli.sh analyze 10_draft-merged/              # Analyze directory
 
-# Manual validation
+# Python validation
 python3 test_mcp_deduplication.py                      # Run deduplication tests
 python3 -c "import mcp_manager; print('Import successful')"  # Module validation
 
-# BMAD quality assurance
-/BMad:agents:qa                                         # Activate QA agent for review
+# File size validation (30KB limit for modular guides)
+wc -c 10_draft-merged/**/*.md                          # Check file sizes
 ```
 
 ### Document Integration Workflow
@@ -165,15 +164,22 @@ Example for issue #12:
 - `TODO_FOR_feat-12-integrate-workflow-secrets.md` (Speckit method)
 - `TODO_FOR_feat-12-integrate-workflow-secrets-claude.md` (Claude method)
 - `TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md` (BMAD method)
+- `TODO_FOR_feat-12-integrate-workflow-secrets-claude2.md` (Claude2 multi-guide method)
 - `TODO_FOR_feat-12-integrate-workflow-secrets-flow.md` (Flow method)
 
-### Worktree Implementation Pattern
+### Active Worktrees (Current)
 ```bash
-# Work completed in separate worktrees
-../stharrold-templates.worktrees/{worktree-name}/
+# Main repository
+/Users/stharrold/Documents/GitHub/stharrold-templates   [contrib/stharrold]
+
+# Implementation worktrees
+../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets         [Speckit]
+../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad    [BMAD]
+../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude  [Claude]
+../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow    [Flow]
 ```
 
-Each implementation method uses dedicated worktrees to avoid conflicts.
+Each implementation method uses dedicated worktrees to avoid conflicts and enable parallel development.
 
 ## Core Classes and Functions
 
@@ -226,16 +232,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ## Integration Priority System
 
 Current priorities (from TODO.md):
-1. **Completed**: Issue #12 (security workflow integration) - Multiple implementations ✅
+1. **In Progress**: Issue #12 (security workflow integration) - Multiple implementations in worktrees
 2. **High Priority**: Issue #19 (state management integration) - Next priority
 3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
 4. **Medium Priority**: Document integrations (#13-18, #21)
 5. **Infrastructure**: Testing and monitoring setup (#8-11)
-
-### BMAD-Specific Workflows
-- Use `/BMad:agents:pm` for roadmap planning and prioritization
-- Use `/BMad:agents:analyst` for requirements analysis on new features
-- Use `/BMad:tasks:create-next-story` for implementing TODO items
 
 ## Common Issues & Solutions
 
@@ -244,11 +245,11 @@ Current priorities (from TODO.md):
 - **Platform not found**: Use `--status` to see available platforms
 - **Auto-detection issues**: Explicitly specify `--platform <name>`
 
-### BMAD Framework Issues
-- **Agent commands not found**: Ensure you're using Claude Code CLI with `/BMad:` prefix
-- **Agent not responding correctly**: Check `.bmad-core/core-config.yaml` for configuration
-- **Task execution fails**: Verify task dependencies in `.bmad-core/tasks/` directory
-- **Missing BMAD files**: Run `ls .bmad-core/` to verify installation integrity
+### Worktree Management Issues
+- **Worktree conflicts**: Use `git worktree list` to check active worktrees
+- **Branch conflicts**: Ensure each worktree uses unique branch names
+- **Disk space**: Worktrees create full working copies; monitor disk usage
+- **Sync issues**: Changes in one worktree don't automatically sync to others
 
 ### Python Development Issues
 - **Import errors**: Use `/usr/bin/python3` for system Python
@@ -261,6 +262,6 @@ Current priorities (from TODO.md):
 - Follow the document lifecycle: Research → Integration → Archive
 - Maintain bidirectional references between TODO.md and TODO_FOR files
 - Use platform-specific MCP management approach (no cross-platform sync)
-- **Use BMAD agents for complex tasks**: Activate appropriate personas for specialized work
-- **Leverage BMAD task templates**: Use existing tasks in `.bmad-core/tasks/` for consistency
-- **Document BMAD workflows**: When using BMAD agents, document the persona and reasoning
+- **Use appropriate implementation method**: Choose Speckit, Claude, BMAD, Claude2, or Flow based on task requirements
+- **Leverage worktrees for parallel work**: Create separate worktrees for different implementation approaches
+- **Document implementation decisions**: Record rationale for chosen implementation method in TODO_FOR files
