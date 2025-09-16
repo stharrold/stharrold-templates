@@ -8,7 +8,7 @@ related:
   - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
 changelog:
-  - 4.0: BREAKING CHANGE - Added MCP hybrid architecture, OAuth 2.1 authentication, and health monitoring
+  - 4.0: BREAKING CHANGE - Enhanced with resource-based credential sharing, production security patterns, and MCP tool ecosystem integration
   - 3.1: Previous version baseline
 ---
 
@@ -94,6 +94,196 @@ claude oauth validate --all-providers --health-check
 
 # Enterprise SSO integration
 claude oauth configure-sso --provider okta --domain company.okta.com
+```
+
+### Resource-Based Credential Sharing
+
+**Secure Credential Access Patterns:**
+
+MCP servers can expose stored credentials through the resource protocol, enabling controlled access with user consent:
+
+```javascript
+// Resource-based credential sharing implementation
+class SecureCredentialResource {
+  constructor() {
+    this.server = new MCPServer();
+    this.setupResourceHandlers();
+  }
+
+  setupResourceHandlers() {
+    // List available credential resources
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
+      const credentials = await this.getAvailableCredentials();
+
+      return {
+        resources: credentials.map((cred) => ({
+          uri: `credential://${cred.service}/${cred.account}`,
+          name: `${cred.service} - ${cred.account}`,
+          description: `Secure credential for ${cred.service}`,
+          mimeType: "application/json",
+          annotations: {
+            security_level: cred.classification,
+            last_rotated: cred.lastRotated,
+            expires_at: cred.expiresAt
+          }
+        }))
+      };
+    });
+
+    // Provide credential with user consent
+    this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      const credentialUri = request.params.uri;
+
+      // Parse credential URI
+      const match = credentialUri.match(/credential:\/\/(.*?)\/(.*?)$/);
+      if (!match) {
+        throw new Error('Invalid credential URI format');
+      }
+
+      const [, service, account] = match;
+
+      // Require explicit user consent
+      const consentGranted = await this.requestUserConsent({
+        service,
+        account,
+        requester: request.meta?.client_id || 'unknown',
+        scope: request.meta?.requested_scope || 'read'
+      });
+
+      if (!consentGranted) {
+        throw new Error('User consent required for credential access');
+      }
+
+      // Retrieve and return credential securely
+      const credential = await this.getCredential(service, account);
+
+      // Log access for audit trail
+      await this.logCredentialAccess({
+        service,
+        account,
+        requester: request.meta?.client_id,
+        timestamp: new Date().toISOString(),
+        access_granted: true
+      });
+
+      return {
+        contents: [{
+          uri: credentialUri,
+          mimeType: "application/json",
+          text: JSON.stringify({
+            token: credential.token,
+            expires_at: credential.expiresAt,
+            scopes: credential.scopes
+          })
+        }]
+      };
+    });
+  }
+
+  async requestUserConsent({ service, account, requester, scope }) {
+    // Zero-trust consent mechanism
+    console.log(`\n🔒 Credential Access Request:`);
+    console.log(`Service: ${service}`);
+    console.log(`Account: ${account}`);
+    console.log(`Requester: ${requester}`);
+    console.log(`Scope: ${scope}`);
+
+    const answer = await prompt('Grant access? (y/N): ');
+    return answer.toLowerCase() === 'y';
+  }
+
+  async logCredentialAccess(accessEvent) {
+    // Comprehensive audit logging
+    const auditEntry = {
+      event_type: 'credential_shared',
+      ...accessEvent,
+      ip_address: this.getClientIP(),
+      user_agent: this.getClientUserAgent()
+    };
+
+    // Send to audit system
+    await this.auditLogger.log(auditEntry);
+  }
+}
+```
+
+### Production Security Implementation
+
+**Enterprise MCP Security Architecture:**
+
+```yaml
+# Production MCP server security configuration
+production_security:
+  authentication:
+    oauth2_1:
+      mandatory_pkce: true
+      resource_indicators: true
+      dynamic_client_registration: true
+      token_audience_validation: true
+
+  network_security:
+    mutual_tls:
+      enabled: true
+      certificate_pinning: true
+      ca_bundle: "/etc/ssl/certs/mcp-ca.pem"
+
+    ip_allowlist:
+      - "10.0.0.0/8"      # Internal corporate network
+      - "192.168.0.0/16"  # Private network ranges
+      - "172.16.0.0/12"   # Additional private ranges
+
+  container_hardening:
+    read_only_root_fs: true
+    non_root_user: true
+    user_id: 1001
+    capabilities_drop: ["ALL"]
+    capabilities_add: ["NET_BIND_SERVICE"]
+
+  monitoring:
+    audit_logging:
+      level: "detailed"
+      destination: "syslog://audit.company.com:514"
+      format: "json"
+
+    anomaly_detection:
+      enabled: true
+      ml_model: "/etc/mcp/anomaly-model.joblib"
+      alert_threshold: 0.95
+```
+
+**Network Isolation with Service Mesh:**
+
+```yaml
+# Istio service mesh configuration for MCP servers
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mcp-server-mtls
+  namespace: mcp-system
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mcp-server-access
+  namespace: mcp-system
+spec:
+  selector:
+    matchLabels:
+      app: mcp-server
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/claude-code/sa/claude-client"]
+  - to:
+    - operation:
+        methods: ["POST", "GET"]
+        paths: ["/mcp/*"]
+  - when:
+    - key: source.ip
+      values: ["10.0.0.0/8"]
 ```
 
 ### Health Monitoring Endpoints

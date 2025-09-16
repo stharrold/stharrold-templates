@@ -1,7 +1,7 @@
 ---
 title: Windows Credential Manager Setup
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -17,6 +17,7 @@ related:
   - ./23_enterprise-sso.md
   - ../10_mcp/12_servers.md
 changelog:
+  - Enhanced with Windows DPAPI technical details and native API integration patterns
   - Added project template integration patterns
   - Enhanced with PowerShell profile management
   - Improved cross-platform compatibility
@@ -28,12 +29,81 @@ Secure credential storage and management using Windows Credential Manager for MC
 
 ## Overview
 
-Windows Credential Manager provides enterprise-grade credential storage on Windows systems. This approach ensures:
+Windows Credential Manager provides enterprise-grade credential storage through the Data Protection API (DPAPI) with per-user encryption contexts and Hardware-supported Virtualization-based Code Integrity (HVCI) protection on Windows 10/11. This approach ensures:
 
-- **OS-level encryption** using Windows Data Protection API (DPAPI)
-- **User authentication** integrated with Windows logon
-- **PowerShell integration** with environment variables
-- **Enterprise domain** compatibility for SSO environments
+- **OS-level encryption** using DPAPI with per-user encryption contexts
+- **User authentication** integrated with Windows logon and domain security
+- **PowerShell integration** with environment variables and enterprise policies
+- **Enterprise domain** compatibility for SSO environments and Group Policy management
+- **Hardware security** through HVCI protection (Windows 10/11)
+
+### DPAPI Architecture & Security
+
+The Windows Data Protection API provides transparent encryption/decryption with these characteristics:
+
+- **Per-User Encryption**: Each user account has unique encryption keys derived from logon credentials
+- **Transparent Operation**: Automatic encryption on write, decryption on read without user intervention
+- **Machine Binding**: Credentials tied to specific machine and user account combinations
+- **Enterprise Integration**: Domain-roaming profiles support credential synchronization
+- **HVCI Enhancement**: Windows 10/11 provide hardware-backed code integrity verification
+
+### Native API Integration
+
+For programmatic access, Windows provides these core credential management APIs:
+
+- **CredWrite()**: Store credentials with specified persistence scope
+- **CredRead()**: Retrieve stored credentials for authenticated user
+- **CredDelete()**: Remove credentials permanently
+- **CredEnumerate()**: List available credentials for current user
+
+**Target Credential Type**: MCP servers should use `CRED_TYPE_GENERIC` with `CRED_PERSIST_LOCAL_MACHINE` persistence for service-level storage, ensuring credentials survive user session changes while maintaining security isolation.
+
+## Cross-Platform Unification
+
+### Keytar Library Integration
+
+Just like macOS, Windows benefits from the **keytar** library (v7.9.0) for cross-platform credential management abstraction:
+
+```javascript
+// Windows-specific keytar implementation uses Credential Manager
+const keytar = require('keytar');
+
+class WindowsCredentialManager {
+  async storeCredential(service, account, password) {
+    // Maps to CredWrite() via keytar
+    return await keytar.setPassword(service, account, password);
+  }
+
+  async getCredential(service, account) {
+    // Maps to CredRead() via keytar
+    return await keytar.getPassword(service, account);
+  }
+
+  async deleteCredential(service, account) {
+    // Maps to CredDelete() via keytar
+    return await keytar.deletePassword(service, account);
+  }
+}
+```
+
+### Alternative Integration Options
+
+**For Node.js MCP Servers**: Use the **wincredmgr** npm package for direct Windows Credential Manager access without Electron dependencies:
+
+```javascript
+const wincred = require('wincredmgr');
+
+// Store credential
+wincred.setCredential({
+  targetName: 'MCP_GITHUB_TOKEN',
+  userName: 'token',
+  credential: process.env.GITHUB_TOKEN,
+  persist: 'local_machine'
+});
+
+// Retrieve credential
+const stored = wincred.getCredential('MCP_GITHUB_TOKEN');
+```
 
 ## Prerequisites
 
