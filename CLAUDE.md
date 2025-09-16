@@ -168,6 +168,26 @@ mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 .specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
 ```
 
+### Testing & Validation
+```bash
+# Documentation validation tests
+./test_file_size.sh              # Verify 30KB constraints
+./test_cross_references.sh       # Check internal links
+./test_content_duplication.sh    # Detect duplicate content
+./test_command_syntax.sh         # Validate bash commands
+./test_yaml_structure.sh         # Check YAML frontmatter
+./validate_documentation.sh      # Comprehensive validation
+
+# Core functionality tests
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
+
+# Module verification
+python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
+
+# MCP server connectivity (after setup)
+claude mcp list                                   # List configured servers
+```
+
 ### Quality Assurance
 ```bash
 # Codacy analysis (configured in repository)
@@ -197,7 +217,6 @@ mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
 ```
 
 ## Platform-Specific MCP Configuration
-
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
 - ARCHIVED/ contains only compressed date-based archives (YYYYMMDD.tar.gz)
