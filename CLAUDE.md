@@ -109,20 +109,18 @@ git worktree add ../stharrold-templates.worktrees/{feature-name} -b {branch-name
 # Switch to worktree
 cd ../stharrold-templates.worktrees/{feature-name}
 
-<<<<<<< HEAD
+# Remove completed worktree
+git worktree remove ../stharrold-templates.worktrees/{feature-name}
+
+# Prune deleted worktrees
+git worktree prune
+
 # GitHub Issue synchronization
 gh issue comment <number> --body "completion summary"
 gh issue close <number> --comment "resolution notes"
 
 # Archive files with UTC timestamp
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-=======
-# Remove completed worktree
-git worktree remove ../stharrold-templates.worktrees/{feature-name}
-
-# Prune deleted worktrees
-git worktree prune
->>>>>>> 9d876d4c4bdceaca2fad2814380117b8ee61b8a9
 ```
 
 ### MCP Manager Operations
@@ -147,7 +145,6 @@ git worktree prune
 /usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
 ```
 
-<<<<<<< HEAD
 ### Feature Specification Workflow
 ```bash
 # .specify workflow commands
@@ -166,27 +163,14 @@ git worktree prune
 ./test_yaml_structure.sh         # Check YAML frontmatter
 ./validate_documentation.sh      # Comprehensive validation
 
-# Python testing
-/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
-/usr/bin/python3 mcp_manager.py --validate-all     # Validate all configurations
-python3 -c "import mcp_manager; mcp_manager.validate_credentials()"  # Test credentials
-=======
-### Testing and Validation
-```bash
 # Core functionality tests
-/usr/bin/python3 test_mcp_deduplication.py       # Test deduplication functionality
->>>>>>> 9d876d4c4bdceaca2fad2814380117b8ee61b8a9
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
 
 # Module verification
 python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
 
-<<<<<<< HEAD
-# Dependency management with UV (system default)
-uv sync && uv add package_name            # Sync dependencies and add new packages
-=======
 # MCP server connectivity (after setup)
 claude mcp list                                   # List configured servers
->>>>>>> 9d876d4c4bdceaca2fad2814380117b8ee61b8a9
 ```
 
 ### Quality Assurance
@@ -217,18 +201,11 @@ ls -la 10_draft-merged/target/             # Check target directory structure
 mv 00_draft-initial/source.md ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_source.md
 ```
 
-<<<<<<< HEAD
-## Critical Workflow Rules
-
+## Platform-Specific MCP Configuration
 
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
 - Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext` for `ARCHIVED/`
-
-## MCP Server Configuration Architecture
-=======
-## Platform-Specific MCP Configuration
->>>>>>> 9d876d4c4bdceaca2fad2814380117b8ee61b8a9
 
 ### Platform Differences
 - **Claude Code CLI & Desktop**: Use `"mcpServers": {}` as root key
@@ -246,15 +223,10 @@ The `mcp_manager.py` tool operates on **one platform at a time**:
 
 This repository supports multiple implementation approaches for the same task:
 
-<<<<<<< HEAD
-Complete details in `.github/instructions/codacy.instructions.md`
-
-=======
 ### TODO_FOR Files Pattern
 ```
 TODO_FOR_feat-{issue}-{task}-{method}.md
 ```
->>>>>>> 9d876d4c4bdceaca2fad2814380117b8ee61b8a9
 
 Example for issue #12:
 - `TODO_FOR_feat-12-integrate-workflow-secrets.md` (Speckit method)
