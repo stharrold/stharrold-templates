@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches. Integrated practical workflow secrets with step-by-step credential management examples, platform-specific verification commands, and error handling patterns via Speckit implementation.
+**Latest Update (2025-09-15)**: Completed Issue #12 security workflow integration, cleaned ARCHIVED directory structure to contain only 10 compressed date-based archives, and updated documentation to reflect current repository state. Enhanced Quick Start section and streamlined duplicate content sections.
 
 ## Repository Architecture
 
@@ -12,19 +12,7 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 ## Multi-Implementation Architecture
 
-This repository supports parallel development using multiple implementation approaches through git worktrees:
-
-### Implementation Methods Available
-- **Speckit** - Traditional systematic approach
-- **Claude** - AI-assisted development patterns
-- **BMAD** - Framework-driven methodology
-- **Claude2** - Multi-guide content distribution
-- **Flow** - Workflow automation approach
-
-### Worktree Structure
-- **Main repo**: `/Users/stharrold/Documents/GitHub/stharrold-templates/`
-- **Worktrees**: `../stharrold-templates.worktrees/{feature-branch}/`
-- **Pattern**: Each implementation method uses dedicated worktrees to avoid conflicts
+This repository supports parallel development using multiple implementation approaches through git worktrees when needed for complex tasks with multiple viable solutions.
 
 ## Core Architecture
 
@@ -38,13 +26,17 @@ Research → Integration → Archive
 initial/    merged/     (UTC timestamps)
 ```
 
+**Lifecycle Stages:**
+- **00_draft-initial/**: New content awaiting review and integration
+- **10_draft-merged/**: Production-ready content (≤30KB per file for AI context)
+- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz) preserving completed work
+
 ### Key architectural relationships:
 
 1. **TODO-Driven Integration Pipeline:**
    - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
-   - `TODO_FOR_*.md` files contain detailed execution plans for high-priority integrations
-   - Five implementation approaches supported: Speckit, Claude, BMAD, Claude2, and Flow
-   - Each plan maps source files to target locations with size constraints
+   - Completed tasks are archived to ARCHIVED/ as compressed archives
+   - Active integration status visible in TODO.md with clear priority ordering
 
 2. **Platform-Specific MCP Management:**
    - `mcp_manager.py` handles 3 platforms: Claude Code CLI, VS Code MCP, Claude Desktop
@@ -54,6 +46,36 @@ initial/    merged/     (UTC timestamps)
 3. **Modular Guide Hierarchy:**
    - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
    - 30KB file size limit enforced across all modular guides for AI context optimization
+
+## Dependencies
+
+### Core Requirements
+- **Python 3.x**: Uses system Python at `/usr/bin/python3`
+- **No external packages**: Uses Python standard library only
+- **Codacy CLI**: For code quality analysis (pre-configured in `./.codacy/cli.sh`)
+- **Git worktrees**: For parallel development workflows
+
+### Optional Tools
+- **GitHub CLI (`gh`)**: For PR and issue management
+- **Various MCP servers**: Installed via npm/pip as needed
+
+## Quick Start
+
+Most common workflows:
+
+```bash
+# Check MCP server status across all platforms
+/usr/bin/python3 mcp_manager.py --status
+
+# Add a new MCP server (interactive)
+/usr/bin/python3 mcp_manager.py --add
+
+# Validate documentation before committing changes
+./validate_documentation.sh
+
+# Create new feature worktree
+git worktree add ../stharrold-templates.worktrees/{feature-name} -b feat/{feature-name}
+```
 
 ## Essential Development Commands
 
@@ -76,6 +98,23 @@ git worktree add ../worktrees/feat/12-task -b feat/12-task
 git commit -m "feat: descriptive message"
 ```
 
+### Testing & Validation
+```bash
+# Documentation validation tests (run before committing documentation changes)
+./test_file_size.sh              # Verify 30KB constraints
+./test_cross_references.sh       # Check internal links
+./test_content_duplication.sh    # Detect duplicate content
+./test_command_syntax.sh         # Validate bash commands
+./test_yaml_structure.sh         # Check YAML frontmatter
+./validate_documentation.sh      # Comprehensive validation
+
+# Core functionality tests
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
+
+# Module verification
+python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
+```
+
 ### MCP Manager Operations
 ```bash
 # System status and platform detection
@@ -93,9 +132,9 @@ git commit -m "feat: descriptive message"
 /usr/bin/python3 mcp_manager.py --platform claude-desktop --remove
 
 # Maintenance operations
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates
-/usr/bin/python3 mcp_manager.py --backup-only    # Create backups
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
+/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates (run after seeing duplicate servers)
+/usr/bin/python3 mcp_manager.py --backup-only    # Create backups without changes
+/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials (run before adding auth-required servers)
 ```
 
 ### Git Worktree Management
@@ -115,15 +154,17 @@ git worktree remove ../stharrold-templates.worktrees/{feature-name}
 # Prune deleted worktrees
 git worktree prune
 
-# Archive files with UTC timestamp
+# GitHub Issue synchronization
+gh issue comment <number> --body "completion summary"
+gh issue close <number> --comment "resolution notes"
+
+# Archive completed task files
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ```
 
 ### Feature Specification Workflow
 ```bash
-# .specify workflow commands
-.specify/scripts/bash/create-new-feature.sh    # Create new feature spec
-.specify/scripts/bash/setup-plan.sh            # Initialize implementation plan
+# .specify workflow commands (available when needed)
 .specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
 ```
 
@@ -171,53 +212,25 @@ cat TODO.md                               # Review integration priorities
 head -20 00_draft-initial/source.md       # Preview source content
 ls -la 10_draft-merged/target/             # Check target directory structure
 
-# 3. Archive source document after integration
-mv 00_draft-initial/source.md ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_source.md
+# 3. Archive completed task files (individual files get compressed into date-based archives)
+mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
 ```
 
 ## Platform-Specific MCP Configuration
+### File Size Constraints
+- All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
+- ARCHIVED/ contains only compressed date-based archives (YYYYMMDD.tar.gz)
+- Individual files archived with UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
 
 ### Platform Differences
 - **Claude Code CLI & Desktop**: Use `"mcpServers": {}` as root key
 - **VS Code MCP Extension**: Uses `"servers": {}` as root key
 - **Config Paths**: `~/.claude.json` (CLI), platform-specific for VS Code/Desktop
 - **Credentials**: Keychain (macOS), Credential Manager (Windows), environment variables (Linux)
-
-### Platform Auto-Detection
-The `mcp_manager.py` tool operates on **one platform at a time**:
 - **Auto-detection**: `--status` shows all platforms, tool auto-selects first available
 - **Explicit targeting**: `--platform <name>` (claude-code, vscode, claude-desktop)
 - **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
 
-## Multi-Implementation Architecture
-
-This repository supports multiple implementation approaches for the same task:
-
-### TODO_FOR Files Pattern
-```
-TODO_FOR_feat-{issue}-{task}-{method}.md
-```
-
-Example for issue #12:
-- `TODO_FOR_feat-12-integrate-workflow-secrets.md` (Speckit method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-claude.md` (Claude method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md` (BMAD method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-claude2.md` (Claude2 multi-guide method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-flow.md` (Flow method)
-
-### Active Worktrees (Current)
-```bash
-# Main repository
-/Users/stharrold/Documents/GitHub/stharrold-templates   [contrib/stharrold]
-
-# Implementation worktrees
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets         [Speckit]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad    [BMAD]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude  [Claude]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow    [Flow]
-```
-
-Each implementation method uses dedicated worktrees to avoid conflicts and enable parallel development.
 
 ## Core Classes and Functions
 
@@ -238,11 +251,6 @@ import mcp_manager
 # Validate: results = mcp_manager.validate_credentials()
 ```
 
-## File Size and Context Constraints
-
-- All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- Use UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext` for `ARCHIVED/`
-- YAML frontmatter tracks version history and cross-references in modular guides
 
 ## Git Workflow Conventions
 
@@ -252,9 +260,40 @@ import mcp_manager
 - `docs/` - Documentation changes
 - `chore/` - Maintenance, dependencies, tooling
 
-### Default Branch
-- Work on `contrib/stharrold` branch for active development
-- Create PRs to `develop` or `main` as appropriate
+### Git Flow Hierarchy
+
+**Branch Structure:**
+```
+main (production)
+  ↓
+develop (integration)
+  ↓
+contrib/stharrold (active development)
+  ↓
+feature worktrees (individual features)
+```
+
+**PR Merge Flow (reverse direction):**
+```
+Feature Worktree
+  ↓ PR targets
+contrib/stharrold (working branch)
+  ↓ PR targets
+develop (integration testing)
+  ↓ PR targets
+main (production release)
+```
+
+**Branch Purposes:**
+- **main**: Production-ready code, stable releases
+- **develop**: Integration branch for testing combined features
+- **contrib/stharrold**: Active development branch for ongoing work
+- **worktrees**: Feature-specific development branches
+
+**IMPORTANT**: Always create PRs to the branch your feature was derived from:
+- Feature worktrees → `contrib/stharrold`
+- contrib/stharrold → `develop` (when ready for integration)
+- develop → `main` (for production releases)
 
 ### Commit Message Format
 ```bash
@@ -270,11 +309,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ## Integration Priority System
 
 Current priorities (from TODO.md):
-1. **In Progress**: Issue #12 (security workflow integration) - Multiple implementations in worktrees
-2. **High Priority**: Issue #19 (state management integration) - Next priority
-3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
-4. **Medium Priority**: Document integrations (#13-18, #21)
-5. **Infrastructure**: Testing and monitoring setup (#8-11)
+1. **Next Priority**: Issue #19 (state management integration)
+2. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
+3. **Medium Priority**: Document integrations (#13-18, #21)
+4. **Infrastructure**: Testing and monitoring setup (#8-11)
+
+**Completed**: Issue #12 (security workflow integration) - archived in ARCHIVED/
 
 ## Common Issues & Solutions
 
@@ -284,10 +324,9 @@ Current priorities (from TODO.md):
 - **Auto-detection issues**: Explicitly specify `--platform <name>`
 
 ### Worktree Management Issues
-- **Worktree conflicts**: Use `git worktree list` to check active worktrees
-- **Branch conflicts**: Ensure each worktree uses unique branch names
-- **Disk space**: Worktrees create full working copies; monitor disk usage
-- **Sync issues**: Changes in one worktree don't automatically sync to others
+- **Current state**: No active worktrees (use `git worktree list` to verify)
+- **When needed**: Create worktrees for complex parallel implementations
+- **Cleanup**: Remove worktrees after PR merge to keep repository clean
 
 ### Python Development Issues
 - **Import errors**: Use `/usr/bin/python3` for system Python
@@ -297,9 +336,7 @@ Current priorities (from TODO.md):
 
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- Follow the document lifecycle: Research → Integration → Archive
-- Maintain bidirectional references between TODO.md and TODO_FOR files
+- Follow the document lifecycle: Research → Integration → Archive (compressed)
 - Use platform-specific MCP management approach (no cross-platform sync)
-- **Use appropriate implementation method**: Choose Speckit, Claude, BMAD, Claude2, or Flow based on task requirements
-- **Leverage worktrees for parallel work**: Create separate worktrees for different implementation approaches
-- **Document implementation decisions**: Record rationale for chosen implementation method in TODO_FOR files
+- Archive completed tasks to maintain clean repository state
+- Check TODO.md for current integration priorities
