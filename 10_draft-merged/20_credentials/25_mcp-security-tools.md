@@ -21,7 +21,7 @@ related:
   - ../10_mcp/11_setup.md
   - ../10_mcp/12_servers.md
 changelog:
-  - 1.2: Added advanced troubleshooting & recovery procedures, emergency credential access patterns, and automated health monitoring
+  - 1.2: Added Node.js keytar alternative for JavaScript applications, enhanced tool selection matrix, advanced troubleshooting & recovery procedures, emergency credential access patterns, and automated health monitoring
   - 1.1: Enhanced with practical workflow examples, platform-specific verification commands, and step-by-step credential management workflows
   - 1.0: Initial version with production-ready MCP security tool implementations
 ---
@@ -364,6 +364,37 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 CMD ["node", "server.js"]
 ```
+
+### Alternative: Node.js Keytar Integration
+
+**Overview:** For JavaScript/Node.js applications, keytar provides native credential management without Python dependencies.
+
+```javascript
+// Cross-platform credential management with keytar
+const keytar = require('keytar');
+
+async function getSecureCredential(service, account, envVar = null) {
+  try {
+    const credential = await keytar.getPassword(service, account);
+    if (credential) return credential;
+  } catch (error) {
+    console.warn(`Keytar failed: ${error.message}`);
+  }
+
+  // Fall back to environment variable
+  if (envVar && process.env[envVar]) {
+    console.warn(`Using environment variable ${envVar} as fallback`);
+    return process.env[envVar];
+  }
+
+  throw new Error(`No credential found for ${service}/${account}`);
+}
+
+// Usage in MCP server
+const githubToken = await getSecureCredential('github', 'token', 'GITHUB_TOKEN');
+```
+
+**Installation:** `npm install keytar` (requires build tools on some platforms)
 
 ### Auth0 MCP Server: Enterprise Reference Implementation
 
@@ -711,9 +742,20 @@ $ kwalletcli -f kdewallet -e github-token
 
 ```python
 import keyring
+
 # Test credential retrieval
-token = keyring.get_password("mcp-secrets", "github-token")
-print("✓ Found" if token else "✗ Not found")
+try:
+    token = keyring.get_password("mcp-secrets", "github-token")
+    if token:
+        print("✓ Credential found and accessible")
+        print(f"Token length: {len(token)} characters")
+    else:
+        print("✗ Credential not found")
+except Exception as e:
+    print(f"✗ Error accessing credential: {e}")
+
+# List available backends
+print("Available keyring backends:", keyring.backend.get_all_keyring())
 ```
 
 ## Tool Selection Guidelines
@@ -723,6 +765,7 @@ print("✓ Found" if token else "✗ Not found")
 | Tool | Cross-Platform | Enterprise SSO | OAuth 2.1 | Audit Logging | Container Ready |
 |------|---------------|----------------|-----------|---------------|-----------------|
 | **mcp-secrets-plugin** | ✅ | ❌ | ❌ | Basic | ✅ |
+| **Node.js keytar** | ✅ | ❌ | ❌ | Basic | ✅ |
 | **mcpauth** | ✅ | ✅ | ✅ | Comprehensive | ✅ |
 | **Auth0 MCP Server** | ✅ | ✅ | ✅ | Enterprise | ✅ |
 | **Claude Desktop DXT** | ✅ | ❌ | ❌ | Basic | ❌ |
