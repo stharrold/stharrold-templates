@@ -1,7 +1,7 @@
 ---
 title: Credentials Management Context
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ../CLAUDE.md
 template_version: 1.0
 project_template:
@@ -22,10 +22,12 @@ files:
   - 22_credential-manager-win.md
   - 23_enterprise-sso.md
   - 24_audit-compliance.md
+  - 25_mcp-security-tools.md
 changelog:
+  - Enhanced with production-ready MCP security tools and comprehensive implementation guides
   - Integrated CLAUDE.md project context template (v1.0)
   - Restructured from monolithic to hierarchical organization
-  - Split 18.8KB file into 4 focused modules under 30KB each
+  - Split 18.8KB file into 5 focused modules under 30KB each
   - Added template security patterns and maintenance workflows
 ---
 
@@ -47,7 +49,9 @@ Execute in recommended order for comprehensive security:
 
 1. **[21_keychain-macos.md](./21_keychain-macos.md)** - macOS Keychain credential storage and management
 2. **[22_credential-manager-win.md](./22_credential-manager-win.md)** - Windows Credential Manager setup and configuration
-3. **[23_enterprise-sso.md](./23_enterprise-sso.md)** - Enterprise authentication, SSO integration, and cost management
+3. **[23_enterprise-sso.md](./23_enterprise-sso.md)** - Enterprise authentication, SSO integration, OAuth 2.1 security, and cost management
+4. **[24_audit-compliance.md](./24_audit-compliance.md)** - Security auditing, compliance monitoring, and incident response
+5. **[25_mcp-security-tools.md](./25_mcp-security-tools.md)** - Production-ready security tools and ecosystem integration
 4. **[24_audit-compliance.md](./24_audit-compliance.md)** - Security auditing, compliance, and vulnerability management
 
 ## MCP Server Credential Requirements
