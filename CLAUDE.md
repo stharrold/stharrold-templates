@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches. Integrated practical workflow secrets with step-by-step credential management examples, platform-specific verification commands, and error handling patterns via Speckit implementation.
+**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches. Added comprehensive testing commands, clarified PR workflow targeting `contrib/stharrold`, updated worktree management guidance, and streamlined duplicate content sections.
 
 ## Repository Architecture
 
@@ -55,6 +55,18 @@ initial/    merged/     (UTC timestamps)
    - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
    - 30KB file size limit enforced across all modular guides for AI context optimization
 
+## Dependencies
+
+### Core Requirements
+- **Python 3.x**: Uses system Python at `/usr/bin/python3`
+- **No external packages**: Uses Python standard library only
+- **Codacy CLI**: For code quality analysis (pre-configured in `./.codacy/cli.sh`)
+- **Git worktrees**: For parallel development workflows
+
+### Optional Tools
+- **GitHub CLI (`gh`)**: For PR and issue management
+- **Various MCP servers**: Installed via npm/pip as needed
+
 ## Essential Development Commands
 
 ### Most Frequently Used
@@ -74,6 +86,23 @@ initial/    merged/     (UTC timestamps)
 # Git workflow with unified conventions
 git worktree add ../worktrees/feat/12-task -b feat/12-task
 git commit -m "feat: descriptive message"
+```
+
+### Testing & Validation
+```bash
+# Documentation validation tests
+./test_file_size.sh              # Verify 30KB constraints
+./test_cross_references.sh       # Check internal links
+./test_content_duplication.sh    # Detect duplicate content
+./test_command_syntax.sh         # Validate bash commands
+./test_yaml_structure.sh         # Check YAML frontmatter
+./validate_documentation.sh      # Comprehensive validation
+
+# Core functionality tests
+/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
+
+# Module verification
+python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
 ```
 
 ### MCP Manager Operations
@@ -121,28 +150,6 @@ gh issue close <number> --comment "resolution notes"
 
 # Archive files with UTC timestamp
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-```
-
-### MCP Manager Operations
-```bash
-# System status and platform detection
-/usr/bin/python3 mcp_manager.py --status
-
-# Interactive MCP management (auto-detects platform)
-/usr/bin/python3 mcp_manager.py --add            # Add server
-/usr/bin/python3 mcp_manager.py --remove         # Remove server
-/usr/bin/python3 mcp_manager.py --disable        # Disable servers (DISABLED_ prefix)
-/usr/bin/python3 mcp_manager.py --enable         # Re-enable servers
-
-# Platform-specific operations
-/usr/bin/python3 mcp_manager.py --platform claude-code --list
-/usr/bin/python3 mcp_manager.py --platform vscode --add
-/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove
-
-# Maintenance operations
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates
-/usr/bin/python3 mcp_manager.py --backup-only    # Create backups
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
 ```
 
 ### Feature Specification Workflow
@@ -237,14 +244,17 @@ Example for issue #12:
 
 ### Active Worktrees (Current)
 ```bash
-# Main repository
-/Users/stharrold/Documents/GitHub/stharrold-templates   [contrib/stharrold]
+# Check current active worktrees
+git worktree list
 
-# Implementation worktrees
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets         [Speckit]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad    [BMAD]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-claude  [Claude]
-../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow    [Flow]
+# Pattern for new worktrees
+../stharrold-templates.worktrees/{feature-branch}/
+
+# Create new worktree
+git worktree add ../stharrold-templates.worktrees/{feature-name} -b {branch-name}
+
+# Remove completed worktree
+git worktree remove {worktree-path}
 ```
 
 Each implementation method uses dedicated worktrees to avoid conflicts and enable parallel development.
@@ -284,7 +294,8 @@ import mcp_manager
 
 ### Default Branch
 - Work on `contrib/stharrold` branch for active development
-- Create PRs to `develop` or `main` as appropriate
+- **IMPORTANT**: Create PRs to `contrib/stharrold` (working branch), not `main`
+- PRs should target the branch they were derived from
 
 ### Commit Message Format
 ```bash
