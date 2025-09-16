@@ -292,10 +292,40 @@ import mcp_manager
 - `docs/` - Documentation changes
 - `chore/` - Maintenance, dependencies, tooling
 
-### Default Branch
-- Work on `contrib/stharrold` branch for active development
-- **IMPORTANT**: Create PRs to `contrib/stharrold` (working branch), not `main`
-- PRs should target the branch they were derived from
+### Git Flow Hierarchy
+
+**Branch Structure:**
+```
+main (production)
+  ↓
+develop (integration)
+  ↓
+contrib/stharrold (active development)
+  ↓
+feature worktrees (individual features)
+```
+
+**PR Merge Flow (reverse direction):**
+```
+Feature Worktree
+  ↓ PR targets
+contrib/stharrold (working branch)
+  ↓ PR targets
+develop (integration testing)
+  ↓ PR targets
+main (production release)
+```
+
+**Branch Purposes:**
+- **main**: Production-ready code, stable releases
+- **develop**: Integration branch for testing combined features
+- **contrib/stharrold**: Active development branch for ongoing work
+- **worktrees**: Feature-specific development branches
+
+**IMPORTANT**: Always create PRs to the branch your feature was derived from:
+- Feature worktrees → `contrib/stharrold`
+- contrib/stharrold → `develop` (when ready for integration)
+- develop → `main` (for production releases)
 
 ### Commit Message Format
 ```bash
