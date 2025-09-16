@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches. Added comprehensive testing commands, clarified PR workflow targeting `contrib/stharrold`, updated worktree management guidance, and streamlined duplicate content sections.
+**Latest Update (2025-09-15)**: Enhanced with comprehensive MCP security patterns including OAuth 2.1 implementation, production security tools (mcp-secrets-plugin, mcpauth, Auth0), layered storage architecture, and multi-implementation worktree architecture supporting parallel development approaches. Added Quick Start section, clarified command usage context, streamlined duplicate content sections, and improved document lifecycle guidance.
 
 ## Repository Architecture
 
@@ -14,12 +14,8 @@ This is a **templates and utilities repository** for MCP (Model Context Protocol
 
 This repository supports parallel development using multiple implementation approaches through git worktrees:
 
-### Implementation Methods Available
-- **Speckit** - Traditional systematic approach
-- **Claude** - AI-assisted development patterns
-- **BMAD** - Framework-driven methodology
-- **Claude2** - Multi-guide content distribution
-- **Flow** - Workflow automation approach
+### Implementation Methods
+Multiple approaches can be used for complex tasks, each implemented in separate worktrees to avoid conflicts during parallel development.
 
 ### Worktree Structure
 - **Main repo**: `/Users/stharrold/Documents/GitHub/stharrold-templates/`
@@ -37,6 +33,11 @@ Research → Integration → Archive
 00_draft-   10_draft-   ARCHIVED/
 initial/    merged/     (UTC timestamps)
 ```
+
+**Lifecycle Stages:**
+- **00_draft-initial/**: New content awaiting review and integration
+- **10_draft-merged/**: Production-ready content (≤30KB per file for AI context)
+- **ARCHIVED/**: Historical versions after major updates (UTC timestamp prefix)
 
 ### Key architectural relationships:
 
@@ -67,6 +68,24 @@ initial/    merged/     (UTC timestamps)
 - **GitHub CLI (`gh`)**: For PR and issue management
 - **Various MCP servers**: Installed via npm/pip as needed
 
+## Quick Start
+
+Most common workflows:
+
+```bash
+# Check MCP server status across all platforms
+/usr/bin/python3 mcp_manager.py --status
+
+# Add a new MCP server (interactive)
+/usr/bin/python3 mcp_manager.py --add
+
+# Validate documentation before committing changes
+./validate_documentation.sh
+
+# Create new feature worktree
+git worktree add ../stharrold-templates.worktrees/{feature-name} -b feat/{feature-name}
+```
+
 ## Essential Development Commands
 
 ### Most Frequently Used
@@ -90,7 +109,7 @@ git commit -m "feat: descriptive message"
 
 ### Testing & Validation
 ```bash
-# Documentation validation tests
+# Documentation validation tests (run before committing documentation changes)
 ./test_file_size.sh              # Verify 30KB constraints
 ./test_cross_references.sh       # Check internal links
 ./test_content_duplication.sh    # Detect duplicate content
@@ -122,9 +141,9 @@ python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manage
 /usr/bin/python3 mcp_manager.py --platform claude-desktop --remove
 
 # Maintenance operations
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates
-/usr/bin/python3 mcp_manager.py --backup-only    # Create backups
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials
+/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates (run after seeing duplicate servers)
+/usr/bin/python3 mcp_manager.py --backup-only    # Create backups without changes
+/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials (run before adding auth-required servers)
 ```
 
 ### Git Worktree Management
@@ -160,25 +179,6 @@ mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 .specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
 ```
 
-### Testing & Validation
-```bash
-# Documentation validation tests
-./test_file_size.sh              # Verify 30KB constraints
-./test_cross_references.sh       # Check internal links
-./test_content_duplication.sh    # Detect duplicate content
-./test_command_syntax.sh         # Validate bash commands
-./test_yaml_structure.sh         # Check YAML frontmatter
-./validate_documentation.sh      # Comprehensive validation
-
-# Core functionality tests
-/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
-
-# Module verification
-python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
-
-# MCP server connectivity (after setup)
-claude mcp list                                   # List configured servers
-```
 
 ### Quality Assurance
 ```bash
@@ -235,12 +235,7 @@ This repository supports multiple implementation approaches for the same task:
 TODO_FOR_feat-{issue}-{task}-{method}.md
 ```
 
-Example for issue #12:
-- `TODO_FOR_feat-12-integrate-workflow-secrets.md` (Speckit method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-claude.md` (Claude method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md` (BMAD method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-claude2.md` (Claude2 multi-guide method)
-- `TODO_FOR_feat-12-integrate-workflow-secrets-flow.md` (Flow method)
+These files contain detailed execution plans for complex feature implementations, mapping source files to target locations with specific constraints and implementation approaches.
 
 ### Active Worktrees (Current)
 ```bash
@@ -253,11 +248,11 @@ git worktree list
 # Create new worktree
 git worktree add ../stharrold-templates.worktrees/{feature-name} -b {branch-name}
 
-# Remove completed worktree
+# Remove completed worktree (after PR merge)
 git worktree remove {worktree-path}
 ```
 
-Each implementation method uses dedicated worktrees to avoid conflicts and enable parallel development.
+**Best Practice**: Remove worktrees after their associated PRs are merged to keep the repository clean.
 
 ## Core Classes and Functions
 
