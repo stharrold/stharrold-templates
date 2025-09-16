@@ -1,7 +1,7 @@
 ---
 title: MCP Security Tools & Ecosystem
 version: 1.2
-updated: 2025-09-15
+updated: 2025-09-16
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -21,7 +21,7 @@ related:
   - ../10_mcp/11_setup.md
   - ../10_mcp/12_servers.md
 changelog:
-  - 1.2: Added Node.js keytar alternative for JavaScript applications and enhanced tool selection matrix
+  - 1.2: Added Node.js keytar alternative for JavaScript applications, enhanced tool selection matrix, advanced troubleshooting & recovery procedures, emergency credential access patterns, and automated health monitoring
   - 1.1: Enhanced with practical workflow examples, platform-specific verification commands, and step-by-step credential management workflows
   - 1.0: Initial version with production-ready MCP security tool implementations
 ---
@@ -740,8 +740,6 @@ $ kwalletcli -f kdewallet -e github-token
 
 ### Cross-Platform Python Verification
 
-For programmatic verification across all platforms:
-
 ```python
 import keyring
 
@@ -976,13 +974,126 @@ def handle_expired_credential():
     print("3. Restart the MCP server")
 ```
 
+## Advanced Troubleshooting & Recovery
+
+### Comprehensive Error Diagnosis
+
+When MCP servers fail to start due to credential issues, use this systematic diagnosis approach:
+
+```bash
+# Step 1: Verify credential storage backend
+python3 -c "import keyring; print('Backend:', keyring.get_keyring())"
+
+# Step 2: Test credential retrieval
+python3 -c "
+import keyring
+try:
+    token = keyring.get_password('mcp-secrets', 'github_token')
+    print(f'Token found: {len(token) if token else 0} chars')
+except Exception as e:
+    print(f'Error: {e}')
+"
+
+# Step 3: Verify environment variable expansion
+echo "Testing pattern: \${SECRET:github_token}"
+mcp-secrets test github_token
+
+# Step 4: Check MCP server logs
+tail -f ~/.local/share/claude/logs/mcp.log
+```
+
+### Platform-Specific Recovery Procedures
+
+**macOS Keychain Recovery:**
+```bash
+# Reset keychain if corrupted
+security delete-keychain ~/Library/Keychains/mcp-credentials.keychain
+security create-keychain -p "" mcp-credentials.keychain
+
+# Re-add to search list
+security list-keychains -s $(security list-keychains | sed 's/"//g') mcp-credentials.keychain
+
+# Restore credentials
+mcp-secrets restore-backup
+```
+
+**Windows Credential Manager Recovery:**
+```powershell
+# Clear corrupted entries
+cmdkey /delete:mcp-secrets:*
+
+# Verify clean state
+cmdkey /list | findstr mcp-secrets
+
+# Restore from backup
+mcp-secrets.exe restore --platform windows
+```
+
+**Linux Secret Service Recovery:**
+```bash
+# Restart keyring daemon
+systemctl --user restart gnome-keyring-daemon
+
+# Clear and rebuild keyring
+rm -rf ~/.local/share/keyrings/mcp-secrets.keyring
+secret-tool store --label="MCP Secrets" service mcp-secrets account github_token
+
+# Test access
+secret-tool lookup service mcp-secrets account github_token
+```
+
+### Emergency Credential Access Patterns
+
+For critical production systems, implement these emergency access patterns:
+
+```python
+def emergency_credential_handler():
+    """Emergency credential access with audit logging."""
+    import logging
+    import getpass
+
+    logging.warning("EMERGENCY CREDENTIAL ACCESS INITIATED")
+
+    # Log emergency access
+    with open("/var/log/mcp-emergency.log", "a") as f:
+        f.write(f"{datetime.now()}: Emergency credential access by {os.getlogin()}\n")
+
+    # Secure temporary input
+    emergency_token = getpass.getpass("Emergency token (hidden): ")
+
+    print("⚠️  SECURITY WARNING: Emergency credential in use")
+    print("   → Restore secure storage immediately after incident")
+    print("   → This session is being audited")
+
+    return emergency_token
+```
+
+### Automated Health Monitoring
+
+```bash
+# credential-health-monitor.sh - Run via cron
+check_credential_health() {
+    local service=$1
+    if ! mcp-secrets get "$service" token >/dev/null 2>&1; then
+        logger "ERROR: $service credential failed"
+        return 1
+    fi
+    logger "INFO: $service credential healthy"
+}
+
+check_credential_health "github"
+check_credential_health "slack"
+```
+
 ## Next Steps
 
 1. **Assess current security posture** - Identify plaintext credentials and security gaps
 2. **Select appropriate tools** - Choose based on enterprise requirements and existing infrastructure
 3. **Implement in phases** - Follow the recommended 4-phase deployment strategy
-4. **Monitor and optimize** - Continuous security monitoring and improvement
-5. **Team training** - Establish security-first development practices
+4. **Set up monitoring** - Deploy automated credential health monitoring
+5. **Train emergency procedures** - Establish and practice emergency credential recovery
+6. **Monitor and optimize** - Continuous security monitoring and improvement
+7. **Team training** - Establish security-first development practices
 
 ---
 
