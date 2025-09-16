@@ -1,7 +1,7 @@
 ---
 title: macOS Keychain Credential Management
-version: 3.1
-updated: 2025-09-12
+version: 3.2
+updated: 2025-09-13
 parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
@@ -17,6 +17,7 @@ related:
   - ./23_enterprise-sso.md
   - ../10_mcp/12_servers.md
 changelog:
+  - Enhanced with macOS Security Framework technical details and cross-platform integration patterns
   - Added project template integration patterns
   - Enhanced with common commands and workflow integration
   - Improved error handling and verification procedures
@@ -28,12 +29,63 @@ Secure credential storage and management using macOS Keychain for MCP server aut
 
 ## Overview
 
-macOS Keychain provides the most secure method for storing API tokens locally. This approach ensures:
+macOS Keychain provides military-grade security for storing API tokens locally, implementing AES-256-GCM encryption with per-application access controls through the Security Framework. This approach ensures:
 
-- **OS-level encryption** of all stored credentials
-- **User authentication** required for access
-- **System integration** with environment variables
-- **Secure token rotation** without exposing plaintext
+- **OS-level encryption** using AES-256-GCM with per-application access controls
+- **User authentication** integrated with macOS logon and keychain locking
+- **System integration** with environment variables and automatic timeout-based locking
+- **Secure token rotation** without exposing plaintext credentials
+- **Cross-platform compatibility** via keytar library abstraction
+
+### Security Framework Architecture
+
+The macOS Security Framework provides enterprise-grade credential protection:
+
+- **Encryption**: AES-256-GCM with hardware-backed key derivation when available
+- **Access Control**: Per-application ACLs with user consent prompts
+- **Storage Location**: User-specific keychains at `~/Library/Keychains/`
+- **Automatic Locking**: Configurable timeout-based keychain locking
+- **API Integration**: SecItem* APIs for programmatic access without GUI dependencies
+
+## Security Framework Integration
+
+### Programmatic Access via SecItem APIs
+
+For MCP servers requiring programmatic credential access, the Security Framework provides these core APIs:
+
+- **SecItemAdd()**: Store new credentials with specified access controls
+- **SecItemCopyMatching()**: Retrieve credentials with proper authentication
+- **SecItemUpdate()**: Modify existing credentials securely
+- **SecItemDelete()**: Remove credentials permanently
+
+### Terminal-Based Access
+
+The `/usr/bin/security` command-line utility enables direct keychain manipulation without GUI dependencies, making it ideal for terminal-based MCP servers and CI/CD environments.
+
+### Cross-Platform Unification with Keytar
+
+**Keytar Library (v7.9.0)**: Despite being archived, keytar remains the de facto standard for cross-platform credential management with 664+ dependent projects. It abstracts OS-specific APIs behind a unified interface:
+
+```javascript
+// Example keytar integration for MCP servers
+const keytar = require('keytar');
+
+class SecureCredentialManager {
+  async storeCredential(service, account, password) {
+    return await keytar.setPassword(service, account, password);
+  }
+
+  async getCredential(service, account) {
+    return await keytar.getPassword(service, account);
+  }
+
+  async deleteCredential(service, account) {
+    return await keytar.deletePassword(service, account);
+  }
+}
+```
+
+**Alternative**: Electron's **safeStorage** API offers a modern alternative for Electron-based MCP clients, providing built-in OS-level encryption without external dependencies.
 
 ## Store Credentials in Keychain
 
@@ -196,6 +248,65 @@ For VS Code users, create or update the MCP extension settings:
       }
     }
   }
+}
+```
+
+## Secure Terminal Prompting
+
+### Modern Credential Input Patterns
+
+For MCP servers requiring secure credential input, use modern terminal libraries that provide proper masking and validation:
+
+**Using @inquirer/password (v4.0.15)**:
+```javascript
+import { password } from "@inquirer/prompts";
+
+const credential = await password({
+  message: "Enter your API key:",
+  mask: true,
+  validate: (input) =>
+    input.length >= 32 || "API key must be at least 32 characters",
+});
+```
+
+**Lightweight alternative with password-prompt**:
+```javascript
+const prompt = require('password-prompt');
+
+const credential = await prompt('Enter API key: ', {
+  method: 'mask',
+  replace: '*'
+});
+```
+
+### Memory Protection Strategies
+
+Sensitive credentials require specialized handling to prevent memory disclosure:
+
+```javascript
+class SecureString {
+  constructor(value) {
+    this.buffer = Buffer.alloc(value.length);
+    this.buffer.write(value);
+    value = null; // Clear original reference
+  }
+
+  getValue() {
+    return this.buffer.toString();
+  }
+
+  clear() {
+    crypto.randomFillSync(this.buffer); // Overwrite with random data
+    this.buffer.fill(0); // Then zero
+  }
+}
+
+// Usage in MCP servers
+const secureToken = new SecureString(process.env.API_TOKEN);
+try {
+  // Use secureToken.getValue() for API calls
+} finally {
+  secureToken.clear(); // Always clear after use
 }
 ```
 
