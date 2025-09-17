@@ -16,7 +16,7 @@ This repository supports parallel development using multiple implementation appr
 
 ## Core Architecture
 
-This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle**:
+This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle** and **modular CLAUDE.md orchestration**:
 
 ### Document Lifecycle Architecture
 ```
@@ -46,6 +46,8 @@ initial/    merged/     (UTC timestamps)
 3. **Modular Guide Hierarchy:**
    - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
    - 30KB file size limit enforced across all modular guides for AI context optimization
+   - Hierarchical navigation: main CLAUDE.md → subdirectory CLAUDE.md → specific guides
+   - Cross-references between related concepts without loading full content
 
 ## Dependencies
 
@@ -106,13 +108,21 @@ git commit -m "feat: descriptive message"
 ./test_content_duplication.sh    # Detect duplicate content
 ./test_command_syntax.sh         # Validate bash commands
 ./test_yaml_structure.sh         # Check YAML frontmatter
-./validate_documentation.sh      # Comprehensive validation
+./validate_documentation.sh      # Comprehensive validation (orchestrates all 5 tests)
 
 # Core functionality tests
 /usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
 
 # Module verification
 python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
+
+# Individual test execution with detailed output
+./test_file_size.sh 10_draft-merged/               # Test specific directory
+./test_cross_references.sh --verbose               # Detailed link validation
+./test_content_duplication.sh --threshold 85       # Custom similarity threshold
+
+# Shell script permissions (if tests fail with permission errors)
+chmod +x test_*.sh validate_documentation.sh
 ```
 
 ### MCP Manager Operations
@@ -166,6 +176,17 @@ mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ```bash
 # .specify workflow commands (available when needed)
 .specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
+
+# Modular CLAUDE.md navigation patterns
+# Always start with the main orchestrator, then follow hierarchical structure:
+# 1. Read main CLAUDE.md for repository overview
+# 2. Navigate to subdirectory CLAUDE.md for specific domain context
+# 3. Access individual guide files through orchestrator navigation
+
+# Example navigation workflow:
+cat 10_draft-merged/CLAUDE.md                     # Main orchestrator
+cat 10_draft-merged/30_implementation/CLAUDE.md   # Implementation context
+cat 10_draft-merged/30_implementation/33_testing-standards.md  # Specific guide
 ```
 
 ### Testing & Validation
@@ -190,9 +211,14 @@ claude mcp list                                   # List configured servers
 
 ### Quality Assurance
 ```bash
-# Codacy analysis (configured in repository)
+# Codacy analysis (8 analysis tools: pylint, bandit, ruff, mypy, prospector, flake8, pydocstyle, pycodestyle)
 ./.codacy/cli.sh analyze {file_path}                   # Analyze specific file
 ./.codacy/cli.sh analyze 10_draft-merged/              # Analyze directory
+./.codacy/cli.sh analyze --tool pylint mcp_manager.py  # Specific tool analysis
+./.codacy/cli.sh analyze --tool bandit --format json   # Security scan with JSON output
+
+# Multi-language analysis support
+./.codacy/cli.sh analyze --help                        # View all available tools and languages
 
 # Python validation
 python3 test_mcp_deduplication.py                      # Run deduplication tests
@@ -200,6 +226,11 @@ python3 -c "import mcp_manager; print('Import successful')"  # Module validation
 
 # File size validation (30KB limit for modular guides)
 wc -c 10_draft-merged/**/*.md                          # Check file sizes
+find 10_draft-merged/ -name "*.md" -size +30k          # Find oversized files
+
+# Virtual environment activation (if .venv detected)
+source .venv/bin/activate                              # Activate local venv
+deactivate                                             # Deactivate when done
 ```
 
 ### Document Integration Workflow
@@ -332,6 +363,39 @@ Current priorities (from TODO.md):
 - **Import errors**: Use `/usr/bin/python3` for system Python
 - **Configuration not found**: Check platform-specific paths with `--status`
 
+## Development Environment Setup
+
+### Shell Script Execution
+All test and validation scripts require proper permissions. If scripts fail with permission errors:
+```bash
+# Make all shell scripts executable
+chmod +x *.sh test_*.sh validate_documentation.sh
+
+# Or make specific scripts executable as needed
+chmod +x test_file_size.sh test_cross_references.sh
+
+# Verify script permissions
+ls -la *.sh | grep rwx
+```
+
+### Virtual Environment Management
+The repository supports virtual environments for Python dependencies:
+```bash
+# Create virtual environment (if .venv doesn't exist)
+python3 -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # macOS/Linux
+.venv\Scripts\activate     # Windows
+
+# Verify activation
+which python3              # Should show .venv path
+pip list                   # Show installed packages
+
+# Deactivate when done
+deactivate
+```
+
 ## Critical Guidelines
 
 - **ALWAYS prefer editing existing files** over creating new ones
@@ -340,3 +404,5 @@ Current priorities (from TODO.md):
 - Use platform-specific MCP management approach (no cross-platform sync)
 - Archive completed tasks to maintain clean repository state
 - Check TODO.md for current integration priorities
+- **Use modular CLAUDE.md navigation**: Start with orchestrators, follow hierarchy
+- **Test before committing**: Run `./validate_documentation.sh` for documentation changes
