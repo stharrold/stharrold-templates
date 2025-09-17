@@ -1,7 +1,7 @@
 # TODO
 
 ## GitHub Issue Sync
-Last sync: 2025-09-16 01:30 UTC (Issue #12 closed, added 10 code review issues)
+Last sync: 2025-09-16 22:30 UTC (Issue #12 status updated in TODO.md, all 32 issues synchronized)
 
 ## Active Tasks
 
@@ -37,13 +37,6 @@ Last sync: 2025-09-16 01:30 UTC (Issue #12 closed, added 10 code review issues)
 ## Document Integration (Priority: Sequential Merge)
 
 ### High Priority - Security & State Management
-- [ ] Integrate 09_workflow-secrets-mcp.md into security tools (#12) - BMAD Implementation Complete, PR Pending
-      → [Speckit Plan](TODO_FOR_feat-12-integrate-workflow-secrets.md) | [Claude Plan](TODO_FOR_feat-12-integrate-workflow-secrets-claude.md) | [BMAD Plan](TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md) | [Flow Plan](TODO_FOR_feat-12-integrate-workflow-secrets-flow.md) | [Claude2 Plan](TODO_FOR_feat-12-integrate-workflow-secrets-claude2.md)
-      | [Claude Worktree: feat/12-integrate-workflow-secrets-claude (in progress)]
-      | [Claude2 Worktree: feat/12-integrate-workflow-secrets-claude2 (multi-guide distribution - in progress)]
-      | [Speckit Worktree: feat/12-integrate-workflow-secrets (completed, PR #25)]
-      | [BMAD Worktree: feat/12-integrate-workflow-secrets-bmad (✅ completed - awaiting PR merge)]
-      | [Flow Worktree: feat/12-integrate-workflow-secrets-flow (pending)]
 - [ ] Integrate 20_claude-preserve-state-todo-compact.md into state management (#19)
 
 ### Medium Priority - Core Development Tools
@@ -74,6 +67,6 @@ See `ARCHIVED/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
 ## Sync Status
 - **GitHub Issues**: 32 total (#3-24, #31-35, #38-39, #41-44) - 31 open, 1 closed (#12)
 - **TODO Items**: 31 pending (10 code review + 9 enhancements + 12 document integrations)
-- **Action**: ✅ Synchronized (2025-09-16 01:30 UTC)
+- **Action**: ✅ Synchronized (2025-09-16 22:30 UTC)
 - **Immediate Priority**: Code review feedback issues (#31-35, #38-39, #41-44)
 - **Next Major Priority**: Issue #19 (state management integration)
