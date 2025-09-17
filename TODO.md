@@ -42,6 +42,7 @@ Last sync: 2025-09-16 22:45 UTC (Reorganized document integration by numerical o
 
 ### Priority 2-5 - Core Technical Documentation
 - [ ] **Issue #15**: Integrate 12_report-baml-documentation-extractor.md into documentation patterns
+      → [Implementation Plan](TODO_FOR_issue-15-merge-12-baml.md) | [Worktree: issue/15-merge-12-baml (in progress)]
 - [ ] **Issue #16**: Integrate 13_report-baml-kuzu-graph-schema.md into database patterns
 - [ ] **Issue #23**: Integrate 14_report-agents-autogen-bmad-speckit-dspy-baml.md into agent architectures
 - [ ] **Issue #22**: Integrate 15_report-ai-agent-workflow-architecture-optimization.md into agent architectures

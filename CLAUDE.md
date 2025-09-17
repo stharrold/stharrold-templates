@@ -116,10 +116,16 @@ git commit -m "feat: descriptive message"
 # Module verification
 python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
 
-# Individual test execution with detailed output
-./test_file_size.sh 10_draft-merged/               # Test specific directory
-./test_cross_references.sh --verbose               # Detailed link validation
-./test_content_duplication.sh --threshold 85       # Custom similarity threshold
+# Run single test file with directory target
+./test_file_size.sh 10_draft-merged/30_implementation/  # Test specific directory
+./test_cross_references.sh --verbose                    # Detailed link validation
+./test_content_duplication.sh --threshold 85            # Custom similarity threshold
+
+# Run individual Python tests
+/usr/bin/python3 test_mcp_deduplication.py              # Test deduplication logic
+
+# Test specific files or patterns
+./test_command_syntax.sh 10_draft-merged/**/*.md        # Validate bash commands in markdown
 
 # Shell script permissions (if tests fail with permission errors)
 chmod +x test_*.sh validate_documentation.sh
@@ -172,11 +178,23 @@ gh issue close <number> --comment "resolution notes"
 mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
 ```
 
+### Specify Workflow Commands
+```bash
+# Create feature specification (creates branch and spec file)
+.specify/scripts/bash/create-new-feature.sh --json "feature description"
+
+# Check task prerequisites
+.specify/scripts/bash/check-task-prerequisites.sh
+
+# Get feature paths for current branch
+.specify/scripts/bash/get-feature-paths.sh
+
+# Setup implementation plan
+.specify/scripts/bash/setup-plan.sh
+```
+
 ### Feature Specification Workflow
 ```bash
-# .specify workflow commands (available when needed)
-.specify/scripts/bash/check-task-prerequisites.sh  # Validate prerequisites
-
 # Modular CLAUDE.md navigation patterns
 # Always start with the main orchestrator, then follow hierarchical structure:
 # 1. Read main CLAUDE.md for repository overview
@@ -263,6 +281,26 @@ mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
 - **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
 
 
+## MCP Manager Internal Architecture
+
+The `mcp_manager.py` tool implements platform-specific server management:
+
+### Key Functions & Classes:
+- `MCPConfig(platform, config_path)` - Platform-specific configuration handler
+- `select_target_platform()` - Returns first available platform (claude-code, vscode, claude-desktop)
+- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions during cleanup
+- `validate_credentials()` - Checks keychain/credential manager for tokens
+
+### Server Management Pattern:
+- Active servers: Normal names (e.g., "github")
+- Disabled servers: DISABLED_ prefix (e.g., "DISABLED_github")
+- Platform schemas: "mcpServers" (Claude) vs "servers" (VS Code)
+
+### Platform Configuration Paths:
+- **macOS**: `~/.claude.json`, `~/Library/Application Support/Code/User/mcp.json`
+- **Windows**: `~/.claude.json`, `~/AppData/Roaming/Code/User/mcp.json`
+- **Linux**: `~/.claude.json`, `~/.config/Code/User/mcp.json`
+
 ## Core Classes and Functions
 
 ### mcp_manager.py Architecture
@@ -337,12 +375,28 @@ Closes #123
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+## Issue Integration Architecture
+
+The repository follows a structured issue-to-implementation pipeline:
+
+1. **GitHub Issues** → Numbered sequentially (#3-24, #31-44)
+2. **Planning Documents** → `TODO_FOR_issue-{number}-{approach}.md`
+3. **Worktrees** → `../stharrold-templates.worktrees/issue/{number}-{approach}`
+4. **Document Order** → Files numbered by source (09_, 11_, 12_) integrate in sequence
+5. **Multi-Approach** → Single issue can have multiple worktrees (claude, bmad, speckit, flow)
+
+Example flow for Issue #15:
+- Source: `00_draft-initial/12_report-baml-documentation-extractor.md`
+- Plan: `TODO_FOR_issue-15-merge-12-baml.md`
+- Worktree: `issue/15-merge-12-baml`
+- Target: `10_draft-merged/30_implementation/42_documentation-patterns.md`
+
 ## Integration Priority System
 
 Current priorities (from TODO.md):
-1. **Next Priority**: Issue #19 (state management integration)
-2. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
-3. **Medium Priority**: Document integrations (#13-18, #21)
+1. **Top Priority**: Issue #13 (Document #11 - embedding model integration)
+2. **Priority 2-5**: Core technical documentation (#15-16, #22-23)
+3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
 4. **Infrastructure**: Testing and monitoring setup (#8-11)
 
 **Completed**: Issue #12 (security workflow integration) - archived in ARCHIVED/
