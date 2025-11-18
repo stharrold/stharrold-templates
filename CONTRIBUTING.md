@@ -29,7 +29,7 @@ Ensure you have the required tools installed:
 
 ```bash
 # Required
-python3 --version     # Python 3.11+ (system python or via uv)
+python3 --version     # Python 3.12+ (required for development tools and CI/CD)
 git --version         # Version control
 gh --version          # GitHub CLI (for PR management)
 
