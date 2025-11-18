@@ -12,10 +12,6 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Add VCS module to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'))
-from vcs import get_vcs_adapter
-
 # Constants with documented rationale
 TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'  # Compact ISO8601 for filename/branch safety
 VALID_WORKFLOW_TYPES = ['feature', 'release', 'hotfix']  # Supported workflow types
@@ -102,14 +98,28 @@ def create_worktree(workflow_type, slug, base_branch):
         print(f"Git error: {e.stderr.strip()}", file=sys.stderr)
         raise
 
-    # Get VCS username (GitHub/Azure DevOps)
+    # Get GitHub username from gh CLI or git config
     try:
-        vcs = get_vcs_adapter()
-        gh_user = vcs.get_current_user()
-    except RuntimeError as e:
-        print("ERROR: Failed to get VCS username", file=sys.stderr)
-        print(f"Error: {e}", file=sys.stderr)
-        raise
+        # Try gh CLI first
+        gh_user = subprocess.check_output(
+            ['gh', 'api', 'user', '--jq', '.login'],
+            text=True,
+            stderr=subprocess.PIPE
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback to git config
+        try:
+            gh_user = subprocess.check_output(
+                ['git', 'config', 'user.name'],
+                text=True,
+                stderr=subprocess.PIPE
+            ).strip()
+            print(f"INFO: Using git user.name ('{gh_user}') - gh CLI not available", file=sys.stderr)
+        except subprocess.CalledProcessError:
+            # Last resort: use environment variable or default
+            import os
+            gh_user = os.environ.get('USER', 'user')
+            print(f"INFO: Using fallback username ('{gh_user}')", file=sys.stderr)
 
     todo_filename = f"TODO_{workflow_type}_{timestamp}_{slug}.md"
     todo_path = repo_root / todo_filename
