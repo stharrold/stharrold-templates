@@ -29,7 +29,7 @@ initial/    merged/     (UTC timestamps)
 **Lifecycle Stages:**
 - **00_draft-initial/**: New content awaiting review and integration
 - **10_draft-merged/**: Production-ready content (≤30KB per file for AI context)
-- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz) preserving completed work
+- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz format for templates, .zip format for workflow tools)
 
 ### Key architectural relationships:
 
@@ -268,7 +268,9 @@ mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
 ## Platform-Specific MCP Configuration
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- ARCHIVED/ contains only compressed date-based archives (YYYYMMDD.tar.gz)
+- ARCHIVED/ contains compressed archives:
+  - Templates repository format: date-based .tar.gz (YYYYMMDD.tar.gz)
+  - Workflow tools format: timestamped .zip (YYYYMMDDTHHMMSSZ_description.zip)
 - Individual files archived with UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
 
 ### Platform Differences
@@ -387,9 +389,9 @@ Available in `tools/` directory (stdlib-only, no external dependencies):
 
 **workflow-utilities/**
 ```bash
-# Manage compressed archives
+# Manage compressed archives (.zip format)
 python3 tools/workflow-utilities/archive_manager.py list
-python3 tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118.tar.gz output/
+python3 tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118T120000Z_description.zip output/
 
 # Ensure CLAUDE.md and README.md in directories
 python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
