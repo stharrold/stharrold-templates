@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-09-15)**: Completed Issue #12 security workflow integration, cleaned ARCHIVED directory structure to contain only 10 compressed date-based archives, and updated documentation to reflect current repository state. Enhanced Quick Start section and streamlined duplicate content sections.
+**Latest Update (2025-11-18)**: Integrated select tools from german workflow system v5.3.0 (workflow-utilities, git-helpers, CI/CD pipelines). Added pyproject.toml with uv dependency management (pytest, ruff, mypy). Added CONTRIBUTING.md with quality standards. Enhanced .gitignore with comprehensive Python exclusions. All integrations maintain stdlib-only principle for core tools.
 
 ## Repository Architecture
 
@@ -29,7 +29,7 @@ initial/    merged/     (UTC timestamps)
 **Lifecycle Stages:**
 - **00_draft-initial/**: New content awaiting review and integration
 - **10_draft-merged/**: Production-ready content (≤30KB per file for AI context)
-- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz) preserving completed work
+- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz format for templates, .zip format for workflow tools)
 
 ### Key architectural relationships:
 
@@ -268,7 +268,9 @@ mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
 ## Platform-Specific MCP Configuration
 ### File Size Constraints
 - All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- ARCHIVED/ contains only compressed date-based archives (YYYYMMDD.tar.gz)
+- ARCHIVED/ contains compressed archives:
+  - Templates repository format: date-based .tar.gz (YYYYMMDD.tar.gz)
+  - Workflow tools format: timestamped .zip (YYYYMMDDTHHMMSSZ_description.zip)
 - Individual files archived with UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
 
 ### Platform Differences
@@ -374,6 +376,89 @@ Closes #123
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
+
+## German Workflow System Integration (Selective)
+
+This repository integrates select tools from the german workflow system v5.3.0 for automation and quality improvements.
+
+**Reference Documentation**: See `docs/reference/german-workflow-v5.3.0.md` for complete workflow guide.
+
+### Integrated Tools
+
+Available in `tools/` directory (stdlib-only, no external dependencies):
+
+**workflow-utilities/**
+```bash
+# Manage compressed archives (.zip format)
+python3 tools/workflow-utilities/archive_manager.py list
+python3 tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118T120000Z_description.zip output/
+
+# Ensure CLAUDE.md and README.md in directories
+python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
+
+# Validate version consistency
+python3 tools/workflow-utilities/validate_versions.py --verbose
+```
+
+**git-helpers/**
+```bash
+# Calculate semantic version from changes
+python3 tools/git-helpers/semantic_version.py develop v5.0.0
+
+# Create standardized worktree
+python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+```
+
+### Development Tools (uv + pyproject.toml)
+
+This repository now uses `uv` for development dependency management:
+
+```bash
+# Install development dependencies
+uv sync
+
+# Run linting
+uv run ruff check .
+
+# Run type checking
+uv run mypy mcp_manager.py
+
+# Auto-fix linting issues
+uv run ruff check --fix .
+```
+
+**Installed dev dependencies:** pytest, pytest-cov, ruff, mypy
+
+### CI/CD Pipelines
+
+Automated testing via GitHub Actions and Azure Pipelines:
+
+- **GitHub Actions**: `.github/workflows/tests.yml`
+- **Azure Pipelines**: `azure-pipelines.yml`
+- **Triggers**: Push/PR to main, develop, contrib/stharrold
+- **Tests**: Documentation validation, MCP manager, deduplication, linting
+
+### NOT Integrated
+
+The following german workflow components are NOT integrated:
+
+- **BMAD planner** - Interactive planning Q&A (Python project focus)
+- **SpecKit author** - Specification generation (Python project focus)
+- **Quality enforcer** - pytest + coverage gates (overkill for docs)
+- **AgentDB state manager** - DuckDB tracking (external dependency)
+- **Full workflow orchestrator** - 6-phase coordinator (not applicable)
+
+### Workflow Philosophy Differences
+
+| Aspect | German Workflow | Templates Repository |
+|--------|-----------------|---------------------|
+| **Purpose** | Multi-phase Python development | MCP configuration + documentation |
+| **Dependencies** | uv + pytest + ruff + mypy | Stdlib + dev tools (optional) |
+| **Testing** | Automated (pytest) | Manual validation scripts |
+| **Documentation** | Phase-based (planning/, specs/) | Numbered lifecycle (00_, 10_) |
+| **Development** | Interactive tools (BMAD, SpecKit) | Manual documentation integration |
+
+**Recommendation**: Use german workflow tools where they add value without disrupting templates repository focus on MCP management and cross-platform configuration.
 
 ## Issue Integration Architecture
 
