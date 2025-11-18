@@ -13,7 +13,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional
 
 
 def get_platform_config_paths() -> Dict[str, Path]:
@@ -459,7 +459,7 @@ class MCPManager:
                 print(f"  {platform_key}: Not found ({config.path})")
 
         if configs:
-            print(f"\nUse --platform <name> to work with a specific platform")
+            print("\nUse --platform <name> to work with a specific platform")
             print(f"Available platforms: {', '.join(self.platform_map.keys())}")
 
     def list_platform_servers(self, config: MCPConfig) -> None:
@@ -538,10 +538,10 @@ class MCPManager:
             scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
             print(f"{i:2d}. {server['name']}{scope_info}")
 
-        print(f"\nRemoval options:")
-        print(f"1. Remove specific servers (interactive selection)")
+        print("\nRemoval options:")
+        print("1. Remove specific servers (interactive selection)")
         print(f"2. Remove ALL servers from {config.name}")
-        print(f"3. Cancel")
+        print("3. Cancel")
 
         choice = input("\nEnter your choice (1-3): ").strip()
 
@@ -674,9 +674,9 @@ class MCPManager:
         # Recommendations
         missing_env = [var for var, status in env_creds.items() if not status]
         if missing_env:
-            print(f"\nRecommendations:")
+            print("\nRecommendations:")
             print(f"  Missing credentials: {', '.join(missing_env)}")
-            print(f"  See GUIDE-CREDENTIALS.md for secure setup instructions")
+            print("  See GUIDE-CREDENTIALS.md for secure setup instructions")
 
     def interactive_disable(self, config: MCPConfig) -> None:
         """Interactive MCP server disabling."""
@@ -1016,7 +1016,7 @@ Examples:
         if not args.platform:
             platform_key = {v: k for k, v in manager.platform_map.items()}.get(config.name, config.name.lower())
             print(f"Auto-detected platform: {platform_key} ({config.name})")
-            print(f"Use --platform <name> to specify a different platform\n")
+            print("Use --platform <name> to specify a different platform\n")
 
     # Handle backup-only mode
     if args.backup_only:
