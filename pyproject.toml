@@ -6,7 +6,7 @@
 name = "stharrold-templates"
 version = "5.0.0"
 description = "Templates and utilities for MCP server configuration and agentic development workflows"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -14,7 +14,7 @@ pythonpath = ["."]
 
 [tool.ruff]
 line-length = 170
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]
@@ -23,7 +23,7 @@ select = ["E", "F", "I", "N", "W"]
 "tools/**/*.py" = ["N999"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = false
 # Don't require full type coverage for utility scripts
 disallow_untyped_defs = false
