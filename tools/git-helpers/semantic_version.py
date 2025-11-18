@@ -40,24 +40,40 @@ def analyze_changes(changed_files):
     has_fix = False
 
     for file in changed_files:
-        # API changes are potentially breaking
-        if file.startswith('src/api/') or file.startswith('src/*/api/'):
-            # Check if file existed before (new = feature, modified = potentially breaking)
+        # Core tools changes - conservative approach
+        if file.startswith('mcp_manager.py') or file.startswith('tools/'):
+            # Assume breaking if removing files or changing core APIs
+            # For templates repo, most changes are additive (features) or fixes
             if Path(file).exists():
+                # File still exists = likely feature or fix, not breaking
+                # Conservative: treat as feature unless it's a test
+                if not file.startswith('test_'):
+                    has_feature = True
+                else:
+                    has_fix = True
+            else:
+                # File removed = potentially breaking
                 has_breaking = True
 
-        # New Python files in src/ are features
-        elif file.startswith('src/') and file.endswith('.py'):
-            if Path(file).exists():
-                has_feature = True
+        # Documentation changes are patches
+        elif any(file.startswith(prefix) for prefix in ['10_draft-merged/', '00_draft-initial/', 'docs/', 'CLAUDE.md', 'README.md', 'CONTRIBUTING.md']):
+            has_fix = True
 
-        # Tests, docs, config are patches
-        elif any(file.startswith(prefix) for prefix in ['tests/', 'docs/', 'resources/']):
+        # Test files are patches
+        elif file.startswith('test_') or file.startswith('tests/'):
             has_fix = True
 
         # Configuration changes
-        elif file in ['pyproject.toml', 'requirements.txt', 'uv.lock']:
+        elif file in ['pyproject.toml', 'requirements.txt', 'uv.lock', '.gitignore', '.python-version']:
             has_fix = True
+
+        # CI/CD changes
+        elif file.startswith('.github/') or file == 'azure-pipelines.yml':
+            has_fix = True
+
+        # New files in root (like new tools) are features
+        elif file.endswith('.py') or file.endswith('.sh'):
+            has_feature = True
 
     # Determine bump type (priority: major > minor > patch)
     if has_breaking:
