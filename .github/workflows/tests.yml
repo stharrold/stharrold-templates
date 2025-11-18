@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop, contrib/stharrold]
+  pull_request:
+    branches: [main, develop, contrib/stharrold]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2.1.0
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run documentation validation
+        run: ./validate_documentation.sh
+
+      - name: Run MCP deduplication tests
+        run: /usr/bin/python3 test_mcp_deduplication.py
+
+      - name: Test MCP manager status
+        run: /usr/bin/python3 mcp_manager.py --help
+
+      - name: Run linting (ruff)
+        run: uv run ruff check .
+
+      - name: Run type checking (mypy) on Python files
+        run: |
+          if [ -f mcp_manager.py ]; then uv run mypy mcp_manager.py || true; fi
+          if [ -f test_mcp_deduplication.py ]; then uv run mypy test_mcp_deduplication.py || true; fi
+        continue-on-error: true
