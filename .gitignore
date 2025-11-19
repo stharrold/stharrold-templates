@@ -1,5 +1,44 @@
-
-
-#Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Testing
+.coverage
+coverage.xml
+test-results.xml
+.pytest_cache/
+htmlcov/
+coverage.json
+*.cover
+
+# uv
+.uv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+.tmp/
+
+# VSCode AI rules
+.github/instructions/codacy.instructions.md
