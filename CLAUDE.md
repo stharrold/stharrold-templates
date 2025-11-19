@@ -2,546 +2,368 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Latest Update (2025-11-18)**: Integrated select tools from german workflow system v5.3.0 (workflow-utilities, git-helpers, CI/CD pipelines). Added pyproject.toml with uv dependency management (pytest, ruff, mypy). Added CONTRIBUTING.md with quality standards. Enhanced .gitignore with comprehensive Python exclusions. All integrations maintain stdlib-only principle for core tools.
+## What This Repository Is
 
-## Repository Architecture
+**Templates and utilities for MCP (Model Context Protocol) server configuration:**
+- Multi-platform MCP manager (`mcp_manager.py`) for Claude Code CLI, VS Code, and Claude Desktop
+- Modular documentation guides (≤30KB per file for AI context optimization)
+- Workflow automation tools (git helpers, archive management, semantic versioning)
+- **NOT a Python package** - Collection of standalone stdlib-only tools and templates
 
-This is a **templates and utilities repository** for MCP (Model Context Protocol) server configuration and agentic development workflows. The repository provides cross-platform tools, comprehensive modular guides, automation scripts for managing MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
+**Key Principle**: Core tools use stdlib only. Development tools (pytest, ruff, mypy) are optional via uv.
 
-**Repository Configuration**: Default working branch is `contrib/stharrold` for active development. GitHub repository configured with minimal branch protection (deletion prevention only).
+## Repository Structure
 
-## Multi-Implementation Architecture
-
-This repository supports parallel development using multiple implementation approaches through git worktrees when needed for complex tasks with multiple viable solutions.
+```
+stharrold-templates/
+├── mcp_manager.py              # Main: Multi-platform MCP server manager
+├── test_mcp_deduplication.py   # MCP deduplication tests
+├── validate_documentation.sh   # Validation orchestrator (runs 5 test_*.sh scripts)
+├── test_*.sh                   # file_size, cross_references, content_duplication, command_syntax, yaml_structure
+├── tools/                      # Workflow automation (german-workflow v5.3.0 selective integration)
+│   ├── git-helpers/           # create_worktree.py, semantic_version.py
+│   └── workflow-utilities/    # archive_manager.py, directory_structure.py, validate_versions.py
+├── 00_draft-initial/          # New content awaiting integration
+├── 10_draft-merged/           # Production guides (≤30KB, modular CLAUDE.md hierarchy)
+│   ├── CLAUDE.md             # Orchestrator for subdirectories
+│   ├── 10_mcp/               # MCP server configuration
+│   ├── 20_credentials/       # Security and credential management
+│   └── 30_implementation/    # Development patterns and workflows
+├── ARCHIVED/                  # Compressed date-based archives (YYYYMMDD.tar.gz)
+├── TODO.md                    # GitHub issues tracker (#3-#44, 31 open, 1 closed)
+├── CONTRIBUTING.md            # Contributor guidelines and quality standards
+└── docs/reference/            # german-workflow-v5.3.0.md, WORKFLOW-INIT-PROMPT.md
+```
 
 ## Core Architecture
 
-This repository implements a sophisticated **multi-platform management system** with a **structured document lifecycle** and **modular CLAUDE.md orchestration**:
-
-### Document Lifecycle Architecture
+### Document Lifecycle
 ```
 Research → Integration → Archive
    ↓           ↓          ↓
 00_draft-   10_draft-   ARCHIVED/
-initial/    merged/     (UTC timestamps)
+initial/    merged/     (YYYYMMDD.tar.gz)
 ```
 
-**Lifecycle Stages:**
-- **00_draft-initial/**: New content awaiting review and integration
-- **10_draft-merged/**: Production-ready content (≤30KB per file for AI context)
-- **ARCHIVED/**: Compressed date-based archives (YYYYMMDD.tar.gz format for templates, .zip format for workflow tools)
+**Integration Pipeline**: TODO.md tracks 22 GitHub issues → Planning docs → Worktrees → 10_draft-merged/
 
-### Key architectural relationships:
+### MCP Manager Architecture
 
-1. **TODO-Driven Integration Pipeline:**
-   - `TODO.md` tracks 22 GitHub issues (#3-#24) with integration priorities
-   - Completed tasks are archived to ARCHIVED/ as compressed archives
-   - Active integration status visible in TODO.md with clear priority ordering
+**Platform Detection** (`mcp_manager.py`):
+- Auto-detects first available: claude-code → vscode → claude-desktop
+- Platform-specific schemas: `"mcpServers": {}` (Claude) vs `"servers": {}` (VS Code)
+- Config paths: `~/.claude.json` (CLI), platform-specific for VS Code/Desktop
 
-2. **Platform-Specific MCP Management:**
-   - `mcp_manager.py` handles 3 platforms: Claude Code CLI, VS Code MCP, Claude Desktop
-   - Each platform uses different schema: `mcpServers` vs `servers` root keys
-   - Platform auto-detection algorithm in `select_target_platform()` function
+**Key Classes & Functions**:
+- `MCPConfig(platform, config_path)` - Platform-specific configuration handler (mcp_manager.py:97)
+- `select_target_platform()` - Returns first available platform (mcp_manager.py:74)
+- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions (mcp_manager.py:432)
+- `validate_credentials()` - Checks keychain/env for tokens (mcp_manager.py:44)
+- `get_platform_config_paths()` - Returns OS-specific paths (mcp_manager.py:19)
 
-3. **Modular Guide Hierarchy:**
-   - Each directory in `10_draft-merged/` has its own `CLAUDE.md` orchestrator
-   - 30KB file size limit enforced across all modular guides for AI context optimization
-   - Hierarchical navigation: main CLAUDE.md → subdirectory CLAUDE.md → specific guides
-   - Cross-references between related concepts without loading full content
+**Server Management Pattern**:
+- Active: Normal names (e.g., "github")
+- Disabled: DISABLED_ prefix (e.g., "DISABLED_github")
+- Deduplication preserves DISABLED_ versions during cleanup
 
-## Dependencies
+### Modular CLAUDE.md Navigation
 
-### Core Requirements
-- **Python 3.x**: Uses system Python at `/usr/bin/python3`
-- **No external packages**: Uses Python standard library only
-- **Codacy CLI**: For code quality analysis (pre-configured in `./.codacy/cli.sh`)
-- **Git worktrees**: For parallel development workflows
+Hierarchical orchestration pattern:
+1. Main CLAUDE.md (this file) → Repository overview
+2. 10_draft-merged/CLAUDE.md → Subdirectory orchestrator
+3. 10_draft-merged/{subdirectory}/CLAUDE.md → Domain-specific context
+4. Individual guide files → Detailed implementation
 
-### Optional Tools
-- **GitHub CLI (`gh`)**: For PR and issue management
-- **Various MCP servers**: Installed via npm/pip as needed
+**30KB Context Optimization**: Cross-references without loading full content.
 
-## Quick Start
-
-Most common workflows:
-
-```bash
-# Check MCP server status across all platforms
-/usr/bin/python3 mcp_manager.py --status
-
-# Add a new MCP server (interactive)
-/usr/bin/python3 mcp_manager.py --add
-
-# Validate documentation before committing changes
-./validate_documentation.sh
-
-# Create new feature worktree
-git worktree add ../stharrold-templates.worktrees/{feature-name} -b feat/{feature-name}
-```
-
-## Essential Development Commands
-
-### Most Frequently Used
-```bash
-# System status and testing
-/usr/bin/python3 mcp_manager.py --status
-/usr/bin/python3 test_mcp_deduplication.py
-/usr/bin/python3 mcp_manager.py --check-credentials
-
-# Interactive MCP management
-/usr/bin/python3 mcp_manager.py --add
-/usr/bin/python3 mcp_manager.py --backup-only
-
-# Code quality (CRITICAL after edits)
-./.codacy/cli.sh analyze --tool pylint edited_file.py
-
-# Git workflow with unified conventions
-git worktree add ../worktrees/feat/12-task -b feat/12-task
-git commit -m "feat: descriptive message"
-```
-
-### Testing & Validation
-```bash
-# Documentation validation tests (run before committing documentation changes)
-./test_file_size.sh              # Verify 30KB constraints
-./test_cross_references.sh       # Check internal links
-./test_content_duplication.sh    # Detect duplicate content
-./test_command_syntax.sh         # Validate bash commands
-./test_yaml_structure.sh         # Check YAML frontmatter
-./validate_documentation.sh      # Comprehensive validation (orchestrates all 5 tests)
-
-# Core functionality tests
-/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
-
-# Module verification
-python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
-
-# Run single test file with directory target
-./test_file_size.sh 10_draft-merged/30_implementation/  # Test specific directory
-./test_cross_references.sh --verbose                    # Detailed link validation
-./test_content_duplication.sh --threshold 85            # Custom similarity threshold
-
-# Run individual Python tests
-/usr/bin/python3 test_mcp_deduplication.py              # Test deduplication logic
-
-# Test specific files or patterns
-./test_command_syntax.sh 10_draft-merged/**/*.md        # Validate bash commands in markdown
-
-# Shell script permissions (if tests fail with permission errors)
-chmod +x test_*.sh validate_documentation.sh
-```
+## Essential Commands
 
 ### MCP Manager Operations
-```bash
-# System status and platform detection
-/usr/bin/python3 mcp_manager.py --status
 
-# Interactive MCP management (auto-detects platform)
-/usr/bin/python3 mcp_manager.py --add            # Add server
-/usr/bin/python3 mcp_manager.py --remove         # Remove server
-/usr/bin/python3 mcp_manager.py --disable        # Disable servers (DISABLED_ prefix)
-/usr/bin/python3 mcp_manager.py --enable         # Re-enable servers
+```bash
+# Status and platform detection
+/usr/bin/python3 mcp_manager.py --status           # Show all platforms and servers
+/usr/bin/python3 mcp_manager.py --check-credentials # Validate tokens
+
+# Interactive management (auto-detects platform)
+/usr/bin/python3 mcp_manager.py --add              # Add server
+/usr/bin/python3 mcp_manager.py --remove           # Remove server
+/usr/bin/python3 mcp_manager.py --disable          # Disable (DISABLED_ prefix)
+/usr/bin/python3 mcp_manager.py --enable           # Re-enable
 
 # Platform-specific operations
 /usr/bin/python3 mcp_manager.py --platform claude-code --list
 /usr/bin/python3 mcp_manager.py --platform vscode --add
-/usr/bin/python3 mcp_manager.py --platform claude-desktop --remove
 
-# Maintenance operations
-/usr/bin/python3 mcp_manager.py --deduplicate     # Remove duplicates (run after seeing duplicate servers)
-/usr/bin/python3 mcp_manager.py --backup-only    # Create backups without changes
-/usr/bin/python3 mcp_manager.py --check-credentials  # Validate credentials (run before adding auth-required servers)
+# Maintenance
+/usr/bin/python3 mcp_manager.py --deduplicate      # Remove duplicates
+/usr/bin/python3 mcp_manager.py --backup-only      # Create backups
 ```
 
-### Git Worktree Management
+### Validation & Testing
+
 ```bash
-# List all worktrees
-git worktree list
+# Documentation validation (run before committing docs)
+./validate_documentation.sh                        # All 5 tests (orchestrator)
+./test_file_size.sh                               # 30KB limit check
+./test_cross_references.sh                        # Internal links
+./test_content_duplication.sh                     # Duplicate detection
+./test_command_syntax.sh                          # Bash command validation
+./test_yaml_structure.sh                          # YAML frontmatter
 
-# Create new worktree for feature implementation
-git worktree add ../stharrold-templates.worktrees/{feature-name} -b {branch-name}
+# MCP functionality tests
+/usr/bin/python3 test_mcp_deduplication.py        # Deduplication logic
 
-# Switch to worktree
-cd ../stharrold-templates.worktrees/{feature-name}
-
-# Remove completed worktree
-git worktree remove ../stharrold-templates.worktrees/{feature-name}
-
-# Prune deleted worktrees
-git worktree prune
-
-# GitHub Issue synchronization
-gh issue comment <number> --body "completion summary"
-gh issue close <number> --comment "resolution notes"
-
-# Archive completed task files
-mv file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_file.ext
-```
-
-### Specify Workflow Commands
-```bash
-# Create feature specification (creates branch and spec file)
-.specify/scripts/bash/create-new-feature.sh --json "feature description"
-
-# Check task prerequisites
-.specify/scripts/bash/check-task-prerequisites.sh
-
-# Get feature paths for current branch
-.specify/scripts/bash/get-feature-paths.sh
-
-# Setup implementation plan
-.specify/scripts/bash/setup-plan.sh
-```
-
-### Feature Specification Workflow
-```bash
-# Modular CLAUDE.md navigation patterns
-# Always start with the main orchestrator, then follow hierarchical structure:
-# 1. Read main CLAUDE.md for repository overview
-# 2. Navigate to subdirectory CLAUDE.md for specific domain context
-# 3. Access individual guide files through orchestrator navigation
-
-# Example navigation workflow:
-cat 10_draft-merged/CLAUDE.md                     # Main orchestrator
-cat 10_draft-merged/30_implementation/CLAUDE.md   # Implementation context
-cat 10_draft-merged/30_implementation/33_testing-standards.md  # Specific guide
-```
-
-### Testing & Validation
-```bash
-# Documentation validation tests
-./test_file_size.sh              # Verify 30KB constraints
-./test_cross_references.sh       # Check internal links
-./test_content_duplication.sh    # Detect duplicate content
-./test_command_syntax.sh         # Validate bash commands
-./test_yaml_structure.sh         # Check YAML frontmatter
-./validate_documentation.sh      # Comprehensive validation
-
-# Core functionality tests
-/usr/bin/python3 test_mcp_deduplication.py         # Test deduplication functionality
-
-# Module verification
-python3 -c "import mcp_manager; print('MCPConfig available:', hasattr(mcp_manager, 'MCPConfig'))"
-
-# MCP server connectivity (after setup)
-claude mcp list                                   # List configured servers
+# Test specific directory
+./test_file_size.sh 10_draft-merged/30_implementation/
 ```
 
 ### Quality Assurance
+
 ```bash
-# Codacy analysis (8 analysis tools: pylint, bandit, ruff, mypy, prospector, flake8, pydocstyle, pycodestyle)
-./.codacy/cli.sh analyze {file_path}                   # Analyze specific file
-./.codacy/cli.sh analyze 10_draft-merged/              # Analyze directory
-./.codacy/cli.sh analyze --tool pylint mcp_manager.py  # Specific tool analysis
-./.codacy/cli.sh analyze --tool bandit --format json   # Security scan with JSON output
+# Linting and type checking (requires uv sync)
+uv run ruff check .                               # All files
+uv run ruff check --fix .                         # Auto-fix issues
+uv run mypy mcp_manager.py                        # Type checking
 
-# Multi-language analysis support
-./.codacy/cli.sh analyze --help                        # View all available tools and languages
-
-# Python validation
-python3 test_mcp_deduplication.py                      # Run deduplication tests
-python3 -c "import mcp_manager; print('Import successful')"  # Module validation
-
-# File size validation (30KB limit for modular guides)
-wc -c 10_draft-merged/**/*.md                          # Check file sizes
-find 10_draft-merged/ -name "*.md" -size +30k          # Find oversized files
-
-# Virtual environment activation (if .venv detected)
-source .venv/bin/activate                              # Activate local venv
-deactivate                                             # Deactivate when done
+# Codacy analysis (8 tools: pylint, bandit, ruff, mypy, prospector, flake8, pydocstyle, pycodestyle)
+./.codacy/cli.sh analyze mcp_manager.py           # Analyze file
+./.codacy/cli.sh analyze --tool pylint .          # Specific tool
+./.codacy/cli.sh analyze --tool bandit --format json  # Security scan
 ```
 
-### Document Integration Workflow
-```bash
-# 1. Navigate to priority document for integration
-ls 00_draft-initial/                      # Check draft documents awaiting integration
-cat TODO.md                               # Review integration priorities
+### Git Workflow
 
-# 2. Read source and target files
-head -20 00_draft-initial/source.md       # Preview source content
-ls -la 10_draft-merged/target/             # Check target directory structure
-
-# 3. Archive completed task files (individual files get compressed into date-based archives)
-mv completed_file.ext ARCHIVED/$(date -u +"%Y%m%dT%H%M%SZ")_completed_file.ext
-```
-
-## Platform-Specific MCP Configuration
-### File Size Constraints
-- All files in `10_draft-merged/` must be ≤30KB for optimal AI context processing
-- ARCHIVED/ contains compressed archives:
-  - Templates repository format: date-based .tar.gz (YYYYMMDD.tar.gz)
-  - Workflow tools format: timestamped .zip (YYYYMMDDTHHMMSSZ_description.zip)
-- Individual files archived with UTC timestamp format: `YYYYMMDDTHHMMSSZ_filename.ext`
-
-### Platform Differences
-- **Claude Code CLI & Desktop**: Use `"mcpServers": {}` as root key
-- **VS Code MCP Extension**: Uses `"servers": {}` as root key
-- **Config Paths**: `~/.claude.json` (CLI), platform-specific for VS Code/Desktop
-- **Credentials**: Keychain (macOS), Credential Manager (Windows), environment variables (Linux)
-- **Auto-detection**: `--status` shows all platforms, tool auto-selects first available
-- **Explicit targeting**: `--platform <name>` (claude-code, vscode, claude-desktop)
-- **Common tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
-
-
-## MCP Manager Internal Architecture
-
-The `mcp_manager.py` tool implements platform-specific server management:
-
-### Key Functions & Classes:
-- `MCPConfig(platform, config_path)` - Platform-specific configuration handler
-- `select_target_platform()` - Returns first available platform (claude-code, vscode, claude-desktop)
-- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions during cleanup
-- `validate_credentials()` - Checks keychain/credential manager for tokens
-
-### Server Management Pattern:
-- Active servers: Normal names (e.g., "github")
-- Disabled servers: DISABLED_ prefix (e.g., "DISABLED_github")
-- Platform schemas: "mcpServers" (Claude) vs "servers" (VS Code)
-
-### Platform Configuration Paths:
-- **macOS**: `~/.claude.json`, `~/Library/Application Support/Code/User/mcp.json`
-- **Windows**: `~/.claude.json`, `~/AppData/Roaming/Code/User/mcp.json`
-- **Linux**: `~/.claude.json`, `~/.config/Code/User/mcp.json`
-
-## Core Classes and Functions
-
-### mcp_manager.py Architecture
-- `MCPConfig`: Main configuration management class with platform-specific logic
-  - `__init__(platform: str, config_path: Optional[Path] = None)`: Initialize for specific platform
-  - `add_server()`, `remove_server()`: Interactive server management
-  - `disable_server()`, `enable_server()`: DISABLED_ prefix management
-- `select_target_platform()`: Auto-detection algorithm returning first available platform
-- `validate_credentials()`: Cross-platform credential validation for common tokens
-- `deduplicate_servers()`: Intelligent duplicate removal preserving DISABLED_ versions
-
-### Standard Python Import Pattern
-```python
-import mcp_manager
-# Initialize: config = mcp_manager.MCPConfig('claude-code')
-# Auto-detect: platform = mcp_manager.select_target_platform()
-# Validate: results = mcp_manager.validate_credentials()
-```
-
-
-## Git Workflow Conventions
-
-### Branch Naming
-- `feat/` - New features and enhancements
-- `fix/` - Bug fixes
-- `docs/` - Documentation changes
-- `chore/` - Maintenance, dependencies, tooling
-
-### Git Flow Hierarchy
-
-**Branch Structure:**
+**Branch Structure**:
 ```
 main (production)
-  ↓
+  ↑
 develop (integration)
-  ↓
-contrib/stharrold (active development)
-  ↓
-feature worktrees (individual features)
+  ↑
+contrib/stharrold (active development - default branch)
+  ↑
+feature/* (via worktrees)
 ```
 
-**PR Merge Flow (reverse direction):**
-```
-Feature Worktree
-  ↓ PR targets
-contrib/stharrold (working branch)
-  ↓ PR targets
-develop (integration testing)
-  ↓ PR targets
-main (production release)
-```
+**PR Flow**: Feature → contrib/stharrold → develop → main
 
-**Branch Purposes:**
-- **main**: Production-ready code, stable releases
-- **develop**: Integration branch for testing combined features
-- **contrib/stharrold**: Active development branch for ongoing work
-- **worktrees**: Feature-specific development branches
-
-**IMPORTANT**: Always create PRs to the branch your feature was derived from:
-- Feature worktrees → `contrib/stharrold`
-- contrib/stharrold → `develop` (when ready for integration)
-- develop → `main` (for production releases)
-
-### Commit Message Format
+**Worktree Management**:
 ```bash
-git commit -m "feat: descriptive message including issue reference
+# Create feature worktree (using automation tool)
+python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+
+# Manual worktree creation
+git worktree add ../stharrold-templates.worktrees/my-feature -b feat/my-feature
+
+# List and cleanup
+git worktree list
+git worktree remove ../stharrold-templates.worktrees/my-feature
+git worktree prune
+```
+
+**Commit Format**:
+```bash
+git commit -m "feat: descriptive message
 
 Closes #123
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
-## German Workflow System Integration (Selective)
+**Types**: feat, fix, docs, style, refactor, test, chore
 
-This repository integrates select tools from the german workflow system v5.3.0 for automation and quality improvements.
+### Workflow Automation Tools
 
-**Reference Documentation**: See `docs/reference/german-workflow-v5.3.0.md` for complete workflow guide.
-
-### Integrated Tools
-
-Available in `tools/` directory (stdlib-only, no external dependencies):
-
-**workflow-utilities/**
 ```bash
-# Manage compressed archives (.zip format)
-python3 tools/workflow-utilities/archive_manager.py list
-python3 tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118T120000Z_description.zip output/
-
-# Ensure CLAUDE.md and README.md in directories
-python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
-
-# Validate version consistency
-python3 tools/workflow-utilities/validate_versions.py --verbose
-```
-
-**git-helpers/**
-```bash
-# Calculate semantic version from changes
+# Semantic versioning (customized for templates repo)
 python3 tools/git-helpers/semantic_version.py develop v5.0.0
 
-# Create standardized worktree
-python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+# Archive management
+python3 tools/workflow-utilities/archive_manager.py list
+python3 tools/workflow-utilities/archive_manager.py create path/to/file
+
+# Directory structure validation
+python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
+
+# Version consistency
+python3 tools/workflow-utilities/validate_versions.py
 ```
 
-### Development Tools (uv + pyproject.toml)
+## Platform-Specific MCP Configuration
 
-This repository now uses `uv` for development dependency management:
+### Configuration Paths (OS-specific)
 
-```bash
-# Install development dependencies
-uv sync
+**macOS**:
+- Claude Code: `~/.claude.json`
+- VS Code: `~/Library/Application Support/Code/User/mcp.json`
+- Claude Desktop: `~/Library/Application Support/Claude/config.json`
 
-# Run linting
-uv run ruff check .
+**Windows**:
+- Claude Code: `~/.claude.json`
+- VS Code: `~/AppData/Roaming/Code/User/mcp.json`
+- Claude Desktop: `~/AppData/Roaming/Claude/config.json`
 
-# Run type checking
-uv run mypy mcp_manager.py
+**Linux**:
+- Claude Code: `~/.claude.json`
+- VS Code: `~/.config/Code/User/mcp.json`
+- Claude Desktop: `~/.config/claude/config.json`
 
-# Auto-fix linting issues
-uv run ruff check --fix .
+### Schema Differences
+
+**Claude Code & Desktop** (`mcpServers` root key):
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "command",
+      "args": ["arg1"],
+      "env": {"ENV_VAR": "value"}
+    }
+  }
+}
 ```
 
-**Installed dev dependencies:** pytest, pytest-cov, ruff, mypy
-
-### CI/CD Pipelines
-
-Automated testing via GitHub Actions and Azure Pipelines:
-
-- **GitHub Actions**: `.github/workflows/tests.yml`
-- **Azure Pipelines**: `azure-pipelines.yml`
-- **Triggers**: Push/PR to main, develop, contrib/stharrold
-- **Tests**: Documentation validation, MCP manager, deduplication, linting
-
-### NOT Integrated
-
-The following german workflow components are NOT integrated:
-
-- **BMAD planner** - Interactive planning Q&A (Python project focus)
-- **SpecKit author** - Specification generation (Python project focus)
-- **Quality enforcer** - pytest + coverage gates (overkill for docs)
-- **AgentDB state manager** - DuckDB tracking (external dependency)
-- **Full workflow orchestrator** - 6-phase coordinator (not applicable)
-
-### Workflow Philosophy Differences
-
-| Aspect | German Workflow | Templates Repository |
-|--------|-----------------|---------------------|
-| **Purpose** | Multi-phase Python development | MCP configuration + documentation |
-| **Dependencies** | uv + pytest + ruff + mypy | Stdlib + dev tools (optional) |
-| **Testing** | Automated (pytest) | Manual validation scripts |
-| **Documentation** | Phase-based (planning/, specs/) | Numbered lifecycle (00_, 10_) |
-| **Development** | Interactive tools (BMAD, SpecKit) | Manual documentation integration |
-
-**Recommendation**: Use german workflow tools where they add value without disrupting templates repository focus on MCP management and cross-platform configuration.
-
-## Issue Integration Architecture
-
-The repository follows a structured issue-to-implementation pipeline:
-
-1. **GitHub Issues** → Numbered sequentially (#3-24, #31-44)
-2. **Planning Documents** → `TODO_FOR_issue-{number}-{approach}.md`
-3. **Worktrees** → `../stharrold-templates.worktrees/issue/{number}-{approach}`
-4. **Document Order** → Files numbered by source (09_, 11_, 12_) integrate in sequence
-5. **Multi-Approach** → Single issue can have multiple worktrees (claude, bmad, speckit, flow)
-
-Example flow for Issue #15:
-- Source: `00_draft-initial/12_report-baml-documentation-extractor.md`
-- Plan: `TODO_FOR_issue-15-merge-12-baml.md`
-- Worktree: `issue/15-merge-12-baml`
-- Target: `10_draft-merged/30_implementation/42_documentation-patterns.md`
-
-## Integration Priority System
-
-Current priorities (from TODO.md):
-1. **Top Priority**: Issue #13 (Document #11 - embedding model integration)
-2. **Priority 2-5**: Core technical documentation (#15-16, #22-23)
-3. **Security Enhancements**: Issues #3-5 (mcp-secrets-plugin, OAuth 2.1, Auth0)
-4. **Infrastructure**: Testing and monitoring setup (#8-11)
-
-**Completed**: Issue #12 (security workflow integration) - archived in ARCHIVED/
-
-## Common Issues & Solutions
-
-### MCP Manager Issues
-- **Permission errors**: Run `chmod +x mcp_manager.py` or use `python3 mcp_manager.py`
-- **Platform not found**: Use `--status` to see available platforms
-- **Auto-detection issues**: Explicitly specify `--platform <name>`
-
-### Worktree Management Issues
-- **Current state**: No active worktrees (use `git worktree list` to verify)
-- **When needed**: Create worktrees for complex parallel implementations
-- **Cleanup**: Remove worktrees after PR merge to keep repository clean
-
-### Python Development Issues
-- **Import errors**: Use `/usr/bin/python3` for system Python
-- **Configuration not found**: Check platform-specific paths with `--status`
-
-## Development Environment Setup
-
-### Shell Script Execution
-All test and validation scripts require proper permissions. If scripts fail with permission errors:
-```bash
-# Make all shell scripts executable
-chmod +x *.sh test_*.sh validate_documentation.sh
-
-# Or make specific scripts executable as needed
-chmod +x test_file_size.sh test_cross_references.sh
-
-# Verify script permissions
-ls -la *.sh | grep rwx
+**VS Code** (`servers` root key):
+```json
+{
+  "servers": {
+    "server-name": {
+      "command": "command",
+      "args": ["arg1"],
+      "env": {"ENV_VAR": "value"}
+    }
+  }
+}
 ```
 
-### Virtual Environment Management
-The repository supports virtual environments for Python dependencies:
+### Credential Management
+
+**Common Tokens**: GITHUB_TOKEN, OPENAI_API_KEY, ANTHROPIC_API_KEY
+
+**Storage**:
+- macOS: Keychain
+- Windows: Credential Manager
+- Linux: Environment variables (or gnome-keyring)
+
+**Validation**: `--check-credentials` checks keychain/env for tokens
+
+## Development Environment
+
+### Prerequisites
+
 ```bash
-# Create virtual environment (if .venv doesn't exist)
+# Required
+python3 --version     # Python 3.12+ (for dev tools and CI/CD)
+git --version         # Version control
+gh --version          # GitHub CLI (for PR management)
+
+# Optional (for development tools)
+uv --version          # Python package manager
+```
+
+### Setup
+
+```bash
+# Fork and clone
+gh repo fork stharrold/stharrold-templates --clone
+cd stharrold-templates
+
+# Install development dependencies (optional)
+uv sync               # Installs pytest, ruff, mypy
+
+# Test MCP manager
+/usr/bin/python3 mcp_manager.py --status
+
+# Validate documentation
+./validate_documentation.sh
+```
+
+### Virtual Environment (Optional)
+
+```bash
+# Create and activate
 python3 -m venv .venv
-
-# Activate virtual environment
 source .venv/bin/activate  # macOS/Linux
 .venv\Scripts\activate     # Windows
 
-# Verify activation
-which python3              # Should show .venv path
-pip list                   # Show installed packages
-
-# Deactivate when done
+# Deactivate
 deactivate
 ```
+
+## CI/CD Integration
+
+**GitHub Actions** (`.github/workflows/tests.yml`):
+- Runs on: push/PR to main, develop, contrib/stharrold
+- Tests: documentation validation, MCP manager, deduplication, linting, type checking
+
+**Azure Pipelines** (`azure-pipelines.yml`):
+- Alternative CI/CD platform
+- Same test suite as GitHub Actions
+
+## Issue Integration Architecture
+
+**GitHub Issues → Implementation Pipeline**:
+
+1. **GitHub Issues**: #3-#24, #31-#44 (tracked in TODO.md)
+2. **Planning**: `TODO_FOR_issue-{number}-{approach}.md`
+3. **Worktrees**: `../stharrold-templates.worktrees/issue/{number}-{approach}`
+4. **Document Order**: Files numbered by source (09_, 11_, 12_) integrate sequentially
+5. **Multi-Approach**: Single issue can have multiple worktrees (claude, bmad, speckit, flow)
+
+**Current Priorities** (from TODO.md):
+1. Code review feedback (#31-35, #38-39, #41-44)
+2. 🔴 **TOP**: Issue #13 (Document #11 - embedding model integration)
+3. Core technical docs (#15-16, #22-23)
+4. Security enhancements (#3-5)
+5. Infrastructure (#8-11)
 
 ## Critical Guidelines
 
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- Follow the document lifecycle: Research → Integration → Archive (compressed)
-- Use platform-specific MCP management approach (no cross-platform sync)
-- Archive completed tasks to maintain clean repository state
-- Check TODO.md for current integration priorities
-- **Use modular CLAUDE.md navigation**: Start with orchestrators, follow hierarchy
-- **Test before committing**: Run `./validate_documentation.sh` for documentation changes
+- **Test before committing**: Run `./validate_documentation.sh` for docs, linting for code
+- **Follow document lifecycle**: 00_draft-initial → 10_draft-merged → ARCHIVED
+- **Use modular navigation**: Start with CLAUDE.md orchestrators, follow hierarchy
+- **Platform-specific approach**: No cross-platform MCP sync (manage each platform separately)
+- **Archive completed tasks**: Keep repository clean with compressed archives
+- **Stdlib-only for core tools**: Dev tools (pytest, ruff, mypy) are optional
+
+## Common Issues
+
+### MCP Manager
+- **Permission errors**: Use `/usr/bin/python3 mcp_manager.py` or `chmod +x mcp_manager.py`
+- **Platform not found**: Use `--status` to see available platforms
+- **Auto-detection issues**: Explicitly specify `--platform <name>`
+
+### Shell Scripts
+- **Permission denied**: Run `chmod +x *.sh test_*.sh validate_documentation.sh`
+- **Validation failures**: Check specific test output for details
+
+### Development
+- **Import errors**: Use `/usr/bin/python3` for system Python
+- **Configuration not found**: Check platform-specific paths with `--status`
+- **Worktree conflicts**: Remove old worktrees with `git worktree remove` and `git worktree prune`
+
+## German Workflow System Integration (Selective)
+
+Integrated from german workflow v5.3.0:
+
+**Added**:
+- ✅ CI/CD Pipelines (GitHub Actions + Azure Pipelines)
+- ✅ Workflow Tools (tools/ directory - stdlib only)
+- ✅ CONTRIBUTING.md (quality standards, PR process)
+- ✅ Enhanced .gitignore (comprehensive Python exclusions)
+- ✅ pyproject.toml with uv dependency management (dev tools)
+- ✅ Reference documentation (docs/reference/)
+
+**NOT Added** (intentionally):
+- ❌ Full workflow system (.claude/skills/ - 9 skills)
+- ❌ BMAD planner (Python project focus)
+- ❌ SpecKit author (Python project focus)
+- ❌ AgentDB state manager (external dependency conflict)
+- ❌ pytest coverage gates (overkill for docs repo)
+- ❌ German TODO.md format (incompatible with GitHub issues)
+
+See `docs/reference/german-workflow-v5.3.0.md` for complete workflow documentation.
