@@ -2,21 +2,21 @@
 """Test script to verify the deduplication fix for mcp_manager.py"""
 
 import json
+import os
+import sys
 import tempfile
 from pathlib import Path
-import sys
-import os
 
 # Add the current directory to the path to import mcp_manager
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 def test_remove_duplicate_servers():
     """Test the remove_duplicate_servers method to reproduce and verify the fix."""
-    
+
     # Import MCPConfig using standard Python import
     import mcp_manager
-    MCPConfig = mcp_manager.MCPConfig
-    
+    mcp_config_class = mcp_manager.MCPConfig
+
     # Create a temporary config file with duplicates
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         test_config = {
@@ -37,43 +37,43 @@ def test_remove_duplicate_servers():
         }
         json.dump(test_config, f)
         temp_path = Path(f.name)
-    
+
     try:
         # Create MCPConfig instance
-        config = MCPConfig("Test Platform", temp_path, "Test config for deduplication")
-        
+        config = mcp_config_class("Test Platform", temp_path, "Test config for deduplication")
+
         # Load the config
         if not config.load():
             print("❌ Failed to load test config")
             return False
-        
+
         print(f"✓ Loaded test config with {len(config.servers)} active servers")
         print(f"  Config data keys: {list(config.data.keys())}")
-        
+
         # Try to run remove_duplicate_servers - this should fail with AttributeError before fix
         print("\nAttempting deduplication...")
         try:
             result = config.remove_duplicate_servers()
             print(f"✓ Deduplication completed successfully: {result}")
-            
+
             # Verify the duplicate was removed
             if 'github' not in config.data['mcpServers']:
                 print("✓ Active 'github' server was correctly removed")
             else:
                 print("❌ Active 'github' server was not removed")
-                
+
             if 'DISABLED_github' in config.data['mcpServers']:
                 print("✓ DISABLED_github server was correctly kept")
             else:
                 print("❌ DISABLED_github server was not kept")
-                
+
             return True
-            
+
         except AttributeError as e:
             print(f"❌ AttributeError occurred: {e}")
-            print(f"   This is expected before the fix is applied")
+            print("   This is expected before the fix is applied")
             return False
-            
+
     finally:
         # Clean up temp file
         if temp_path.exists():
@@ -83,9 +83,9 @@ def test_remove_duplicate_servers():
 if __name__ == "__main__":
     print("Testing MCPConfig.remove_duplicate_servers() method")
     print("=" * 60)
-    
+
     success = test_remove_duplicate_servers()
-    
+
     print("\n" + "=" * 60)
     if success:
         print("✅ TEST PASSED: Deduplication works correctly")
