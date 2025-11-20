@@ -20,7 +20,17 @@ stharrold-templates/
 ├── test_mcp_deduplication.py   # MCP deduplication tests
 ├── validate_documentation.sh   # Validation orchestrator (runs 5 test_*.sh scripts)
 ├── test_*.sh                   # file_size, cross_references, content_duplication, command_syntax, yaml_structure
-├── tools/                      # Workflow automation (german-workflow v5.3.0 selective integration)
+├── .claude/skills/             # Full german-workflow v1.15.1 skills integration (9 skills)
+│   ├── agentdb-state-manager/ # State management with DuckDB synchronization
+│   ├── bmad-planner/          # BMAD planning (requirements + architecture)
+│   ├── git-workflow-manager/  # Git worktree and release management
+│   ├── initialize-repository/ # Repository initialization
+│   ├── quality-enforcer/      # Quality gates (tests, coverage, linting)
+│   ├── speckit-author/        # SpecKit specifications (spec + plan)
+│   ├── tech-stack-adapter/    # Python/uv/Podman stack detection
+│   ├── workflow-orchestrator/ # Main workflow coordinator
+│   └── workflow-utilities/    # Archive, directory structure, version validation
+├── tools/                      # Workflow automation (german-workflow v1.15.1 stdlib-only scripts)
 │   ├── git-helpers/           # create_worktree.py, semantic_version.py
 │   └── workflow-utilities/    # archive_manager.py, directory_structure.py, validate_versions.py
 ├── 00_draft-initial/          # New content awaiting integration
@@ -346,24 +356,32 @@ deactivate
 - **Configuration not found**: Check platform-specific paths with `--status`
 - **Worktree conflicts**: Remove old worktrees with `git worktree remove` and `git worktree prune`
 
-## German Workflow System Integration (Selective)
+## German Workflow System Integration (Full)
 
-Integrated from german workflow v5.3.0:
+Integrated from german workflow v1.15.1 (updated 2025-11-20):
 
-**Added**:
+**Skills** (`.claude/skills/` - 9 skills):
+- ✅ **workflow-orchestrator** - Main coordinator (~300 lines) with TODO, WORKFLOW, CLAUDE templates
+- ✅ **tech-stack-adapter** - Detects Python/uv/Podman (~200 lines)
+- ✅ **git-workflow-manager** - Git operations (~500 lines): worktree, release, semantic version
+- ✅ **bmad-planner** - BMAD planning (requirements + architecture)
+- ✅ **speckit-author** - SpecKit specifications (spec + plan)
+- ✅ **quality-enforcer** - Quality gates (≥80% coverage, tests, linting)
+- ✅ **agentdb-state-manager** - DuckDB state synchronization (MIT Agent Pattern)
+- ✅ **initialize-repository** - Repository initialization
+- ✅ **workflow-utilities** - Archive, directory structure, version validation
+
+**Infrastructure**:
 - ✅ CI/CD Pipelines (GitHub Actions + Azure Pipelines)
-- ✅ Workflow Tools (tools/ directory - stdlib only)
+- ✅ Workflow Tools (tools/ directory - stdlib only scripts)
 - ✅ CONTRIBUTING.md (quality standards, PR process)
 - ✅ Enhanced .gitignore (comprehensive Python exclusions)
 - ✅ pyproject.toml with uv dependency management (dev tools)
 - ✅ Reference documentation (docs/reference/)
 
-**NOT Added** (intentionally):
-- ❌ Full workflow system (.claude/skills/ - 9 skills)
-- ❌ BMAD planner (Python project focus)
-- ❌ SpecKit author (Python project focus)
-- ❌ AgentDB state manager (external dependency conflict)
-- ❌ pytest coverage gates (overkill for docs repo)
-- ❌ German TODO.md format (incompatible with GitHub issues)
+**Usage**:
+- Skills provide progressive disclosure workflow for complex tasks
+- Use BMAD for planning, SpecKit for specifications, quality-enforcer for gates
+- AgentDB provides state management across worktrees (optional)
 
-See `docs/reference/german-workflow-v5.3.0.md` for complete workflow documentation.
+See `docs/reference/german-workflow-v5.3.0.md` for workflow reference (v5.3.0 documentation snapshot). Latest workflow version in `.tmp/german/` is v1.15.1 (2025-11-18).
