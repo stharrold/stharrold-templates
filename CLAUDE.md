@@ -20,7 +20,7 @@ stharrold-templates/
 ├── test_mcp_deduplication.py   # MCP deduplication tests
 ├── validate_documentation.sh   # Validation orchestrator (runs 5 test_*.sh scripts)
 ├── test_*.sh                   # file_size, cross_references, content_duplication, command_syntax, yaml_structure
-├── tools/                      # Workflow automation (german-workflow v5.3.0 selective integration)
+├── tools/                      # Workflow automation (german-workflow v1.15.1 selective integration)
 │   ├── git-helpers/           # create_worktree.py, semantic_version.py
 │   └── workflow-utilities/    # archive_manager.py, directory_structure.py, validate_versions.py
 ├── 00_draft-initial/          # New content awaiting integration
@@ -348,7 +348,7 @@ deactivate
 
 ## German Workflow System Integration (Selective)
 
-Integrated from german workflow v5.3.0:
+Integrated from german workflow v1.15.1 (updated 2025-11-18):
 
 **Added**:
 - ✅ CI/CD Pipelines (GitHub Actions + Azure Pipelines)
@@ -366,4 +366,4 @@ Integrated from german workflow v5.3.0:
 - ❌ pytest coverage gates (overkill for docs repo)
 - ❌ German TODO.md format (incompatible with GitHub issues)
 
-See `docs/reference/german-workflow-v5.3.0.md` for complete workflow documentation.
+See `docs/reference/german-workflow-v5.3.0.md` for workflow reference (v5.3.0 documentation snapshot). Latest workflow version in `.tmp/german/` is v1.15.1 (2025-11-18).
