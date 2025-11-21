@@ -90,9 +90,9 @@ branch: feature/timestamp_slug
 **Platform Detection**: Auto-detects claude-code → vscode → claude-desktop
 
 **Key Functions**:
-- `MCPConfig(platform, config_path)` - Platform-specific handler (line 97)
-- `select_target_platform()` - Returns first available platform (line 74)
-- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions (line 432)
+- `MCPConfig(platform, config_path)` - Platform-specific handler
+- `select_target_platform()` - Returns first available platform
+- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions
 
 **Schema Differences**:
 - Claude Code & Desktop: `"mcpServers": {}`
@@ -105,6 +105,15 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 ```
 
 **PR Flow**: feature → contrib → develop → main
+
+**Branch Editability:**
+| Branch | Editable | Direct Commits |
+|--------|----------|----------------|
+| `feature/*` | Yes | Yes |
+| `contrib/*` | Yes | Yes |
+| `develop` | No | PRs only |
+| `main` | No | PRs only |
+| `release/*` | Ephemeral | Deleted after merge |
 
 ### Skills System (9 skills in `.claude/skills/`)
 
@@ -167,6 +176,7 @@ gh --version              # GitHub CLI
 ## Critical Guidelines
 
 - **One way to run**: Always use `podman-compose run --rm dev <command>`
+- **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
 - **Follow PR workflow sequence**: finish-feature → archive-todo → sync-agents → start-develop
@@ -181,6 +191,7 @@ gh --version              # GitHub CLI
 | Import errors | Use `podman-compose run --rm dev python` |
 | Platform not found | `mcp_manager.py --status` to check |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
+| Ended on wrong branch | `git checkout contrib/stharrold` |
 
 ## Reference Documentation
 
