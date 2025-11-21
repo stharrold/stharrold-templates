@@ -29,12 +29,10 @@ Ensure you have the required tools installed:
 
 ```bash
 # Required
-python3 --version     # Python 3.12+ (required for development tools and CI/CD)
-git --version         # Version control
-gh --version          # GitHub CLI (for PR management)
-
-# Optional but recommended
-uv --version          # Python package manager (for dev tools)
+podman --version          # Container runtime (Podman 4.0+)
+podman-compose --version  # Container orchestration
+git --version             # Version control
+gh --version              # GitHub CLI (for PR management)
 ```
 
 ### Initial Setup
@@ -45,19 +43,19 @@ uv --version          # Python package manager (for dev tools)
    cd stharrold-templates
    ```
 
-2. **Install development dependencies (optional):**
+2. **Build container:**
    ```bash
-   uv sync  # Installs pytest, ruff, mypy
+   podman-compose build
    ```
 
 3. **Test MCP manager:**
    ```bash
-   /usr/bin/python3 mcp_manager.py --status
+   podman-compose run --rm dev python mcp_manager.py --status
    ```
 
 4. **Run validation scripts:**
    ```bash
-   ./validate_documentation.sh
+   podman-compose run --rm dev ./validate_documentation.sh
    ```
 
 ## Development Workflow
@@ -80,7 +78,7 @@ feature/* (individual features via worktrees)
 
 ```bash
 # Option 1: Using workflow tool (recommended)
-python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+podman-compose run --rm dev python tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
 
 # Option 2: Manual worktree creation
 git worktree add ../stharrold-templates.worktrees/my-feature -b feat/my-feature
@@ -203,7 +201,7 @@ gh pr create \
 - [ ] MCP manager functional (if Python changes)
 - [ ] Documentation updated
 - [ ] Commit messages follow convention
-- [ ] No external dependencies added (stdlib only)
+- [ ] Dependencies added to pyproject.toml if needed
 
 ### 3. Commit Message Format
 
@@ -241,21 +239,20 @@ git push origin --delete feat/my-feature
 ### Python Code Standards
 
 **Core Principles:**
-- **Stdlib only**: No external dependencies for core tools
+- **Containerized**: Use podman-compose for all development
 - **Cross-platform**: Works on macOS, Linux, Windows
-- **System Python**: Use `/usr/bin/python3` in scripts
+- **One way to run**: Always use `podman-compose run --rm dev <command>`
 - **Error handling**: Comprehensive try/except with clear messages
 
-**Development Tools (optional):**
+**Quality Tools:**
 ```bash
-# Linting
-uv run ruff check .
+# Linting with ruff
+podman-compose run --rm dev ruff check .
+podman-compose run --rm dev ruff check --fix .
 
-# Type checking
-uv run mypy mcp_manager.py
-
-# Auto-fix linting issues
-uv run ruff check --fix .
+# Testing with pytest
+podman-compose run --rm dev pytest
+podman-compose run --rm dev pytest --cov=. --cov-report=term
 ```
 
 ### Documentation Standards
@@ -277,20 +274,20 @@ uv run ruff check --fix .
 **Manual Testing:**
 ```bash
 # MCP manager functionality
-/usr/bin/python3 mcp_manager.py --status
-/usr/bin/python3 test_mcp_deduplication.py
+podman-compose run --rm dev python mcp_manager.py --status
+podman-compose run --rm dev pytest test_mcp_deduplication.py
 
 # Documentation validation
-./validate_documentation.sh
+podman-compose run --rm dev ./validate_documentation.sh
 
-# New workflow tools
-python3 tools/workflow-utilities/archive_manager.py list
-python3 tools/git-helpers/semantic_version.py develop v5.0.0
+# Workflow tools
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
 ```
 
 **Automated Testing (CI/CD):**
-- GitHub Actions runs on push/PR
-- Azure Pipelines available
+- GitHub Actions runs on push/PR (same podman-compose setup)
+- Azure Pipelines available (same podman-compose setup)
 - Must pass before merge
 
 ## Workflow Tools Integration
@@ -301,19 +298,19 @@ This repository includes selective tools from german workflow v5.3.0:
 
 ```bash
 # Archive management
-python3 tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
 
 # Directory structure validation
-python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py 10_draft-merged/
 
 # Version consistency checking
-python3 tools/workflow-utilities/validate_versions.py
+podman-compose run --rm dev python tools/workflow-utilities/validate_versions.py
 
 # Semantic versioning
-python3 tools/git-helpers/semantic_version.py develop v5.0.0
+podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
 
 # Worktree creation
-python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+podman-compose run --rm dev python tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
 ```
 
 ### NOT Included from German Workflow
