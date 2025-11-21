@@ -419,6 +419,20 @@ python .claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py \
 4. **DuckDB constraints:** Optimized for OLAP (analytics), not OLTP (transactions)
 5. **No vector search:** Unlike PostgreSQL pgvector
 
+## Academic References
+
+This skill implements the **MIT Agent Synchronization Pattern** based on:
+
+> **Meng, E., & Jackson, D. (2025).** "What You See Is What It Does: A Structural Pattern for Legible Software."
+> *Onward! at SPLASH 2025*. arXiv:2508.14511v1.
+> https://arxiv.org/abs/2508.14511
+
+**Key concepts from the paper:**
+- **Concepts**: Fully independent services (implemented as agents/worktrees)
+- **Synchronizations**: Event-based rules mediating between services (implemented as `agent_synchronizations` table)
+
+The pattern improves incrementality, integrity, and transparency in multi-agent workflows.
+
 ## Version History
 
 **v1.0.0 (2025-11-02):**

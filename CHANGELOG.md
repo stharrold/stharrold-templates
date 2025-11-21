@@ -249,6 +249,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **MIT Agent Synchronization Pattern (Phase 1: Database Schema)** - Healthcare-compliant multi-agent coordination
+  - Based on: Meng, E., & Jackson, D. (2025). "What You See Is What It Does: A Structural Pattern for Legible Software." *Onward! at SPLASH 2025*. arXiv:2508.14511v1. https://arxiv.org/abs/2508.14511
   - Comprehensive DuckDB schema for agent synchronization tracking
   - HIPAA/FDA/IRB-compliant audit trail design (APPEND-ONLY tables)
   - Phase 1 database tables: agent_synchronizations, sync_executions, sync_events, sync_metrics
