@@ -1,0 +1,24 @@
+# podman-compose.yml - Development environment for stharrold-templates
+#
+# Usage:
+#   podman-compose up -d      # Start container in background
+#   podman-compose exec dev bash  # Shell into container
+#   podman-compose down       # Stop and remove container
+#
+# Or with podman directly:
+#   podman-compose run --rm dev pytest
+#   podman-compose run --rm dev uv run ruff check .
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: stharrold-templates:latest
+    container_name: stharrold-templates-dev
+    working_dir: /app
+    volumes:
+      - .:/app:Z
+    stdin_open: true
+    tty: true
+    command: bash
