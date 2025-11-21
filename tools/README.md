@@ -4,7 +4,7 @@ Selective integration of german workflow system tools (v5.3.0) for stharrold-tem
 
 ## Overview
 
-This directory contains cherry-picked workflow automation tools that add value without requiring external dependencies. All tools use Python standard library only.
+This directory contains cherry-picked workflow automation tools from german workflow system v5.3.0. All tools run within the Podman container environment with uv-managed Python 3.11.
 
 ## Directory Structure
 
@@ -21,13 +21,13 @@ Manage compressed archives in ARCHIVED/ directory.
 **Usage:**
 ```bash
 # List all archives
-python3 tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
 
 # Extract archive
-python3 tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118.tar.gz output/
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py extract ARCHIVED/20251118.tar.gz output/
 
 # Create new archive
-python3 tools/workflow-utilities/archive_manager.py create ARCHIVED/20251118.tar.gz file1.md file2.md
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py create ARCHIVED/20251118.tar.gz file1.md file2.md
 ```
 
 ### directory_structure.py
@@ -36,10 +36,10 @@ Ensure CLAUDE.md and README.md exist in all directories with proper YAML frontma
 **Usage:**
 ```bash
 # Validate directory structure
-python3 tools/workflow-utilities/directory_structure.py 10_draft-merged/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py 10_draft-merged/
 
 # Create missing files
-python3 tools/workflow-utilities/directory_structure.py --create 10_draft-merged/new_directory/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py --create 10_draft-merged/new_directory/
 ```
 
 ### validate_versions.py
@@ -48,10 +48,10 @@ Check version consistency across configuration files.
 **Usage:**
 ```bash
 # Check all versions
-python3 tools/workflow-utilities/validate_versions.py
+podman-compose run --rm dev python tools/workflow-utilities/validate_versions.py
 
 # Verbose output with file locations
-python3 tools/workflow-utilities/validate_versions.py --verbose
+podman-compose run --rm dev python tools/workflow-utilities/validate_versions.py --verbose
 ```
 
 ## git-helpers/
@@ -64,7 +64,7 @@ Calculate semantic version from git diff analysis.
 **Usage:**
 ```bash
 # Calculate version bump from develop to HEAD
-python3 tools/git-helpers/semantic_version.py develop v5.0.0
+podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
 
 # Output: v5.1.0 (if new features added)
 ```
@@ -80,7 +80,7 @@ Create standardized git worktrees for parallel development.
 **Usage:**
 ```bash
 # Create feature worktree
-python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+podman-compose run --rm dev python tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
 
 # Creates: ../stharrold-templates.worktrees/feature_<timestamp>_my-feature/
 # Branch: feature/<timestamp>_my-feature
@@ -90,10 +90,19 @@ python3 tools/git-helpers/create_worktree.py feature my-feature contrib/stharrol
 
 These tools follow stharrold-templates design principles:
 
-- **Zero external dependencies**: Python stdlib only
+- **Containerized**: Run via podman-compose for consistency
 - **Cross-platform**: Works on macOS, Linux, Windows
 - **Standalone**: Each tool can be used independently
 - **Well-documented**: Clear usage examples and error messages
+
+## Running Tools
+
+All tools are run via podman-compose:
+
+```bash
+podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
+```
 
 ## Integration with Templates Repository
 
@@ -105,15 +114,19 @@ These tools complement existing templates infrastructure:
 - **semantic_version.py** automates version bumps for releases
 - **create_worktree.py** standardizes worktree creation for parallel development
 
-## Not Included
+## Integrated Skills
 
-The following german workflow components are NOT integrated:
+The following german workflow skills are fully integrated in `.claude/skills/`:
 
-- **BMAD planner** - Interactive planning Q&A (Python project focus)
-- **SpecKit author** - Specification generation (Python project focus)
-- **Quality enforcer** - pytest + coverage gates (overkill for documentation)
-- **AgentDB state manager** - DuckDB tracking (external dependency)
-- **Full workflow orchestrator** - 6-phase coordinator (not applicable)
+- **BMAD planner** - BMAD planning (requirements + architecture)
+- **SpecKit author** - SpecKit specifications (spec + plan)
+- **Quality enforcer** - Quality gates (tests, coverage, linting)
+- **AgentDB state manager** - DuckDB state synchronization
+- **Workflow orchestrator** - Main workflow coordinator
+- **Tech stack adapter** - Python/uv/Podman detection
+- **Git workflow manager** - Git operations and release management
+- **Initialize repository** - Repository initialization
+- **Workflow utilities** - Archive, directory structure, version validation
 
 ## Reference
 

@@ -1,5 +1,5 @@
 # Azure Pipelines CI/CD configuration for stharrold-templates
-# Runs automated validation, tests, and quality checks
+# Uses same podman-compose setup as local development for consistency
 
 trigger:
   branches:
@@ -26,41 +26,31 @@ jobs:
   - checkout: self
     displayName: 'Checkout code'
 
-  - task: UsePythonVersion@0
-    displayName: 'Set up Python 3.12'
-    inputs:
-      versionSpec: '3.12'
-      addToPath: true
+  - script: |
+      pip install podman-compose
+    displayName: 'Install podman-compose'
 
   - script: |
-      curl -LsSf https://astral.sh/uv/install.sh | sh
-      echo "##vso[task.prependpath]$HOME/.cargo/bin"
-    displayName: 'Install uv'
-
-  - script: |
-      uv sync
-    displayName: 'Install dependencies'
+      podman-compose build
+    displayName: 'Build container'
 
   - script: |
       chmod +x validate_documentation.sh test_*.sh
-      ./validate_documentation.sh
+      podman-compose run --rm dev ./validate_documentation.sh
     displayName: 'Run documentation validation'
 
   - script: |
-      python3 test_mcp_deduplication.py
+      podman-compose run --rm dev pytest
+    displayName: 'Run pytest'
+
+  - script: |
+      podman-compose run --rm dev pytest test_mcp_deduplication.py -v
     displayName: 'Run MCP deduplication tests'
 
   - script: |
-      python3 mcp_manager.py --help
+      podman-compose run --rm dev python mcp_manager.py --help
     displayName: 'Test MCP manager'
 
   - script: |
-      uv run ruff check .
+      podman-compose run --rm dev ruff check .
     displayName: 'Run linting (ruff)'
-    continueOnError: true
-
-  - script: |
-      if [ -f mcp_manager.py ]; then uv run mypy mcp_manager.py || true; fi
-      if [ -f test_mcp_deduplication.py ]; then uv run mypy test_mcp_deduplication.py || true; fi
-    displayName: 'Run type checking (mypy)'
-    continueOnError: true
