@@ -4,6 +4,11 @@
 -- Purpose: MIT Agent Synchronization Pattern database schema for multi-agent
 --          coordination with HIPAA/FDA/IRB compliance
 --
+-- Academic Reference:
+--   Meng, E., & Jackson, D. (2025). "What You See Is What It Does: A Structural
+--   Pattern for Legible Software." Onward! at SPLASH 2025. arXiv:2508.14511v1.
+--   https://arxiv.org/abs/2508.14511
+--
 -- Created: 2025-11-16
 -- Issue: #159 - Phase 1 Database Schema Implementation
 -- Blocks: #160 (Phase 2), #161 (Phase 3)
