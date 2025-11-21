@@ -25,7 +25,11 @@ phase: "Phase 1 - Database Schema Implementation"
 
 ## 1. Overview
 
-The AgentDB Sync Schema implements the MIT Agent Synchronization Pattern with full healthcare compliance (HIPAA/FDA/IRB). It provides three core tables for tracking agent synchronization operations, detailed execution logs, and immutable audit trails.
+The AgentDB Sync Schema implements the **MIT Agent Synchronization Pattern** with full healthcare compliance (HIPAA/FDA/IRB). It provides three core tables for tracking agent synchronization operations, detailed execution logs, and immutable audit trails.
+
+**Academic Reference:**
+> Meng, E., & Jackson, D. (2025). "What You See Is What It Does: A Structural Pattern for Legible Software."
+> *Onward! at SPLASH 2025*. arXiv:2508.14511v1. https://arxiv.org/abs/2508.14511
 
 ### 1.1 Key Features
 
