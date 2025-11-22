@@ -1,20 +1,20 @@
 ---
-description: "workflow/5_release → workflow/6_backmerge → (end) | Sync release to develop and contrib"
+description: "workflow/6_release → workflow/7_backmerge → (end) | Sync release to develop and contrib"
 order: 7
-prev: /5_release
+prev: /6_release
 ---
 
-# /6_backmerge - Step 7 of 7
+# /7_backmerge - Step 7 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+**Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
 **Purpose**: Sync release changes back to development branches (PR release to develop, rebase contrib on develop).
 
-**Prerequisites**: Release PR merged to main (from `/5_release`), release branch still exists
+**Prerequisites**: Release PR merged to main (from `/6_release`), release branch still exists
 
 **Outputs**: PR release to develop merged, contrib rebased on develop, release branch deleted
 
-**Next**: Workflow complete. Return to `/0_specify` for next feature.
+**Next**: Workflow complete. Return to `/1_specify` for next feature.
 
 ---
 

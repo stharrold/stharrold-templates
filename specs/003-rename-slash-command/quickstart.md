@@ -33,27 +33,27 @@ ls .claude/commands/workflow.md   # Should fail
 
 ```bash
 # Check each file has correct description with navigation
-head -5 .claude/commands/workflow/0_specify.md
-# Expected: description includes "(start) → workflow/0_specify → workflow/1_plan"
+head -5 .claude/commands/workflow/1_specify.md
+# Expected: description includes "(start) → workflow/1_specify → workflow/2_plan"
 
-head -5 .claude/commands/workflow/1_plan.md
-# Expected: description includes "workflow/0_specify → workflow/1_plan → workflow/2_tasks"
+head -5 .claude/commands/workflow/2_plan.md
+# Expected: description includes "workflow/1_specify → workflow/2_plan → workflow/3_tasks"
 
-head -5 .claude/commands/workflow/2_tasks.md
-# Expected: description includes "workflow/1_plan → workflow/2_tasks → workflow/3_implement"
+head -5 .claude/commands/workflow/3_tasks.md
+# Expected: description includes "workflow/2_plan → workflow/3_tasks → workflow/4_implement"
 
-head -5 .claude/commands/workflow/3_implement.md
-# Expected: description includes "workflow/2_tasks → workflow/3_implement → workflow/4_deploy"
+head -5 .claude/commands/workflow/4_implement.md
+# Expected: description includes "workflow/3_tasks → workflow/4_implement → workflow/5_integrate"
 
-head -5 .claude/commands/workflow/4_deploy.md
-# Expected: description includes "workflow/3_implement → workflow/4_deploy → (end)"
+head -5 .claude/commands/workflow/5_integrate.md
+# Expected: description includes "workflow/4_implement → workflow/5_integrate → (end)"
 ```
 
 ### 4. Verify Commands Work in Claude Code
 
 ```
 # In Claude Code CLI, type:
-/0_specify test feature
+/1_specify test feature
 
 # Should execute the specify workflow
 # Help should show "(project:workflow)" tag
@@ -65,7 +65,7 @@ head -5 .claude/commands/workflow/4_deploy.md
 # Check workflow order documentation
 grep -A 10 "Slash Commands" CLAUDE.md
 
-# Expected: Shows /0_specify, /1_plan, /2_tasks, /3_implement, /4_deploy
+# Expected: Shows /1_specify, /2_plan, /3_tasks, /4_implement, /5_integrate
 ```
 
 ## Success Criteria

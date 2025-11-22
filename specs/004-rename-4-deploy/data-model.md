@@ -19,7 +19,7 @@ next: /<next_command>  # optional, for non-terminal commands
 
 # /<command_name> - Step X of Y
 
-**Workflow**: `/0_specify` → `/1_plan` → ... → `/N_final`
+**Workflow**: `/1_specify` → `/2_plan` → ... → `/N_final`
 
 **Purpose**: <what this step does>
 
@@ -43,13 +43,13 @@ next: /<next_command>  # optional, for non-terminal commands
 
 | Command | Order | Prev | Next | Description |
 |---------|-------|------|------|-------------|
-| `/0_specify` | 1 | (none) | `/1_plan` | Create feature spec |
-| `/1_plan` | 2 | `/0_specify` | `/2_tasks` | Generate design artifacts |
-| `/2_tasks` | 3 | `/1_plan` | `/3_implement` | Generate task list |
-| `/3_implement` | 4 | `/2_tasks` | `/4_integrate` | Execute tasks |
-| `/4_integrate` | 5 | `/3_implement` | `/5_release` | PR feature → contrib → develop |
-| `/5_release` | 6 | `/4_integrate` | `/6_backmerge` | PR develop → release → main |
-| `/6_backmerge` | 7 | `/5_release` | (end) | PR release → develop, rebase contrib |
+| `/1_specify` | 1 | (none) | `/2_plan` | Create feature spec |
+| `/2_plan` | 2 | `/1_specify` | `/3_tasks` | Generate design artifacts |
+| `/3_tasks` | 3 | `/2_plan` | `/4_implement` | Generate task list |
+| `/4_implement` | 4 | `/3_tasks` | `/5_integrate` | Execute tasks |
+| `/5_integrate` | 5 | `/4_implement` | `/6_release` | PR feature → contrib → develop |
+| `/6_release` | 6 | `/5_integrate` | `/7_backmerge` | PR develop → release → main |
+| `/7_backmerge` | 7 | `/6_release` | (end) | PR release → develop, rebase contrib |
 
 ---
 
@@ -111,15 +111,15 @@ def main():
 ```markdown
 ## Slash Commands
 
-**Workflow Order**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate`
+**Workflow Order**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate`
 
-**Release Order**: `/5_release` → `/6_backmerge`
+**Release Order**: `/6_release` → `/7_backmerge`
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
-| 1 | `/0_specify` | (start) → 0 → 1 | Create feature spec |
+| 1 | `/1_specify` | (start) → 0 → 1 | Create feature spec |
 ...
-| 7 | `/6_backmerge` | 5 → 6 → (end) | Sync release to develop/contrib |
+| 7 | `/7_backmerge` | 5 → 6 → (end) | Sync release to develop/contrib |
 ```
 
 **Validation Rules**:
@@ -135,15 +135,15 @@ def main():
 
 ```
 [START]
-    ↓ /0_specify
+    ↓ /1_specify
 [SPECIFIED] (spec.md exists)
-    ↓ /1_plan
+    ↓ /2_plan
 [PLANNED] (plan.md, research.md, data-model.md, contracts/, quickstart.md exist)
-    ↓ /2_tasks
+    ↓ /3_tasks
 [TASKED] (tasks.md exists)
-    ↓ /3_implement
+    ↓ /4_implement
 [IMPLEMENTED] (tasks complete, quality gates pass)
-    ↓ /4_integrate
+    ↓ /5_integrate
 [INTEGRATED] (PR merged to develop)
     ↓ (ready for release)
 ```
@@ -152,9 +152,9 @@ def main():
 
 ```
 [INTEGRATED] (features merged to develop)
-    ↓ /5_release
+    ↓ /6_release
 [RELEASED] (PR merged to main, tagged)
-    ↓ /6_backmerge
+    ↓ /7_backmerge
 [SYNCED] (release merged to develop, contrib rebased)
     ↓ (ready for next feature)
 [START]
