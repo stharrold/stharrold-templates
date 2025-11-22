@@ -76,9 +76,18 @@ branch: feature/timestamp_slug
 
 ## Slash Commands
 
+**Orchestrator**: `/workflow/all` - Run complete workflow with auto-detection and manual gate pauses
+
 **Feature Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate`
 
 **Release Workflow**: `/5_release` → `/6_backmerge`
+
+| Command | Purpose |
+|---------|---------|
+| `/workflow/all` | Orchestrate full workflow (auto-detect state, pause at PR gates) |
+| `/workflow/all new "desc"` | Start new feature from scratch |
+| `/workflow/all release` | Run release workflow (steps 5-6) |
+| `/workflow/all continue` | Resume after PR merge |
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
