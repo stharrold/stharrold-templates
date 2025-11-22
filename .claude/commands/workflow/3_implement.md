@@ -1,13 +1,13 @@
 ---
-description: "workflow/2_tasks → workflow/3_implement → workflow/4_deploy | Execute tasks automatically"
+description: "workflow/2_tasks → workflow/3_implement → workflow/4_integrate | Execute tasks automatically"
 order: 4
 prev: /2_tasks
-next: /4_deploy
+next: /4_integrate
 ---
 
-# /3_implement - Step 4 of 5
+# /3_implement - Step 4 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_deploy`
+**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
 
 **Purpose**: Execute tasks from tasks.md automatically with progress tracking.
 
@@ -15,7 +15,7 @@ next: /4_deploy
 
 **Outputs**: Implemented feature, completed tasks, quality gates passed
 
-**Next**: Run `/4_deploy` to create PRs and complete deployment
+**Next**: Run `/4_integrate` to create PRs and integrate feature
 
 ---
 
@@ -45,7 +45,7 @@ Execute tasks from tasks.md automatically. User can stop/rewind via Claude Code 
    ```bash
    podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
    ```
-8. Report completion and readiness for `/4_deploy`
+8. Report completion and readiness for `/4_integrate`
 
 ## Task Parsing Rules
 
@@ -62,7 +62,7 @@ Execute tasks from tasks.md automatically. User can stop/rewind via Claude Code 
 - Use TodoWrite to track which tasks are complete
 - Never skip a task unless explicitly told to
 
-## Quality Gates (must pass before /4_deploy)
+## Quality Gates (must pass before /4_integrate)
 
 1. Test coverage ≥80%
 2. All tests passing
@@ -86,5 +86,5 @@ Found 12 tasks: T001-T012
 Running quality gates...
 All gates passed ✓
 
-Ready for /4_deploy
+Ready for /4_integrate
 ```

@@ -4,9 +4,9 @@ order: 1
 next: /1_plan
 ---
 
-# /0_specify - Step 1 of 5
+# /0_specify - Step 1 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_deploy`
+**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
 
 **Purpose**: Create feature branch and specification document from natural language description.
 
