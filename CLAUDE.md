@@ -76,7 +76,9 @@ branch: feature/timestamp_slug
 
 ## Slash Commands
 
-**Workflow Order**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_deploy`
+**Feature Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate`
+
+**Release Workflow**: `/5_release` → `/6_backmerge`
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
@@ -84,7 +86,9 @@ branch: feature/timestamp_slug
 | 2 | `/1_plan` | 0 → 1 → 2 | Generate design artifacts (research, data model, contracts) |
 | 3 | `/2_tasks` | 1 → 2 → 3 | Generate ordered task list from design artifacts |
 | 4 | `/3_implement` | 2 → 3 → 4 | Execute tasks automatically with progress tracking |
-| 5 | `/4_deploy` | 3 → 4 → (end) | Create PRs (feature→contrib→develop) |
+| 5 | `/4_integrate` | 3 → 4 → 5 | Create PRs (feature→contrib→develop) |
+| 6 | `/5_release` | 4 → 5 → 6 | Create release (develop→release→main) |
+| 7 | `/6_backmerge` | 5 → 6 → (end) | Sync release (PR to develop, rebase contrib) |
 
 ## Core Architecture
 
