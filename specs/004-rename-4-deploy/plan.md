@@ -115,7 +115,7 @@ specs/004-rename-4-deploy/
 - Update content of `/5_integrate.md`
 - Create `/6_release.md` with release workflow
 - Create `/7_backmerge.md` with backmerge workflow
-- Update navigation in commands 0-3
+- Update navigation in commands 1-4
 - Update all documentation references
 - Create supporting Python scripts if needed
 
