@@ -1,11 +1,11 @@
 ---
-description: "Orchestrate full workflow | Run steps 0-6 with manual gate pauses"
+description: "Orchestrate full workflow | Run steps 1-7 with manual gate pauses"
 order: 0
 ---
 
 # /workflow/all - Workflow Orchestrator
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+**Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
 **Purpose**: Orchestrate the complete workflow, automatically detecting state and pausing at manual gates.
 
@@ -16,8 +16,8 @@ order: 0
 | Mode | Syntax | Description |
 |------|--------|-------------|
 | Default | `/workflow/all` | Detect state, continue from current step |
-| New | `/workflow/all new "description"` | Start fresh from step 0 |
-| Release | `/workflow/all release` | Run steps 5-6 only |
+| New | `/workflow/all new "description"` | Start fresh from step 1 |
+| Release | `/workflow/all release` | Run steps 6-7 only |
 | Continue | `/workflow/all continue` | Resume after manual gate |
 
 ---
@@ -68,24 +68,24 @@ Detected state:
 1. Validate: Description must not be empty
    - If empty: Report error "Usage: /workflow/all new \"feature description\""
 2. Report: `[▶] Starting new feature workflow`
-3. Invoke: `/workflow:0_specify {description}`
-4. Invoke: `/workflow:1_plan`
-5. Invoke: `/workflow:2_tasks`
-6. Invoke: `/workflow:3_implement`
-7. Invoke: `/workflow:4_integrate`
+3. Invoke: `/workflow:1_specify {description}`
+4. Invoke: `/workflow:2_plan`
+5. Invoke: `/workflow:3_tasks`
+6. Invoke: `/workflow:4_implement`
+7. Invoke: `/workflow:5_integrate`
 8. → PAUSE at manual gate (see Step 5)
 
 #### MODE=release
 1. Validate: Branch must be `contrib/*` or `develop`
    - If not: Report error "Release mode requires contrib/* or develop branch"
 2. Report: `[▶] Starting release workflow`
-3. Invoke: `/workflow:5_release`
+3. Invoke: `/workflow:6_release`
 4. → PAUSE at manual gate (see Step 5) - wait for release→main PR merge
    - Instruct user: "After release→main PR is merged, run `/workflow/all continue`"
 
 *(User runs `/workflow/all continue` after merging release→main PR)*
 
-5. Invoke: `/workflow:6_backmerge`
+5. Invoke: `/workflow:7_backmerge`
 6. → PAUSE at manual gate (see Step 5) - wait for release→develop PR merge
    - Instruct user: "After release→develop PR is merged, run `/workflow/all continue`"
 7. Report completion
@@ -105,14 +105,14 @@ Detected state:
 
 | Branch Type | Artifacts | Start From |
 |-------------|-----------|------------|
-| feature | none | Step 0 (/0_specify) |
-| feature | spec only | Step 1 (/1_plan) |
-| feature | spec + research | Step 2 (/2_tasks) |
-| feature | spec + tasks | Step 3 (/3_implement) |
-| feature | all complete | Step 4 (/4_integrate) |
-| contrib | - | Step 5 (/5_release) or suggest |
-| develop | - | Step 5 (/5_release) |
-| release | - | Step 6 (/6_backmerge) |
+| feature | none | Step 1 (/1_specify) |
+| feature | spec only | Step 2 (/2_plan) |
+| feature | spec + research | Step 3 (/3_tasks) |
+| feature | spec + tasks | Step 4 (/4_implement) |
+| feature | all complete | Step 5 (/5_integrate) |
+| contrib | - | Step 6 (/6_release) or suggest |
+| develop | - | Step 6 (/6_release) |
+| release | - | Step 7 (/7_backmerge) |
 | main | - | Suggest: `/workflow/all new "description"` |
 
 2. Report: `Starting from: Step {N} (/{N}_command)`
@@ -120,7 +120,7 @@ Detected state:
 
 ### Step 5: Manual Gate Handling
 
-After `/4_integrate`, `/5_release`, or `/6_backmerge` (pr-develop step), pause and report:
+After `/5_integrate`, `/6_release`, or `/7_backmerge` (pr-develop step), pause and report:
 ```
 ⏸ PAUSED: Manual gate reached
 

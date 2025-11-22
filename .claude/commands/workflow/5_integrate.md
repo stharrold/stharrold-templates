@@ -1,21 +1,21 @@
 ---
-description: "workflow/3_implement → workflow/4_integrate → workflow/5_release | Integrate feature to develop"
+description: "workflow/4_implement → workflow/5_integrate → workflow/6_release | Integrate feature to develop"
 order: 5
-prev: /3_implement
-next: /5_release
+prev: /4_implement
+next: /6_release
 ---
 
-# /4_integrate - Step 5 of 7
+# /5_integrate - Step 5 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+**Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
 **Purpose**: Integrate completed feature work into shared branches (PR to contrib, archive, sync, PR to develop).
 
-**Prerequisites**: Implementation complete, all tasks done, quality gates passed (from `/3_implement`)
+**Prerequisites**: Implementation complete, all tasks done, quality gates passed (from `/4_implement`)
 
 **Outputs**: PR created, TODO archived, configs synced
 
-**Next**: Run `/5_release` to release to production, then `/6_backmerge` to sync back
+**Next**: Run `/6_release` to release to production, then `/7_backmerge` to sync back
 
 ---
 

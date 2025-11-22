@@ -1,21 +1,21 @@
 ---
-description: "workflow/4_integrate → workflow/5_release → workflow/6_backmerge | Release to production"
+description: "workflow/5_integrate → workflow/6_release → workflow/7_backmerge | Release to production"
 order: 6
-prev: /4_integrate
-next: /6_backmerge
+prev: /5_integrate
+next: /7_backmerge
 ---
 
-# /5_release - Step 6 of 7
+# /6_release - Step 6 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+**Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
 **Purpose**: Create release from develop, run quality gates, and create PR to main for production deployment.
 
-**Prerequisites**: Features integrated to develop (from `/4_integrate`), develop has commits since last release
+**Prerequisites**: Features integrated to develop (from `/5_integrate`), develop has commits since last release
 
 **Outputs**: Release branch created, PR to main, tag on main after merge
 
-**Next**: Run `/6_backmerge` after release PR is merged to main
+**Next**: Run `/7_backmerge` after release PR is merged to main
 
 ---
 
