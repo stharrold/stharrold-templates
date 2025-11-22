@@ -1,19 +1,19 @@
-# Contract: /5_release Command
+# Contract: /6_release Command
 
 **Version**: 1.0.0 | **Date**: 2025-11-22
 
 ## Overview
 
-The `/5_release` command creates a release from develop branch, runs quality gates, and creates a PR to main for production deployment.
+The `/6_release` command creates a release from develop branch, runs quality gates, and creates a PR to main for production deployment.
 
 ## Frontmatter Contract
 
 ```yaml
 ---
-description: "workflow/4_integrate → workflow/5_release → workflow/6_backmerge | Release to production"
+description: "workflow/5_integrate → workflow/6_release → workflow/7_backmerge | Release to production"
 order: 6
-prev: /4_integrate
-next: /6_backmerge
+prev: /5_integrate
+next: /7_backmerge
 ---
 ```
 
@@ -21,7 +21,7 @@ next: /6_backmerge
 
 **Prerequisites**:
 - Current branch: `contrib/*` or `develop`
-- Features integrated to develop (from `/4_integrate`)
+- Features integrated to develop (from `/5_integrate`)
 - develop branch has commits since last release
 
 **Arguments**:
@@ -73,5 +73,5 @@ If version not provided:
 ## Navigation
 
 ```
-/4_integrate → /5_release → /6_backmerge
+/5_integrate → /6_release → /7_backmerge
 ```

@@ -2,14 +2,14 @@
 
 **Branch**: `004-rename-4-deploy` | **Date**: 2025-11-22
 
-## Research Topic 1: Current `/4_deploy` Implementation and References
+## Research Topic 1: Current `/5_integrate` Implementation and References
 
 ### Decision
-Rename `/4_deploy` to `/4_integrate` and update all 16 files containing references.
+Rename `/5_integrate` to `/5_integrate` and update all 16 files containing references.
 
 ### Findings
 
-**Files containing `/4_deploy` references:**
+**Files containing `/5_integrate` references:**
 
 | Category | Files | Action Required |
 |----------|-------|-----------------|
@@ -18,7 +18,7 @@ Rename `/4_deploy` to `/4_integrate` and update all 16 files containing referenc
 | Previous specs | `specs/003-rename-slash-command/*` | Already completed, no action |
 | Current specs | `specs/004-rename-4-deploy/*` | N/A (this feature) |
 
-**Current `/4_deploy` behavior:**
+**Current `/5_integrate` behavior:**
 1. `finish-feature` - PR feature → contrib (runs quality gates)
 2. `archive-todo` - Archive TODO files
 3. `sync-agents` - Sync CLAUDE.md → AGENTS.md
@@ -39,7 +39,7 @@ Rename `/4_deploy` to `/4_integrate` and update all 16 files containing referenc
 ## Research Topic 2: Release Workflow Best Practices
 
 ### Decision
-Implement `/5_release` with: develop → release/* branch → PR to main
+Implement `/6_release` with: develop → release/* branch → PR to main
 
 ### Findings
 
@@ -79,7 +79,7 @@ main (production)
 ## Research Topic 3: Backmerge Patterns (PR + Rebase Hybrid)
 
 ### Decision
-Implement `/6_backmerge` with: PR release → develop, then rebase contrib on develop
+Implement `/7_backmerge` with: PR release → develop, then rebase contrib on develop
 
 ### Findings
 
@@ -100,7 +100,7 @@ Implement `/6_backmerge` with: PR release → develop, then rebase contrib on de
 
 **Edge cases:**
 - Merge conflicts during rebase: User must resolve manually
-- No new commits since last release: `/5_release` should warn but allow
+- No new commits since last release: `/6_release` should warn but allow
 
 ### Rationale
 - PR preserves merge commit (traceable release integration)
@@ -124,16 +124,16 @@ Update all documentation to reflect 7-step workflow with clear separation.
 **Documentation structure (current):**
 ```
 Feature workflow (5 steps):
-  /0_specify → /1_plan → /2_tasks → /3_implement → /4_deploy
+  /1_specify → /2_plan → /3_tasks → /4_implement → /5_integrate
 ```
 
 **Documentation structure (proposed):**
 ```
 Feature workflow (5 steps):
-  /0_specify → /1_plan → /2_tasks → /3_implement → /4_integrate
+  /1_specify → /2_plan → /3_tasks → /4_implement → /5_integrate
 
 Release workflow (2 steps):
-  /5_release → /6_backmerge
+  /6_release → /7_backmerge
 ```
 
 **Files requiring updates:**
@@ -150,10 +150,10 @@ Release workflow (2 steps):
 **Navigation string format:**
 ```yaml
 # Current
-description: "workflow/3_implement → workflow/4_deploy → (end)"
+description: "workflow/4_implement → workflow/5_integrate → (end)"
 
 # Updated
-description: "workflow/3_implement → workflow/4_integrate → workflow/5_release"
+description: "workflow/4_implement → workflow/5_integrate → workflow/6_release"
 ```
 
 ### Rationale
@@ -167,9 +167,9 @@ description: "workflow/3_implement → workflow/4_integrate → workflow/5_relea
 
 | Topic | Decision |
 |-------|----------|
-| Rename | `/4_deploy` → `/4_integrate` |
-| New command | `/5_release`: develop → release/* → main |
-| New command | `/6_backmerge`: PR release→develop, rebase contrib on develop |
+| Rename | `/5_integrate` → `/5_integrate` |
+| New command | `/6_release`: develop → release/* → main |
+| New command | `/7_backmerge`: PR release→develop, rebase contrib on develop |
 | Documentation | Update all 16 files with references |
 
 **Ready for Phase 1: Design & Contracts**

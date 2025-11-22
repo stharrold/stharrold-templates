@@ -5,7 +5,7 @@
 
 ## Summary
 
-Rename `/4_deploy` to `/4_integrate` for semantic accuracy, and add `/5_release` and `/6_backmerge` commands to support daily release workflows. This separates the feature integration workflow (0-4) from the release workflow (5-6).
+Rename `/5_integrate` to `/5_integrate` for semantic accuracy, and add `/6_release` and `/7_backmerge` commands to support daily release workflows. This separates the feature integration workflow (0-4) from the release workflow (5-6).
 
 ## Technical Context
 **Language/Version**: Markdown (slash commands), Python 3.11 (pr_workflow.py)
@@ -76,9 +76,9 @@ specs/004-rename-4-deploy/
 └── 6_backmerge.md       # NEW
 
 .claude/skills/git-workflow-manager/scripts/
-├── pr_workflow.py       # Existing (unchanged for /4_integrate)
-├── release_workflow.py  # NEW (for /5_release)
-└── backmerge_workflow.py # NEW (for /6_backmerge)
+├── pr_workflow.py       # Existing (unchanged for /5_integrate)
+├── release_workflow.py  # NEW (for /6_release)
+└── backmerge_workflow.py # NEW (for /7_backmerge)
 ```
 
 **Structure Decision**: Single project (Option 1)
@@ -86,7 +86,7 @@ specs/004-rename-4-deploy/
 ## Phase 0: Outline & Research
 
 **Research Topics**:
-1. Current `/4_deploy` implementation and all references
+1. Current `/5_integrate` implementation and all references
 2. Release workflow best practices (develop -> release -> main)
 3. Backmerge patterns (PR + rebase hybrid)
 4. Documentation update scope
@@ -101,9 +101,9 @@ specs/004-rename-4-deploy/
 3. Documentation files (CLAUDE.md, WORKFLOW.md, etc.)
 
 **Contracts**:
-1. `/4_integrate` - Same contract as current `/4_deploy`
-2. `/5_release` - New contract for release workflow
-3. `/6_backmerge` - New contract for backmerge workflow
+1. `/5_integrate` - Same contract as current `/5_integrate`
+2. `/6_release` - New contract for release workflow
+3. `/7_backmerge` - New contract for backmerge workflow
 
 **Output**: data-model.md, contracts/, quickstart.md
 
@@ -111,10 +111,10 @@ specs/004-rename-4-deploy/
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-- Rename `/4_deploy.md` to `/4_integrate.md`
-- Update content of `/4_integrate.md`
-- Create `/5_release.md` with release workflow
-- Create `/6_backmerge.md` with backmerge workflow
+- Rename `/5_integrate.md` to `/5_integrate.md`
+- Update content of `/5_integrate.md`
+- Create `/6_release.md` with release workflow
+- Create `/7_backmerge.md` with backmerge workflow
 - Update navigation in commands 0-3
 - Update all documentation references
 - Create supporting Python scripts if needed
