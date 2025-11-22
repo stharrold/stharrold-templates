@@ -132,8 +132,8 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 ### Document Lifecycle
 
 ```
-00_draft-initial/ → 10_draft-merged/ → ARCHIVED/
-(research)         (production)       (compressed)
+docs/research/ → docs/guides/ → docs/archived/
+(research)       (production)   (compressed)
 ```
 
 ### AI Config Sync
