@@ -161,6 +161,14 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/s
 
 # Archive management
 podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
+
+# Release workflow (develop → release → main)
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
+# Steps: create-release, run-gates, pr-main, tag-release, full, status
+
+# Backmerge workflow (release → develop, rebase contrib)
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
+# Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 ```
 
 ## MCP Configuration Paths
