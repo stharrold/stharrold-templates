@@ -36,10 +36,10 @@ Ensure CLAUDE.md and README.md exist in all directories with proper YAML frontma
 **Usage:**
 ```bash
 # Validate directory structure
-podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py 10_draft-merged/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py docs/guides/
 
 # Create missing files
-podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py --create 10_draft-merged/new_directory/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py --create docs/guides/new_directory/
 ```
 
 ### validate_versions.py
