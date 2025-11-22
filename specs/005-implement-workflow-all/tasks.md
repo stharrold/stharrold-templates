@@ -23,7 +23,7 @@
 
 - [ ] T007 Add default mode handler to `all.md`: use state detection to determine starting step, execute steps in sequence until manual gate or completion
 
-- [ ] T008 Add manual gate detection to `all.md`: after /4_integrate and /5_release, pause execution and display PR URLs with resume instructions
+- [ ] T008 Add manual gate detection to `all.md`: after /5_integrate and /6_release, pause execution and display PR URLs with resume instructions
 
 - [ ] T009 Add "continue" mode handler to `all.md`: check PR merge status via `gh pr list`, if merged continue to next step, otherwise report waiting status
 
@@ -45,9 +45,9 @@
 
 - [ ] T016 Test default mode: on feature branch with existing artifacts, verify correct starting step detection
 
-- [ ] T017 Test manual gate pause: verify command pauses after /4_integrate and shows PR URLs
+- [ ] T017 Test manual gate pause: verify command pauses after /5_integrate and shows PR URLs
 
-- [ ] T018 Test "release" mode: from contrib branch, verify /5_release and /6_backmerge execution
+- [ ] T018 Test "release" mode: from contrib branch, verify /6_release and /7_backmerge execution
 
 ---
 

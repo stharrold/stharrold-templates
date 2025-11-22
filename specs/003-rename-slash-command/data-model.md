@@ -41,11 +41,11 @@ A markdown file that defines a Claude Code slash command.
 ```
 .claude/commands/
 └── workflow/
-    ├── 0_specify.md   → /0_specify (project:workflow)
-    ├── 1_plan.md      → /1_plan (project:workflow)
-    ├── 2_tasks.md     → /2_tasks (project:workflow)
-    ├── 3_implement.md → /3_implement (project:workflow) ← NEW
-    └── 4_deploy.md    → /4_deploy (project:workflow)
+    ├── 0_specify.md   → /1_specify (project:workflow)
+    ├── 1_plan.md      → /2_plan (project:workflow)
+    ├── 2_tasks.md     → /3_tasks (project:workflow)
+    ├── 3_implement.md → /4_implement (project:workflow) ← NEW
+    └── 4_deploy.md    → /5_integrate (project:workflow)
 ```
 
 ### Frontmatter Examples
@@ -53,48 +53,48 @@ A markdown file that defines a Claude Code slash command.
 **0_specify.md**:
 ```yaml
 ---
-description: "(start) → workflow/0_specify → workflow/1_plan | Create feature spec"
+description: "(start) → workflow/1_specify → workflow/2_plan | Create feature spec"
 order: 1
-next: /1_plan
+next: /2_plan
 ---
 ```
 
 **1_plan.md**:
 ```yaml
 ---
-description: "workflow/0_specify → workflow/1_plan → workflow/2_tasks | Generate design artifacts"
+description: "workflow/1_specify → workflow/2_plan → workflow/3_tasks | Generate design artifacts"
 order: 2
-prev: /0_specify
-next: /2_tasks
+prev: /1_specify
+next: /3_tasks
 ---
 ```
 
 **2_tasks.md**:
 ```yaml
 ---
-description: "workflow/1_plan → workflow/2_tasks → workflow/3_implement | Generate task list"
+description: "workflow/2_plan → workflow/3_tasks → workflow/4_implement | Generate task list"
 order: 3
-prev: /1_plan
-next: /3_implement
+prev: /2_plan
+next: /4_implement
 ---
 ```
 
 **3_implement.md** (NEW):
 ```yaml
 ---
-description: "workflow/2_tasks → workflow/3_implement → workflow/4_deploy | Execute tasks automatically"
+description: "workflow/3_tasks → workflow/4_implement → workflow/5_integrate | Execute tasks automatically"
 order: 4
-prev: /2_tasks
-next: /4_deploy
+prev: /3_tasks
+next: /5_integrate
 ---
 ```
 
 **4_deploy.md**:
 ```yaml
 ---
-description: "workflow/3_implement → workflow/4_deploy → (end) | Execute PR workflow"
+description: "workflow/4_implement → workflow/5_integrate → (end) | Execute PR workflow"
 order: 5
-prev: /3_implement
+prev: /4_implement
 ---
 ```
 
@@ -109,9 +109,9 @@ prev: /3_implement
 
 Each command produces artifacts consumed by the next command in sequence.
 
-## /3_implement Behavior
+## /4_implement Behavior
 
-The new `/3_implement` command:
+The new `/4_implement` command:
 1. Loads `specs/{feature}/tasks.md`
 2. Parses tasks (T001, T002, etc.)
 3. Executes tasks in dependency order
