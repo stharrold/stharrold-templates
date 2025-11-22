@@ -41,7 +41,7 @@ As a developer using the workflow system, I want a single command that runs mult
 
 ### Key Entities
 - **WorkflowState**: Tracks current step, branch, paused status, last completed step
-- **ManualGate**: Points where workflow pauses (after /4_integrate PR creation, after /5_release PR creation)
+- **ManualGate**: Points where workflow pauses (after /4_integrate PR creation, after /5_release PR creation, after /6_backmerge pr-develop step)
 - **StepResult**: Success/failure status, outputs, errors for each executed step
 
 ---

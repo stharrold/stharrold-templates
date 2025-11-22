@@ -34,9 +34,10 @@ The `/workflow/all` command will orchestrate running multiple workflow steps in 
 ## Design Decisions
 
 ### Decision 1: Command Modes
-**Chosen**: Three modes with state detection
+**Chosen**: Four modes with state detection
 - `new "description"` - Start from /0_specify
 - `release` - Run /5_release → /6_backmerge
+- `continue` - Resume after manual gate (PR merge)
 - Default (no args) - Detect state and continue
 
 **Rationale**: Covers all use cases while keeping interface simple
