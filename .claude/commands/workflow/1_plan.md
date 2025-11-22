@@ -5,9 +5,9 @@ prev: /0_specify
 next: /2_tasks
 ---
 
-# /1_plan - Step 2 of 5
+# /1_plan - Step 2 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_deploy`
+**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
 
 **Purpose**: Generate design artifacts (research, data model, contracts, quickstart) from specification.
 
