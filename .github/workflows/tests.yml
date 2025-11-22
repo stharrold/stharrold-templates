@@ -26,13 +26,13 @@ jobs:
           podman-compose run --rm dev ./validate_documentation.sh
 
       - name: Run pytest
-        run: podman-compose run --rm dev pytest
+        run: podman-compose run --rm dev uv run pytest
 
       - name: Run MCP deduplication tests
-        run: podman-compose run --rm dev pytest test_mcp_deduplication.py -v
+        run: podman-compose run --rm dev uv run pytest tests/test_mcp_deduplication.py -v
 
       - name: Test MCP manager
-        run: podman-compose run --rm dev python mcp_manager.py --help
+        run: podman-compose run --rm dev uv run python mcp_manager.py --help
 
       - name: Run linting (ruff)
-        run: podman-compose run --rm dev ruff check .
+        run: podman-compose run --rm dev uv run ruff check .
