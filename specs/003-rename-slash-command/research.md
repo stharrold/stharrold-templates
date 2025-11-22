@@ -12,7 +12,7 @@
 **Rationale**:
 - Per Claude Code documentation, subdirectories create organizational namespaces
 - Commands in subdirectories appear as "(project:workflow)" in help output
-- Actual command invocation uses filename only: `/0_specify`, `/1_plan`, etc.
+- Actual command invocation uses filename only: `/1_specify`, `/2_plan`, etc.
 - Numeric prefixes (0_, 1_, 2_, 3_, 4_) provide explicit execution order
 
 **Alternatives Considered**:
@@ -32,9 +32,9 @@
 **Schema**:
 ```yaml
 ---
-description: "(start) → workflow/0_specify → workflow/1_plan | Create feature spec"
+description: "(start) → workflow/1_specify → workflow/2_plan | Create feature spec"
 order: 1
-next: /1_plan
+next: /2_plan
 ---
 ```
 
@@ -45,7 +45,7 @@ next: /1_plan
 **Files to Update**:
 1. `.claude/commands/workflow/*.md` - The command files themselves
 2. `CLAUDE.md` - Slash commands section
-3. Command internal references (`/specify` → `/0_specify`, etc.)
+3. Command internal references (`/specify` → `/1_specify`, etc.)
 
 ## Resolved Clarifications
 

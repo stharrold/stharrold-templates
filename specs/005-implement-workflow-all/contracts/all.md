@@ -28,7 +28,7 @@ order: 0
 | Input | Type | Required | Description |
 |-------|------|----------|-------------|
 | mode | string | No | "new", "release", "continue", or empty |
-| description | string | If mode=new | Feature description for /0_specify |
+| description | string | If mode=new | Feature description for /1_specify |
 
 ### Outputs
 | Output | Condition | Description |
@@ -118,13 +118,13 @@ Then:
 Detected state:
   Branch: 005-implement-workflow-all (feature)
   Artifacts: spec.md, research.md, tasks.md
-  Starting from: Step 3 (/3_implement)
+  Starting from: Step 3 (/4_implement)
 
-[▶] Step 3: /3_implement
+[▶] Step 3: /4_implement
     ... (step output) ...
 [✓] Step 3: Complete
 
-[▶] Step 4: /4_integrate
+[▶] Step 4: /5_integrate
     ... (step output) ...
 [✓] Step 4: Complete
 
@@ -157,7 +157,7 @@ Next: Run /workflow/all release when ready to deploy
 ```
 /workflow/all - Error
 
-✗ Step 3 failed: /3_implement
+✗ Step 3 failed: /4_implement
 
 Error: Test failure
   File: tests/test_workflow.py
