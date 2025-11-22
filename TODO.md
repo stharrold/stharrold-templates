@@ -62,12 +62,12 @@ Last sync: 2025-09-16 22:45 UTC (Reorganized document integration by numerical o
 
 ## Completed Tasks
 - ✅ **Issue #12**: Workflow secrets integration (closed 2025-09-16) - commits f687068, 880dd33
-  - Source: `00_draft-initial/09_workflow-secrets-mcp.md` (archived)
-  - Target: Enhanced `10_draft-merged/20_credentials/25_mcp-security-tools.md` (29KB)
+  - Source: `docs/research/09_workflow-secrets-mcp.md` (archived)
+  - Target: Enhanced `docs/guides/20_credentials/25_mcp-security-tools.md` (29KB)
   - Implementation: Practical workflow examples, platform-specific verification, error handling
   - Status: Closed and merged to main
 
-See `ARCHIVED/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
+See `docs/archived/20250914T*_TODO.md` for v4.0 migration history (13/13 complete)
 
 ## Sync Status
 - **GitHub Issues**: 32 total (#3-24, #31-35, #38-39, #41-44) - 31 open, 1 closed (#12)

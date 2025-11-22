@@ -106,7 +106,7 @@ git push origin contrib/stharrold --force-with-lease
 
 When adding templates for new MCP servers:
 
-1. **Document in 10_draft-merged/**
+1. **Document in docs/guides/**
    - Create guide following modular CLAUDE.md pattern
    - Keep file size ≤30KB for AI context optimization
    - Include server configuration, credentials, platform compatibility
@@ -163,7 +163,7 @@ All directories must have:
 
 ### File Size Constraints
 
-- All files in `10_draft-merged/` must be ≤30KB
+- All files in `docs/guides/` must be ≤30KB
 - Use modular structure with cross-references
 - ARCHIVED/ uses compressed date-based archives (YYYYMMDD.tar.gz)
 
@@ -301,7 +301,7 @@ This repository includes selective tools from german workflow v5.3.0:
 podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
 
 # Directory structure validation
-podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py 10_draft-merged/
+podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py docs/guides/
 
 # Version consistency checking
 podman-compose run --rm dev python tools/workflow-utilities/validate_versions.py
