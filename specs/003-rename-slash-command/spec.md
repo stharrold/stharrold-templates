@@ -7,10 +7,10 @@
 
 ---
 
-## � Quick Guidelines
+## Quick Guidelines
 -  Focus on WHAT users need and WHY
-- L Avoid HOW to implement (no tech stack, APIs, code structure)
-- =e Written for business stakeholders, not developers
+- Avoid HOW to implement (no tech stack, APIs, code structure)
+- Written for business stakeholders, not developers
 
 ---
 

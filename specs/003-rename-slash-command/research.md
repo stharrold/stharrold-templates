@@ -13,7 +13,7 @@
 - Per Claude Code documentation, subdirectories create organizational namespaces
 - Commands in subdirectories appear as "(project:workflow)" in help output
 - Actual command invocation uses filename only: `/0_specify`, `/1_plan`, etc.
-- Numeric prefixes (0_, 1_, 2_, 3_) provide explicit execution order
+- Numeric prefixes (0_, 1_, 2_, 3_, 4_) provide explicit execution order
 
 **Alternatives Considered**:
 - Flat structure with prefixes only → Rejected: loses namespace organization benefits
@@ -26,7 +26,7 @@
 
 **Rationale**:
 - `description`: Updated to include navigation flow
-- `order`: Numeric order preserved (1, 2, 3, 4)
+- `order`: Numeric order preserved (1, 2, 3, 4, 5)
 - `prev`/`next`: Updated to reference new command names
 
 **Schema**:
@@ -51,6 +51,6 @@ next: /1_plan
 
 | Item | Resolution |
 |------|------------|
-| Command naming | `0_specify`, `1_plan`, `2_tasks`, `3_deploy` |
+| Command naming | `0_specify`, `1_plan`, `2_tasks`, `3_implement`, `4_deploy` |
 | Directory structure | `.claude/commands/workflow/` |
 | Navigation format | "workflow/<prev> → workflow/<current> → workflow/<next>" |
