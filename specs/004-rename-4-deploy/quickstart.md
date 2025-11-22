@@ -4,7 +4,7 @@
 
 ## Overview
 
-This feature renames `/5_integrate` to `/5_integrate` and adds `/6_release` and `/7_backmerge` commands for daily release workflows.
+This feature renames `/4_deploy` to `/5_integrate` and adds `/6_release` and `/7_backmerge` commands for daily release workflows.
 
 ## New Workflow Structure
 
@@ -34,7 +34,7 @@ This feature renames `/5_integrate` to `/5_integrate` and adds `/6_release` and 
 
 ```bash
 # Old way (no longer works)
-/5_integrate
+/4_deploy
 
 # New way
 /5_integrate
@@ -73,8 +73,8 @@ This feature renames `/5_integrate` to `/5_integrate` and adds `/6_release` and 
 
 ### After Implementation
 
-- [ ] `/5_integrate` no longer exists (renamed to `/5_integrate`)
-- [ ] `/5_integrate` has same behavior as old `/5_integrate`
+- [ ] `/4_deploy` no longer exists (renamed to `/5_integrate`)
+- [ ] `/5_integrate` has same behavior as old `/4_deploy`
 - [ ] `/6_release` creates release branch and PR to main
 - [ ] `/7_backmerge` creates PR to develop and rebases contrib
 - [ ] All navigation strings updated in commands 0-6
@@ -104,22 +104,22 @@ This feature renames `/5_integrate` to `/5_integrate` and adds `/6_release` and 
 ### For Existing Users
 
 The only breaking change is the command name:
-- Old: `/5_integrate`
+- Old: `/4_deploy`
 - New: `/5_integrate`
 
-All functionality is preserved. Update any scripts or documentation that reference `/5_integrate`.
+All functionality is preserved. Update any scripts or documentation that reference `/4_deploy`.
 
 ### For Documentation
 
 Search and replace in all documentation:
-- `/5_integrate` → `/5_integrate`
+- `/4_deploy` → `/5_integrate`
 - "deploy" → "integrate" (in workflow context)
 
 ## Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
-| `/5_integrate` not found | Use `/5_integrate` instead |
+| `/4_deploy` not found | Use `/5_integrate` instead |
 | `/6_release` fails with "no changes" | Ensure develop has commits since last release |
 | `/7_backmerge` rebase conflicts | Resolve conflicts manually, run `git rebase --continue` |
 | Wrong branch after workflow | Run `git checkout contrib/<username>` |
