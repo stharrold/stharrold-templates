@@ -25,7 +25,7 @@ Sync release changes back to development branches.
 ## Workflow Steps (in order)
 
 1. **pr-develop** - Create PR from release branch to develop
-2. **merge-pr** - Merge the PR after approval
+2. **(Manual)** - Merge the PR in GitHub UI after approval
 3. **rebase-contrib** - Rebase contrib branch on updated develop
 4. **cleanup-release** - Delete release branch
 
@@ -51,7 +51,7 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/b
 ## Available Steps
 
 - `pr-develop` - Create PR from release to develop
-- `merge-pr` - Merge the PR (requires approval)
+- **(Manual step)** - Merge the PR in GitHub UI after approval
 - `rebase-contrib` - Rebase contrib/* on develop
 - `cleanup-release` - Delete release branch locally and remotely
 - `full` - Run all steps in sequence

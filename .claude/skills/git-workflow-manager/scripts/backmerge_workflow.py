@@ -18,7 +18,6 @@ Steps:
 import argparse
 import subprocess
 import sys
-from pathlib import Path
 
 
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:

@@ -45,7 +45,7 @@ next: (none - end of workflow)
 | Step | Command | Input | Output |
 |------|---------|-------|--------|
 | 1 | `pr-develop` | release/* branch | PR release → develop |
-| 2 | `merge-pr` | PR number | develop updated |
+| 2 | *(Manual GitHub PR merge)* | PR approval | develop updated |
 | 3 | `rebase-contrib` | contrib/* branch | contrib rebased on develop |
 | 4 | `cleanup-release` | release/* branch | branch deleted |
 
