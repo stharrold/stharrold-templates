@@ -1,19 +1,19 @@
-# Contract: /4_integrate Command
+# Contract: /5_integrate Command
 
 **Version**: 1.0.0 | **Date**: 2025-11-22
 
 ## Overview
 
-The `/4_integrate` command (renamed from `/4_deploy`) integrates completed feature work into shared branches via PRs.
+The `/5_integrate` command (renamed from `/4_deploy`) integrates completed feature work into shared branches via PRs.
 
 ## Frontmatter Contract
 
 ```yaml
 ---
-description: "workflow/3_implement → workflow/4_integrate → workflow/5_release | Integrate feature to develop"
+description: "workflow/4_implement → workflow/5_integrate → workflow/6_release | Integrate feature to develop"
 order: 5
-prev: /3_implement
-next: /5_release
+prev: /4_implement
+next: /6_release
 ---
 ```
 
@@ -21,7 +21,7 @@ next: /5_release
 
 **Prerequisites**:
 - Current branch: `feature/*` (for finish-feature step)
-- Implementation complete (from `/3_implement`)
+- Implementation complete (from `/4_implement`)
 - All tasks marked complete
 - Quality gates passing
 
@@ -59,5 +59,5 @@ next: /5_release
 ## Navigation
 
 ```
-/3_implement → /4_integrate → /5_release
+/4_implement → /5_integrate → /6_release
 ```

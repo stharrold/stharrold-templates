@@ -5,7 +5,7 @@
 
 ## Summary
 
-Reorganize project slash commands into `workflow/` namespace subdirectory with numeric prefixes (0_, 1_, 2_, 3_, 4_) for explicit execution order. Create new `/3_implement` command for automated task execution. Update all command descriptions to include navigation flow showing previous and next commands.
+Reorganize project slash commands into `workflow/` namespace subdirectory with numeric prefixes (0_, 1_, 2_, 3_, 4_) for explicit execution order. Create new `/4_implement` command for automated task execution. Update all command descriptions to include navigation flow showing previous and next commands.
 
 ## Technical Context
 
@@ -98,7 +98,7 @@ See [quickstart.md](./quickstart.md) for:
 **Task Generation Strategy**:
 - Create workflow/ directory
 - Move and rename each existing command file (4 files)
-- Create new /3_implement command file
+- Create new /4_implement command file
 - Update frontmatter in each file (descriptions with navigation)
 - Update internal command references within each file
 - Update CLAUDE.md documentation
@@ -108,7 +108,7 @@ See [quickstart.md](./quickstart.md) for:
 **Ordering Strategy**:
 1. Create directory structure first
 2. Create new files with updated content [P] (parallel - independent files)
-3. Create /3_implement.md (new command)
+3. Create /4_implement.md (new command)
 4. Update CLAUDE.md documentation
 5. Remove old files (after new files verified)
 6. Run verification

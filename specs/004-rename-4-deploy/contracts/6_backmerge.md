@@ -1,18 +1,18 @@
-# Contract: /6_backmerge Command
+# Contract: /7_backmerge Command
 
 **Version**: 1.0.0 | **Date**: 2025-11-22
 
 ## Overview
 
-The `/6_backmerge` command syncs release changes back to development branches: PR release to develop, then rebase contrib on develop.
+The `/7_backmerge` command syncs release changes back to development branches: PR release to develop, then rebase contrib on develop.
 
 ## Frontmatter Contract
 
 ```yaml
 ---
-description: "workflow/5_release → workflow/6_backmerge → (end) | Sync release to develop and contrib"
+description: "workflow/6_release → workflow/7_backmerge → (end) | Sync release to develop and contrib"
 order: 7
-prev: /5_release
+prev: /6_release
 next: (none - end of workflow)
 ---
 ```
@@ -20,7 +20,7 @@ next: (none - end of workflow)
 ## Input Contract
 
 **Prerequisites**:
-- Release PR merged to main (from `/5_release`)
+- Release PR merged to main (from `/6_release`)
 - release/* branch still exists
 - Tag created on main
 
@@ -84,7 +84,7 @@ git push --force-with-lease
 | Condition | Error | Recovery |
 |-----------|-------|----------|
 | Release branch not found | "Release branch does not exist" | Check version, may already be cleaned up |
-| Release not merged to main | "Release not yet merged" | Complete `/5_release` first |
+| Release not merged to main | "Release not yet merged" | Complete `/6_release` first |
 | Rebase conflicts | "Conflicts during rebase" | Resolve manually, continue rebase |
 | Force push rejected | "Push rejected" | Check branch protection, use --force-with-lease |
 
@@ -99,12 +99,12 @@ If rebase conflicts occur:
 ## Navigation
 
 ```
-/5_release → /6_backmerge → (end)
+/6_release → /7_backmerge → (end)
 ```
 
 ## Workflow Completion
 
-After `/6_backmerge`:
+After `/7_backmerge`:
 - All branches synced
 - Ready for new feature cycle
-- Return to `/0_specify` for next feature
+- Return to `/1_specify` for next feature

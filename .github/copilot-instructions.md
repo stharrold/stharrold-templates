@@ -78,26 +78,26 @@ branch: feature/timestamp_slug
 
 **Orchestrator**: `/workflow/all` - Run complete workflow with auto-detection and manual gate pauses
 
-**Feature Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate`
+**Feature Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate`
 
-**Release Workflow**: `/5_release` → `/6_backmerge`
+**Release Workflow**: `/6_release` → `/7_backmerge`
 
 | Command | Purpose |
 |---------|---------|
 | `/workflow/all` | Orchestrate full workflow (auto-detect state, pause at PR gates) |
 | `/workflow/all new "desc"` | Start new feature from scratch |
-| `/workflow/all release` | Run release workflow (steps 5-6) |
+| `/workflow/all release` | Run release workflow (steps 6-7) |
 | `/workflow/all continue` | Resume after PR merge |
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
-| 1 | `/0_specify` | (start) → 0 → 1 | Create feature branch and specification |
-| 2 | `/1_plan` | 0 → 1 → 2 | Generate design artifacts (research, data model, contracts) |
-| 3 | `/2_tasks` | 1 → 2 → 3 | Generate ordered task list from design artifacts |
-| 4 | `/3_implement` | 2 → 3 → 4 | Execute tasks automatically with progress tracking |
-| 5 | `/4_integrate` | 3 → 4 → 5 | Create PRs (feature→contrib→develop) |
-| 6 | `/5_release` | 4 → 5 → 6 | Create release (develop→release→main) |
-| 7 | `/6_backmerge` | 5 → 6 → (end) | Sync release (PR to develop, rebase contrib) |
+| 1 | `/1_specify` | (start) → 1 → 2 | Create feature branch and specification |
+| 2 | `/2_plan` | 1 → 2 → 3 | Generate design artifacts (research, data model, contracts) |
+| 3 | `/3_tasks` | 2 → 3 → 4 | Generate ordered task list from design artifacts |
+| 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks automatically with progress tracking |
+| 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs (feature→contrib→develop) |
+| 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
+| 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
 
 ## Core Architecture
 
@@ -219,7 +219,8 @@ gh --version              # GitHub CLI
 
 ## Reference Documentation
 
-- `WORKFLOW.md` - Complete 6-phase workflow guide (v5.3.0)
+- `WORKFLOW.md` - Complete 7-phase workflow guide
 - `ARCHITECTURE.md` - System architecture analysis
-- `CHANGELOG.md` - Version history
+- `CHANGELOG.md` - Version history (current: v5.7.0)
 - `docs/reference/` - Workflow reference docs
+- `specs/` - Feature specifications with design artifacts
