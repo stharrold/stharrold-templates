@@ -76,12 +76,14 @@ branch: feature/timestamp_slug
 
 ## Slash Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/plan` | Execute implementation planning workflow |
-| `/specify` | Create/update feature specification |
-| `/tasks` | Generate tasks.md from design artifacts |
-| `/workflow` | Execute PR workflow steps |
+**Workflow Order**: `/specify` → `/plan` → `/tasks` → *(implement)* → `/workflow`
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/specify` | Create feature branch and specification |
+| 2 | `/plan` | Generate design artifacts (research, data model, contracts) |
+| 3 | `/tasks` | Generate ordered task list from design artifacts |
+| 4 | `/workflow` | Create PRs (feature→contrib→develop) |
 
 ## Core Architecture
 
