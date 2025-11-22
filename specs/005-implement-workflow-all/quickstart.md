@@ -10,7 +10,7 @@ The `/workflow/all` command orchestrates the complete 7-step workflow, automatic
 ```
 /workflow/all new "add dark mode toggle to settings"
 ```
-Runs: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate`
+Runs: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate`
 
 Pauses at: PR merges (feature→contrib, contrib→develop)
 
@@ -24,7 +24,7 @@ Detects merged PRs and continues to next step.
 ```
 /workflow/all release
 ```
-Runs: `/5_release` → `/6_backmerge`
+Runs: `/6_release` → `/7_backmerge`
 
 Pauses at: PR merges (release→main, release→develop)
 
@@ -41,11 +41,11 @@ Detects current state from branch and artifacts, continues from appropriate step
 > /workflow/all new "implement user preferences API"
 
 Detected state: Starting fresh
-[▶] Step 0: /0_specify ... [✓]
-[▶] Step 1: /1_plan    ... [✓]
-[▶] Step 2: /2_tasks   ... [✓]
-[▶] Step 3: /3_implement ... [✓]
-[▶] Step 4: /4_integrate ... [✓]
+[▶] Step 0: /1_specify ... [✓]
+[▶] Step 1: /2_plan    ... [✓]
+[▶] Step 2: /3_tasks   ... [✓]
+[▶] Step 3: /4_implement ... [✓]
+[▶] Step 4: /5_integrate ... [✓]
 
 ⏸ PAUSED: Manual gate - PR merges required
   • PR #67: feature→contrib
@@ -59,7 +59,7 @@ Run: /workflow/all continue (after merging PRs)
 > /workflow/all continue
 
 Detected state: PRs merged, ready for release
-[▶] Step 5: /5_release ... [✓]
+[▶] Step 5: /6_release ... [✓]
 
 ⏸ PAUSED: Manual gate - PR merge required
   • PR #69: release→main
@@ -72,7 +72,7 @@ Run: /workflow/all continue (after merging PR)
 > /workflow/all continue
 
 Detected state: Release merged, backmerge pending
-[▶] Step 6: /6_backmerge ... [✓]
+[▶] Step 6: /7_backmerge ... [✓]
 
 ✓ Workflow complete!
   Branch: contrib/stharrold
@@ -97,15 +97,15 @@ The command automatically detects your state:
 
 The workflow pauses at these points requiring human action:
 
-1. **After `/4_integrate`**: Merge feature→contrib and contrib→develop PRs
-2. **After `/5_release`**: Merge release→main PR
-3. **After `/6_backmerge` (pr-develop)**: Merge release→develop PR
+1. **After `/5_integrate`**: Merge feature→contrib and contrib→develop PRs
+2. **After `/6_release`**: Merge release→main PR
+3. **After `/7_backmerge` (pr-develop)**: Merge release→develop PR
 
 ## Error Recovery
 
 If a step fails:
 ```
-✗ Step 3 failed: /3_implement
+✗ Step 3 failed: /4_implement
 Error: Test failure in test_auth.py
 
 To retry: /workflow/all

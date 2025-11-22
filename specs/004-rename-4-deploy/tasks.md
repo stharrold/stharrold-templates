@@ -12,25 +12,25 @@
 
 ## Phase 3.1: Setup (Command Rename)
 
-- [ ] T001 Rename `.claude/commands/workflow/4_deploy.md` to `.claude/commands/workflow/4_integrate.md` using `git mv`
-- [ ] T002 Update frontmatter in `.claude/commands/workflow/4_integrate.md`: change description to "workflow/3_implement → workflow/4_integrate → workflow/5_release | Integrate feature to develop", add `next: /5_release`
-- [ ] T003 Update body content in `.claude/commands/workflow/4_integrate.md`: change "Step 5 of 5" to "Step 5 of 7", update workflow string to include all 7 commands, change "deploy" references to "integrate"
+- [ ] T001 Rename `.claude/commands/workflow/5_integrate.md` to `.claude/commands/workflow/5_integrate.md` using `git mv`
+- [ ] T002 Update frontmatter in `.claude/commands/workflow/5_integrate.md`: change description to "workflow/4_implement → workflow/5_integrate → workflow/6_release | Integrate feature to develop", add `next: /6_release`
+- [ ] T003 Update body content in `.claude/commands/workflow/5_integrate.md`: change "Step 5 of 5" to "Step 5 of 7", update workflow string to include all 7 commands, change "deploy" references to "integrate"
 
 ## Phase 3.2: New Command Files
 
-- [ ] T004 [P] Create `.claude/commands/workflow/5_release.md` with frontmatter: description="workflow/4_integrate → workflow/5_release → workflow/6_backmerge | Release to production", order=6, prev=/4_integrate, next=/6_backmerge
-- [ ] T005 [P] Create `.claude/commands/workflow/6_backmerge.md` with frontmatter: description="workflow/5_release → workflow/6_backmerge → (end) | Sync release to develop and contrib", order=7, prev=/5_release
+- [ ] T004 [P] Create `.claude/commands/workflow/6_release.md` with frontmatter: description="workflow/5_integrate → workflow/6_release → workflow/7_backmerge | Release to production", order=6, prev=/5_integrate, next=/7_backmerge
+- [ ] T005 [P] Create `.claude/commands/workflow/7_backmerge.md` with frontmatter: description="workflow/6_release → workflow/7_backmerge → (end) | Sync release to develop and contrib", order=7, prev=/6_release
 
 ## Phase 3.3: Update Existing Command Navigation
 
-- [ ] T006 [P] Update `.claude/commands/workflow/0_specify.md`: change workflow string from 5 steps to 7 steps, update "Step 1 of 5" to "Step 1 of 7"
-- [ ] T007 [P] Update `.claude/commands/workflow/1_plan.md`: change workflow string from 5 steps to 7 steps, update "Step 2 of 5" to "Step 2 of 7"
-- [ ] T008 [P] Update `.claude/commands/workflow/2_tasks.md`: change workflow string from 5 steps to 7 steps, update "Step 3 of 5" to "Step 3 of 7"
-- [ ] T009 [P] Update `.claude/commands/workflow/3_implement.md`: change description to "workflow/2_tasks → workflow/3_implement → workflow/4_integrate", change workflow string, update "Step 4 of 5" to "Step 4 of 7"
+- [ ] T006 [P] Update `.claude/commands/workflow/1_specify.md`: change workflow string from 5 steps to 7 steps, update "Step 1 of 5" to "Step 1 of 7"
+- [ ] T007 [P] Update `.claude/commands/workflow/2_plan.md`: change workflow string from 5 steps to 7 steps, update "Step 2 of 5" to "Step 2 of 7"
+- [ ] T008 [P] Update `.claude/commands/workflow/3_tasks.md`: change workflow string from 5 steps to 7 steps, update "Step 3 of 5" to "Step 3 of 7"
+- [ ] T009 [P] Update `.claude/commands/workflow/4_implement.md`: change description to "workflow/3_tasks → workflow/4_implement → workflow/5_integrate", change workflow string, update "Step 4 of 5" to "Step 4 of 7"
 
 ## Phase 3.4: Update Root Documentation
 
-- [ ] T010 Update `CLAUDE.md` Slash Commands section: change table from 5 rows to 7 rows, rename `/4_deploy` to `/4_integrate`, add `/5_release` and `/6_backmerge` entries, update workflow order string
+- [ ] T010 Update `CLAUDE.md` Slash Commands section: change table from 5 rows to 7 rows, rename `/5_integrate` to `/5_integrate`, add `/6_release` and `/7_backmerge` entries, update workflow order string
 - [ ] T011 Run sync: copy `CLAUDE.md` to `AGENTS.md` (exact copy)
 - [ ] T012 Run sync: copy `CLAUDE.md` to `.github/copilot-instructions.md` (exact copy)
 
@@ -41,17 +41,17 @@
 
 ## Phase 3.6: Populate New Command Content
 
-- [ ] T015 Add body content to `.claude/commands/workflow/5_release.md`: Purpose, Prerequisites, Outputs, workflow steps (create-release, run-gates, pr-main, tag-release), usage examples referencing `release_workflow.py`
-- [ ] T016 Add body content to `.claude/commands/workflow/6_backmerge.md`: Purpose, Prerequisites, Outputs, workflow steps (pr-develop, rebase-contrib, cleanup-release), usage examples referencing `backmerge_workflow.py`
+- [ ] T015 Add body content to `.claude/commands/workflow/6_release.md`: Purpose, Prerequisites, Outputs, workflow steps (create-release, run-gates, pr-main, tag-release), usage examples referencing `release_workflow.py`
+- [ ] T016 Add body content to `.claude/commands/workflow/7_backmerge.md`: Purpose, Prerequisites, Outputs, workflow steps (pr-develop, rebase-contrib, cleanup-release), usage examples referencing `backmerge_workflow.py`
 
 ## Phase 3.7: Validation
 
-- [ ] T017 [P] Verify all `/4_deploy` references removed: run `grep -r "4_deploy" .claude/commands/` should return empty
+- [ ] T017 [P] Verify all `/5_integrate` references removed: run `grep -r "4_deploy" .claude/commands/` should return empty
 - [ ] T018 [P] Verify CLAUDE.md synced: diff `CLAUDE.md` and `AGENTS.md` should be empty
 - [ ] T019 Run quality gates: `podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py`
-- [ ] T020 Manual test: verify `/4_integrate` loads correctly in Claude Code
-- [ ] T021 Manual test: verify `/5_release` loads correctly in Claude Code
-- [ ] T022 Manual test: verify `/6_backmerge` loads correctly in Claude Code
+- [ ] T020 Manual test: verify `/5_integrate` loads correctly in Claude Code
+- [ ] T021 Manual test: verify `/6_release` loads correctly in Claude Code
+- [ ] T022 Manual test: verify `/7_backmerge` loads correctly in Claude Code
 
 ---
 
@@ -73,8 +73,8 @@ T017-T022 run after all implementation complete
 ### Phase 3.2: New Commands (T004-T005)
 ```
 # Launch in parallel - different files, no dependencies
-Task: "Create .claude/commands/workflow/5_release.md with release workflow frontmatter"
-Task: "Create .claude/commands/workflow/6_backmerge.md with backmerge workflow frontmatter"
+Task: "Create .claude/commands/workflow/6_release.md with release workflow frontmatter"
+Task: "Create .claude/commands/workflow/7_backmerge.md with backmerge workflow frontmatter"
 ```
 
 ### Phase 3.3: Navigation Updates (T006-T009)

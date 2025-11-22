@@ -1,12 +1,12 @@
 ---
-description: "(start) → workflow/0_specify → workflow/1_plan | Create feature spec"
+description: "(start) → workflow/1_specify → workflow/2_plan | Create feature spec"
 order: 1
-next: /1_plan
+next: /2_plan
 ---
 
-# /0_specify - Step 1 of 7
+# /1_specify - Step 1 of 7
 
-**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+**Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
 **Purpose**: Create feature branch and specification document from natural language description.
 

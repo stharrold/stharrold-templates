@@ -9,13 +9,13 @@ The `/workflow/all` command will orchestrate running multiple workflow steps in 
 ### Current Commands (7 total)
 | Command | Purpose | Manual Gates After |
 |---------|---------|-------------------|
-| `/0_specify` | Create feature branch + spec | None |
-| `/1_plan` | Generate research, data-model, contracts | None |
-| `/2_tasks` | Generate task list | None |
-| `/3_implement` | Execute tasks | None |
-| `/4_integrate` | PR feature→contrib→develop | PR merges (2) |
-| `/5_release` | PR develop→release→main | PR merge (1) |
-| `/6_backmerge` | PR release→develop, rebase contrib | PR merge (1) |
+| `/1_specify` | Create feature branch + spec | None |
+| `/2_plan` | Generate research, data-model, contracts | None |
+| `/3_tasks` | Generate task list | None |
+| `/4_implement` | Execute tasks | None |
+| `/5_integrate` | PR feature→contrib→develop | PR merges (2) |
+| `/6_release` | PR develop→release→main | PR merge (1) |
+| `/7_backmerge` | PR release→develop, rebase contrib | PR merge (1) |
 
 ### Workflow Phases
 1. **Feature Development** (0→1→2→3): Fully automatable
@@ -35,8 +35,8 @@ The `/workflow/all` command will orchestrate running multiple workflow steps in 
 
 ### Decision 1: Command Modes
 **Chosen**: Four modes with state detection
-- `new "description"` - Start from /0_specify
-- `release` - Run /5_release → /6_backmerge
+- `new "description"` - Start from /1_specify
+- `release` - Run /6_release → /7_backmerge
 - `continue` - Resume after manual gate (PR merge)
 - Default (no args) - Detect state and continue
 
@@ -61,7 +61,7 @@ The `/workflow/all` command will orchestrate running multiple workflow steps in 
 ### Decision 3: Manual Gate Handling
 **Chosen**: Stop execution, report status, show resume command
 ```
-✓ Step 4: /4_integrate complete
+✓ Step 4: /5_integrate complete
 ⏸ PAUSED: Manual gate - PR merge required
 
 PR URLs:
@@ -76,7 +76,7 @@ After merging, run: /workflow/all continue
 ### Decision 4: Error Handling
 **Chosen**: Stop on first error, report step and error, suggest retry
 ```
-✗ Step 3: /3_implement failed
+✗ Step 3: /4_implement failed
 Error: Test failure in test_auth.py
 
 To retry from this step: /workflow/all --from 3
@@ -96,7 +96,7 @@ Create `.claude/commands/workflow/all.md` with:
 - Manual gate detection and pause
 
 ### No Python Script Needed
-Unlike `/4_integrate`, `/5_release`, `/6_backmerge` which run external Python scripts, `/workflow/all` is purely orchestration - it invokes the other slash commands in sequence. The logic lives entirely in the markdown command file.
+Unlike `/5_integrate`, `/6_release`, `/7_backmerge` which run external Python scripts, `/workflow/all` is purely orchestration - it invokes the other slash commands in sequence. The logic lives entirely in the markdown command file.
 
 ### Slash Command Invocation
 Use `SlashCommand` tool to invoke each step:
