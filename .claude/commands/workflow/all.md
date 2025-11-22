@@ -81,12 +81,14 @@ Detected state:
 2. Report: `[▶] Starting release workflow`
 3. Invoke: `/workflow:5_release`
 4. → PAUSE at manual gate (see Step 5) - wait for release→main PR merge
-5. Check PR status: `gh pr list --state open --head release/*`
-   - If PRs still open: Report "Waiting for release PR merge" and remain paused
-   - If PRs merged: Continue to step 6
-6. Invoke: `/workflow:6_backmerge`
-7. → PAUSE at manual gate (see Step 5) - wait for release→develop PR merge
-8. Report completion
+   - Instruct user: "After release→main PR is merged, run `/workflow/all continue`"
+
+*(User runs `/workflow/all continue` after merging release→main PR)*
+
+5. Invoke: `/workflow:6_backmerge`
+6. → PAUSE at manual gate (see Step 5) - wait for release→develop PR merge
+   - Instruct user: "After release→develop PR is merged, run `/workflow/all continue`"
+7. Report completion
 
 #### MODE=continue
 1. Check PR status: `gh pr list --state open --head {branch}`
@@ -95,8 +97,8 @@ Detected state:
    - List open PRs with URLs
    - Remain paused
 3. If PRs merged:
-   - Determine next step based on branch type
-   - Continue execution from that step
+   - Use the state matrix from MODE=default (see below) to determine the next step based on branch type and artifact existence
+   - Continue execution from the determined step
 
 #### MODE=default (auto-detect)
 1. Based on BRANCH_TYPE and artifacts, determine starting step:

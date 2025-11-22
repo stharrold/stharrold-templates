@@ -79,6 +79,10 @@ Then:
   2. Invoke /workflow:5_release
   3. PAUSE at manual gate (PR merge to main)
   4. Report PR URL and resume command
+  5. (After user runs /workflow/all continue and release→main PR is merged)
+  6. Invoke /workflow:6_backmerge
+  7. PAUSE at manual gate (PR merge release→develop)
+  8. Report PR URL and resume command
 ```
 
 ### Continue Mode
