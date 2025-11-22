@@ -1,0 +1,181 @@
+---
+description: "Orchestrate full workflow | Run steps 0-6 with manual gate pauses"
+order: 0
+---
+
+# /workflow/all - Workflow Orchestrator
+
+**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_integrate` → `/5_release` → `/6_backmerge`
+
+**Purpose**: Orchestrate the complete workflow, automatically detecting state and pausing at manual gates.
+
+---
+
+## Modes
+
+| Mode | Syntax | Description |
+|------|--------|-------------|
+| Default | `/workflow/all` | Detect state, continue from current step |
+| New | `/workflow/all new "description"` | Start fresh from step 0 |
+| Release | `/workflow/all release` | Run steps 5-6 only |
+| Continue | `/workflow/all continue` | Resume after manual gate |
+
+---
+
+## Execution Instructions
+
+Given the arguments provided, execute the workflow orchestration:
+
+### Step 1: Parse Mode from Arguments
+
+Parse `$ARGUMENTS` to determine mode:
+- If starts with `new `: Extract description (quoted text after "new"), set MODE=new
+- If equals `release`: Set MODE=release
+- If equals `continue`: Set MODE=continue
+- Otherwise: Set MODE=default (auto-detect)
+
+### Step 2: Detect Current State
+
+Run state detection:
+```bash
+git branch --show-current
+```
+
+Determine branch type:
+- Pattern `^\d{3}-` or `^feature/` → BRANCH_TYPE=feature
+- Pattern `^contrib/` → BRANCH_TYPE=contrib
+- Pattern `^develop$` → BRANCH_TYPE=develop
+- Pattern `^release/` → BRANCH_TYPE=release
+- Pattern `^main$` → BRANCH_TYPE=main
+
+### Step 3: Check Artifact Existence
+
+For feature branches, check which artifacts exist in `specs/{branch-name}/`:
+- `spec.md` exists → SPEC_EXISTS=true
+- `research.md` exists → RESEARCH_EXISTS=true
+- `tasks.md` exists → TASKS_EXISTS=true
+
+Report detected state:
+```
+Detected state:
+  Branch: {branch} ({branch_type})
+  Artifacts: {list of existing artifacts}
+```
+
+### Step 4: Execute Based on Mode
+
+#### MODE=new
+1. Validate: Description must not be empty
+   - If empty: Report error "Usage: /workflow/all new \"feature description\""
+2. Report: `[▶] Starting new feature workflow`
+3. Invoke: `/workflow:0_specify {description}`
+4. Invoke: `/workflow:1_plan`
+5. Invoke: `/workflow:2_tasks`
+6. Invoke: `/workflow:3_implement`
+7. Invoke: `/workflow:4_integrate`
+8. → PAUSE at manual gate (see Step 5)
+
+#### MODE=release
+1. Validate: Branch must be `contrib/*` or `develop`
+   - If not: Report error "Release mode requires contrib/* or develop branch"
+2. Report: `[▶] Starting release workflow`
+3. Invoke: `/workflow:5_release`
+4. → PAUSE at manual gate (see Step 5)
+5. After PR merged: Invoke: `/workflow:6_backmerge`
+6. Report completion
+
+#### MODE=continue
+1. Check PR status: `gh pr list --state open --head {branch}`
+2. If PRs still open:
+   - Report: "Waiting for PR merges"
+   - List open PRs with URLs
+   - Remain paused
+3. If PRs merged:
+   - Determine next step based on branch type
+   - Continue execution from that step
+
+#### MODE=default (auto-detect)
+1. Based on BRANCH_TYPE and artifacts, determine starting step:
+
+| Branch Type | Artifacts | Start From |
+|-------------|-----------|------------|
+| feature | none | Step 0 (/0_specify) |
+| feature | spec only | Step 1 (/1_plan) |
+| feature | spec + research | Step 2 (/2_tasks) |
+| feature | spec + tasks | Step 3 (/3_implement) |
+| feature | all complete | Step 4 (/4_integrate) |
+| contrib | - | Step 5 (/5_release) or suggest |
+| develop | - | Step 5 (/5_release) |
+| release | - | Step 6 (/6_backmerge) |
+| main | - | Suggest: `/workflow/all new "description"` |
+
+2. Report: `Starting from: Step {N} (/{N}_command)`
+3. Execute steps in sequence until manual gate or completion
+
+### Step 5: Manual Gate Handling
+
+After `/4_integrate` or `/5_release`, pause and report:
+```
+⏸ PAUSED: Manual gate reached
+
+PRs created (merge these in GitHub):
+  • {PR URL 1}
+  • {PR URL 2}
+
+After merging, run:
+  /workflow/all continue
+```
+
+### Step 6: Progress Output
+
+Use these indicators throughout:
+- `[▶] Step N: /N_command` - Starting step
+- `[✓] Step N: Complete` - Step finished successfully
+- `[✗] Step N: Failed` - Step failed (stop execution)
+- `⏸ PAUSED` - At manual gate
+
+### Step 7: Error Handling
+
+On any step failure:
+1. Stop execution immediately
+2. Report:
+```
+[✗] Step {N} failed: /{N}_command
+
+Error: {error message}
+
+To retry: /workflow/all
+To skip:  /workflow/all --skip {N}
+```
+
+### Step 8: Completion
+
+When all steps complete:
+```
+✓ Workflow complete!
+
+Summary:
+  • Feature: {feature-name}
+  • Branch: {current-branch}
+  • Steps completed: {list}
+
+Next: Start new feature with /workflow/all new "description"
+```
+
+---
+
+## Quick Reference
+
+```bash
+# Start new feature
+/workflow/all new "implement user authentication"
+
+# Continue after PR merge
+/workflow/all continue
+
+# Release to production
+/workflow/all release
+
+# Auto-detect and continue
+/workflow/all
+```
