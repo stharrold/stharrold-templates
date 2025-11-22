@@ -1,16 +1,16 @@
 ---
-description: Execute PR workflow steps (finish-feature → archive-todo → sync-agents → start-develop)
-order: 4
-prev: /tasks
+description: "workflow/3_implement → workflow/4_deploy → (end) | Execute PR workflow"
+order: 5
+prev: /3_implement
 ---
 
-# /workflow - Step 4 of 4
+# /4_deploy - Step 5 of 5
 
-**Workflow**: `/specify` → `/plan` → `/tasks` → *(implement)* → `/workflow`
+**Workflow**: `/0_specify` → `/1_plan` → `/2_tasks` → `/3_implement` → `/4_deploy`
 
 **Purpose**: Create PRs and complete the feature lifecycle (PR to contrib, archive, sync, PR to develop).
 
-**Prerequisites**: Implementation complete, all tasks done, on feature branch
+**Prerequisites**: Implementation complete, all tasks done, quality gates passed (from `/3_implement`)
 
 **Outputs**: PR created, TODO archived, configs synced
 
