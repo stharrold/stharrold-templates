@@ -54,7 +54,7 @@ From the complete german workflow system, we integrated:
 **stharrold-templates maintains its core identity:**
 - **Purpose**: MCP server configuration and documentation management
 - **Dependencies**: Stdlib-only for core tools (dev tools optional)
-- **Document lifecycle**: 00_draft-initial → 10_draft-merged → ARCHIVED
+- **Document lifecycle**: docs/research → docs/guides → docs/archived
 - **Testing**: Manual validation scripts (not automated pytest)
 - **Workflow**: GitHub issue sync, not TODO-driven phases
 
