@@ -22,19 +22,19 @@ As a developer using the workflow system, I want a single command that runs mult
 4. **Given** the workflow is paused at a manual gate, **When** the PR is merged and I run `/workflow/all continue`, **Then** it should detect the current state and continue from where it left off.
 
 ### Edge Cases
-- What happens when a step fails? ’ Stop execution, report error, allow retry from failed step
-- What happens when run on wrong branch? ’ Detect branch type and suggest appropriate workflow subset
-- What happens when artifacts are missing? ’ Report missing prerequisites, suggest starting from earlier step
+- What happens when a step fails? â†’ Stop execution, report error, allow retry from failed step
+- What happens when run on wrong branch? â†’ Detect branch type and suggest appropriate workflow subset
+- What happens when artifacts are missing? â†’ Report missing prerequisites, suggest starting from earlier step
 
 ## Requirements
 
 ### Functional Requirements
 - **FR-001**: System MUST detect current workflow state based on branch name and existing artifacts
-- **FR-002**: System MUST execute workflow steps in sequence: 0’1’2’3’4 (feature), 5’6 (release)
+- **FR-002**: System MUST execute workflow steps in sequence: 0â†’1â†’2â†’3â†’4 (feature), 5â†’6 (release)
 - **FR-003**: System MUST pause at manual gates (PR merges) and inform user what action is needed
 - **FR-004**: System MUST support `continue` mode to resume from last pause point
 - **FR-005**: System MUST support `new "description"` mode to start fresh from `/0_specify`
-- **FR-006**: System MUST support `release` mode to run `/5_release` ’ `/6_backmerge`
+- **FR-006**: System MUST support `release` mode to run `/5_release` â†’ `/6_backmerge`
 - **FR-007**: System MUST validate prerequisites before running each step
 - **FR-008**: System MUST report progress and current step during execution
 - **FR-009**: System MUST stop on first error and report which step failed

@@ -29,7 +29,7 @@ Given the arguments provided, execute the workflow orchestration:
 ### Step 1: Parse Mode from Arguments
 
 Parse `$ARGUMENTS` to determine mode:
-- If starts with `new `: Extract description (quoted text after "new"), set MODE=new
+- If starts with `new `: Extract description (strip surrounding quotes from text after "new"), set MODE=new
 - If equals `release`: Set MODE=release
 - If equals `continue`: Set MODE=continue
 - Otherwise: Set MODE=default (auto-detect)
@@ -80,9 +80,13 @@ Detected state:
    - If not: Report error "Release mode requires contrib/* or develop branch"
 2. Report: `[▶] Starting release workflow`
 3. Invoke: `/workflow:5_release`
-4. → PAUSE at manual gate (see Step 5)
-5. After PR merged: Invoke: `/workflow:6_backmerge`
-6. Report completion
+4. → PAUSE at manual gate (see Step 5) - wait for release→main PR merge
+5. Check PR status: `gh pr list --state open --head release/*`
+   - If PRs still open: Report "Waiting for release PR merge" and remain paused
+   - If PRs merged: Continue to step 6
+6. Invoke: `/workflow:6_backmerge`
+7. → PAUSE at manual gate (see Step 5) - wait for release→develop PR merge
+8. Report completion
 
 #### MODE=continue
 1. Check PR status: `gh pr list --state open --head {branch}`
@@ -114,7 +118,7 @@ Detected state:
 
 ### Step 5: Manual Gate Handling
 
-After `/4_integrate` or `/5_release`, pause and report:
+After `/4_integrate`, `/5_release`, or `/6_backmerge` (pr-develop step), pause and report:
 ```
 ⏸ PAUSED: Manual gate reached
 
@@ -145,7 +149,7 @@ On any step failure:
 Error: {error message}
 
 To retry: /workflow/all
-To skip:  /workflow/all --skip {N}
+(To skip a step, manually resolve the issue and re-run the command)
 ```
 
 ### Step 8: Completion

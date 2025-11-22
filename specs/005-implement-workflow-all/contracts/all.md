@@ -161,7 +161,7 @@ Error: Test failure
   Message: AssertionError: expected True, got False
 
 To retry: /workflow/all
-To skip:  /workflow/all --skip 3
+(To skip a step, manually resolve the issue and re-run the command)
 ```
 
 ## Integration Points
