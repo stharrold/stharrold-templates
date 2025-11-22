@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `/5_integrate` command (renamed from `/5_integrate`) integrates completed feature work into shared branches via PRs.
+The `/5_integrate` command (renamed from `/4_deploy`) integrates completed feature work into shared branches via PRs.
 
 ## Frontmatter Contract
 

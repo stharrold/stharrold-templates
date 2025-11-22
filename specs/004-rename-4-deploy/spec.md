@@ -3,7 +3,7 @@
 **Feature Branch**: `004-rename-4-deploy`
 **Created**: 2025-11-22
 **Status**: Draft
-**Input**: User description: "Rename /5_integrate to /5_integrate and add /6_release and /7_backmerge commands for daily release workflow"
+**Input**: User description: "Rename /4_deploy to /5_integrate and add /6_release and /7_backmerge commands for daily release workflow"
 
 ---
 
@@ -20,27 +20,27 @@
 As a developer following the workflow, I need clear command names that reflect what each step actually does, and I need explicit commands for daily release cycles so that feature integration and production releases are distinct, well-defined operations.
 
 ### Acceptance Scenarios
-1. **Given** a completed implementation on a feature branch, **When** I run `/5_integrate`, **Then** the system creates PRs from feature � contrib � develop (same behavior as current `/5_integrate`)
+1. **Given** a completed implementation on a feature branch, **When** I run `/5_integrate`, **Then** the system creates PRs from feature → contrib → develop (same behavior as old `/4_deploy`)
 
 2. **Given** features integrated into develop branch, **When** I run `/6_release`, **Then** the system creates a release branch from develop, runs quality gates, and creates a PR to main
 
 3. **Given** a merged release on main, **When** I run `/7_backmerge`, **Then** the system creates a PR from release branch to develop, and rebases contrib on develop
 
-4. **Given** existing documentation referencing `/5_integrate`, **When** the rename is complete, **Then** all references are updated to `/5_integrate`
+4. **Given** existing documentation referencing `/4_deploy`, **When** the rename is complete, **Then** all references are updated to `/5_integrate`
 
 ### Edge Cases
 - What happens when `/6_release` is run but develop has no new commits since last release?
 - How does `/7_backmerge` handle merge conflicts during rebase of contrib on develop?
-- What happens if `/5_integrate` command file still exists after rename?
+- What happens if old `/4_deploy` command file still exists after rename?
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 **Command Rename:**
-- **FR-001**: System MUST rename `/5_integrate` command to `/5_integrate`
-- **FR-002**: System MUST preserve all existing functionality of `/5_integrate` in the renamed `/5_integrate` command
-- **FR-003**: System MUST update all documentation references from `/5_integrate` to `/5_integrate`
+- **FR-001**: System MUST rename `/4_deploy` command to `/5_integrate`
+- **FR-002**: System MUST preserve all existing functionality of `/4_deploy` in the renamed `/5_integrate` command
+- **FR-003**: System MUST update all documentation references from `/4_deploy` to `/5_integrate`
 
 **New Release Command:**
 - **FR-004**: System MUST provide `/6_release` command for daily release workflow

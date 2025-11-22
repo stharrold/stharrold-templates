@@ -2,14 +2,14 @@
 
 **Branch**: `004-rename-4-deploy` | **Date**: 2025-11-22
 
-## Research Topic 1: Current `/5_integrate` Implementation and References
+## Research Topic 1: Current `/4_deploy` Implementation and References
 
 ### Decision
-Rename `/5_integrate` to `/5_integrate` and update all 16 files containing references.
+Rename `/4_deploy` to `/5_integrate` and update all 16 files containing references.
 
 ### Findings
 
-**Files containing `/5_integrate` references:**
+**Files containing `/4_deploy` references:**
 
 | Category | Files | Action Required |
 |----------|-------|-----------------|
@@ -18,7 +18,7 @@ Rename `/5_integrate` to `/5_integrate` and update all 16 files containing refer
 | Previous specs | `specs/003-rename-slash-command/*` | Already completed, no action |
 | Current specs | `specs/004-rename-4-deploy/*` | N/A (this feature) |
 
-**Current `/5_integrate` behavior:**
+**Current `/4_deploy` behavior:**
 1. `finish-feature` - PR feature → contrib (runs quality gates)
 2. `archive-todo` - Archive TODO files
 3. `sync-agents` - Sync CLAUDE.md → AGENTS.md
@@ -167,7 +167,7 @@ description: "workflow/4_implement → workflow/5_integrate → workflow/6_relea
 
 | Topic | Decision |
 |-------|----------|
-| Rename | `/5_integrate` → `/5_integrate` |
+| Rename | `/4_deploy` → `/5_integrate` |
 | New command | `/6_release`: develop → release/* → main |
 | New command | `/7_backmerge`: PR release→develop, rebase contrib on develop |
 | Documentation | Update all 16 files with references |
