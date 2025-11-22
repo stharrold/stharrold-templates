@@ -12,7 +12,7 @@
 
 ## Phase 3.1: Setup (Command Rename)
 
-- [ ] T001 Rename `.claude/commands/workflow/5_integrate.md` to `.claude/commands/workflow/5_integrate.md` using `git mv`
+- [ ] T001 Rename `.claude/commands/workflow/4_deploy.md` to `.claude/commands/workflow/5_integrate.md` using `git mv`
 - [ ] T002 Update frontmatter in `.claude/commands/workflow/5_integrate.md`: change description to "workflow/4_implement → workflow/5_integrate → workflow/6_release | Integrate feature to develop", add `next: /6_release`
 - [ ] T003 Update body content in `.claude/commands/workflow/5_integrate.md`: change "Step 5 of 5" to "Step 5 of 7", update workflow string to include all 7 commands, change "deploy" references to "integrate"
 
@@ -30,7 +30,7 @@
 
 ## Phase 3.4: Update Root Documentation
 
-- [ ] T010 Update `CLAUDE.md` Slash Commands section: change table from 5 rows to 7 rows, rename `/5_integrate` to `/5_integrate`, add `/6_release` and `/7_backmerge` entries, update workflow order string
+- [ ] T010 Update `CLAUDE.md` Slash Commands section: change table from 5 rows to 7 rows, rename `/4_deploy` to `/5_integrate`, add `/6_release` and `/7_backmerge` entries, update workflow order string
 - [ ] T011 Run sync: copy `CLAUDE.md` to `AGENTS.md` (exact copy)
 - [ ] T012 Run sync: copy `CLAUDE.md` to `.github/copilot-instructions.md` (exact copy)
 
