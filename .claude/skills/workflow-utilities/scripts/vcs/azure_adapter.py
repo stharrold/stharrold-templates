@@ -46,9 +46,9 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
             ValueError: If organization or project is empty
         """
         if not organization or not organization.strip():
-            raise ValueError("organization is required for Azure DevOps")
+            raise ValueError('organization is required for Azure DevOps')
         if not project or not project.strip():
-            raise ValueError("project is required for Azure DevOps")
+            raise ValueError('project is required for Azure DevOps')
 
         self.organization = organization.strip()
         self.project = project.strip()
@@ -114,7 +114,7 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
                 f"Error: {error_msg}"
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while getting Azure DevOps user")
+            raise RuntimeError('Timeout while getting Azure DevOps user')
 
     def create_pull_request(
         self,
@@ -165,11 +165,11 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to create Azure DevOps pull request.\n"
-                f"Error: {error_msg}"
+                f'Failed to create Azure DevOps pull request.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while creating Azure DevOps pull request")
+            raise RuntimeError('Timeout while creating Azure DevOps pull request')
 
     def fetch_pr_comments(self, pr_number: int) -> list:
         """Fetch review comments from an Azure DevOps pull request.
@@ -222,13 +222,13 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to fetch Azure DevOps PR comments.\n"
-                f"Error: {error_msg}"
+                f'Failed to fetch Azure DevOps PR comments.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while fetching Azure DevOps PR comments")
+            raise RuntimeError('Timeout while fetching Azure DevOps PR comments')
         except (json.JSONDecodeError, KeyError) as e:
-            raise RuntimeError(f"Failed to parse PR comment data: {e}")
+            raise RuntimeError(f'Failed to parse PR comment data: {e}')
 
     def update_pr(
         self,
@@ -276,11 +276,11 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to update Azure DevOps PR.\n"
-                f"Error: {error_msg}"
+                f'Failed to update Azure DevOps PR.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while updating Azure DevOps PR")
+            raise RuntimeError('Timeout while updating Azure DevOps PR')
 
     def get_pr_status(self, pr_number: int) -> dict:
         """Get Azure DevOps pull request status.
@@ -330,13 +330,13 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to fetch Azure DevOps PR status.\n"
-                f"Error: {error_msg}"
+                f'Failed to fetch Azure DevOps PR status.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while fetching Azure DevOps PR status")
+            raise RuntimeError('Timeout while fetching Azure DevOps PR status')
         except (json.JSONDecodeError, KeyError) as e:
-            raise RuntimeError(f"Failed to parse PR status data: {e}")
+            raise RuntimeError(f'Failed to parse PR status data: {e}')
 
     def get_provider_name(self) -> str:
         """Get provider name.
@@ -344,4 +344,4 @@ class AzureDevOpsAdapter(BaseVCSAdapter):
         Returns:
             "Azure DevOps"
         """
-        return "Azure DevOps"
+        return 'Azure DevOps'

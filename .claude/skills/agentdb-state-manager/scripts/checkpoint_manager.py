@@ -9,15 +9,15 @@ Usage:
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 def store_checkpoint(todo_file: str) -> None:
     """Store checkpoint to AgentDB."""
-    print(f"Storing checkpoint from {todo_file}...")
+    print(f'Storing checkpoint from {todo_file}...')
 
     checkpoint_record = {
-        'object_id': f"checkpoint_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+        'object_id': f"checkpoint_{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}",
         'object_type': 'checkpoint',
         'object_state': '20_saved',
         'object_metadata': json.dumps({
@@ -36,9 +36,9 @@ def store_checkpoint(todo_file: str) -> None:
             '{checkpoint_record['object_state']}', '{checkpoint_record['object_metadata']}'::JSON);
     """
 
-    print("SQL (to be executed via AgentDB):")
+    print('SQL (to be executed via AgentDB):')
     print(sql)
-    print("\n✓ Checkpoint stored")
+    print('\n✓ Checkpoint stored')
 
 def list_checkpoints() -> None:
     """List all checkpoints."""
@@ -51,9 +51,9 @@ def list_checkpoints() -> None:
     ORDER BY record_datetimestamp DESC;
     """
 
-    print("SQL Query:")
+    print('SQL Query:')
     print(query)
-    print("\nNOTE: Would display checkpoint list from AgentDB")
+    print('\nNOTE: Would display checkpoint list from AgentDB')
 
 def restore_checkpoint(checkpoint_id: str) -> None:
     """Restore from checkpoint."""
@@ -64,10 +64,10 @@ def restore_checkpoint(checkpoint_id: str) -> None:
     LIMIT 1;
     """
 
-    print(f"Restoring checkpoint {checkpoint_id}...")
-    print("SQL Query:")
+    print(f'Restoring checkpoint {checkpoint_id}...')
+    print('SQL Query:')
     print(query)
-    print("\n✓ Checkpoint restored (would display resume instructions)")
+    print('\n✓ Checkpoint restored (would display resume instructions)')
 
 def main() -> None:
     parser = argparse.ArgumentParser(description='Manage AgentDB checkpoints')

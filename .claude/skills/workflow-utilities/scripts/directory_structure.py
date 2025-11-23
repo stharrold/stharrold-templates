@@ -21,7 +21,7 @@ def get_child_directories(dir_path):
 
     for child in sorted(dir_path.iterdir()):
         if child.is_dir() and (child / 'CLAUDE.md').exists():
-            children.append(f"{child.name}/CLAUDE.md")
+            children.append(f'{child.name}/CLAUDE.md')
 
     return children
 
@@ -38,10 +38,10 @@ def format_yaml_list(items, indent=2):
         Formatted YAML list string
     """
     if not items:
-        return " []"
+        return ' []'
 
-    spaces = " " * indent
-    return "\n" + "\n".join(f"{spaces}- {item}" for item in items)
+    spaces = ' ' * indent
+    return '\n' + '\n'.join(f'{spaces}- {item}' for item in items)
 
 
 def create_directory_structure(directory, is_archived=False):
@@ -77,33 +77,33 @@ def create_directory_structure(directory, is_archived=False):
         relative_dir = dir_path
 
     # Determine parent paths
-    parent_claude = "../CLAUDE.md" if dir_path.parent != dir_path else None
-    parent_readme = "../README.md" if dir_path.parent != dir_path else None
+    parent_claude = '../CLAUDE.md' if dir_path.parent != dir_path else None
+    parent_readme = '../README.md' if dir_path.parent != dir_path else None
 
     # Get children (will be populated after ARCHIVED is created)
     child_dirs = []
     if not is_archived:
-        child_dirs.append("ARCHIVED/CLAUDE.md")
+        child_dirs.append('ARCHIVED/CLAUDE.md')
 
     # Scan for existing child directories
     for child in sorted(dir_path.iterdir()):
-        if child.is_dir() and child.name != "ARCHIVED" and (child / 'CLAUDE.md').exists():
-            child_dirs.append(f"{child.name}/CLAUDE.md")
+        if child.is_dir() and child.name != 'ARCHIVED' and (child / 'CLAUDE.md').exists():
+            child_dirs.append(f'{child.name}/CLAUDE.md')
 
     # Create CLAUDE.md
     claude_md = dir_path / 'CLAUDE.md'
     if not claude_md.exists():
         if is_archived:
-            context_type = "Archived Content"
-            purpose = f"Archive of deprecated files from {dir_path.parent.name}"
-            related_skills = ["workflow-utilities"]
+            context_type = 'Archived Content'
+            purpose = f'Archive of deprecated files from {dir_path.parent.name}'
+            related_skills = ['workflow-utilities']
         else:
             context_type = dir_name
-            purpose = f"Context-specific guidance for {dir_name}"
-            related_skills = ["workflow-orchestrator", "workflow-utilities"]
+            purpose = f'Context-specific guidance for {dir_name}'
+            related_skills = ['workflow-orchestrator', 'workflow-utilities']
 
         # Build children section
-        children_yaml = format_yaml_list(child_dirs) if child_dirs else "[]"
+        children_yaml = format_yaml_list(child_dirs) if child_dirs else '[]'
 
         # Build related skills section
         skills_yaml = format_yaml_list(related_skills)
@@ -146,37 +146,37 @@ related_skills:{skills_yaml}
         if parent_claude:
             # Determine parent directory name
             parent_dir_name = dir_path.parent.name.replace('-', ' ').replace('_', ' ').title()
-            body += f"- **[{parent_claude}]({parent_claude})** - Parent directory: {parent_dir_name}\n"
+            body += f'- **[{parent_claude}]({parent_claude})** - Parent directory: {parent_dir_name}\n'
 
         if child_dirs:
-            body += "\n**Child Directories:**\n"
+            body += '\n**Child Directories:**\n'
             for child_path in child_dirs:
                 child_name = child_path.split('/')[0].replace('-', ' ').replace('_', ' ').title()
-                body += f"- **[{child_path}]({child_path})** - {child_name}\n"
+                body += f'- **[{child_path}]({child_path})** - {child_name}\n'
 
         body += """
 ## Related Skills
 
 """
         for skill in related_skills:
-            body += f"- {skill}\n"
+            body += f'- {skill}\n'
 
         claude_md.write_text(frontmatter + body)
-        print(f"✓ Created {claude_md}")
+        print(f'✓ Created {claude_md}')
 
     # Create README.md
     readme_md = dir_path / 'README.md'
     if not readme_md.exists():
         if is_archived:
-            title = "Archived Files"
-            overview = "Archive of deprecated files that are no longer in active use."
+            title = 'Archived Files'
+            overview = 'Archive of deprecated files that are no longer in active use.'
         else:
             title = dir_name.replace('-', ' ').replace('_', ' ').title()
-            overview = f"Documentation for {dir_name}"
+            overview = f'Documentation for {dir_name}'
 
         # Build children section for README
-        readme_children = [child.replace("CLAUDE.md", "README.md") for child in child_dirs]
-        children_readme_yaml = format_yaml_list(readme_children) if readme_children else "[]"
+        readme_children = [child.replace('CLAUDE.md', 'README.md') for child in child_dirs]
+        children_readme_yaml = format_yaml_list(readme_children) if readme_children else '[]'
 
         frontmatter = f"""---
 type: directory-documentation
@@ -213,10 +213,10 @@ children:{children_readme_yaml}
 """
 
         if parent_readme:
-            body += f"- **[{parent_readme}]({parent_readme})** - Parent directory documentation\n"
+            body += f'- **[{parent_readme}]({parent_readme})** - Parent directory documentation\n'
 
         readme_md.write_text(frontmatter + body)
-        print(f"✓ Created {readme_md}")
+        print(f'✓ Created {readme_md}')
 
     # Create ARCHIVED/ subdirectory (unless this IS archived)
     if not is_archived:
@@ -226,12 +226,12 @@ children:{children_readme_yaml}
         # Recursively create structure for ARCHIVED
         create_directory_structure(archived_dir, is_archived=True)
 
-    print(f"✓ Directory structure complete: {dir_path}")
+    print(f'✓ Directory structure complete: {dir_path}')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("Usage: directory_structure.py <directory>")
-        print("Example: directory_structure.py planning/my-feature")
+        print('Usage: directory_structure.py <directory>')
+        print('Example: directory_structure.py planning/my-feature')
         sys.exit(1)
 
     create_directory_structure(sys.argv[1])

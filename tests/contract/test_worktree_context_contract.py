@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -85,4 +85,4 @@ class TestGetWorktreeContextContract:
         from worktree_context import get_worktree_context
 
         result = get_worktree_context()
-        assert result.state_dir == result.worktree_root / ".claude-state"
+        assert result.state_dir == result.worktree_root / '.claude-state'

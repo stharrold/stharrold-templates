@@ -3,10 +3,9 @@
 
 import sys
 from pathlib import Path
-from typing import List
 
 
-def get_all_claude_files(root_dir: Path) -> List[Path]:
+def get_all_claude_files(root_dir: Path) -> list[Path]:
     """Find all CLAUDE.md files in the repository."""
     return sorted(root_dir.rglob('CLAUDE.md'))
 
@@ -45,15 +44,15 @@ def generate_cross_references(claude_file: Path, root_dir: Path) -> str:
     # Reference to README.md in same directory
     readme = dir_path / 'README.md'
     if readme.exists():
-        refs.append("- **[README.md](README.md)** - Human-readable documentation for this directory")
+        refs.append('- **[README.md](README.md)** - Human-readable documentation for this directory')
 
     # Reference to parent CLAUDE.md (if not root)
     if dir_path != root_dir:
         parent_claude = dir_path.parent / 'CLAUDE.md'
         if parent_claude.exists():
             rel_path = get_relative_path(claude_file, parent_claude)
-            parent_name = dir_path.parent.name if dir_path.parent != root_dir else "Root"
-            refs.append(f"- **[../{parent_claude.name}]({rel_path})** - Parent directory: {parent_name}")
+            parent_name = dir_path.parent.name if dir_path.parent != root_dir else 'Root'
+            refs.append(f'- **[../{parent_claude.name}]({rel_path})** - Parent directory: {parent_name}')
 
     # References to child directories' CLAUDE.md files
     child_dirs = sorted([d for d in dir_path.iterdir() if d.is_dir() and not d.name.startswith('.')])
@@ -66,17 +65,17 @@ def generate_cross_references(claude_file: Path, root_dir: Path) -> str:
             child_claudes.append(f"- **[{child_dir.name}/CLAUDE.md]({rel_path})** - {child_dir.name.replace('-', ' ').replace('_', ' ').title()}")
 
     if child_claudes:
-        refs.append("")
-        refs.append("**Child Directories:**")
+        refs.append('')
+        refs.append('**Child Directories:**')
         refs.extend(child_claudes)
 
     if refs:
-        section = "\n## Related Documentation\n\n"
-        section += "\n".join(refs)
-        section += "\n"
+        section = '\n## Related Documentation\n\n'
+        section += '\n'.join(refs)
+        section += '\n'
         return section
 
-    return ""
+    return ''
 
 def update_claude_file(claude_file: Path, root_dir: Path, dry_run: bool = False):
     """Update a CLAUDE.md file with cross-references."""
@@ -116,12 +115,12 @@ def update_claude_file(claude_file: Path, root_dir: Path, dry_run: bool = False)
 
     if dry_run:
         print(f"\n{'='*60}")
-        print(f"Would update: {claude_file.relative_to(root_dir)}")
+        print(f'Would update: {claude_file.relative_to(root_dir)}')
         print(f"{'='*60}")
         print(cross_refs)
     else:
         claude_file.write_text(final_content, encoding='utf-8')
-        print(f"✓ Updated {claude_file.relative_to(root_dir)}")
+        print(f'✓ Updated {claude_file.relative_to(root_dir)}')
 
 def main():
     """Update all CLAUDE.md files with cross-references."""
@@ -133,11 +132,11 @@ def main():
     # Find all CLAUDE.md files
     claude_files = get_all_claude_files(root_dir)
 
-    print(f"Found {len(claude_files)} CLAUDE.md files")
+    print(f'Found {len(claude_files)} CLAUDE.md files')
     print()
 
     if dry_run:
-        print("DRY RUN MODE - No files will be modified")
+        print('DRY RUN MODE - No files will be modified')
         print()
 
     # Update each file
@@ -149,7 +148,7 @@ def main():
 
     if dry_run:
         print()
-        print("Run without --dry-run to apply changes")
+        print('Run without --dry-run to apply changes')
 
 if __name__ == '__main__':
     main()

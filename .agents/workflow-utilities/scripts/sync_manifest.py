@@ -23,14 +23,14 @@ Constants:
 import argparse
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import yaml
 except ImportError:
-    print("Error: PyYAML required. Install: pip install pyyaml", file=sys.stderr)
+    print('Error: PyYAML required. Install: pip install pyyaml', file=sys.stderr)
     sys.exit(1)
 
 # Constants
@@ -47,20 +47,20 @@ class Colors:
     END = '\033[0m'
 
 def error_exit(msg: str) -> None:
-    print(f"{Colors.RED}✗ Error:{Colors.END} {msg}", file=sys.stderr)
+    print(f'{Colors.RED}✗ Error:{Colors.END} {msg}', file=sys.stderr)
     sys.exit(1)
 
 def success(msg: str) -> None:
-    print(f"{Colors.GREEN}✓{Colors.END} {msg}")
+    print(f'{Colors.GREEN}✓{Colors.END} {msg}')
 
 def info(msg: str) -> None:
-    print(f"{Colors.BLUE}ℹ{Colors.END} {msg}")
+    print(f'{Colors.BLUE}ℹ{Colors.END} {msg}')
 
 def warning(msg: str) -> None:
-    print(f"{Colors.YELLOW}⚠{Colors.END} {msg}")
+    print(f'{Colors.YELLOW}⚠{Colors.END} {msg}')
 
 
-def parse_todo_filename(filename: str) -> Optional[Dict[str, str]]:
+def parse_todo_filename(filename: str) -> dict[str, str] | None:
     """Parse TODO filename to extract metadata.
 
     Args:
@@ -76,8 +76,8 @@ def parse_todo_filename(filename: str) -> Optional[Dict[str, str]]:
     workflow_type, timestamp, slug = match.groups()
 
     # Convert timestamp to ISO8601
-    iso_timestamp = f"{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]}T" \
-                   f"{timestamp[9:11]}:{timestamp[11:13]}:{timestamp[13:15]}Z"
+    iso_timestamp = f'{timestamp[0:4]}-{timestamp[4:6]}-{timestamp[6:8]}T' \
+                   f'{timestamp[9:11]}:{timestamp[11:13]}:{timestamp[13:15]}Z'
 
     return {
         'workflow_type': workflow_type,
@@ -87,7 +87,7 @@ def parse_todo_filename(filename: str) -> Optional[Dict[str, str]]:
     }
 
 
-def load_workflow_metadata(todo_file: Path) -> Optional[Dict[str, Any]]:
+def load_workflow_metadata(todo_file: Path) -> dict[str, Any] | None:
     """Load workflow file and extract metadata from frontmatter.
 
     Args:
@@ -100,23 +100,23 @@ def load_workflow_metadata(todo_file: Path) -> Optional[Dict[str, Any]]:
         content = todo_file.read_text(encoding='utf-8')
 
         if not content.startswith('---'):
-            warning(f"Skipping {todo_file.name}: missing YAML frontmatter")
+            warning(f'Skipping {todo_file.name}: missing YAML frontmatter')
             return None
 
         parts = content.split('---', 2)
         if len(parts) < 3:
-            warning(f"Skipping {todo_file.name}: invalid format")
+            warning(f'Skipping {todo_file.name}: invalid format')
             return None
 
         frontmatter = yaml.safe_load(parts[1])
         return frontmatter
 
     except Exception as e:
-        warning(f"Error reading {todo_file.name}: {e}")
+        warning(f'Error reading {todo_file.name}: {e}')
         return None
 
 
-def scan_filesystem() -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+def scan_filesystem() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Scan filesystem for TODO files.
 
     Returns:
@@ -132,7 +132,7 @@ def scan_filesystem() -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
 
         parsed = parse_todo_filename(todo_file.name)
         if not parsed:
-            warning(f"Skipping {todo_file.name}: unrecognized format")
+            warning(f'Skipping {todo_file.name}: unrecognized format')
             continue
 
         metadata = load_workflow_metadata(todo_file)
@@ -152,7 +152,7 @@ def scan_filesystem() -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         for todo_file in ARCHIVED_DIR.glob('TODO_*.md'):
             parsed = parse_todo_filename(todo_file.name)
             if not parsed:
-                warning(f"Skipping {todo_file.name}: unrecognized format")
+                warning(f'Skipping {todo_file.name}: unrecognized format')
                 continue
 
             metadata = load_workflow_metadata(todo_file)
@@ -162,7 +162,7 @@ def scan_filesystem() -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
                 'timestamp': parsed['timestamp'],
                 'title': metadata.get('slug', parsed['slug']) if metadata else parsed['slug'],
                 'status': 'completed',
-                'file': f"ARCHIVED/{todo_file.name}"
+                'file': f'ARCHIVED/{todo_file.name}'
             }
 
             # Try to get completion metadata
@@ -177,33 +177,33 @@ def scan_filesystem() -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     return active_workflows, archived_workflows
 
 
-def load_todo_md() -> tuple[Dict[str, Any], str]:
+def load_todo_md() -> tuple[dict[str, Any], str]:
     """Load TODO.md and parse YAML frontmatter.
 
     Returns:
         Tuple of (frontmatter dict, full content)
     """
     if not TODO_MD_PATH.exists():
-        error_exit(f"TODO.md not found: {TODO_MD_PATH}")
+        error_exit(f'TODO.md not found: {TODO_MD_PATH}')
 
     content = TODO_MD_PATH.read_text(encoding='utf-8')
 
     if not content.startswith('---'):
-        error_exit("TODO.md missing YAML frontmatter")
+        error_exit('TODO.md missing YAML frontmatter')
 
     parts = content.split('---', 2)
     if len(parts) < 3:
-        error_exit("Invalid TODO.md format")
+        error_exit('Invalid TODO.md format')
 
     try:
         frontmatter = yaml.safe_load(parts[1])
     except yaml.YAMLError as e:
-        error_exit(f"Invalid YAML in TODO.md: {e}")
+        error_exit(f'Invalid YAML in TODO.md: {e}')
 
     return frontmatter, content
 
 
-def save_todo_md(frontmatter: Dict[str, Any], content: str) -> None:
+def save_todo_md(frontmatter: dict[str, Any], content: str) -> None:
     """Save updated TODO.md with new frontmatter.
 
     Args:
@@ -212,7 +212,7 @@ def save_todo_md(frontmatter: Dict[str, Any], content: str) -> None:
     """
     parts = content.split('---', 2)
     new_yaml = yaml.dump(frontmatter, default_flow_style=False, sort_keys=False)
-    new_content = f"---\n{new_yaml}---{parts[2]}"
+    new_content = f'---\n{new_yaml}---{parts[2]}'
 
     TODO_MD_PATH.write_text(new_content, encoding='utf-8')
 
@@ -223,13 +223,13 @@ def sync_manifest(dry_run: bool = False) -> None:
     Args:
         dry_run: If True, preview changes without saving
     """
-    info("Scanning filesystem for TODO files...")
+    info('Scanning filesystem for TODO files...')
 
     # Scan filesystem
     active_workflows, archived_workflows = scan_filesystem()
 
-    info(f"Found {len(active_workflows)} active workflow(s)")
-    info(f"Found {len(archived_workflows)} archived workflow(s)")
+    info(f'Found {len(active_workflows)} active workflow(s)')
+    info(f'Found {len(archived_workflows)} archived workflow(s)')
 
     # Load current TODO.md
     frontmatter, content = load_todo_md()
@@ -249,23 +249,23 @@ def sync_manifest(dry_run: bool = False) -> None:
         frontmatter['context_stats'] = {}
 
     frontmatter['context_stats']['total_workflows_completed'] = len(archived_workflows)
-    frontmatter['last_update'] = datetime.now(timezone.utc).isoformat()
+    frontmatter['last_update'] = datetime.now(UTC).isoformat()
 
     # Display changes
-    print(f"\n{Colors.BLUE}Changes to be made:{Colors.END}")
-    print(f"  Active workflows: {old_active_count} → {len(active_workflows)}")
-    print(f"  Archived workflows: {old_archived_count} → {len(archived_workflows)}")
+    print(f'\n{Colors.BLUE}Changes to be made:{Colors.END}')
+    print(f'  Active workflows: {old_active_count} → {len(active_workflows)}')
+    print(f'  Archived workflows: {old_archived_count} → {len(archived_workflows)}')
 
     if dry_run:
-        warning("Dry run mode: not saving changes")
-        print(f"\n{Colors.BLUE}Preview of new TODO.md:{Colors.END}")
+        warning('Dry run mode: not saving changes')
+        print(f'\n{Colors.BLUE}Preview of new TODO.md:{Colors.END}')
         new_yaml = yaml.dump(frontmatter, default_flow_style=False, sort_keys=False)
         print(new_yaml)
         return
 
     # Save
     save_todo_md(frontmatter, content)
-    success("TODO.md synchronized with filesystem")
+    success('TODO.md synchronized with filesystem')
 
 
 def main() -> None:
