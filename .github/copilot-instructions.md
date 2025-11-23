@@ -37,7 +37,7 @@ uv run pytest -v -k test_name
 uv run ruff check .
 ```
 
-## Quality Gates (6 gates, all must pass before PR)
+## Quality Gates (5 gates, all must pass before PR)
 
 ```bash
 podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
@@ -130,7 +130,7 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 |-------|---------|
 | workflow-orchestrator | Main coordinator, templates |
 | git-workflow-manager | Worktrees, PRs, semantic versioning |
-| quality-enforcer | Quality gates (6 gates) |
+| quality-enforcer | Quality gates (5 gates) |
 | bmad-planner | Requirements + architecture |
 | speckit-author | Specifications |
 | tech-stack-adapter | Python/uv/Podman detection |
