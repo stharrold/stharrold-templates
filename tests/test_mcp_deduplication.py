@@ -46,7 +46,7 @@ def test_remove_duplicate_servers():
         assert config.load(), "Failed to load test config"
 
         # Try to run remove_duplicate_servers
-        result = config.remove_duplicate_servers()
+        config.remove_duplicate_servers()
 
         # Verify the duplicate was removed (active version removed, DISABLED kept)
         assert 'github' not in config.data['mcpServers'], "Active 'github' server was not removed"
@@ -61,12 +61,12 @@ if __name__ == "__main__":
     print("Testing MCPConfig.remove_duplicate_servers() method")
     print("=" * 60)
 
-    success = test_remove_duplicate_servers()
-
-    print("\n" + "=" * 60)
-    if success:
+    try:
+        test_remove_duplicate_servers()
+        print("\n" + "=" * 60)
         print("✅ TEST PASSED: Deduplication works correctly")
         sys.exit(0)
-    else:
-        print("❌ TEST FAILED: Deduplication has errors")
+    except AssertionError as e:
+        print("\n" + "=" * 60)
+        print(f"❌ TEST FAILED: {e}")
         sys.exit(1)

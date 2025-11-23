@@ -13,9 +13,6 @@ sys.path.insert(
     ),
 )
 
-import pytest
-
-
 class TestWorktreeIdGeneration:
     """Unit tests for worktree ID generation."""
 

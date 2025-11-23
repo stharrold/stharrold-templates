@@ -15,9 +15,6 @@ sys.path.insert(
     ),
 )
 
-import pytest
-
-
 class TestStateDirectoryCreation:
     """Integration tests for state directory creation."""
 
