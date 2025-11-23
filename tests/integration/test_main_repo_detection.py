@@ -73,7 +73,7 @@ class TestMainRepoDetection:
     def test_branch_name_matches_git_branch(self):
         """Given: Running in main repository.
         When: get_worktree_context() called.
-        Then: branch_name matches git branch --show-current.
+        Then: branch_name matches git branch --show-current, or short commit hash if detached HEAD.
         """
         import subprocess
 
@@ -85,4 +85,12 @@ class TestMainRepoDetection:
             ["git", "branch", "--show-current"], text=True
         ).strip()
 
-        assert ctx.branch_name == expected_branch
+        if expected_branch:
+            # On a named branch
+            assert ctx.branch_name == expected_branch
+        else:
+            # Detached HEAD (e.g., in CI) - should return short commit hash
+            expected_short_hash = subprocess.check_output(
+                ["git", "rev-parse", "--short", "HEAD"], text=True
+            ).strip()
+            assert ctx.branch_name == expected_short_hash
