@@ -21,25 +21,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Add workflow-utilities to path for container_utils
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'),
+)
 
-def is_inside_container() -> bool:
-    """Detect if running inside a container (Docker/Podman)."""
-    return (
-        Path('/.dockerenv').exists()
-        or Path('/run/.containerenv').exists()
-        or (Path('/app').exists() and Path('/app/pyproject.toml').exists())
-    )
-
-
-def get_command_prefix() -> list:
-    """Get command prefix based on environment.
-
-    Returns ['uv', 'run'] if inside container,
-    or ['podman-compose', 'run', '--rm', 'dev'] if on host.
-    """
-    if is_inside_container():
-        return ['uv', 'run']
-    return ['podman-compose', 'run', '--rm', 'dev']
+from container_utils import get_command_prefix
 
 
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
