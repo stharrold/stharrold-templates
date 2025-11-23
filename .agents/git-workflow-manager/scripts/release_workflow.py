@@ -22,6 +22,26 @@ import sys
 from pathlib import Path
 
 
+def is_inside_container() -> bool:
+    """Detect if running inside a container (Docker/Podman)."""
+    return (
+        Path('/.dockerenv').exists()
+        or Path('/run/.containerenv').exists()
+        or (Path('/app').exists() and Path('/app/pyproject.toml').exists())
+    )
+
+
+def get_command_prefix() -> list:
+    """Get command prefix based on environment.
+
+    Returns ['uv', 'run'] if inside container,
+    or ['podman-compose', 'run', '--rm', 'dev'] if on host.
+    """
+    if is_inside_container():
+        return ['uv', 'run']
+    return ['podman-compose', 'run', '--rm', 'dev']
+
+
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     print(f"  → {' '.join(cmd)}")
@@ -89,8 +109,9 @@ def run_quality_gates() -> bool:
         print('⚠️  Quality gates script not found, skipping')
         return True
 
+    prefix = get_command_prefix()
     result = subprocess.run(
-        ['podman-compose', 'run', '--rm', 'dev', 'python', str(script_path)],
+        prefix + ['python', str(script_path)],
         check=False
     )
 
