@@ -27,10 +27,6 @@ import hashlib
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
 
 
 @dataclass
@@ -55,6 +51,22 @@ class WorktreeContext:
     def state_dir(self) -> Path:
         """Get the path to the worktree-specific state directory."""
         return self.worktree_root / ".claude-state"
+
+
+def compute_worktree_id(path: Path) -> str:
+    """Compute a stable worktree identifier for any path.
+
+    Generates a 12-character hex string derived from the given path
+    using SHA-256. This is the shared implementation used by both
+    worktree detection and worktree creation.
+
+    Args:
+        path: The path to compute an ID for.
+
+    Returns:
+        12-character hex string.
+    """
+    return hashlib.sha256(str(path).encode()).hexdigest()[:12]
 
 
 def get_worktree_context() -> WorktreeContext:
@@ -97,7 +109,7 @@ def get_worktree_context() -> WorktreeContext:
         is_worktree = git_path.is_file()
 
         # Generate stable worktree ID from path hash
-        worktree_id = hashlib.sha256(str(worktree_root).encode()).hexdigest()[:12]
+        worktree_id = compute_worktree_id(worktree_root)
 
         # Get current branch name
         try:
@@ -182,7 +194,9 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
     """Find orphaned state directories from removed worktrees.
 
     Scans for .claude-state/ directories that belong to worktrees
-    that no longer exist.
+    that no longer exist. This function checks any directory in the
+    parent folder that contains a .claude-state/ subdirectory, regardless
+    of naming convention.
 
     Args:
         repo_root: Main repository root path.
@@ -209,21 +223,14 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
 
         # Check for state directories in parent directory of repo
         parent_dir = repo_root.parent
-        repo_name = repo_root.name
 
-        # Look for worktree directories matching common patterns
+        # Look for any directories in the parent that contain a .claude-state subdirectory
+        # This handles worktrees created with any naming convention
         for item in parent_dir.iterdir():
-            if item.is_dir() and item.name.startswith(f"{repo_name}_"):
+            if item.is_dir():
                 state_dir = item / ".claude-state"
                 if state_dir.exists() and item not in active_worktree_paths:
                     orphaned.append(state_dir)
-
-        # Also check the main repo's state directory if it's orphaned
-        # (though this shouldn't happen for main repo)
-        main_state_dir = repo_root / ".claude-state"
-        if main_state_dir.exists() and repo_root not in active_worktree_paths:
-            # This would be unusual - main repo should always be in worktree list
-            pass
 
     except subprocess.CalledProcessError:
         # If git command fails, return empty list

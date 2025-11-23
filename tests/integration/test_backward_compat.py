@@ -15,9 +15,6 @@ sys.path.insert(
     ),
 )
 
-import pytest
-
-
 class TestBackwardCompatibility:
     """Integration tests for backward compatibility."""
 

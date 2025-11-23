@@ -12,9 +12,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Add VCS module to path
+# Add workflow-utilities to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'))
 from vcs import get_vcs_adapter
+from worktree_context import compute_worktree_id
 
 # Constants with documented rationale
 TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'  # Compact ISO8601 for filename/branch safety
@@ -196,9 +197,8 @@ Created: {created_timestamp}
         state_dir.mkdir(exist_ok=True)
         # Create .gitignore in state dir
         (state_dir / ".gitignore").write_text("# Ignore all files in state directory\n*\n")
-        # Create .worktree-id with hash of worktree path
-        import hashlib
-        worktree_id = hashlib.sha256(str(worktree_path).encode()).hexdigest()[:12]
+        # Create .worktree-id with hash of worktree path (using shared implementation)
+        worktree_id = compute_worktree_id(worktree_path)
         (state_dir / ".worktree-id").write_text(worktree_id)
         print(f"✓ State directory: {state_dir}")
     except (OSError, PermissionError) as e:
