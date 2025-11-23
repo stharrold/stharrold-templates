@@ -54,6 +54,38 @@ RELEASE_BRANCH_PREFIX = 'release/'
 MERGE_STRATEGY = '--no-ff'
 # Rationale: Preserves release branch history in develop, easier to track releases
 
+INVALID_SOURCE_BRANCHES = ['main', 'master', 'develop']
+# Rationale: Backmerge must be from release/* branch, NEVER from main/develop.
+# Merging main → develop is incorrect git-flow and can cause issues.
+
+
+def validate_not_main_or_develop(version: str) -> None:
+    """
+    Validate that backmerge source is NOT main, master, or develop.
+
+    This prevents the common mistake of merging main → develop instead of
+    release/vX.Y.Z → develop. The correct git-flow backmerge is always
+    from the release branch.
+
+    Args:
+        version: Version string (should be vX.Y.Z, NOT a branch name)
+
+    Raises:
+        ValueError: If version looks like main, master, or develop
+    """
+    version_lower = version.lower()
+    if version_lower in INVALID_SOURCE_BRANCHES:
+        raise ValueError(
+            f"❌ INVALID BACKMERGE SOURCE: '{version}'\n\n"
+            f"Backmerge must be from a release/* branch, NOT from {version}.\n\n"
+            f"CORRECT: backmerge_release.py v1.1.0 develop\n"
+            f"         (merges release/v1.1.0 → develop)\n\n"
+            f"WRONG:   Manually creating PR from main → develop\n"
+            f"         This violates git-flow and can cause issues.\n\n"
+            f"The release branch contains release-specific changes that need\n"
+            f"to be merged back to develop. Use the release branch, not main."
+        )
+
 
 def validate_version_format(version):
     """
@@ -122,7 +154,7 @@ def verify_tag_exists(version):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to check git tags: {e.stderr.strip()}"
+            f'Failed to check git tags: {e.stderr.strip()}'
         ) from e
 
 
@@ -143,13 +175,13 @@ def check_working_directory_clean():
 
         if result.stdout.strip():
             raise RuntimeError(
-                "Working directory has uncommitted changes. "
-                "Please commit or stash changes before back-merge."
+                'Working directory has uncommitted changes. '
+                'Please commit or stash changes before back-merge.'
             )
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to check git status: {e.stderr.strip()}"
+            f'Failed to check git status: {e.stderr.strip()}'
         ) from e
 
 
@@ -207,20 +239,20 @@ def rebase_release_branch(release_branch, target_branch):
             separator = '\n' if stderr_part and stdout_part else ''
             error_output = stderr_part + separator + stdout_part
             if 'CONFLICT' in error_output or 'conflict' in error_output.lower():
-                error_type = "Rebase conflict"
+                error_type = 'Rebase conflict'
             else:
-                error_type = "Rebase failed"
+                error_type = 'Rebase failed'
 
             raise RuntimeError(
-                f"{error_type} when rebasing {release_branch} onto origin/{target_branch}.\n"
-                f"Error output: {error_output.strip()}\n\n"
-                f"Manual resolution required:\n"
-                f"  1. git checkout {release_branch}\n"
-                f"  2. git rebase origin/{target_branch}\n"
-                f"  3. Resolve conflicts (if any)\n"
-                f"  4. git rebase --continue\n"
-                f"  5. git push --force-with-lease origin {release_branch}\n"
-                f"  6. Re-run this script"
+                f'{error_type} when rebasing {release_branch} onto origin/{target_branch}.\n'
+                f'Error output: {error_output.strip()}\n\n'
+                f'Manual resolution required:\n'
+                f'  1. git checkout {release_branch}\n'
+                f'  2. git rebase origin/{target_branch}\n'
+                f'  3. Resolve conflicts (if any)\n'
+                f'  4. git rebase --continue\n'
+                f'  5. git push --force-with-lease origin {release_branch}\n'
+                f'  6. Re-run this script'
             )
 
         # Force push rebased branch
@@ -234,17 +266,17 @@ def rebase_release_branch(release_branch, target_branch):
     except subprocess.CalledProcessError as e:
         # More specific error message (Issue #135, #141)
         error_msg = e.stderr.strip() if e.stderr else str(e)
-        if "fetch" in str(e.cmd):
-            operation = "fetch"
-        elif "checkout" in str(e.cmd):
-            operation = "checkout"
-        elif "push" in str(e.cmd):
-            operation = "push"
+        if 'fetch' in str(e.cmd):
+            operation = 'fetch'
+        elif 'checkout' in str(e.cmd):
+            operation = 'checkout'
+        elif 'push' in str(e.cmd):
+            operation = 'push'
         else:
             # e.cmd check is safe: empty lists are falsy in Python (Issue #147)
             operation = f"git command ({e.cmd[0] if e.cmd else 'unknown'})"
         raise RuntimeError(
-            f"Failed to {operation} during rebase operation: {error_msg}"
+            f'Failed to {operation} during rebase operation: {error_msg}'
         ) from e
 
 
@@ -275,14 +307,14 @@ def create_pr(version, target_branch):
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         raise RuntimeError(
-            "gh CLI not available. Cannot create PR. "
-            "Install gh CLI: https://cli.github.com/"
+            'gh CLI not available. Cannot create PR. '
+            'Install gh CLI: https://cli.github.com/'
         )
 
-    release_branch = f"{RELEASE_BRANCH_PREFIX}{version}"
+    release_branch = f'{RELEASE_BRANCH_PREFIX}{version}'
 
     # Build PR title and body
-    pr_title = f"chore(release): back-merge {version} to {target_branch}"
+    pr_title = f'chore(release): back-merge {version} to {target_branch}'
 
     # Get tag URL
     try:
@@ -293,9 +325,9 @@ def create_pr(version, target_branch):
             check=True
         )
         repo_url = result.stdout.strip()
-        tag_url = f"{repo_url}/releases/tag/{version}"
+        tag_url = f'{repo_url}/releases/tag/{version}'
     except subprocess.CalledProcessError:
-        tag_url = f"Release {version}"
+        tag_url = f'Release {version}'
 
     pr_body = f"""## Back-merge Release to Develop
 
@@ -350,25 +382,26 @@ python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to create PR: {e.stderr.strip()}"
+            f'Failed to create PR: {e.stderr.strip()}'
         ) from e
 
 
 def main():
     """Main entry point for backmerge_release.py script."""
     if len(sys.argv) != 3:
-        print("Usage: backmerge_release.py <version> <target_branch>", file=sys.stderr)
-        print("Example: backmerge_release.py v1.1.0 develop", file=sys.stderr)
+        print('Usage: backmerge_release.py <version> <target_branch>', file=sys.stderr)
+        print('Example: backmerge_release.py v1.1.0 develop', file=sys.stderr)
         sys.exit(1)
 
     version = sys.argv[1]
     target_branch = sys.argv[2]
 
-    release_branch = f"{RELEASE_BRANCH_PREFIX}{version}"
+    release_branch = f'{RELEASE_BRANCH_PREFIX}{version}'
 
     try:
         # Step 1: Input Validation
-        print("Validating inputs...", file=sys.stderr)
+        print('Validating inputs...', file=sys.stderr)
+        validate_not_main_or_develop(version)  # Prevent main → develop mistake
         validate_version_format(version)
         verify_branch_exists(release_branch)
         verify_branch_exists(target_branch)
@@ -378,31 +411,31 @@ def main():
         check_working_directory_clean()
 
         # Step 3: Rebase release branch onto target branch
-        print(f"Rebasing {release_branch} onto {target_branch}...", file=sys.stderr)
+        print(f'Rebasing {release_branch} onto {target_branch}...', file=sys.stderr)
         rebase_release_branch(release_branch, target_branch)
-        print("✓ Rebase successful", file=sys.stderr)
+        print('✓ Rebase successful', file=sys.stderr)
 
         # Step 4: Create PR
-        print("Creating pull request for back-merge...", file=sys.stderr)
+        print('Creating pull request for back-merge...', file=sys.stderr)
         pr_url = create_pr(version, target_branch)
 
         # Output
-        print(f"\n✓ Created PR: {pr_url}")
-        print(f"  Title: \"chore(release): back-merge {version} to {target_branch}\"")
-        print("\n📋 Next steps:")
-        print("  1. Review PR in GitHub/Azure DevOps portal")
-        print("  2. Wait for CI checks to pass")
-        print("  3. Merge through portal when ready")
-        print(f"  4. Run cleanup: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}")
+        print(f'\n✓ Created PR: {pr_url}')
+        print(f'  Title: "chore(release): back-merge {version} to {target_branch}"')
+        print('\n📋 Next steps:')
+        print('  1. Review PR in GitHub/Azure DevOps portal')
+        print('  2. Wait for CI checks to pass')
+        print('  3. Merge through portal when ready')
+        print(f'  4. Run cleanup: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}')
 
     except (ValueError, RuntimeError) as e:
-        print(f"ERROR: {e}", file=sys.stderr)
+        print(f'ERROR: {e}', file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
-        print("\nBack-merge cancelled by user.", file=sys.stderr)
+        print('\nBack-merge cancelled by user.', file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"UNEXPECTED ERROR: {e}", file=sys.stderr)
+        print(f'UNEXPECTED ERROR: {e}', file=sys.stderr)
         sys.exit(1)
 
 

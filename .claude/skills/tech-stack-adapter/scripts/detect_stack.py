@@ -16,13 +16,13 @@ def detect_stack():
             text=True
         ).strip())
     except subprocess.CalledProcessError:
-        print("Error: Not a git repository", file=sys.stderr)
+        print('Error: Not a git repository', file=sys.stderr)
         sys.exit(1)
 
     # Check for pyproject.toml
     pyproject_path = repo_root / 'pyproject.toml'
     if not pyproject_path.exists():
-        print("Error: pyproject.toml not found - not a Python/uv project", file=sys.stderr)
+        print('Error: pyproject.toml not found - not a Python/uv project', file=sys.stderr)
         sys.exit(1)
 
     # Parse pyproject.toml
@@ -32,7 +32,7 @@ def detect_stack():
         try:
             import tomli as tomllib
         except ImportError:
-            print("Error: tomllib/tomli not available. Install tomli: pip install tomli", file=sys.stderr)
+            print('Error: tomllib/tomli not available. Install tomli: pip install tomli', file=sys.stderr)
             sys.exit(1)
 
     with open(pyproject_path, 'rb') as f:

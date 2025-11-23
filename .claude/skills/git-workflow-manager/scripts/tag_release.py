@@ -27,7 +27,7 @@ from pathlib import Path
 VERSION_PATTERN = r'^v\d+\.\d+\.\d+$'
 # Rationale: Enforce semantic versioning (vMAJOR.MINOR.PATCH) for consistency
 
-TAG_MESSAGE_TEMPLATE = "Release {version}: {summary}"
+TAG_MESSAGE_TEMPLATE = 'Release {version}: {summary}'
 # Rationale: Annotated tags include metadata, recommended for releases
 
 
@@ -98,7 +98,7 @@ def verify_tag_not_exists(version):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to check local git tags: {e.stderr.strip()}"
+            f'Failed to check local git tags: {e.stderr.strip()}'
         ) from e
 
     # Check remote tags
@@ -118,7 +118,7 @@ def verify_tag_not_exists(version):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to check remote git tags: {e.stderr.strip()}"
+            f'Failed to check remote git tags: {e.stderr.strip()}'
         ) from e
 
 
@@ -203,7 +203,7 @@ def verify_branch_up_to_date(branch_name):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to verify branch status: {e.stderr.strip()}"
+            f'Failed to verify branch status: {e.stderr.strip()}'
         ) from e
 
 
@@ -252,7 +252,7 @@ def extract_release_summary(version):
         pass
 
     # Default summary
-    return f"Production release {version}"
+    return f'Production release {version}'
 
 
 def create_annotated_tag(version, commit_sha):
@@ -307,7 +307,7 @@ def push_tag_to_remote(version):
 
     except subprocess.CalledProcessError as e:
         # Cleanup: delete local tag on push failure
-        print("ERROR: Failed to push tag to remote, cleaning up...", file=sys.stderr)
+        print('ERROR: Failed to push tag to remote, cleaning up...', file=sys.stderr)
         subprocess.run(
             ['git', 'tag', '-d', version],
             capture_output=True,
@@ -345,7 +345,7 @@ def verify_tag_pushed(version):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to verify tag on remote: {e.stderr.strip()}"
+            f'Failed to verify tag on remote: {e.stderr.strip()}'
         ) from e
 
 
@@ -367,7 +367,7 @@ def create_github_release(version):
             check=True
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("Note: gh CLI not available, skipping GitHub release creation", file=sys.stderr)
+        print('Note: gh CLI not available, skipping GitHub release creation', file=sys.stderr)
         return None
 
     # Create GitHub release
@@ -384,16 +384,16 @@ def create_github_release(version):
         return release_url
 
     except subprocess.CalledProcessError as e:
-        print(f"Warning: Failed to create GitHub release: {e.stderr.strip()}", file=sys.stderr)
-        print(f"You can create it manually: gh release create {version} --generate-notes", file=sys.stderr)
+        print(f'Warning: Failed to create GitHub release: {e.stderr.strip()}', file=sys.stderr)
+        print(f'You can create it manually: gh release create {version} --generate-notes', file=sys.stderr)
         return None
 
 
 def main():
     """Main entry point for tag_release.py script."""
     if len(sys.argv) != 3:
-        print("Usage: tag_release.py <version> <branch>", file=sys.stderr)
-        print("Example: tag_release.py v1.1.0 main", file=sys.stderr)
+        print('Usage: tag_release.py <version> <branch>', file=sys.stderr)
+        print('Example: tag_release.py v1.1.0 main', file=sys.stderr)
         sys.exit(1)
 
     version = sys.argv[1]
@@ -401,57 +401,57 @@ def main():
 
     try:
         # Step 1: Input Validation
-        print("Validating inputs...", file=sys.stderr)
+        print('Validating inputs...', file=sys.stderr)
         validate_version_format(version)
         verify_branch_exists(branch)
         verify_tag_not_exists(version)
 
         # Step 2: Branch Operations
-        print(f"Checking out {branch} and pulling latest...", file=sys.stderr)
+        print(f'Checking out {branch} and pulling latest...', file=sys.stderr)
         commit_sha = checkout_and_pull_branch(branch)
 
-        print("Verifying branch is up-to-date...", file=sys.stderr)
+        print('Verifying branch is up-to-date...', file=sys.stderr)
         verify_branch_up_to_date(branch)
 
         # Step 3: Tag Creation
-        print("Creating annotated tag...", file=sys.stderr)
+        print('Creating annotated tag...', file=sys.stderr)
         tag_message = create_annotated_tag(version, commit_sha)
 
         # Step 4: Tag Push
-        print("Pushing tag to origin...", file=sys.stderr)
+        print('Pushing tag to origin...', file=sys.stderr)
         push_tag_to_remote(version)
 
-        print("Verifying tag push...", file=sys.stderr)
+        print('Verifying tag push...', file=sys.stderr)
         verify_tag_pushed(version)
 
         # Step 5: GitHub Release (Optional)
-        print("Creating GitHub release...", file=sys.stderr)
+        print('Creating GitHub release...', file=sys.stderr)
         release_url = create_github_release(version)
 
         # Success output
-        print(f"\n✓ Checked out {branch} branch")
-        print(f"✓ Pulled latest changes (commit {commit_sha})")
-        print(f"✓ Created annotated tag: {version}")
-        print(f"  Message: \"{tag_message}\"")
-        print("✓ Pushed tag to origin")
+        print(f'\n✓ Checked out {branch} branch')
+        print(f'✓ Pulled latest changes (commit {commit_sha})')
+        print(f'✓ Created annotated tag: {version}')
+        print(f'  Message: "{tag_message}"')
+        print('✓ Pushed tag to origin')
 
         if release_url:
-            print(f"✓ GitHub release created: {release_url}")
+            print(f'✓ GitHub release created: {release_url}')
         else:
-            print("  GitHub release: skipped (gh CLI not available or failed)")
+            print('  GitHub release: skipped (gh CLI not available or failed)')
 
-        print("\nNext steps:")
-        print(f"  1. Back-merge to develop: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py {version} develop")
-        print(f"  2. Cleanup release branch: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}")
+        print('\nNext steps:')
+        print(f'  1. Back-merge to develop: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py {version} develop')
+        print(f'  2. Cleanup release branch: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}')
 
     except (ValueError, RuntimeError) as e:
-        print(f"ERROR: {e}", file=sys.stderr)
+        print(f'ERROR: {e}', file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
-        print("\nTag creation cancelled by user.", file=sys.stderr)
+        print('\nTag creation cancelled by user.', file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"UNEXPECTED ERROR: {e}", file=sys.stderr)
+        print(f'UNEXPECTED ERROR: {e}', file=sys.stderr)
         sys.exit(1)
 
 

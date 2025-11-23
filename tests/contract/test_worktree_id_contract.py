@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 

@@ -16,7 +16,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -29,17 +29,17 @@ class Colors:
     END = '\033[0m'
 
 def error_exit(msg: str) -> None:
-    print(f"{Colors.RED}✗ {msg}{Colors.END}", file=sys.stderr)
+    print(f'{Colors.RED}✗ {msg}{Colors.END}', file=sys.stderr)
     sys.exit(1)
 
 def success(msg: str) -> None:
-    print(f"{Colors.GREEN}✓ {msg}{Colors.END}")
+    print(f'{Colors.GREEN}✓ {msg}{Colors.END}')
 
 def info(msg: str) -> None:
-    print(f"{Colors.BLUE}ℹ {msg}{Colors.END}")
+    print(f'{Colors.BLUE}ℹ {msg}{Colors.END}')
 
 
-def parse_todo_file(file_path: Path) -> Optional[Dict[str, Any]]:
+def parse_todo_file(file_path: Path) -> dict[str, Any] | None:
     """Parse TODO file and extract YAML frontmatter.
 
     Args:
@@ -60,11 +60,11 @@ def parse_todo_file(file_path: Path) -> Optional[Dict[str, Any]]:
         return frontmatter
 
     except Exception as e:
-        error_exit(f"Failed to parse {file_path.name}: {e}")
+        error_exit(f'Failed to parse {file_path.name}: {e}')
         return None
 
 
-def convert_to_records(frontmatter: Dict[str, Any], file_name: str) -> List[Dict[str, Any]]:
+def convert_to_records(frontmatter: dict[str, Any], file_name: str) -> list[dict[str, Any]]:
     """Convert TODO frontmatter to AgentDB records.
 
     Args:
@@ -84,9 +84,9 @@ def convert_to_records(frontmatter: Dict[str, Any], file_name: str) -> List[Dict
     phase = workflow_progress.get('phase', 0)
 
     records.append({
-        'object_id': f"workflow_{workflow_id}",
+        'object_id': f'workflow_{workflow_id}',
         'object_type': 'workflow',
-        'object_state': f"0{phase}_phase-{phase}",
+        'object_state': f'0{phase}_phase-{phase}',
         'object_metadata': json.dumps({
             'workflow_type': workflow_type,
             'slug': frontmatter.get('slug'),
@@ -117,7 +117,7 @@ def convert_to_records(frontmatter: Dict[str, Any], file_name: str) -> List[Dict
             }
 
             records.append({
-                'object_id': f"task_{task_id}",
+                'object_id': f'task_{task_id}',
                 'object_type': 'task',
                 'object_state': state_map.get(status, '00_pending'),
                 'object_metadata': json.dumps({
@@ -139,7 +139,7 @@ def convert_to_records(frontmatter: Dict[str, Any], file_name: str) -> List[Dict
             passed = value if isinstance(value, bool) else (value >= 80 if isinstance(value, (int, float)) else False)
 
             records.append({
-                'object_id': f"quality_{workflow_id}_{gate_type}",
+                'object_id': f'quality_{workflow_id}_{gate_type}',
                 'object_type': 'quality_gate',
                 'object_state': '20_passed' if passed else 'E01_failed',
                 'object_metadata': json.dumps({
@@ -152,7 +152,7 @@ def convert_to_records(frontmatter: Dict[str, Any], file_name: str) -> List[Dict
     return records
 
 
-def sync_to_agentdb(records: List[Dict[str, Any]], session_id: str) -> bool:
+def sync_to_agentdb(records: list[dict[str, Any]], session_id: str) -> bool:
     """Insert records into AgentDB.
 
     Args:
@@ -164,7 +164,7 @@ def sync_to_agentdb(records: List[Dict[str, Any]], session_id: str) -> bool:
 
     Note: In actual execution, would use AgentDB tool to execute SQL.
     """
-    info(f"Syncing {len(records)} records to AgentDB...")
+    info(f'Syncing {len(records)} records to AgentDB...')
 
     # Generate INSERT statements
     for record in records:
@@ -179,8 +179,8 @@ def sync_to_agentdb(records: List[Dict[str, Any]], session_id: str) -> bool:
         """
         print(sql.strip())
 
-    success(f"Prepared {len(records)} INSERT statements")
-    print("\nNOTE: In actual execution, these would be sent to AgentDB")
+    success(f'Prepared {len(records)} INSERT statements')
+    print('\nNOTE: In actual execution, these would be sent to AgentDB')
 
     return True
 
@@ -197,29 +197,29 @@ def main() -> None:
     if args.all or not args.file:
         todo_files = list(Path.cwd().glob('TODO_*.md'))
         if not todo_files:
-            error_exit("No TODO_*.md files found")
+            error_exit('No TODO_*.md files found')
     else:
         todo_files = [Path(args.file)]
         if not todo_files[0].exists():
-            error_exit(f"File not found: {args.file}")
+            error_exit(f'File not found: {args.file}')
 
-    info(f"Found {len(todo_files)} TODO file(s)")
+    info(f'Found {len(todo_files)} TODO file(s)')
 
     # Parse and sync each file
     for todo_file in todo_files:
-        info(f"Processing {todo_file.name}...")
+        info(f'Processing {todo_file.name}...')
 
         frontmatter = parse_todo_file(todo_file)
         if not frontmatter:
-            print(f"  Skipping {todo_file.name} (no valid frontmatter)")
+            print(f'  Skipping {todo_file.name} (no valid frontmatter)')
             continue
 
         records = convert_to_records(frontmatter, todo_file.name)
         sync_to_agentdb(records, args.session_id or 'default')
 
-        success(f"Synced {todo_file.name}")
+        success(f'Synced {todo_file.name}')
 
-    print(f"\n{Colors.GREEN}✓ Sync complete{Colors.END}\n")
+    print(f'\n{Colors.GREEN}✓ Sync complete{Colors.END}\n')
 
 
 if __name__ == '__main__':

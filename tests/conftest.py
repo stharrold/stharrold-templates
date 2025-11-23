@@ -1,8 +1,9 @@
 # conftest.py - Shared pytest fixtures for stharrold-templates
 """Shared pytest fixtures and configuration."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
@@ -14,6 +15,6 @@ def repo_root() -> Path:
 @pytest.fixture
 def test_data_dir(repo_root: Path) -> Path:
     """Return the test data directory."""
-    data_dir = repo_root / "tests" / "data"
+    data_dir = repo_root / 'tests' / 'data'
     data_dir.mkdir(exist_ok=True)
     return data_dir

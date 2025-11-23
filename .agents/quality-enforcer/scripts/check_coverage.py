@@ -19,8 +19,16 @@ def check_coverage(threshold=80):
     """
     try:
         # Run pytest with coverage
+        # Measure coverage for: .claude/skills, tools, and root Python files
         subprocess.run(
-            ['uv', 'run', 'pytest', '--cov=src', '--cov-report=term', '--cov-report=json'],
+            [
+                'uv', 'run', 'pytest',
+                '--cov=.claude/skills',
+                '--cov=tools',
+                '--cov=mcp_manager.py',
+                '--cov-report=term',
+                '--cov-report=json'
+            ],
             capture_output=True,
             text=True,
             check=False
@@ -35,17 +43,17 @@ def check_coverage(threshold=80):
             total_coverage = coverage_data['totals']['percent_covered']
         else:
             # Fallback: try to parse from stdout
-            print("Warning: coverage.json not found, parsing stdout", file=sys.stderr)
+            print('Warning: coverage.json not found, parsing stdout', file=sys.stderr)
             total_coverage = 0.0
 
         passed = total_coverage >= threshold
 
-        print(f"Coverage: {total_coverage:.1f}%")
-        print(f"Threshold: {threshold}%")
+        print(f'Coverage: {total_coverage:.1f}%')
+        print(f'Threshold: {threshold}%')
         print(f"Status: {'✓ PASS' if passed else '✗ FAIL'}")
 
         if not passed:
-            print(f"\nCoverage is below {threshold}%. Add more tests.")
+            print(f'\nCoverage is below {threshold}%. Add more tests.')
 
         return passed, total_coverage
 
@@ -53,7 +61,7 @@ def check_coverage(threshold=80):
         print("Error: 'uv' command not found. Is uv installed?", file=sys.stderr)
         return False, 0.0
     except Exception as e:
-        print(f"Error checking coverage: {e}", file=sys.stderr)
+        print(f'Error checking coverage: {e}', file=sys.stderr)
         return False, 0.0
 
 if __name__ == '__main__':
