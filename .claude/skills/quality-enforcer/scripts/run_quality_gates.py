@@ -299,7 +299,7 @@ def run_all_quality_gates(coverage_threshold=80):
     return all_passed, results
 
 if __name__ == '__main__':
-    # TODO: Increase coverage threshold to 80 once test coverage improves
-    # Current codebase has ~4% coverage; target is 80%
+    # TODO(2025-11-23): Increase coverage threshold to 80 once test coverage improves
+    # Current codebase has ~4% coverage as of 2025-11-23; target is 80%
     passed, _ = run_all_quality_gates(coverage_threshold=0)
     sys.exit(0 if passed else 1)
