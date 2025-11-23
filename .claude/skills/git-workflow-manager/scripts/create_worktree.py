@@ -190,6 +190,20 @@ Created: {created_timestamp}
             pass
         raise
 
+    # Initialize .claude-state/ directory in new worktree
+    state_dir = worktree_path / ".claude-state"
+    try:
+        state_dir.mkdir(exist_ok=True)
+        # Create .gitignore in state dir
+        (state_dir / ".gitignore").write_text("# Ignore all files in state directory\n*\n")
+        # Create .worktree-id with hash of worktree path
+        import hashlib
+        worktree_id = hashlib.sha256(str(worktree_path).encode()).hexdigest()[:12]
+        (state_dir / ".worktree-id").write_text(worktree_id)
+        print(f"✓ State directory: {state_dir}")
+    except (OSError, PermissionError) as e:
+        print(f"⚠️  Could not create state directory: {e}", file=sys.stderr)
+
     print(f"✓ Worktree created: {worktree_path}")
     print(f"✓ Branch: {branch_name}")
     print(f"✓ TODO file: {todo_filename}")
@@ -197,7 +211,8 @@ Created: {created_timestamp}
     return {
         'worktree_path': str(worktree_path),
         'branch_name': branch_name,
-        'todo_file': todo_filename
+        'todo_file': todo_filename,
+        'state_dir': str(state_dir) if state_dir.exists() else None
     }
 
 if __name__ == '__main__':
