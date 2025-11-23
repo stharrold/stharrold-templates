@@ -5,7 +5,7 @@
 
 ## Summary
 
-Rename `/5_integrate` to `/5_integrate` for semantic accuracy, and add `/6_release` and `/7_backmerge` commands to support daily release workflows. This separates the feature integration workflow (0-4) from the release workflow (5-6).
+Rename `/4_deploy` to `/5_integrate` for semantic accuracy, and add `/6_release` and `/7_backmerge` commands to support daily release workflows. This separates the feature integration workflow (1-5) from the release workflow (6-7).
 
 ## Technical Context
 **Language/Version**: Markdown (slash commands), Python 3.11 (pr_workflow.py)
@@ -111,11 +111,11 @@ specs/004-rename-4-deploy/
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-- Rename `/5_integrate.md` to `/5_integrate.md`
+- Rename `/4_deploy.md` to `/5_integrate.md`
 - Update content of `/5_integrate.md`
 - Create `/6_release.md` with release workflow
 - Create `/7_backmerge.md` with backmerge workflow
-- Update navigation in commands 0-3
+- Update navigation in commands 1-4
 - Update all documentation references
 - Create supporting Python scripts if needed
 
