@@ -23,7 +23,7 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # Add workflow-utilities to path for worktree_context
 sys.path.insert(

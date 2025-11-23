@@ -8,7 +8,6 @@ This module bridges git-workflow-manager with the worktree-aware
 state management system.
 """
 
-import asyncio
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -46,7 +45,7 @@ def get_flow_token() -> str:
         # Fallback to worktree ID
         return f"worktree-{ctx.worktree_id}"
 
-    except (ImportError, RuntimeError) as e:
+    except (ImportError, RuntimeError):
         # Fallback for non-git environments
         from uuid import uuid4
 
