@@ -54,6 +54,38 @@ RELEASE_BRANCH_PREFIX = 'release/'
 MERGE_STRATEGY = '--no-ff'
 # Rationale: Preserves release branch history in develop, easier to track releases
 
+INVALID_SOURCE_BRANCHES = ['main', 'master', 'develop']
+# Rationale: Backmerge must be from release/* branch, NEVER from main/develop.
+# Merging main → develop is incorrect git-flow and can cause issues.
+
+
+def validate_not_main_or_develop(version: str) -> None:
+    """
+    Validate that backmerge source is NOT main, master, or develop.
+
+    This prevents the common mistake of merging main → develop instead of
+    release/vX.Y.Z → develop. The correct git-flow backmerge is always
+    from the release branch.
+
+    Args:
+        version: Version string (should be vX.Y.Z, NOT a branch name)
+
+    Raises:
+        ValueError: If version looks like main, master, or develop
+    """
+    version_lower = version.lower()
+    if version_lower in INVALID_SOURCE_BRANCHES:
+        raise ValueError(
+            f"❌ INVALID BACKMERGE SOURCE: '{version}'\n\n"
+            f"Backmerge must be from a release/* branch, NOT from {version}.\n\n"
+            f"CORRECT: backmerge_release.py v1.1.0 develop\n"
+            f"         (merges release/v1.1.0 → develop)\n\n"
+            f"WRONG:   Manually creating PR from main → develop\n"
+            f"         This violates git-flow and can cause issues.\n\n"
+            f"The release branch contains release-specific changes that need\n"
+            f"to be merged back to develop. Use the release branch, not main."
+        )
+
 
 def validate_version_format(version):
     """
@@ -369,6 +401,7 @@ def main():
     try:
         # Step 1: Input Validation
         print("Validating inputs...", file=sys.stderr)
+        validate_not_main_or_develop(version)  # Prevent main → develop mistake
         validate_version_format(version)
         verify_branch_exists(release_branch)
         verify_branch_exists(target_branch)

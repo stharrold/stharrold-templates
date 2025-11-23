@@ -18,10 +18,15 @@ Usage:
 from __future__ import annotations
 
 import json
+import logging
+import os
+import tempfile
 from datetime import datetime, timezone
 from typing import Any
 
 from worktree_context import get_state_dir, get_worktree_id
+
+logger = logging.getLogger(__name__)
 
 
 def get_workflow_progress() -> dict[str, Any]:
@@ -45,7 +50,10 @@ def get_workflow_progress() -> dict[str, Any]:
         try:
             return json.loads(progress_file.read_text())
         except json.JSONDecodeError:
-            # Corrupted file, return default
+            logger.warning(
+                "Corrupted workflow.json at %s, returning default state",
+                progress_file,
+            )
             pass
 
     # Return default structure
@@ -115,10 +123,22 @@ def update_workflow_progress(
     # Ensure worktree_id is set
     progress["worktree_id"] = get_worktree_id()
 
-    # Write to file
+    # Write to file atomically (write to temp, then rename)
     state_dir = get_state_dir()
     progress_file = state_dir / "workflow.json"
-    progress_file.write_text(json.dumps(progress, indent=2))
+
+    # Create temp file in same directory to ensure atomic rename
+    fd, temp_path = tempfile.mkstemp(dir=state_dir, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(progress, f, indent=2)
+        # Atomic rename (works on POSIX systems)
+        os.replace(temp_path, progress_file)
+    except Exception:
+        # Clean up temp file on failure
+        if os.path.exists(temp_path):
+            os.unlink(temp_path)
+        raise
 
     return progress
 

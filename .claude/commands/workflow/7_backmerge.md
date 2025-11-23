@@ -22,6 +22,16 @@ prev: /6_release
 
 Sync release changes back to development branches.
 
+## ⚠️ CRITICAL: Backmerge Direction
+
+```
+CORRECT:  release/vX.Y.Z → develop  (use the release branch)
+WRONG:    main → develop            (NEVER merge main to develop!)
+```
+
+The backmerge must ALWAYS use the **release branch** as the source, not main.
+This is enforced by `backmerge_release.py` which validates the source branch.
+
 ## Workflow Steps (in order)
 
 1. **pr-develop** - Create PR from release branch to develop
