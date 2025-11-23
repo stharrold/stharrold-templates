@@ -18,7 +18,7 @@ def is_inside_container() -> bool:
     return (
         Path('/.dockerenv').exists()
         or Path('/run/.containerenv').exists()
-        or Path('/app').exists() and Path('/app/pyproject.toml').exists()
+        or (Path('/app').exists() and Path('/app/pyproject.toml').exists())
     )
 
 
@@ -205,7 +205,7 @@ def sync_ai_config():
         print(f'⚠️  Sync failed (non-critical): {e}')
         return True  # Don't fail quality gates if sync fails
 
-def run_all_quality_gates(coverage_threshold=0):
+def run_all_quality_gates(coverage_threshold=80):
     """
     Run all quality gates and report results.
 
@@ -260,9 +260,11 @@ def run_all_quality_gates(coverage_threshold=0):
     print('\n' + '=' * 60)
     print('SUMMARY')
     print('=' * 60)
-    gate_keys = ['coverage', 'tests', 'build', 'linting', 'ai_config_sync']
-    for gate in gate_keys:
-        result = results.get(gate, {})
+    # Dynamically summarize gates, filtering out non-gate keys
+    non_gate_keys = {'worktree_id', 'worktree_root'}
+    for gate, result in results.items():
+        if gate in non_gate_keys:
+            continue
         if isinstance(result, dict):
             status = '✓ PASS' if result.get('passed', False) else '✗ FAIL'
             print(f'{gate.upper()}: {status}')
@@ -297,5 +299,7 @@ def run_all_quality_gates(coverage_threshold=0):
     return all_passed, results
 
 if __name__ == '__main__':
-    passed, _ = run_all_quality_gates()
+    # TODO: Increase coverage threshold to 80 once test coverage improves
+    # Current codebase has ~4% coverage; target is 80%
+    passed, _ = run_all_quality_gates(coverage_threshold=0)
     sys.exit(0 if passed else 1)
