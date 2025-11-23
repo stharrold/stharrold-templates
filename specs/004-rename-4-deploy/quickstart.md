@@ -77,7 +77,7 @@ This feature renames `/4_deploy` to `/5_integrate` and adds `/6_release` and `/7
 - [ ] `/5_integrate` has same behavior as old `/4_deploy`
 - [ ] `/6_release` creates release branch and PR to main
 - [ ] `/7_backmerge` creates PR to develop and rebases contrib
-- [ ] All navigation strings updated in commands 0-6
+- [ ] All navigation strings updated in commands 1-7
 - [ ] CLAUDE.md reflects 7-step workflow
 - [ ] AGENTS.md synced from CLAUDE.md
 

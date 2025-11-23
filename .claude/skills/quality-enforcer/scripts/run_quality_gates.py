@@ -6,6 +6,30 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Add workflow-utilities to path for worktree_context
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
+)
+
+
+def get_worktree_info() -> dict:
+    """Get worktree context information for logging.
+
+    Returns:
+        Dictionary with worktree_id and worktree_root, or empty values if detection fails.
+    """
+    try:
+        from worktree_context import get_worktree_context
+
+        ctx = get_worktree_context()
+        return {
+            "worktree_id": ctx.worktree_id,
+            "worktree_root": str(ctx.worktree_root),
+        }
+    except (ImportError, RuntimeError):
+        return {"worktree_id": "", "worktree_root": str(Path.cwd())}
+
 
 def run_tests():
     """Run all tests and verify they pass."""
@@ -210,8 +234,15 @@ def run_all_quality_gates(coverage_threshold=80):
     results = {}
     all_passed = True
 
+    # Get worktree context
+    worktree_info = get_worktree_info()
+    results["worktree_id"] = worktree_info["worktree_id"]
+    results["worktree_root"] = worktree_info["worktree_root"]
+
     print("=" * 60)
     print("QUALITY GATES")
+    if worktree_info["worktree_id"]:
+        print(f"Worktree: {worktree_info['worktree_id']}")
     print("=" * 60)
 
     # Gate 1: Test Coverage
