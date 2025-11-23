@@ -21,6 +21,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Add workflow-utilities to path for container_utils
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'),
+)
+
+from container_utils import get_command_prefix
+
 
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
@@ -89,8 +97,9 @@ def run_quality_gates() -> bool:
         print('⚠️  Quality gates script not found, skipping')
         return True
 
+    prefix = get_command_prefix()
     result = subprocess.run(
-        ['podman-compose', 'run', '--rm', 'dev', 'python', str(script_path)],
+        prefix + ['python', str(script_path)],
         check=False
     )
 
