@@ -28,9 +28,8 @@ import argparse
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 # Constants with documented rationale
 TIMESTAMP_FORMAT = '%Y-%m-%d'  # Human-readable date for documentation
@@ -39,11 +38,11 @@ CONTRIB_BRANCH_PREFIX = 'contrib/'  # Must be on contrib branch
 
 def error_exit(message: str, code: int = 1) -> None:
     """Print error message and exit with code."""
-    print(f"ERROR: {message}", file=sys.stderr)
+    print(f'ERROR: {message}', file=sys.stderr)
     sys.exit(code)
 
 
-def run_command(cmd: List[str], capture=True, check=True) -> Optional[str]:
+def run_command(cmd: list[str], capture=True, check=True) -> str | None:
     """Run command and return output or None on error."""
     try:
         if capture:
@@ -59,10 +58,10 @@ def run_command(cmd: List[str], capture=True, check=True) -> Optional[str]:
             error_exit(f"Command failed: {' '.join(cmd)}\n{e.stderr}")
         return None
     except FileNotFoundError:
-        error_exit(f"Command not found: {cmd[0]}")
+        error_exit(f'Command not found: {cmd[0]}')
 
 
-def detect_context() -> Dict[str, any]:
+def detect_context() -> dict[str, any]:
     """Detect current repository context and validate for BMAD planning."""
 
     # Get repository root
@@ -75,18 +74,18 @@ def detect_context() -> Dict[str, any]:
 
     if not is_main_repo:
         error_exit(
-            "Not in main repository. BMAD planning must be run from main repo.\n"
-            f"Current directory: {current_dir}\n"
-            f"Repository root: {repo_root}\n"
-            "Change to main repository directory first."
+            'Not in main repository. BMAD planning must be run from main repo.\n'
+            f'Current directory: {current_dir}\n'
+            f'Repository root: {repo_root}\n'
+            'Change to main repository directory first.'
         )
 
     # Verify on contrib branch
     if not current_branch.startswith(CONTRIB_BRANCH_PREFIX):
         error_exit(
-            f"Not on contrib branch. Current branch: {current_branch}\n"
-            f"BMAD planning must be created on contrib/<gh-user> branch.\n"
-            "Checkout contrib branch first: git checkout contrib/<gh-user>"
+            f'Not on contrib branch. Current branch: {current_branch}\n'
+            f'BMAD planning must be created on contrib/<gh-user> branch.\n'
+            'Checkout contrib branch first: git checkout contrib/<gh-user>'
         )
 
     return {
@@ -97,19 +96,19 @@ def detect_context() -> Dict[str, any]:
     }
 
 
-def ask_question(prompt: str, options: Optional[List[str]] = None, default: Optional[str] = None) -> str:
+def ask_question(prompt: str, options: list[str] | None = None, default: str | None = None) -> str:
     """Ask user a question and return response."""
 
     if options:
-        print(f"\n{prompt}")
+        print(f'\n{prompt}')
         for i, option in enumerate(options, 1):
-            print(f"  {i}) {option}")
+            print(f'  {i}) {option}')
 
         if default:
-            print(f"  [default: {default}]")
+            print(f'  [default: {default}]')
 
         while True:
-            response = input("> ").strip()
+            response = input('> ').strip()
 
             if not response and default:
                 return default
@@ -124,21 +123,21 @@ def ask_question(prompt: str, options: Optional[List[str]] = None, default: Opti
             if response in options:
                 return response
 
-            print("Invalid selection. Please try again.")
+            print('Invalid selection. Please try again.')
     else:
         if default:
-            print(f"\n{prompt} [{default}]")
+            print(f'\n{prompt} [{default}]')
         else:
-            print(f"\n{prompt}")
+            print(f'\n{prompt}')
 
-        response = input("> ").strip()
-        return response if response else (default or "")
+        response = input('> ').strip()
+        return response if response else (default or '')
 
 
 def ask_yes_no(prompt: str, default: bool = True) -> bool:
     """Ask yes/no question."""
-    default_str = "Y/n" if default else "y/N"
-    response = input(f"\n{prompt} ({default_str}) > ").strip().lower()
+    default_str = 'Y/n' if default else 'y/N'
+    response = input(f'\n{prompt} ({default_str}) > ').strip().lower()
 
     if not response:
         return default
@@ -146,24 +145,24 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
     return response in ['y', 'yes']
 
 
-def interactive_qa_analyst() -> Dict[str, any]:
+def interactive_qa_analyst() -> dict[str, any]:
     """Conduct 🧠 BMAD Analyst persona Q&A for requirements gathering."""
 
-    print("\n" + "=" * 70)
-    print("🧠 BMAD Analyst Persona - Requirements Gathering")
-    print("=" * 70)
+    print('\n' + '=' * 70)
+    print('🧠 BMAD Analyst Persona - Requirements Gathering')
+    print('=' * 70)
     print("\nI'll help create the requirements document through interactive Q&A.")
-    print("-" * 70)
+    print('-' * 70)
 
     data = {}
 
     # Business context
     data['problem_statement'] = ask_question(
-        "What problem does this feature solve?"
+        'What problem does this feature solve?'
     )
 
     data['primary_users'] = ask_question(
-        "Who are the primary users of this feature?"
+        'Who are the primary users of this feature?'
     )
 
     data['success_criteria'] = ask_question(
@@ -171,40 +170,40 @@ def interactive_qa_analyst() -> Dict[str, any]:
     )
 
     # Functional requirements
-    print("\n" + "-" * 70)
-    print("Functional Requirements (FR-001, FR-002, ...)")
-    print("-" * 70)
+    print('\n' + '-' * 70)
+    print('Functional Requirements (FR-001, FR-002, ...)')
+    print('-' * 70)
 
     data['functional_requirements'] = []
     fr_num = 1
 
     while True:
         fr_name = ask_question(
-            f"FR-{fr_num:03d} requirement name (or press Enter to finish):",
-            default=""
+            f'FR-{fr_num:03d} requirement name (or press Enter to finish):',
+            default=''
         )
 
         if not fr_name:
             break
 
         fr_desc = ask_question(
-            f"FR-{fr_num:03d} description:"
+            f'FR-{fr_num:03d} description:'
         )
 
         fr_priority = ask_question(
-            f"FR-{fr_num:03d} priority?",
-            options=["High", "Medium", "Low"],
-            default="Medium"
+            f'FR-{fr_num:03d} priority?',
+            options=['High', 'Medium', 'Low'],
+            default='Medium'
         )
 
         # Acceptance criteria
-        print(f"\nFR-{fr_num:03d} Acceptance Criteria (AC):")
+        print(f'\nFR-{fr_num:03d} Acceptance Criteria (AC):')
         acceptance_criteria = []
         ac_num = 1
         while True:
             ac = ask_question(
-                f"  AC {ac_num} (or press Enter to finish):",
-                default=""
+                f'  AC {ac_num} (or press Enter to finish):',
+                default=''
             )
             if not ac:
                 break
@@ -222,171 +221,171 @@ def interactive_qa_analyst() -> Dict[str, any]:
         fr_num += 1
 
     # Non-functional requirements
-    print("\n" + "-" * 70)
-    print("Non-Functional Requirements (NFR)")
-    print("-" * 70)
+    print('\n' + '-' * 70)
+    print('Non-Functional Requirements (NFR)')
+    print('-' * 70)
 
     data['performance_requirements'] = ask_question(
         "Performance requirements? (e.g., '<200ms response', 'not critical')",
-        default="Standard performance expectations"
+        default='Standard performance expectations'
     )
 
     data['security_requirements'] = ask_question(
         "Security requirements? (e.g., 'authentication', 'encryption', 'none')",
-        default="none"
+        default='none'
     )
 
     data['scalability_requirements'] = ask_question(
         "Scalability requirements? (e.g., '1000 concurrent users', 'not critical')",
-        default="Standard scalability"
+        default='Standard scalability'
     )
 
     # Constraints and assumptions
     data['constraints'] = ask_question(
-        "Any constraints or limitations?",
-        default="None identified"
+        'Any constraints or limitations?',
+        default='None identified'
     )
 
     data['assumptions'] = ask_question(
-        "Any assumptions being made?",
-        default="Standard development environment and tooling"
+        'Any assumptions being made?',
+        default='Standard development environment and tooling'
     )
 
-    print("\n✓ Requirements gathering complete!")
+    print('\n✓ Requirements gathering complete!')
 
     return data
 
 
-def interactive_qa_architect(requirements_data: Dict[str, any]) -> Dict[str, any]:
+def interactive_qa_architect(requirements_data: dict[str, any]) -> dict[str, any]:
     """Conduct 🏗️ BMAD Architect persona Q&A for architecture design."""
 
-    print("\n" + "=" * 70)
-    print("🏗️ BMAD Architect Persona - Technical Architecture Design")
-    print("=" * 70)
+    print('\n' + '=' * 70)
+    print('🏗️ BMAD Architect Persona - Technical Architecture Design')
+    print('=' * 70)
     print("\nBased on the requirements, I'll design the technical architecture.")
-    print("-" * 70)
+    print('-' * 70)
 
     data = {}
 
     # Technology stack
-    print("\nTechnology Stack:")
+    print('\nTechnology Stack:')
 
     data['web_framework'] = ask_question(
-        "Web framework (if applicable)?",
-        options=["FastAPI", "Flask", "Django", "None"],
-        default="None"
+        'Web framework (if applicable)?',
+        options=['FastAPI', 'Flask', 'Django', 'None'],
+        default='None'
     )
 
     data['database'] = ask_question(
-        "Database?",
-        options=["SQLite (dev)", "PostgreSQL", "MySQL", "None"],
-        default="SQLite (dev)"
+        'Database?',
+        options=['SQLite (dev)', 'PostgreSQL', 'MySQL', 'None'],
+        default='SQLite (dev)'
     )
 
-    if data['database'] != "None":
+    if data['database'] != 'None':
         data['database_migration'] = ask_question(
-            "Database migration strategy?",
-            options=["Alembic", "Manual SQL", "None"],
-            default="Alembic"
+            'Database migration strategy?',
+            options=['Alembic', 'Manual SQL', 'None'],
+            default='Alembic'
         )
     else:
-        data['database_migration'] = "None"
+        data['database_migration'] = 'None'
 
     data['testing_framework'] = ask_question(
-        "Testing framework?",
-        options=["pytest (recommended)", "unittest", "other"],
-        default="pytest (recommended)"
+        'Testing framework?',
+        options=['pytest (recommended)', 'unittest', 'other'],
+        default='pytest (recommended)'
     )
 
     # Container strategy
     data['use_containers'] = ask_yes_no(
-        "Use containerization (Podman)?",
+        'Use containerization (Podman)?',
         default=True
     )
 
     if data['use_containers']:
         data['container_strategy'] = ask_question(
-            "Container strategy?",
-            options=["Single container", "Multi-container (podman-compose)", "Custom"],
-            default="Single container"
+            'Container strategy?',
+            options=['Single container', 'Multi-container (podman-compose)', 'Custom'],
+            default='Single container'
         )
     else:
-        data['container_strategy'] = "None"
+        data['container_strategy'] = 'None'
 
     # Architecture patterns
     data['architecture_pattern'] = ask_question(
-        "Architecture pattern?",
-        options=["Layered (data/service/API)", "Modular", "Monolithic", "Other"],
-        default="Layered (data/service/API)"
+        'Architecture pattern?',
+        options=['Layered (data/service/API)', 'Modular', 'Monolithic', 'Other'],
+        default='Layered (data/service/API)'
     )
 
     # API design (if web framework selected)
-    if data['web_framework'] != "None":
+    if data['web_framework'] != 'None':
         data['api_style'] = ask_question(
-            "API style?",
-            options=["REST", "GraphQL", "RPC", "Other"],
-            default="REST"
+            'API style?',
+            options=['REST', 'GraphQL', 'RPC', 'Other'],
+            default='REST'
         )
 
         data['api_versioning'] = ask_yes_no(
-            "Include API versioning?",
+            'Include API versioning?',
             default=False
         )
     else:
-        data['api_style'] = "Not applicable"
+        data['api_style'] = 'Not applicable'
         data['api_versioning'] = False
 
     # Security architecture
     if requirements_data.get('security_requirements', 'none').lower() != 'none':
         data['authentication_method'] = ask_question(
-            "Authentication method?",
-            options=["JWT", "OAuth2", "API Key", "Session-based", "Other"],
-            default="JWT"
+            'Authentication method?',
+            options=['JWT', 'OAuth2', 'API Key', 'Session-based', 'Other'],
+            default='JWT'
         )
 
         data['authorization_method'] = ask_question(
-            "Authorization method?",
-            options=["RBAC (Role-based)", "ABAC (Attribute-based)", "Simple permissions", "None"],
-            default="Simple permissions"
+            'Authorization method?',
+            options=['RBAC (Role-based)', 'ABAC (Attribute-based)', 'Simple permissions', 'None'],
+            default='Simple permissions'
         )
     else:
-        data['authentication_method'] = "None"
-        data['authorization_method'] = "None"
+        data['authentication_method'] = 'None'
+        data['authorization_method'] = 'None'
 
     # Error handling strategy
     data['error_handling'] = ask_question(
-        "Error handling strategy?",
-        options=["Structured exceptions", "Error codes", "Standard Python exceptions", "Custom"],
-        default="Structured exceptions"
+        'Error handling strategy?',
+        options=['Structured exceptions', 'Error codes', 'Standard Python exceptions', 'Custom'],
+        default='Structured exceptions'
     )
 
     # Logging and observability
     data['logging_level'] = ask_question(
-        "Logging approach?",
-        options=["Standard Python logging", "Structured logging (JSON)", "Custom", "Minimal"],
-        default="Standard Python logging"
+        'Logging approach?',
+        options=['Standard Python logging', 'Structured logging (JSON)', 'Custom', 'Minimal'],
+        default='Standard Python logging'
     )
 
     # Deployment considerations
     data['deployment_target'] = ask_question(
-        "Deployment target?",
-        options=["Local development only", "Server deployment", "Cloud (AWS/GCP/Azure)", "Other"],
-        default="Local development only"
+        'Deployment target?',
+        options=['Local development only', 'Server deployment', 'Cloud (AWS/GCP/Azure)', 'Other'],
+        default='Local development only'
     )
 
-    print("\n✓ Architecture design complete!")
+    print('\n✓ Architecture design complete!')
 
     return data
 
 
-def generate_epic_breakdown(requirements_data: Dict[str, any], architecture_data: Dict[str, any]) -> List[Dict[str, any]]:
+def generate_epic_breakdown(requirements_data: dict[str, any], architecture_data: dict[str, any]) -> list[dict[str, any]]:
     """Generate 📋 BMAD PM epic breakdown automatically based on requirements and architecture."""
 
-    print("\n" + "=" * 70)
-    print("📋 BMAD PM Persona - Epic Breakdown")
-    print("=" * 70)
-    print("\nAnalyzing requirements and architecture to create epic breakdown...")
-    print("-" * 70)
+    print('\n' + '=' * 70)
+    print('📋 BMAD PM Persona - Epic Breakdown')
+    print('=' * 70)
+    print('\nAnalyzing requirements and architecture to create epic breakdown...')
+    print('-' * 70)
 
     epics = []
     epic_num = 1
@@ -497,20 +496,20 @@ def generate_epic_breakdown(requirements_data: Dict[str, any], architecture_data
             ]
         })
 
-    print(f"\n✓ Identified {len(epics)} epics:")
+    print(f'\n✓ Identified {len(epics)} epics:')
     for epic in epics:
         print(f"  - {epic['id']}: {epic['name']} (Priority: {epic['priority']}, {epic['complexity']} complexity)")
 
-    print("\n✓ Epic breakdown complete!")
+    print('\n✓ Epic breakdown complete!')
 
     return epics
 
 
-def process_requirements_template(template_path: Path, analyst_data: Dict[str, any], slug: str, gh_user: str) -> str:
+def process_requirements_template(template_path: Path, analyst_data: dict[str, any], slug: str, gh_user: str) -> str:
     """Process requirements.md template with analyst data."""
 
     template = template_path.read_text()
-    date = datetime.now(timezone.utc).strftime(TIMESTAMP_FORMAT)
+    date = datetime.now(UTC).strftime(TIMESTAMP_FORMAT)
     title = slug.replace('-', ' ').replace('_', ' ').title()
 
     # Replace basic placeholders
@@ -519,15 +518,15 @@ def process_requirements_template(template_path: Path, analyst_data: Dict[str, a
     content = content.replace('{{GH_USER}}', gh_user)
 
     # Build functional requirements section
-    fr_section = ""
+    fr_section = ''
     for fr in analyst_data.get('functional_requirements', []):
         fr_section += f"\n### {fr['id']}: {fr['name']}\n\n"
         fr_section += f"**Priority:** {fr['priority']}\n"
         fr_section += f"**Description:** {fr['description']}\n\n"
-        fr_section += "**Acceptance Criteria:**\n"
+        fr_section += '**Acceptance Criteria:**\n'
         for ac in fr['acceptance_criteria']:
-            fr_section += f"- [ ] {ac}\n"
-        fr_section += "\n"
+            fr_section += f'- [ ] {ac}\n'
+        fr_section += '\n'
 
     # Replace template sections with actual content
     content = re.sub(
@@ -567,11 +566,11 @@ def process_requirements_template(template_path: Path, analyst_data: Dict[str, a
     return content
 
 
-def process_architecture_template(template_path: Path, architect_data: Dict[str, any], slug: str, gh_user: str) -> str:
+def process_architecture_template(template_path: Path, architect_data: dict[str, any], slug: str, gh_user: str) -> str:
     """Process architecture.md template with architect data."""
 
     template = template_path.read_text()
-    date = datetime.now(timezone.utc).strftime(TIMESTAMP_FORMAT)
+    date = datetime.now(UTC).strftime(TIMESTAMP_FORMAT)
     title = slug.replace('-', ' ').replace('_', ' ').title()
 
     # Replace basic placeholders
@@ -603,7 +602,7 @@ def process_architecture_template(template_path: Path, architect_data: Dict[str,
     )
 
     # Add architecture notes section
-    arch_notes = "\n## Architecture Notes\n\n"
+    arch_notes = '\n## Architecture Notes\n\n'
     arch_notes += f"**Architecture Pattern:** {architect_data.get('architecture_pattern', 'Layered')}\n\n"
 
     if architect_data.get('web_framework', 'None') != 'None':
@@ -618,19 +617,19 @@ def process_architecture_template(template_path: Path, architect_data: Dict[str,
     arch_notes += f"**Deployment Target:** {architect_data.get('deployment_target', 'Local development')}\n"
 
     # Append architecture notes before any "## Related Documentation" section or at end
-    if "## Related Documentation" in content:
-        content = content.replace("## Related Documentation", arch_notes + "\n## Related Documentation")
+    if '## Related Documentation' in content:
+        content = content.replace('## Related Documentation', arch_notes + '\n## Related Documentation')
     else:
-        content += "\n" + arch_notes
+        content += '\n' + arch_notes
 
     return content
 
 
-def process_epics_template(template_path: Path, epics: List[Dict[str, any]], slug: str, gh_user: str) -> str:
+def process_epics_template(template_path: Path, epics: list[dict[str, any]], slug: str, gh_user: str) -> str:
     """Process epics.md template with generated epic data."""
 
     template = template_path.read_text()
-    date = datetime.now(timezone.utc).strftime(TIMESTAMP_FORMAT)
+    date = datetime.now(UTC).strftime(TIMESTAMP_FORMAT)
     title = slug.replace('-', ' ').replace('_', ' ').title()
 
     # Replace basic placeholders
@@ -639,8 +638,8 @@ def process_epics_template(template_path: Path, epics: List[Dict[str, any]], slu
     content = content.replace('{{GH_USER}}', gh_user)
 
     # Build epic summary table
-    summary_table = "| Epic ID | Name | Complexity | Priority | Dependencies | Estimated Effort |\n"
-    summary_table += "|---------|------|------------|----------|--------------|------------------|\n"
+    summary_table = '| Epic ID | Name | Complexity | Priority | Dependencies | Estimated Effort |\n'
+    summary_table += '|---------|------|------------|----------|--------------|------------------|\n'
     for epic in epics:
         summary_table += f"| {epic['id']} | {epic['name']} | {epic['complexity']} | {epic['priority']} | {epic['dependencies']} | {epic['estimated_effort']} |\n"
 
@@ -649,7 +648,7 @@ def process_epics_template(template_path: Path, epics: List[Dict[str, any]], slu
         float(epic['estimated_effort'].split('-')[0].split()[0])
         for epic in epics
     )
-    summary_table += f"\n**Total Estimated Effort:** {total_days:.0f}+ days\n"
+    summary_table += f'\n**Total Estimated Effort:** {total_days:.0f}+ days\n'
 
     # Replace template table
     content = re.sub(
@@ -660,19 +659,19 @@ def process_epics_template(template_path: Path, epics: List[Dict[str, any]], slu
     )
 
     # Build epic definitions
-    epic_definitions = ""
+    epic_definitions = ''
     for epic in epics:
         epic_definitions += f"\n### {epic['id']}: {epic['name']}\n\n"
         epic_definitions += f"**Description:**\n{epic['description']}\n\n"
-        epic_definitions += "**Scope:**\n"
-        epic_definitions += "**Deliverables:**\n"
+        epic_definitions += '**Scope:**\n'
+        epic_definitions += '**Deliverables:**\n'
         for deliverable in epic['deliverables']:
-            epic_definitions += f"  - [ ] {deliverable}\n"
+            epic_definitions += f'  - [ ] {deliverable}\n'
         epic_definitions += f"\n**Complexity:** {epic['complexity']}\n\n"
-        epic_definitions += "**Complexity Reasoning:**\n"
+        epic_definitions += '**Complexity Reasoning:**\n'
         epic_definitions += f"{epic['complexity_reasoning']}\n\n"
         epic_definitions += f"**Priority:** {epic['priority']}\n\n"
-        epic_definitions += "**Priority Reasoning:**\n"
+        epic_definitions += '**Priority Reasoning:**\n'
         epic_definitions += f"{epic['priority_reasoning']}\n\n"
         epic_definitions += f"**Dependencies:** {epic['dependencies']}\n\n"
         epic_definitions += f"**Estimated Effort:** {epic['estimated_effort']}\n\n"
@@ -769,7 +768,7 @@ These planning documents are used as input context by SpecKit (Phase 2) when cre
 - workflow-utilities
 """
         claude_md.write_text(claude_content)
-        print(f"  ✓ Created {claude_md}")
+        print(f'  ✓ Created {claude_md}')
 
     # Create README.md
     readme_md = planning_dir / 'README.md'
@@ -820,7 +819,7 @@ Epic breakdown created through BMAD PM persona:
 - **[epics.md](epics.md)** - Epic breakdown and planning
 """
         readme_md.write_text(readme_content)
-        print(f"  ✓ Created {readme_md}")
+        print(f'  ✓ Created {readme_md}')
 
     # Create ARCHIVED subdirectory
     archived_dir = planning_dir / 'ARCHIVED'
@@ -842,7 +841,7 @@ This directory contains previous versions of planning documents that have been s
 
 - **[README.md](README.md)** - Archive information
 """)
-        print(f"  ✓ Created {archived_claude}")
+        print(f'  ✓ Created {archived_claude}')
 
     archived_readme = archived_dir / 'README.md'
     if not archived_readme.exists():
@@ -856,13 +855,13 @@ Archive of deprecated planning documents that are no longer in active use.
 
 This directory contains archived versions of requirements.md, architecture.md, and epics.md that have been replaced or superseded.
 """)
-        print(f"  ✓ Created {archived_readme}")
+        print(f'  ✓ Created {archived_readme}')
 
 
 def commit_planning_docs(planning_dir: Path, slug: str) -> None:
     """Commit planning documents to git."""
 
-    print("\nCommitting planning documents...")
+    print('\nCommitting planning documents...')
 
     # Stage planning directory
     run_command(['git', 'add', str(planning_dir)], capture=False)
@@ -890,7 +889,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
     # Commit
     run_command(['git', 'commit', '-m', commit_msg], capture=False)
 
-    print(f"✓ Committed planning documents for {slug}")
+    print(f'✓ Committed planning documents for {slug}')
 
 
 def main():
@@ -906,7 +905,7 @@ def main():
     args = parser.parse_args()
 
     # Detect and validate context
-    print("Working in main repository...")
+    print('Working in main repository...')
     context = detect_context()
     print(f"Branch: {context['current_branch']}")
 
@@ -914,19 +913,19 @@ def main():
     planning_dir = Path('planning') / args.slug
     if planning_dir.exists():
         overwrite = ask_yes_no(
-            f"Planning directory already exists: {planning_dir}\nOverwrite?",
+            f'Planning directory already exists: {planning_dir}\nOverwrite?',
             default=False
         )
         if not overwrite:
-            print("Aborted.")
+            print('Aborted.')
             sys.exit(0)
 
-    print("\n" + "=" * 70)
-    print("BMAD Interactive Planning Tool")
-    print("=" * 70)
-    print(f"\nCreating planning documents for: {args.slug}")
-    print(f"GitHub user: {args.gh_user}")
-    print(f"Output directory: {planning_dir}")
+    print('\n' + '=' * 70)
+    print('BMAD Interactive Planning Tool')
+    print('=' * 70)
+    print(f'\nCreating planning documents for: {args.slug}')
+    print(f'GitHub user: {args.gh_user}')
+    print(f'Output directory: {planning_dir}')
 
     # Phase 1: 🧠 Analyst - Requirements
     analyst_data = interactive_qa_analyst()
@@ -938,9 +937,9 @@ def main():
     epics = generate_epic_breakdown(analyst_data, architect_data)
 
     # Generate documents from templates
-    print("\n" + "=" * 70)
-    print("Generating Planning Documents")
-    print("=" * 70)
+    print('\n' + '=' * 70)
+    print('Generating Planning Documents')
+    print('=' * 70)
 
     templates_dir = Path(__file__).parent.parent / 'templates'
 
@@ -982,50 +981,50 @@ def main():
     if not args.no_commit:
         commit_planning_docs(planning_dir, args.slug)
     else:
-        print("\n⚠ Skipping git commit (--no-commit flag)")
+        print('\n⚠ Skipping git commit (--no-commit flag)')
 
     # Trigger sync engine (Phase 3 integration)
     try:
         import asyncio
-        integration_path = Path(__file__).parent.parent.parent / "agentdb-state-manager" / "scripts"
+        integration_path = Path(__file__).parent.parent.parent / 'agentdb-state-manager' / 'scripts'
         if str(integration_path) not in sys.path:
             sys.path.insert(0, str(integration_path))
         from worktree_agent_integration import trigger_sync_completion
 
         asyncio.run(trigger_sync_completion(
-            agent_id="orchestrate",
-            action="planning_complete",
+            agent_id='orchestrate',
+            action='planning_complete',
             state_snapshot={
-                "slug": args.slug,
-                "planning_dir": str(planning_dir),
-                "requirements_generated": True,
-                "architecture_generated": True,
-                "epics_generated": True
+                'slug': args.slug,
+                'planning_dir': str(planning_dir),
+                'requirements_generated': True,
+                'architecture_generated': True,
+                'epics_generated': True
             },
-            context={"user": args.gh_user}
+            context={'user': args.gh_user}
         ))
     except Exception:
         # Graceful degradation: don't fail if sync unavailable
         pass
 
     # Success summary
-    print("\n" + "=" * 70)
-    print("✓ BMAD Planning Documents Created Successfully!")
-    print("=" * 70)
+    print('\n' + '=' * 70)
+    print('✓ BMAD Planning Documents Created Successfully!')
+    print('=' * 70)
 
-    print(f"\nFiles created in {planning_dir}:")
-    print("  - requirements.md (Business requirements and acceptance criteria)")
-    print("  - architecture.md (Technical architecture and design)")
-    print("  - epics.md (Epic breakdown and planning)")
-    print("  - CLAUDE.md (Context for Claude Code)")
-    print("  - README.md (Human-readable overview)")
-    print("  - ARCHIVED/ (Directory for deprecated planning docs)")
+    print(f'\nFiles created in {planning_dir}:')
+    print('  - requirements.md (Business requirements and acceptance criteria)')
+    print('  - architecture.md (Technical architecture and design)')
+    print('  - epics.md (Epic breakdown and planning)')
+    print('  - CLAUDE.md (Context for Claude Code)')
+    print('  - README.md (Human-readable overview)')
+    print('  - ARCHIVED/ (Directory for deprecated planning docs)')
 
-    print("\nNext steps:")
-    print(f"  1. Review planning documents in {planning_dir}")
+    print('\nNext steps:')
+    print(f'  1. Review planning documents in {planning_dir}')
     print("  2. Create feature worktree: python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature {args.slug} {context['current_branch']}")
-    print("  3. SpecKit will auto-detect and use these planning documents")
-    print("  4. Token savings: ~1,700-2,700 tokens by reusing planning context")
+    print('  3. SpecKit will auto-detect and use these planning documents')
+    print('  4. Token savings: ~1,700-2,700 tokens by reusing planning context')
 
 
 if __name__ == '__main__':

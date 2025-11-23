@@ -43,7 +43,7 @@ def daily_rebase(contrib_branch):
             f"Must start with 'contrib/' (e.g., 'contrib/username')"
         )
 
-    print(f"Rebasing {contrib_branch} onto develop...", file=sys.stderr)
+    print(f'Rebasing {contrib_branch} onto develop...', file=sys.stderr)
 
     # Check for uncommitted changes
     try:
@@ -54,13 +54,13 @@ def daily_rebase(contrib_branch):
             check=True
         )
         if result.stdout.strip():
-            print("ERROR: You have uncommitted changes. Please commit or stash them first.", file=sys.stderr)
-            print("\nUncommitted changes:", file=sys.stderr)
+            print('ERROR: You have uncommitted changes. Please commit or stash them first.', file=sys.stderr)
+            print('\nUncommitted changes:', file=sys.stderr)
             print(result.stdout, file=sys.stderr)
             return False
     except subprocess.CalledProcessError as e:
-        print("ERROR: Failed to check git status", file=sys.stderr)
-        print(f"Git error: {e.stderr}", file=sys.stderr)
+        print('ERROR: Failed to check git status', file=sys.stderr)
+        print(f'Git error: {e.stderr}', file=sys.stderr)
         return False
 
     # Verify contrib branch exists
@@ -72,13 +72,13 @@ def daily_rebase(contrib_branch):
         )
     except subprocess.CalledProcessError:
         print(f"ERROR: Branch '{contrib_branch}' does not exist", file=sys.stderr)
-        print("\nAvailable contrib branches:", file=sys.stderr)
+        print('\nAvailable contrib branches:', file=sys.stderr)
         subprocess.run(['git', 'branch', '--list', 'contrib/*'], check=False)
         return False
 
     try:
         # Checkout contrib branch
-        print(f"Checking out {contrib_branch}...", file=sys.stderr)
+        print(f'Checking out {contrib_branch}...', file=sys.stderr)
         subprocess.run(
             ['git', 'checkout', contrib_branch],
             check=True,
@@ -86,7 +86,7 @@ def daily_rebase(contrib_branch):
         )
 
         # Fetch latest from origin
-        print("Fetching from origin...", file=sys.stderr)
+        print('Fetching from origin...', file=sys.stderr)
         subprocess.run(
             ['git', 'fetch', 'origin'],
             check=True,
@@ -94,7 +94,7 @@ def daily_rebase(contrib_branch):
         )
 
         # Rebase onto origin/develop
-        print(f"Rebasing onto {TARGET_BRANCH}...", file=sys.stderr)
+        print(f'Rebasing onto {TARGET_BRANCH}...', file=sys.stderr)
         result = subprocess.run(
             ['git', 'rebase', TARGET_BRANCH],
             check=True,
@@ -103,41 +103,41 @@ def daily_rebase(contrib_branch):
         )
 
         # Force push with lease (safe force push - only pushes if remote hasn't changed)
-        print("Pushing to origin...", file=sys.stderr)
+        print('Pushing to origin...', file=sys.stderr)
         subprocess.run([
             'git', 'push', 'origin', contrib_branch, '--force-with-lease'
         ], check=True, capture_output=True)
 
-        print(f"✓ {contrib_branch} successfully rebased onto develop", file=sys.stderr)
+        print(f'✓ {contrib_branch} successfully rebased onto develop', file=sys.stderr)
         return True
 
     except subprocess.CalledProcessError as e:
-        print("✗ Rebase failed", file=sys.stderr)
+        print('✗ Rebase failed', file=sys.stderr)
         if e.stderr:
-            print(f"\nGit error: {e.stderr.strip()}", file=sys.stderr)
+            print(f'\nGit error: {e.stderr.strip()}', file=sys.stderr)
 
-        print("\nTo resolve conflicts:", file=sys.stderr)
-        print("  1. Fix conflicts in affected files", file=sys.stderr)
-        print("  2. git add <resolved-files>", file=sys.stderr)
-        print("  3. git rebase --continue", file=sys.stderr)
-        print(f"  4. git push origin {contrib_branch} --force-with-lease", file=sys.stderr)
-        print("\nOr to abort the rebase:", file=sys.stderr)
-        print("  git rebase --abort", file=sys.stderr)
+        print('\nTo resolve conflicts:', file=sys.stderr)
+        print('  1. Fix conflicts in affected files', file=sys.stderr)
+        print('  2. git add <resolved-files>', file=sys.stderr)
+        print('  3. git rebase --continue', file=sys.stderr)
+        print(f'  4. git push origin {contrib_branch} --force-with-lease', file=sys.stderr)
+        print('\nOr to abort the rebase:', file=sys.stderr)
+        print('  git rebase --abort', file=sys.stderr)
         return False
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("Usage: daily_rebase.py <contrib_branch>", file=sys.stderr)
-        print("\nExample: daily_rebase.py contrib/johndoe", file=sys.stderr)
-        print("\nThis rebases your contrib branch onto origin/develop.", file=sys.stderr)
+        print('Usage: daily_rebase.py <contrib_branch>', file=sys.stderr)
+        print('\nExample: daily_rebase.py contrib/johndoe', file=sys.stderr)
+        print('\nThis rebases your contrib branch onto origin/develop.', file=sys.stderr)
         sys.exit(1)
 
     try:
         success = daily_rebase(sys.argv[1])
         sys.exit(0 if success else 1)
     except ValueError as e:
-        print(f"\n{e}", file=sys.stderr)
+        print(f'\n{e}', file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"\nUnexpected error: {e}", file=sys.stderr)
+        print(f'\nUnexpected error: {e}', file=sys.stderr)
         sys.exit(1)

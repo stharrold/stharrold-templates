@@ -22,24 +22,24 @@ def update_todo_task_status(todo_file, task_id, status, context_usage=None):
         try:
             import ruamel.yaml as yaml
         except ImportError:
-            print("Error: PyYAML or ruamel.yaml required. Install: pip install pyyaml", file=sys.stderr)
+            print('Error: PyYAML or ruamel.yaml required. Install: pip install pyyaml', file=sys.stderr)
             sys.exit(1)
 
     todo_path = Path(todo_file)
     if not todo_path.exists():
-        print(f"Error: TODO file not found: {todo_file}", file=sys.stderr)
+        print(f'Error: TODO file not found: {todo_file}', file=sys.stderr)
         sys.exit(1)
 
     content = todo_path.read_text()
 
     # Split frontmatter and body
     if not content.startswith('---'):
-        print("Error: TODO file missing YAML frontmatter", file=sys.stderr)
+        print('Error: TODO file missing YAML frontmatter', file=sys.stderr)
         sys.exit(1)
 
     parts = content.split('---', 2)
     if len(parts) < 3:
-        print("Error: Invalid TODO file format", file=sys.stderr)
+        print('Error: Invalid TODO file format', file=sys.stderr)
         sys.exit(1)
 
     frontmatter = yaml.safe_load(parts[1])
@@ -54,12 +54,12 @@ def update_todo_task_status(todo_file, task_id, status, context_usage=None):
                 task['status'] = status
                 if status == 'complete':
                     task['completed_at'] = datetime.utcnow().isoformat() + 'Z'
-                print(f"✓ Updated {task_id} status to {status}")
+                print(f'✓ Updated {task_id} status to {status}')
                 break
         else:
-            print(f"Warning: Task {task_id} not found in category {task_category}", file=sys.stderr)
+            print(f'Warning: Task {task_id} not found in category {task_category}', file=sys.stderr)
     else:
-        print(f"Warning: Task category {task_category} not found", file=sys.stderr)
+        print(f'Warning: Task category {task_category} not found', file=sys.stderr)
 
     # Update workflow progress
     if 'workflow_progress' not in frontmatter:
@@ -69,7 +69,7 @@ def update_todo_task_status(todo_file, task_id, status, context_usage=None):
     frontmatter['workflow_progress']['last_update'] = datetime.utcnow().isoformat() + 'Z'
 
     if context_usage is not None:
-        frontmatter['workflow_progress']['context_usage'] = f"{context_usage}%"
+        frontmatter['workflow_progress']['context_usage'] = f'{context_usage}%'
 
     # Write back
     try:
@@ -78,17 +78,17 @@ def update_todo_task_status(todo_file, task_id, status, context_usage=None):
         # Fallback for older PyYAML
         yaml_str = yaml.dump(frontmatter, default_flow_style=False)
 
-    new_content = f"---\n{yaml_str}---{body}"
+    new_content = f'---\n{yaml_str}---{body}'
     todo_path.write_text(new_content)
 
-    print(f"✓ Updated TODO file: {todo_file}")
+    print(f'✓ Updated TODO file: {todo_file}')
 
 def add_todo_history_entry(todo_file, message):
     """Add entry to TODO status history in body."""
 
     todo_path = Path(todo_file)
     if not todo_path.exists():
-        print(f"Error: TODO file not found: {todo_file}", file=sys.stderr)
+        print(f'Error: TODO file not found: {todo_file}', file=sys.stderr)
         return
 
     content = todo_path.read_text()
@@ -97,21 +97,21 @@ def add_todo_history_entry(todo_file, message):
     # Find status history section
     history_marker = '## Status History'
     if history_marker in content:
-        entry = f"- {timestamp}: {message}"
+        entry = f'- {timestamp}: {message}'
         content = content.replace(
             history_marker,
-            f"{history_marker}\n{entry}"
+            f'{history_marker}\n{entry}'
         )
         todo_path.write_text(content)
-        print(f"✓ Added history: {message}")
+        print(f'✓ Added history: {message}')
     else:
-        print(f"Warning: Status History section not found in {todo_file}", file=sys.stderr)
+        print(f'Warning: Status History section not found in {todo_file}', file=sys.stderr)
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        print("Usage: todo_updater.py <todo_file> <task_id> <status> [context_usage]")
-        print("Example: todo_updater.py TODO_feature_xxx.md impl_003 complete 35")
-        print("Status: pending, complete, blocked")
+        print('Usage: todo_updater.py <todo_file> <task_id> <status> [context_usage]')
+        print('Example: todo_updater.py TODO_feature_xxx.md impl_003 complete 35')
+        print('Status: pending, complete, blocked')
         sys.exit(1)
 
     context_usage = int(sys.argv[4]) if len(sys.argv) > 4 else None

@@ -33,7 +33,7 @@ import subprocess
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -42,10 +42,10 @@ logger = logging.getLogger(__name__)
 class FlowTokenType(Enum):
     """Types of flow tokens for different workflow contexts."""
 
-    MAIN_REPO = "main_repo"
-    WORKTREE = "worktree"
-    ISSUE = "issue"
-    AD_HOC = "ad_hoc"
+    MAIN_REPO = 'main_repo'
+    WORKTREE = 'worktree'
+    ISSUE = 'issue'
+    AD_HOC = 'ad_hoc'
 
 
 class FlowTokenManager:
@@ -83,43 +83,43 @@ class FlowTokenManager:
         cwd = Path.cwd()
 
         # Check if in worktree (directory name pattern: german_feature_*)
-        if cwd.name.startswith("german_feature_"):
+        if cwd.name.startswith('german_feature_'):
             # Extract branch name from worktree directory
             # Example: german_feature_20251117T024349Z_phase-3-integration
             #   → feature/20251117T024349Z_phase-3-integration
-            parts = cwd.name.split("_", 2)  # ["german", "feature", "20251117T024349Z_phase-3-integration"]
+            parts = cwd.name.split('_', 2)  # ["german", "feature", "20251117T024349Z_phase-3-integration"]
             if len(parts) >= 3:
-                return f"feature/{parts[2]}"
+                return f'feature/{parts[2]}'
 
         # Check if in hotfix worktree (directory name pattern: german_hotfix_*)
-        if cwd.name.startswith("german_hotfix_"):
-            parts = cwd.name.split("_", 2)
+        if cwd.name.startswith('german_hotfix_'):
+            parts = cwd.name.split('_', 2)
             if len(parts) >= 3:
-                return f"hotfix/{parts[2]}"
+                return f'hotfix/{parts[2]}'
 
         # Check if in main repo on contrib branch
         try:
             result = subprocess.run(
-                ["git", "branch", "--show-current"],
+                ['git', 'branch', '--show-current'],
                 capture_output=True,
                 text=True,
                 check=True,
                 timeout=5
             )
             branch = result.stdout.strip()
-            if branch.startswith("contrib/"):
+            if branch.startswith('contrib/'):
                 return branch
-            if branch.startswith("claude/"):
+            if branch.startswith('claude/'):
                 # Claude Code session branches
                 return branch
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            logger.warning(f"Failed to detect git branch: {e}")
+            logger.warning(f'Failed to detect git branch: {e}')
 
         # Fallback: generate UUID for ad-hoc workflows
-        return f"ad-hoc-{uuid4().hex[:8]}"
+        return f'ad-hoc-{uuid4().hex[:8]}'
 
     @staticmethod
-    def extract_issue_number(flow_token: str) -> Optional[int]:
+    def extract_issue_number(flow_token: str) -> int | None:
         """Extract issue number from flow token if present.
 
         Patterns:
@@ -195,7 +195,7 @@ class PHIDetector:
     SSN_PATTERN = r'\b\d{3}-?\d{2}-?\d{4}\b'
 
     @classmethod
-    def detect_phi(cls, state_snapshot: Dict[str, Any]) -> bool:
+    def detect_phi(cls, state_snapshot: dict[str, Any]) -> bool:
         """Detect if state snapshot contains PHI.
 
         Args:
@@ -215,7 +215,7 @@ class PHIDetector:
             False
         """
         # Explicit PHI marker
-        if state_snapshot.get("_contains_phi") is True:
+        if state_snapshot.get('_contains_phi') is True:
             logger.info("PHI detected: explicit marker '_contains_phi': true")
             return True
 
@@ -244,7 +244,7 @@ class PHIDetector:
         return False
 
     @classmethod
-    def extract_justification(cls, context: Dict[str, Any]) -> str:
+    def extract_justification(cls, context: dict[str, Any]) -> str:
         """Extract or generate access justification from workflow context.
 
         Priority:
@@ -268,24 +268,24 @@ class PHIDetector:
             'stharrold performing commit'
         """
         # Priority 1: Explicit justification
-        if "phi_justification" in context:
-            return context["phi_justification"]
+        if 'phi_justification' in context:
+            return context['phi_justification']
 
         # Priority 2: Issue number
-        issue_num = context.get("issue_number")
+        issue_num = context.get('issue_number')
         if issue_num:
-            return f"Development work for issue #{issue_num}"
+            return f'Development work for issue #{issue_num}'
 
         # Priority 3: Commit message (first line)
-        commit_msg = context.get("commit_message", "")
+        commit_msg = context.get('commit_message', '')
         if commit_msg:
-            first_line = commit_msg.split("\n")[0][:100]  # First line, max 100 chars
-            return f"Code change: {first_line}"
+            first_line = commit_msg.split('\n')[0][:100]  # First line, max 100 chars
+            return f'Code change: {first_line}'
 
         # Priority 4: Generic development justification
-        user = context.get("user", "unknown")
-        action = context.get("action", "development")
-        return f"{user} performing {action}"
+        user = context.get('user', 'unknown')
+        action = context.get('action', 'development')
+        return f'{user} performing {action}'
 
 
 class ComplianceWrapper:
@@ -314,9 +314,9 @@ class ComplianceWrapper:
         agent_id: str,
         action: str,
         flow_token: str,
-        state_snapshot: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None
-    ) -> List[str]:
+        state_snapshot: dict[str, Any],
+        context: dict[str, Any] | None = None
+    ) -> list[str]:
         """Wrapped version of sync_engine.on_agent_action_complete with compliance logging.
 
         This method:
@@ -346,9 +346,9 @@ class ComplianceWrapper:
 
         # Check for explicit justification (not fallback)
         has_explicit_justification = (
-            "phi_justification" in context
-            or "issue_number" in context
-            or "commit_message" in context
+            'phi_justification' in context
+            or 'issue_number' in context
+            or 'commit_message' in context
         )
 
         # Extract justification if PHI detected
@@ -356,15 +356,15 @@ class ComplianceWrapper:
         if phi_detected:
             phi_justification = PHIDetector.extract_justification(context)
             logger.warning(
-                f"PHI detected in sync: agent={agent_id}, action={action}, "
-                f"flow_token={flow_token}"
+                f'PHI detected in sync: agent={agent_id}, action={action}, '
+                f'flow_token={flow_token}'
             )
-            logger.info(f"PHI justification: {phi_justification}")
+            logger.info(f'PHI justification: {phi_justification}')
 
         # Add PHI metadata to context for audit trail
-        context["phi_detected"] = phi_detected
+        context['phi_detected'] = phi_detected
         if phi_justification:
-            context["phi_justification"] = phi_justification
+            context['phi_justification'] = phi_justification
 
         # Call sync engine
         # Note: sync_engine.py has its own _detect_phi() stub, but we're
@@ -381,14 +381,14 @@ class ComplianceWrapper:
             # Additional compliance check: PHI without explicit justification
             if phi_detected and not has_explicit_justification:
                 logger.error(
-                    f"COMPLIANCE VIOLATION: PHI detected but no explicit justification provided! "
-                    f"agent={agent_id}, action={action}, flow_token={flow_token}"
+                    f'COMPLIANCE VIOLATION: PHI detected but no explicit justification provided! '
+                    f'agent={agent_id}, action={action}, flow_token={flow_token}'
                 )
 
             return execution_ids
 
         except Exception as e:
-            logger.error(f"Sync engine failed: {e}", exc_info=True)
+            logger.error(f'Sync engine failed: {e}', exc_info=True)
             raise
 
 
@@ -406,10 +406,10 @@ class SyncEngineFactory:
     - AGENTDB_PATH: Path to DuckDB database (default: "agentdb.duckdb")
     """
 
-    _instances: Dict[str, ComplianceWrapper] = {}
+    _instances: dict[str, ComplianceWrapper] = {}
 
     @classmethod
-    def create_sync_engine(cls, db_path: Optional[str] = None) -> Optional[ComplianceWrapper]:
+    def create_sync_engine(cls, db_path: str | None = None) -> ComplianceWrapper | None:
         """Create sync engine instance if enabled.
 
         Feature Flag:
@@ -438,19 +438,19 @@ class SyncEngineFactory:
             True
         """
         # Check feature flag
-        enabled = os.getenv("SYNC_ENGINE_ENABLED", "false").lower() == "true"
+        enabled = os.getenv('SYNC_ENGINE_ENABLED', 'false').lower() == 'true'
 
         if not enabled:
-            logger.debug("Sync engine disabled (SYNC_ENGINE_ENABLED=false)")
+            logger.debug('Sync engine disabled (SYNC_ENGINE_ENABLED=false)')
             return None
 
         # Get or default db_path
         if db_path is None:
-            db_path = os.getenv("AGENTDB_PATH", "agentdb.duckdb")
+            db_path = os.getenv('AGENTDB_PATH', 'agentdb.duckdb')
 
         # Check singleton cache
         if db_path in cls._instances:
-            logger.debug(f"Reusing cached sync engine for db_path={db_path}")
+            logger.debug(f'Reusing cached sync engine for db_path={db_path}')
             return cls._instances[db_path]
 
         # Create new instance
@@ -464,7 +464,7 @@ class SyncEngineFactory:
             from sync_engine import SynchronizationEngine
 
             # Create engine
-            logger.info(f"Initializing sync engine with db_path={db_path}")
+            logger.info(f'Initializing sync engine with db_path={db_path}')
             engine = SynchronizationEngine(db_path=db_path)
 
             # Wrap with compliance
@@ -473,20 +473,20 @@ class SyncEngineFactory:
             # Cache instance
             cls._instances[db_path] = wrapper
 
-            logger.info(f"Sync engine enabled and initialized (db_path={db_path})")
+            logger.info(f'Sync engine enabled and initialized (db_path={db_path})')
             return wrapper
 
         except Exception as e:
-            logger.error(f"Failed to initialize sync engine: {e}", exc_info=True)
+            logger.error(f'Failed to initialize sync engine: {e}', exc_info=True)
             return None
 
 
 async def trigger_sync_completion(
     agent_id: str,
     action: str,
-    state_snapshot: Dict[str, Any],
-    context: Optional[Dict[str, Any]] = None,
-    sync_engine: Optional[ComplianceWrapper] = None
+    state_snapshot: dict[str, Any],
+    context: dict[str, Any] | None = None,
+    sync_engine: ComplianceWrapper | None = None
 ) -> bool:
     """Trigger sync engine after agent action completes.
 
@@ -545,7 +545,7 @@ async def trigger_sync_completion(
 
     # If disabled, return early
     if sync_engine is None:
-        logger.debug(f"Sync not triggered: engine disabled (agent={agent_id}, action={action})")
+        logger.debug(f'Sync not triggered: engine disabled (agent={agent_id}, action={action})')
         return False
 
     try:
@@ -554,12 +554,12 @@ async def trigger_sync_completion(
 
         # Add flow token to context
         context = context or {}
-        context["flow_token"] = flow_token
+        context['flow_token'] = flow_token
 
         # Extract issue number if present
         issue_num = FlowTokenManager.extract_issue_number(flow_token)
         if issue_num:
-            context["issue_number"] = issue_num
+            context['issue_number'] = issue_num
 
         # Trigger sync (call wrapper, which calls underlying engine)
         execution_ids = await sync_engine.on_agent_action_complete(
@@ -571,20 +571,20 @@ async def trigger_sync_completion(
         )
 
         logger.info(
-            f"Sync triggered: agent={agent_id}, action={action}, "
-            f"flow_token={flow_token}, executions={len(execution_ids)}"
+            f'Sync triggered: agent={agent_id}, action={action}, '
+            f'flow_token={flow_token}, executions={len(execution_ids)}'
         )
 
         # TODO (Phase 4): Execute target actions
         # For now, just log them
         for exec_id in execution_ids:
-            logger.info(f"Target execution queued: {exec_id}")
+            logger.info(f'Target execution queued: {exec_id}')
 
         return True
 
     except Exception as e:
         logger.error(
-            f"Sync trigger failed: agent={agent_id}, action={action}, error={e}",
+            f'Sync trigger failed: agent={agent_id}, action={action}, error={e}',
             exc_info=True
         )
         # Graceful degradation: don't crash the agent

@@ -30,7 +30,6 @@ Constants:
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 # Constants with documented rationale
 SKILL_DIRS = [
@@ -58,7 +57,7 @@ class ValidationError:
         self.message = message
 
     def __str__(self):
-        return f"[{self.severity}] {self.file}: {self.message}"
+        return f'[{self.severity}] {self.file}: {self.message}'
 
 
 class VersionValidator:
@@ -67,9 +66,9 @@ class VersionValidator:
     def __init__(self, repo_root: Path, verbose: bool = False):
         self.repo_root = repo_root
         self.verbose = verbose
-        self.errors: List[ValidationError] = []
-        self.warnings: List[ValidationError] = []
-        self.skill_versions: Dict[str, Tuple[str, Path]] = {}  # skill_name -> (version, path)
+        self.errors: list[ValidationError] = []
+        self.warnings: list[ValidationError] = []
+        self.skill_versions: dict[str, tuple[str, Path]] = {}  # skill_name -> (version, path)
 
     def log(self, message: str):
         """Print message if verbose mode enabled."""
@@ -84,7 +83,7 @@ class VersionValidator:
         """Add validation warning."""
         self.warnings.append(ValidationError('WARNING', file, message))
 
-    def parse_version(self, version_str: str) -> Optional[Tuple[int, int, int]]:
+    def parse_version(self, version_str: str) -> tuple[int, int, int] | None:
         """Parse semantic version string into (major, minor, patch) tuple.
 
         Args:
@@ -101,7 +100,7 @@ class VersionValidator:
             return None
         return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
 
-    def extract_yaml_frontmatter(self, content: str) -> Optional[Dict[str, str]]:
+    def extract_yaml_frontmatter(self, content: str) -> dict[str, str] | None:
         """Extract YAML frontmatter from markdown file.
 
         Args:
@@ -135,7 +134,7 @@ class VersionValidator:
         skill_md = skill_dir / 'SKILL.md'
 
         if not skill_md.exists():
-            self.add_error(str(skill_md), "SKILL.md file not found")
+            self.add_error(str(skill_md), 'SKILL.md file not found')
             return False
 
         content = skill_md.read_text()
@@ -143,7 +142,7 @@ class VersionValidator:
         # Extract YAML frontmatter
         frontmatter = self.extract_yaml_frontmatter(content)
         if not frontmatter:
-            self.add_error(str(skill_md), "No YAML frontmatter found")
+            self.add_error(str(skill_md), 'No YAML frontmatter found')
             return False
 
         # Check for required fields
@@ -177,7 +176,7 @@ class VersionValidator:
         # Store version for cross-reference checks
         self.skill_versions[skill_name] = (version, skill_md)
 
-        self.log(f"✓ {skill_name}: version {version}")
+        self.log(f'✓ {skill_name}: version {version}')
 
         return True
 
@@ -187,12 +186,12 @@ class VersionValidator:
         Returns:
             True if all validations passed, False otherwise
         """
-        self.log("\nValidating skill SKILL.md files...")
-        self.log("-" * 70)
+        self.log('\nValidating skill SKILL.md files...')
+        self.log('-' * 70)
 
         skills_dir = self.repo_root / '.claude' / 'skills'
         if not skills_dir.exists():
-            self.add_error(str(skills_dir), "Skills directory not found")
+            self.add_error(str(skills_dir), 'Skills directory not found')
             return False
 
         all_valid = True
@@ -200,7 +199,7 @@ class VersionValidator:
         for skill_name in SKILL_DIRS:
             skill_dir = skills_dir / skill_name
             if not skill_dir.exists():
-                self.add_warning(str(skill_dir), f"Skill directory not found: {skill_name}")
+                self.add_warning(str(skill_dir), f'Skill directory not found: {skill_name}')
                 continue
 
             if not self.validate_skill_file(skill_name, skill_dir):
@@ -214,12 +213,12 @@ class VersionValidator:
         Returns:
             True if validation passed, False otherwise
         """
-        self.log("\nValidating WORKFLOW.md...")
-        self.log("-" * 70)
+        self.log('\nValidating WORKFLOW.md...')
+        self.log('-' * 70)
 
         workflow_md = self.repo_root / 'WORKFLOW.md'
         if not workflow_md.exists():
-            self.add_error(str(workflow_md), "WORKFLOW.md not found")
+            self.add_error(str(workflow_md), 'WORKFLOW.md not found')
             return False
 
         content = workflow_md.read_text()
@@ -227,7 +226,7 @@ class VersionValidator:
         # Extract version from line 3: **Version:** X.Y.Z
         version_match = re.search(r'\*\*Version:\*\*\s+(\d+\.\d+\.\d+)', content)
         if not version_match:
-            self.add_error(str(workflow_md), "Version number not found (expected on line 3)")
+            self.add_error(str(workflow_md), 'Version number not found (expected on line 3)')
             return False
 
         workflow_version = version_match.group(1)
@@ -239,14 +238,14 @@ class VersionValidator:
             )
             return False
 
-        self.log(f"✓ WORKFLOW.md: version {workflow_version}")
+        self.log(f'✓ WORKFLOW.md: version {workflow_version}')
 
         # Check for skill references in phase sections
         # Look for patterns like: [bmad-planner](/.claude/skills/bmad-planner/SKILL.md)
         skill_ref_pattern = re.compile(r'\[([a-z-]+)\]\(/\.claude/skills/\1/SKILL\.md\)')
         skill_refs = skill_ref_pattern.findall(content)
 
-        self.log(f"  Found {len(skill_refs)} skill references in WORKFLOW.md")
+        self.log(f'  Found {len(skill_refs)} skill references in WORKFLOW.md')
 
         for skill_name in skill_refs:
             if skill_name not in self.skill_versions:
@@ -263,12 +262,12 @@ class VersionValidator:
         Returns:
             True if validation passed, False otherwise
         """
-        self.log("\nValidating TODO.md manifest...")
-        self.log("-" * 70)
+        self.log('\nValidating TODO.md manifest...')
+        self.log('-' * 70)
 
         todo_md = self.repo_root / 'TODO.md'
         if not todo_md.exists():
-            self.add_warning(str(todo_md), "TODO.md not found (optional)")
+            self.add_warning(str(todo_md), 'TODO.md not found (optional)')
             return True
 
         content = todo_md.read_text()
@@ -276,7 +275,7 @@ class VersionValidator:
         # Extract frontmatter
         frontmatter = self.extract_yaml_frontmatter(content)
         if not frontmatter:
-            self.add_warning(str(todo_md), "No YAML frontmatter found")
+            self.add_warning(str(todo_md), 'No YAML frontmatter found')
             return True
 
         # Check for version field
@@ -290,9 +289,9 @@ class VersionValidator:
                 )
                 return False
 
-            self.log(f"✓ TODO.md: version {version}")
+            self.log(f'✓ TODO.md: version {version}')
         else:
-            self.log("  TODO.md: no version field (optional)")
+            self.log('  TODO.md: no version field (optional)')
 
         return True
 
@@ -302,12 +301,12 @@ class VersionValidator:
         Returns:
             True if validation passed, False otherwise
         """
-        self.log("\nValidating root CLAUDE.md...")
-        self.log("-" * 70)
+        self.log('\nValidating root CLAUDE.md...')
+        self.log('-' * 70)
 
         claude_md = self.repo_root / 'CLAUDE.md'
         if not claude_md.exists():
-            self.add_error(str(claude_md), "CLAUDE.md not found")
+            self.add_error(str(claude_md), 'CLAUDE.md not found')
             return False
 
         content = claude_md.read_text()
@@ -326,9 +325,9 @@ class VersionValidator:
                         f"Invalid version format in reference: '{version}'"
                     )
 
-            self.log(f"✓ CLAUDE.md: found {len(version_refs)} version references")
+            self.log(f'✓ CLAUDE.md: found {len(version_refs)} version references')
         else:
-            self.log("  CLAUDE.md: no explicit version references found (may be OK)")
+            self.log('  CLAUDE.md: no explicit version references found (may be OK)')
 
         return True
 
@@ -338,29 +337,29 @@ class VersionValidator:
         Returns:
             True if no errors found, False otherwise
         """
-        print("\n" + "=" * 70)
-        print("Validation Summary")
-        print("=" * 70)
+        print('\n' + '=' * 70)
+        print('Validation Summary')
+        print('=' * 70)
 
         if self.errors:
-            print(f"\n❌ {len(self.errors)} ERROR(S) found:\n")
+            print(f'\n❌ {len(self.errors)} ERROR(S) found:\n')
             for error in self.errors:
-                print(f"  {error}")
+                print(f'  {error}')
         else:
-            print("\n✓ No errors found")
+            print('\n✓ No errors found')
 
         if self.warnings:
-            print(f"\n⚠ {len(self.warnings)} WARNING(S) found:\n")
+            print(f'\n⚠ {len(self.warnings)} WARNING(S) found:\n')
             for warning in self.warnings:
-                print(f"  {warning}")
+                print(f'  {warning}')
 
-        print("\n" + "=" * 70)
+        print('\n' + '=' * 70)
 
         if self.verbose and self.skill_versions:
-            print("\nSkill Versions:")
-            print("-" * 70)
+            print('\nSkill Versions:')
+            print('-' * 70)
             for skill, (version, path) in sorted(self.skill_versions.items()):
-                print(f"  {skill:25s} v{version}")
+                print(f'  {skill:25s} v{version}')
             print()
 
         return len(self.errors) == 0
@@ -371,10 +370,10 @@ class VersionValidator:
         Returns:
             True if all validations passed, False otherwise
         """
-        print("=" * 70)
-        print("Version Consistency Validator")
-        print("=" * 70)
-        print(f"Repository: {self.repo_root}")
+        print('=' * 70)
+        print('Version Consistency Validator')
+        print('=' * 70)
+        print(f'Repository: {self.repo_root}')
         print()
 
         all_valid = True
@@ -419,7 +418,7 @@ def main():
     args = parser.parse_args()
 
     if args.fix:
-        print("ERROR: --fix option is not yet implemented")
+        print('ERROR: --fix option is not yet implemented')
         sys.exit(2)
 
     # Determine repository root
@@ -433,10 +432,10 @@ def main():
         )
         repo_root = Path(result.stdout.strip())
     except subprocess.CalledProcessError:
-        print("ERROR: Not in a git repository")
+        print('ERROR: Not in a git repository')
         sys.exit(2)
     except FileNotFoundError:
-        print("ERROR: git command not found")
+        print('ERROR: git command not found')
         sys.exit(2)
 
     # Run validation
@@ -448,10 +447,10 @@ def main():
 
     # Exit with appropriate code
     if success:
-        print("✓ All validation checks passed!")
+        print('✓ All validation checks passed!')
         sys.exit(0)
     else:
-        print("❌ Validation failed - please fix errors above")
+        print('❌ Validation failed - please fix errors above')
         sys.exit(1)
 
 

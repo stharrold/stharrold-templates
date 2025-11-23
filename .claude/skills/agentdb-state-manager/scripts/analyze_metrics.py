@@ -45,12 +45,12 @@ def main() -> None:
     GROUP BY json_extract_string(object_metadata, '$.gate_type');
     """
 
-    print("Metrics Queries (to be executed via AgentDB):\n")
-    print("1. Time-in-phase analysis:")
+    print('Metrics Queries (to be executed via AgentDB):\n')
+    print('1. Time-in-phase analysis:')
     print(time_in_phase_query)
-    print("\n2. Quality gate pass rates:")
+    print('\n2. Quality gate pass rates:')
     print(quality_query)
-    print("\nNOTE: In actual execution, would query AgentDB and generate metrics report")
+    print('\nNOTE: In actual execution, would query AgentDB and generate metrics report')
 
 if __name__ == '__main__':
     main()

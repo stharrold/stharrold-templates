@@ -74,13 +74,13 @@ def get_vcs_adapter() -> BaseVCSAdapter:
 
             return AzureDevOpsAdapter(organization=org, project=project, repository=repository)
         else:
-            raise ValueError(f"Unknown VCS provider in config: {provider}")
+            raise ValueError(f'Unknown VCS provider in config: {provider}')
 
     # Try detecting from git remote
     detected = detect_provider()
     if detected == VCSProvider.AZURE_DEVOPS:
         # TODO: Extract org/project from git remote URL
-        raise ValueError("Azure DevOps detected but requires .vcs_config.yaml with org/project")
+        raise ValueError('Azure DevOps detected but requires .vcs_config.yaml with org/project')
 
     # Default to GitHub (backward compatibility)
     return GitHubAdapter()
