@@ -22,16 +22,39 @@ import hashlib
 import json
 import logging
 import re
+import sys
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 try:
     import duckdb
 except ImportError:
-    raise ImportError("duckdb package required. Run: uv add duckdb")
+    raise ImportError('duckdb package required. Run: uv add duckdb')
+
+# Add workflow-utilities to path for worktree_context
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'),
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _get_worktree_defaults() -> tuple[Path, str]:
+    """Get default database path and worktree ID.
+
+    Returns:
+        Tuple of (db_path, worktree_id).
+        Falls back to current directory and empty string if detection fails.
+    """
+    try:
+        from worktree_context import get_state_dir, get_worktree_id
+
+        return get_state_dir() / 'agentdb.duckdb', get_worktree_id()
+    except (ImportError, RuntimeError):
+        return Path('agentdb.duckdb'), ''
 
 
 class SynchronizationEngine:
@@ -58,28 +81,38 @@ class SynchronizationEngine:
         # Returns: ['exec-uuid-1', 'exec-uuid-2'] - IDs of triggered syncs
     """
 
-    def __init__(self, db_path: str, cache_ttl: int = 300):
+    def __init__(
+        self,
+        db_path: str | None = None,
+        cache_ttl: int = 300,
+        worktree_id: str | None = None,
+    ):
         """Initialize sync engine with database connection.
 
         Args:
-            db_path: Path to DuckDB database (e.g., "agentdb.duckdb")
+            db_path: Path to DuckDB database. If None, uses worktree state directory.
             cache_ttl: Cache TTL in seconds for active syncs (default 5 minutes)
+            worktree_id: Worktree identifier for scoping. If None, auto-detected.
         """
-        self.db_path = db_path
+        # Get worktree-aware defaults if not specified
+        default_db_path, default_worktree_id = _get_worktree_defaults()
+
+        self.db_path = db_path or str(default_db_path)
+        self.worktree_id = worktree_id or default_worktree_id
         self.cache_ttl = cache_ttl
-        self._sync_cache: Dict[str, Any] = {}
-        self._cache_invalidated_at: Optional[datetime] = None
+        self._sync_cache: dict[str, Any] = {}
+        self._cache_invalidated_at: datetime | None = None
 
         # Initialize database connection
         # Note: DuckDB supports concurrent readers but single writer
         # For production, consider connection pooling
-        self.conn = duckdb.connect(db_path, read_only=False)
+        self.conn = duckdb.connect(self.db_path, read_only=False)
 
     def _compute_provenance_hash(
         self,
         sync_id: str,
         flow_token: str,
-        state: Dict[str, Any]
+        state: dict[str, Any]
     ) -> str:
         """Compute SHA-256 content-addressed hash for idempotency.
 
@@ -114,13 +147,13 @@ class SynchronizationEngine:
         state_json = json.dumps(state, sort_keys=True, separators=(',', ':'))
 
         # Combine components with delimiter
-        content = f"{sync_id}:{flow_token}:{state_json}"
+        content = f'{sync_id}:{flow_token}:{state_json}'
 
         # SHA-256 hash
         hash_bytes = hashlib.sha256(content.encode('utf-8')).digest()
         return hash_bytes.hex()
 
-    def _get_nested_value(self, obj: Dict[str, Any], path: str) -> Any:
+    def _get_nested_value(self, obj: dict[str, Any], path: str) -> Any:
         """Extract nested value from dict using dot-notation path.
 
         Args:
@@ -147,9 +180,9 @@ class SynchronizationEngine:
 
     def _resolve_params(
         self,
-        action_spec: Dict[str, Any],
-        trigger_state: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        action_spec: dict[str, Any],
+        trigger_state: dict[str, Any]
+    ) -> dict[str, Any]:
         """Resolve ${trigger_state.path} placeholders in action spec.
 
         Template Syntax:
@@ -185,8 +218,8 @@ class SynchronizationEngine:
             value = self._get_nested_value(trigger_state, path)
 
             if value is None:
-                logger.warning(f"Missing path in trigger_state: {path}")
-                return "null"
+                logger.warning(f'Missing path in trigger_state: {path}')
+                return 'null'
 
             # Return JSON-encoded value (handles strings, numbers, objects)
             return json.dumps(value) if not isinstance(value, str) else value
@@ -196,7 +229,7 @@ class SynchronizationEngine:
 
         return json.loads(resolved_json)
 
-    def _pattern_matches(self, pattern: Dict[str, Any], state: Dict[str, Any]) -> bool:
+    def _pattern_matches(self, pattern: dict[str, Any], state: dict[str, Any]) -> bool:
         """Check if state contains pattern (partial match).
 
         Pattern matching rules:
@@ -243,8 +276,8 @@ class SynchronizationEngine:
         self,
         agent_id: str,
         action: str,
-        state: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        state: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Find synchronization rules matching current agent/action/state.
 
         Query Pattern (DuckDB):
@@ -309,7 +342,7 @@ class SynchronizationEngine:
 
         return matched_syncs
 
-    def _detect_phi(self, state: Dict[str, Any]) -> bool:
+    def _detect_phi(self, state: dict[str, Any]) -> bool:
         """Detect if state contains PHI (Protected Health Information).
 
         Heuristics:
@@ -335,7 +368,7 @@ class SynchronizationEngine:
         execution_id: str,
         event_type: str,
         phi_involved: bool,
-        event_details: Dict[str, Any]
+        event_details: dict[str, Any]
     ):
         """Log event to sync_audit_trail (APPEND-ONLY compliance log).
 
@@ -374,17 +407,17 @@ class SynchronizationEngine:
             'autonomous_agent',  # Role
             phi_involved,
             json.dumps({
-                "purpose": "Workflow synchronization",
-                "legal_basis": "Research protocol"
+                'purpose': 'Workflow synchronization',
+                'legal_basis': 'Research protocol'
             }),
             json.dumps(event_details)
         ])
 
     def _execute_sync(
         self,
-        sync: Dict[str, Any],
+        sync: dict[str, Any],
         flow_token: str,
-        trigger_state: Dict[str, Any],
+        trigger_state: dict[str, Any],
         prov_hash: str
     ) -> str:
         """Record sync execution and trigger target agent.
@@ -408,8 +441,8 @@ class SynchronizationEngine:
         # Resolve parameters from trigger state
         # Example: "${trigger_state.coverage.percentage}" → 85
         action_spec = {
-            "action": sync['target_action'],
-            "agent_id": sync['target_agent_id']
+            'action': sync['target_action'],
+            'agent_id': sync['target_agent_id']
         }
         resolved_params = self._resolve_params(action_spec, trigger_state)
 
@@ -445,10 +478,10 @@ class SynchronizationEngine:
             event_type='sync_initiated',
             phi_involved=self._detect_phi(trigger_state),
             event_details={
-                "trigger_agent": sync['trigger_agent_id'],
-                "target_agent": sync['target_agent_id'],
-                "flow_token": flow_token,
-                "resolved_params": resolved_params
+                'trigger_agent': sync['trigger_agent_id'],
+                'target_agent': sync['target_agent_id'],
+                'flow_token': flow_token,
+                'resolved_params': resolved_params
             }
         )
 
@@ -469,8 +502,8 @@ class SynchronizationEngine:
         agent_id: str,
         action: str,
         flow_token: str,
-        state_snapshot: Dict[str, Any]
-    ) -> List[str]:
+        state_snapshot: dict[str, Any]
+    ) -> list[str]:
         """Main entry point - called after any agent action completes.
 
         Performance Requirements:
@@ -504,8 +537,8 @@ class SynchronizationEngine:
         matching_syncs = self._find_matching_syncs(agent_id, action, state_snapshot)
 
         logger.info(
-            f"Agent action: {agent_id}.{action} (flow_token={flow_token}) "
-            f"matched {len(matching_syncs)} sync rules"
+            f'Agent action: {agent_id}.{action} (flow_token={flow_token}) '
+            f'matched {len(matching_syncs)} sync rules'
         )
 
         for sync in matching_syncs:
@@ -518,7 +551,7 @@ class SynchronizationEngine:
 
             # Check if this sync already executed for this exact state
             existing = self.conn.execute(
-                "SELECT execution_id FROM sync_executions WHERE provenance_hash = ?",
+                'SELECT execution_id FROM sync_executions WHERE provenance_hash = ?',
                 [prov_hash]
             ).fetchone()
 

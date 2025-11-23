@@ -1275,13 +1275,24 @@ python .claude/skills/git-workflow-manager/scripts/tag_release.py \
 
 **Purpose:** Merge any release-specific changes back to develop through PR
 
+**⚠️ CRITICAL: Backmerge Direction**
+
+```
+CORRECT:  release/vX.Y.Z → develop  (release branch to develop)
+WRONG:    main → develop            (NEVER do this!)
+```
+
+The backmerge must ALWAYS be from the **release branch**, not from main.
+This ensures only release-specific changes (version bumps, changelog updates)
+are merged back to develop, not the entire main branch history.
+
 **Command:**
 ```bash
 python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
   v1.1.0 develop
 ```
 
-**Important:** This script ALWAYS creates a PR (never pushes directly to develop), ensuring proper review workflow and branch protection compliance.
+**Important:** This script ALWAYS creates a PR (never pushes directly to develop), ensuring proper review workflow and branch protection compliance. The script validates that the source is a release/* branch and will reject attempts to use main/develop as the source.
 
 **Steps:**
 1. Checkout develop branch

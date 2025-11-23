@@ -13,35 +13,35 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
-def get_platform_config_paths() -> Dict[str, Path]:
+def get_platform_config_paths() -> dict[str, Path]:
     """Get platform-specific configuration file paths."""
     system = platform.system().lower()
     home = Path.home()
 
-    if system == "darwin":  # macOS
+    if system == 'darwin':  # macOS
         return {
-            "claude_code": home / ".claude.json",
-            "vscode": home / "Library" / "Application Support" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / "Library" / "Application Support" / "Claude" / "config.json"
+            'claude_code': home / '.claude.json',
+            'vscode': home / 'Library' / 'Application Support' / 'Code' / 'User' / 'mcp.json',
+            'claude_desktop': home / 'Library' / 'Application Support' / 'Claude' / 'config.json'
         }
-    elif system == "windows":
+    elif system == 'windows':
         return {
-            "claude_code": home / ".claude.json",
-            "vscode": home / "AppData" / "Roaming" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / "AppData" / "Roaming" / "Claude" / "config.json"
+            'claude_code': home / '.claude.json',
+            'vscode': home / 'AppData' / 'Roaming' / 'Code' / 'User' / 'mcp.json',
+            'claude_desktop': home / 'AppData' / 'Roaming' / 'Claude' / 'config.json'
         }
     else:  # Linux and others
         return {
-            "claude_code": home / ".claude.json",
-            "vscode": home / ".config" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / ".config" / "claude" / "config.json"
+            'claude_code': home / '.claude.json',
+            'vscode': home / '.config' / 'Code' / 'User' / 'mcp.json',
+            'claude_desktop': home / '.config' / 'claude' / 'config.json'
         }
 
 
-def validate_credentials() -> Dict[str, bool]:
+def validate_credentials() -> dict[str, bool]:
     """Validate common MCP server credentials."""
     credentials = {}
 
@@ -60,29 +60,29 @@ def validate_credentials() -> Dict[str, bool]:
     return credentials
 
 
-def validate_platform_credentials() -> Dict[str, bool]:
+def validate_platform_credentials() -> dict[str, bool]:
     """Validate platform-specific credential storage."""
     system = platform.system().lower()
     results = {}
 
-    if system == "darwin":
+    if system == 'darwin':
         # Check macOS Keychain
         try:
             for service in ['GITHUB_TOKEN', 'AZURE_DEVOPS_PAT']:
                 cmd = ['security', 'find-generic-password', '-a', os.getenv('USER', ''), '-s', service, '-w']
                 result = subprocess.run(cmd, capture_output=True, text=True)
-                results[f"keychain_{service}"] = result.returncode == 0
+                results[f'keychain_{service}'] = result.returncode == 0
         except Exception:
-            results["keychain_error"] = True
+            results['keychain_error'] = True
 
-    elif system == "windows":
+    elif system == 'windows':
         # Check Windows Credential Manager
         try:
             cmd = ['powershell', '-Command', 'Get-Module -ListAvailable -Name CredentialManager']
             result = subprocess.run(cmd, capture_output=True, text=True)
-            results["credential_manager_module"] = result.returncode == 0
+            results['credential_manager_module'] = result.returncode == 0
         except Exception:
-            results["credential_manager_error"] = True
+            results['credential_manager_error'] = True
 
     return results
 
@@ -95,8 +95,8 @@ class MCPConfig:
         self.path = path
         self.description = description
         self.exists = path.exists()
-        self.data: Optional[Dict] = None
-        self.servers: List[Dict] = []
+        self.data: dict | None = None
+        self.servers: list[dict] = []
 
     def load(self) -> bool:
         """Load and validate the configuration file."""
@@ -104,12 +104,12 @@ class MCPConfig:
             return False
 
         try:
-            with open(self.path, 'r') as f:
+            with open(self.path) as f:
                 self.data = json.load(f)
             self._extract_servers()
             return True
-        except (json.JSONDecodeError, IOError) as e:
-            print(f"Error reading {self.path}: {e}")
+        except (OSError, json.JSONDecodeError) as e:
+            print(f'Error reading {self.path}: {e}')
             return False
 
     def _extract_servers(self) -> None:
@@ -122,7 +122,7 @@ class MCPConfig:
         # Handle global mcpServers (skip disabled ones)
         if 'mcpServers' in self.data:
             for name, config in self.data['mcpServers'].items():
-                if not name.startswith("DISABLED_"):
+                if not name.startswith('DISABLED_'):
                     self.servers.append({
                         'name': name,
                         'config': config,
@@ -135,7 +135,7 @@ class MCPConfig:
             for project_path, project_config in self.data['projects'].items():
                 if 'mcpServers' in project_config:
                     for name, config in project_config['mcpServers'].items():
-                        if not name.startswith("DISABLED_"):
+                        if not name.startswith('DISABLED_'):
                             self.servers.append({
                                 'name': name,
                                 'config': config,
@@ -143,19 +143,19 @@ class MCPConfig:
                                 'project': project_path
                             })
 
-    def backup(self) -> Optional[Path]:
+    def backup(self) -> Path | None:
         """Create a backup of the configuration file."""
         if not self.exists:
             return None
 
-        timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-        backup_path = self.path.parent / f"{self.path.name}.backup.{timestamp}"
+        timestamp = datetime.now().strftime('%Y%m%dT%H%M%S')
+        backup_path = self.path.parent / f'{self.path.name}.backup.{timestamp}'
 
         try:
             shutil.copy2(self.path, backup_path)
             return backup_path
-        except IOError as e:
-            print(f"Error creating backup for {self.path}: {e}")
+        except OSError as e:
+            print(f'Error creating backup for {self.path}: {e}')
             return None
 
     def save(self) -> bool:
@@ -167,11 +167,11 @@ class MCPConfig:
             with open(self.path, 'w') as f:
                 json.dump(self.data, f, indent=2)
             return True
-        except IOError as e:
-            print(f"Error saving {self.path}: {e}")
+        except OSError as e:
+            print(f'Error saving {self.path}: {e}')
             return False
 
-    def remove_server(self, server_name: str, project_path: Optional[str] = None) -> bool:
+    def remove_server(self, server_name: str, project_path: str | None = None) -> bool:
         """Remove an MCP server from the configuration."""
         if not self.data:
             return False
@@ -197,7 +197,7 @@ class MCPConfig:
 
         return removed
 
-    def add_server(self, server_name: str, server_config: Dict[str, Any], project_path: Optional[str] = None) -> bool:
+    def add_server(self, server_name: str, server_config: dict[str, Any], project_path: str | None = None) -> bool:
         """Add an MCP server to the configuration."""
         if not self.data:
             # Initialize empty config if needed
@@ -229,13 +229,13 @@ class MCPConfig:
 
         return added
 
-    def disable_server(self, server_name: str, project_path: Optional[str] = None) -> bool:
+    def disable_server(self, server_name: str, project_path: str | None = None) -> bool:
         """Disable an MCP server by renaming it with DISABLED_ prefix."""
         if not self.data:
             return False
 
         disabled = False
-        disabled_name = f"DISABLED_{server_name}"
+        disabled_name = f'DISABLED_{server_name}'
 
         if project_path:
             # Disable in specific project
@@ -259,12 +259,12 @@ class MCPConfig:
 
         return disabled
 
-    def enable_server(self, disabled_server_name: str, project_path: Optional[str] = None) -> bool:
+    def enable_server(self, disabled_server_name: str, project_path: str | None = None) -> bool:
         """Enable a disabled MCP server by removing DISABLED_ prefix."""
         if not self.data:
             return False
 
-        if not disabled_server_name.startswith("DISABLED_"):
+        if not disabled_server_name.startswith('DISABLED_'):
             return False
 
         enabled = False
@@ -292,7 +292,7 @@ class MCPConfig:
 
         return enabled
 
-    def get_disabled_servers(self) -> List[Dict]:
+    def get_disabled_servers(self) -> list[dict]:
         """Get list of disabled servers."""
         if not self.data:
             return []
@@ -302,7 +302,7 @@ class MCPConfig:
         # Check global mcpServers
         if 'mcpServers' in self.data:
             for name, config in self.data['mcpServers'].items():
-                if name.startswith("DISABLED_"):
+                if name.startswith('DISABLED_'):
                     disabled_servers.append({
                         'name': name,
                         'original_name': name[9:],  # Remove "DISABLED_" prefix
@@ -316,7 +316,7 @@ class MCPConfig:
             for project_path, project_config in self.data['projects'].items():
                 if 'mcpServers' in project_config:
                     for name, config in project_config['mcpServers'].items():
-                        if name.startswith("DISABLED_"):
+                        if name.startswith('DISABLED_'):
                             disabled_servers.append({
                                 'name': name,
                                 'original_name': name[9:],  # Remove "DISABLED_" prefix
@@ -330,12 +330,12 @@ class MCPConfig:
     def remove_duplicate_servers(self) -> bool:
         """Remove duplicate servers where both active and DISABLED_ versions exist."""
         if not self.data:
-            print(f"No configuration found for {self.name}")
+            print(f'No configuration found for {self.name}')
             return False
 
         servers = self.data.get('mcpServers', {})
         if not servers:
-            print(f"No MCP servers configured for {self.name}")
+            print(f'No MCP servers configured for {self.name}')
             return False
 
         # Create backup before deduplication
@@ -346,7 +346,7 @@ class MCPConfig:
         servers_to_remove = []
 
         for server_name in list(servers.keys()):
-            if server_name.startswith("DISABLED_"):
+            if server_name.startswith('DISABLED_'):
                 active_name = server_name[9:]  # Remove "DISABLED_" prefix
                 if active_name in servers:
                     # Both disabled and active versions exist - keep disabled, remove active
@@ -354,13 +354,13 @@ class MCPConfig:
                     servers_to_remove.append(active_name)
 
         if not duplicates_found:
-            print(f"No duplicate servers found in {self.name} configuration")
+            print(f'No duplicate servers found in {self.name} configuration')
             return True
 
         # Remove duplicates
-        print(f"\nFound {len(duplicates_found)} duplicate server(s) in {self.name}:")
+        print(f'\nFound {len(duplicates_found)} duplicate server(s) in {self.name}:')
         for name in duplicates_found:
-            print(f"  - {name} (keeping DISABLED_{name}, removing active)")
+            print(f'  - {name} (keeping DISABLED_{name}, removing active)')
 
         for server_name in servers_to_remove:
             del servers[server_name]
@@ -369,7 +369,7 @@ class MCPConfig:
         self.data['mcpServers'] = servers
         self.save()
 
-        print(f"\nSuccessfully removed {len(duplicates_found)} duplicate(s) from {self.name}")
+        print(f'\nSuccessfully removed {len(duplicates_found)} duplicate(s) from {self.name}')
         return True
 
 
@@ -380,30 +380,30 @@ class MCPManager:
         paths = get_platform_config_paths()
         self.configs = [
             MCPConfig(
-                "Claude Code CLI",
-                paths["claude_code"],
-                "Claude Code command-line interface"
+                'Claude Code CLI',
+                paths['claude_code'],
+                'Claude Code command-line interface'
             ),
             MCPConfig(
-                "VS Code MCP Extension",
-                paths["vscode"],
-                "Visual Studio Code MCP extension"
+                'VS Code MCP Extension',
+                paths['vscode'],
+                'Visual Studio Code MCP extension'
             ),
             MCPConfig(
-                "Claude Desktop",
-                paths["claude_desktop"],
-                "Claude Desktop application"
+                'Claude Desktop',
+                paths['claude_desktop'],
+                'Claude Desktop application'
             )
         ]
 
         # Platform name mapping for command-line arguments
         self.platform_map = {
-            "claude-code": "Claude Code CLI",
-            "vscode": "VS Code MCP Extension",
-            "claude-desktop": "Claude Desktop"
+            'claude-code': 'Claude Code CLI',
+            'vscode': 'VS Code MCP Extension',
+            'claude-desktop': 'Claude Desktop'
         }
 
-    def select_target_platform(self, platform_name: Optional[str] = None) -> Optional[MCPConfig]:
+    def select_target_platform(self, platform_name: str | None = None) -> MCPConfig | None:
         """Select target platform configuration."""
         available_configs = self.detect_configs()
 
@@ -422,16 +422,16 @@ class MCPManager:
                     return config
 
             print(f"Error: Platform '{platform_name}' not found or not configured.")
-            print("Available platforms:")
+            print('Available platforms:')
             for config in available_configs:
                 platform_key = {v: k for k, v in self.platform_map.items()}.get(config.name, config.name.lower())
-                print(f"  {platform_key}: {config.path}")
+                print(f'  {platform_key}: {config.path}')
             return None
         else:
             # Auto-detect first available platform
             return available_configs[0] if available_configs else None
 
-    def detect_configs(self) -> List[MCPConfig]:
+    def detect_configs(self) -> list[MCPConfig]:
         """Detect and load available MCP configuration files."""
         available = []
 
@@ -443,23 +443,23 @@ class MCPManager:
 
     def show_platform_status(self) -> None:
         """Show status of all MCP platforms."""
-        print("MCP Configuration Status:")
+        print('MCP Configuration Status:')
         configs = self.detect_configs()
 
         for config in self.configs:
             platform_key = {v: k for k, v in self.platform_map.items()}.get(config.name, config.name.lower())
             if config in configs:
                 disabled_count = len(config.get_disabled_servers())
-                server_info = f" ({len(config.servers)} active"
+                server_info = f' ({len(config.servers)} active'
                 if disabled_count > 0:
-                    server_info += f", {disabled_count} disabled"
-                server_info += ")"
-                print(f"  {platform_key}: Found{server_info}")
+                    server_info += f', {disabled_count} disabled'
+                server_info += ')'
+                print(f'  {platform_key}: Found{server_info}')
             else:
-                print(f"  {platform_key}: Not found ({config.path})")
+                print(f'  {platform_key}: Not found ({config.path})')
 
         if configs:
-            print("\nUse --platform <name> to work with a specific platform")
+            print('\nUse --platform <name> to work with a specific platform')
             print(f"Available platforms: {', '.join(self.platform_map.keys())}")
 
     def list_platform_servers(self, config: MCPConfig) -> None:
@@ -467,16 +467,16 @@ class MCPManager:
         disabled_servers = config.get_disabled_servers()
 
         print(f"\n{'=' * 60}")
-        print(f"Platform: {config.name}")
-        print(f"Config: {config.path}")
-        print(f"Status: {len(config.servers)} active, {len(disabled_servers)} disabled")
+        print(f'Platform: {config.name}')
+        print(f'Config: {config.path}')
+        print(f'Status: {len(config.servers)} active, {len(disabled_servers)} disabled')
         print('=' * 60)
 
         # Show active servers
         if config.servers:
-            print("\nActive servers:")
+            print('\nActive servers:')
             for i, server in enumerate(config.servers, 1):
-                scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+                scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
                 print(f"{i:2d}. {server['name']}{scope_info}")
 
                 # Show server details
@@ -485,7 +485,7 @@ class MCPManager:
                     cmd = server_config['command']
                     if isinstance(cmd, list):
                         cmd = ' '.join(cmd)
-                    print(f"    Command: {cmd}")
+                    print(f'    Command: {cmd}')
                 elif 'url' in server_config:
                     print(f"    URL: {server_config['url']}")
 
@@ -493,13 +493,13 @@ class MCPManager:
                     args = server_config['args']
                     if isinstance(args, list):
                         args = ' '.join(args)
-                    print(f"    Args: {args}")
+                    print(f'    Args: {args}')
 
         # Show disabled servers
         if disabled_servers:
-            print("\nDisabled servers:")
+            print('\nDisabled servers:')
             for server in disabled_servers:
-                scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+                scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
                 print(f"    {server['original_name']}{scope_info} [DISABLED]")
 
                 # Show server details
@@ -508,7 +508,7 @@ class MCPManager:
                     cmd = server_config['command']
                     if isinstance(cmd, list):
                         cmd = ' '.join(cmd)
-                    print(f"        Command: {cmd}")
+                    print(f'        Command: {cmd}')
                 elif 'url' in server_config:
                     print(f"        URL: {server_config['url']}")
 
@@ -516,50 +516,50 @@ class MCPManager:
                     args = server_config['args']
                     if isinstance(args, list):
                         args = ' '.join(args)
-                    print(f"        Args: {args}")
+                    print(f'        Args: {args}')
 
         if not config.servers and not disabled_servers:
-            print("No MCP servers configured.")
+            print('No MCP servers configured.')
 
-        print(f"\nTotal: {len(config.servers)} active, {len(disabled_servers)} disabled servers")
+        print(f'\nTotal: {len(config.servers)} active, {len(disabled_servers)} disabled servers')
 
     def interactive_remove(self, config: MCPConfig) -> None:
         """Interactive MCP server removal."""
         if not config.servers:
-            print("No MCP servers found to remove.")
+            print('No MCP servers found to remove.')
             return
 
         print(f"\n{'=' * 60}")
-        print(f"Remove MCP Servers from {config.name}")
-        print("=" * 60)
+        print(f'Remove MCP Servers from {config.name}')
+        print('=' * 60)
 
-        print("\nAvailable servers:")
+        print('\nAvailable servers:')
         for i, server in enumerate(config.servers, 1):
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"{i:2d}. {server['name']}{scope_info}")
 
-        print("\nRemoval options:")
-        print("1. Remove specific servers (interactive selection)")
-        print(f"2. Remove ALL servers from {config.name}")
-        print("3. Cancel")
+        print('\nRemoval options:')
+        print('1. Remove specific servers (interactive selection)')
+        print(f'2. Remove ALL servers from {config.name}')
+        print('3. Cancel')
 
-        choice = input("\nEnter your choice (1-3): ").strip()
+        choice = input('\nEnter your choice (1-3): ').strip()
 
-        if choice == "1":
+        if choice == '1':
             self._remove_specific_servers(config)
-        elif choice == "2":
+        elif choice == '2':
             self._remove_all_servers(config)
-        elif choice == "3":
-            print("Operation cancelled.")
+        elif choice == '3':
+            print('Operation cancelled.')
         else:
-            print("Invalid choice.")
+            print('Invalid choice.')
 
     def _remove_specific_servers(self, config: MCPConfig) -> None:
         """Remove specific servers interactively."""
         print(f"\nSelect servers to remove (1-{len(config.servers)}, or 'q' to quit):")
-        print("You can enter multiple numbers separated by spaces or commas.")
+        print('You can enter multiple numbers separated by spaces or commas.')
 
-        selection = input("Enter selection: ").strip()
+        selection = input('Enter selection: ').strip()
         if selection.lower() == 'q':
             return
 
@@ -571,28 +571,28 @@ class MCPManager:
                 if 1 <= idx <= len(config.servers):
                     selected_indices.append(idx - 1)  # Convert to 0-based index
                 else:
-                    print(f"Invalid selection: {idx}. Must be between 1 and {len(config.servers)}")
+                    print(f'Invalid selection: {idx}. Must be between 1 and {len(config.servers)}')
                     return
         except ValueError:
-            print("Invalid selection format.")
+            print('Invalid selection format.')
             return
 
         # Confirm removal
         servers_to_remove = []
-        print("\nServers to remove:")
+        print('\nServers to remove:')
         for idx in selected_indices:
             server = config.servers[idx]
             servers_to_remove.append(server)
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  - {server['name']}{scope_info}")
 
         if not servers_to_remove:
-            print("No valid servers selected.")
+            print('No valid servers selected.')
             return
 
-        confirm = input(f"\nRemove {len(servers_to_remove)} servers? (y/N): ").strip().lower()
+        confirm = input(f'\nRemove {len(servers_to_remove)} servers? (y/N): ').strip().lower()
         if confirm != 'y':
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
         # Create backup and remove servers
@@ -610,19 +610,19 @@ class MCPManager:
 
         # Show backup info
         if backup_path:
-            print(f"\nBackup created: {backup_path}")
+            print(f'\nBackup created: {backup_path}')
 
     def _remove_all_servers(self, config: MCPConfig) -> None:
         """Remove all servers from platform."""
-        print(f"\nThis will remove ALL {len(config.servers)} MCP servers from {config.name}")
+        print(f'\nThis will remove ALL {len(config.servers)} MCP servers from {config.name}')
 
         for server in config.servers:
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  - {server['name']}{scope_info}")
 
-        confirm = input("\nThis action cannot be easily undone. Continue? (y/N): ").strip().lower()
+        confirm = input('\nThis action cannot be easily undone. Continue? (y/N): ').strip().lower()
         if confirm != 'y':
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
         # Create backup and remove all servers
@@ -640,63 +640,63 @@ class MCPManager:
 
             config.save()
             config._extract_servers()  # Refresh
-            print(f"Removed all servers from {config.name}")
+            print(f'Removed all servers from {config.name}')
 
         # Show backup info
         if backup_path:
-            print(f"\nBackup created: {backup_path}")
+            print(f'\nBackup created: {backup_path}')
             print(f"Restore with: cp '{backup_path}' '{config.path}'")
 
     def show_credential_status(self) -> None:
         """Show credential validation status."""
-        print("\n" + "=" * 60)
-        print("Credential Validation Status")
-        print("=" * 60)
+        print('\n' + '=' * 60)
+        print('Credential Validation Status')
+        print('=' * 60)
 
         # Check environment variables
         env_creds = validate_credentials()
-        print("\nEnvironment Variables:")
+        print('\nEnvironment Variables:')
         for var, status in env_creds.items():
-            status_str = "✓ Found" if status else "✗ Missing"
-            print(f"  {var}: {status_str}")
+            status_str = '✓ Found' if status else '✗ Missing'
+            print(f'  {var}: {status_str}')
 
         # Check platform-specific storage
         platform_creds = validate_platform_credentials()
         if platform_creds:
-            print(f"\nPlatform-Specific Storage ({platform.system()}):")
+            print(f'\nPlatform-Specific Storage ({platform.system()}):')
             for key, status in platform_creds.items():
-                if "error" in key:
-                    print(f"  Error checking {key}")
+                if 'error' in key:
+                    print(f'  Error checking {key}')
                 else:
-                    status_str = "✓ Found" if status else "✗ Missing"
-                    print(f"  {key}: {status_str}")
+                    status_str = '✓ Found' if status else '✗ Missing'
+                    print(f'  {key}: {status_str}')
 
         # Recommendations
         missing_env = [var for var, status in env_creds.items() if not status]
         if missing_env:
-            print("\nRecommendations:")
+            print('\nRecommendations:')
             print(f"  Missing credentials: {', '.join(missing_env)}")
-            print("  See GUIDE-CREDENTIALS.md for secure setup instructions")
+            print('  See GUIDE-CREDENTIALS.md for secure setup instructions')
 
     def interactive_disable(self, config: MCPConfig) -> None:
         """Interactive MCP server disabling."""
         if not config.servers:
-            print("No active MCP servers found to disable.")
+            print('No active MCP servers found to disable.')
             return
 
-        print("\n" + "=" * 60)
-        print(f"Disable servers in {config.name}")
-        print("=" * 60)
+        print('\n' + '=' * 60)
+        print(f'Disable servers in {config.name}')
+        print('=' * 60)
 
-        print("\nActive servers:")
+        print('\nActive servers:')
         for i, server in enumerate(config.servers, 1):
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  {i:2d}. {server['name']}{scope_info}")
 
         print(f"\nSelect servers to disable (1-{len(config.servers)}, or 'q' to quit):")
-        print("You can enter multiple numbers separated by spaces or commas.")
+        print('You can enter multiple numbers separated by spaces or commas.')
 
-        selection = input("Enter selection: ").strip()
+        selection = input('Enter selection: ').strip()
         if selection.lower() == 'q':
             return
 
@@ -708,28 +708,28 @@ class MCPManager:
                 if 1 <= idx <= len(config.servers):
                     selected_indices.append(idx - 1)  # Convert to 0-based index
                 else:
-                    print(f"Invalid selection: {idx}. Must be between 1 and {len(config.servers)}")
+                    print(f'Invalid selection: {idx}. Must be between 1 and {len(config.servers)}')
                     return
         except ValueError:
-            print("Invalid selection format.")
+            print('Invalid selection format.')
             return
 
         # Confirm disabling
         servers_to_disable = []
-        print("\nServers to disable:")
+        print('\nServers to disable:')
         for idx in selected_indices:
             server = config.servers[idx]
             servers_to_disable.append(server)
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  - {server['name']}{scope_info}")
 
         if not servers_to_disable:
-            print("No valid servers selected.")
+            print('No valid servers selected.')
             return
 
-        confirm = input(f"\nDisable {len(servers_to_disable)} servers? (y/N): ").strip().lower()
+        confirm = input(f'\nDisable {len(servers_to_disable)} servers? (y/N): ').strip().lower()
         if confirm != 'y':
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
         # Create backup and disable servers
@@ -747,29 +747,29 @@ class MCPManager:
 
         # Show backup info
         if backup_path:
-            print(f"\nBackup created: {backup_path}")
+            print(f'\nBackup created: {backup_path}')
 
     def interactive_enable(self, config: MCPConfig) -> None:
         """Interactive MCP server enabling."""
         disabled_servers = config.get_disabled_servers()
 
         if not disabled_servers:
-            print("No disabled MCP servers found to enable.")
+            print('No disabled MCP servers found to enable.')
             return
 
-        print("\n" + "=" * 60)
-        print(f"Enable servers in {config.name}")
-        print("=" * 60)
+        print('\n' + '=' * 60)
+        print(f'Enable servers in {config.name}')
+        print('=' * 60)
 
-        print("\nDisabled servers:")
+        print('\nDisabled servers:')
         for i, server in enumerate(disabled_servers, 1):
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  {i:2d}. {server['original_name']}{scope_info} [DISABLED]")
 
         print(f"\nSelect servers to enable (1-{len(disabled_servers)}, or 'q' to quit):")
-        print("You can enter multiple numbers separated by spaces or commas.")
+        print('You can enter multiple numbers separated by spaces or commas.')
 
-        selection = input("Enter selection: ").strip()
+        selection = input('Enter selection: ').strip()
         if selection.lower() == 'q':
             return
 
@@ -781,28 +781,28 @@ class MCPManager:
                 if 1 <= idx <= len(disabled_servers):
                     selected_indices.append(idx - 1)  # Convert to 0-based index
                 else:
-                    print(f"Invalid selection: {idx}. Must be between 1 and {len(disabled_servers)}")
+                    print(f'Invalid selection: {idx}. Must be between 1 and {len(disabled_servers)}')
                     return
         except ValueError:
-            print("Invalid selection format.")
+            print('Invalid selection format.')
             return
 
         # Confirm enabling
         servers_to_enable = []
-        print("\nServers to enable:")
+        print('\nServers to enable:')
         for idx in selected_indices:
             server = disabled_servers[idx]
             servers_to_enable.append(server)
-            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else "") + "]"
+            scope_info = f" [{server['scope']}" + (f": {server['project']}" if server['project'] else '') + ']'
             print(f"  - {server['original_name']}{scope_info}")
 
         if not servers_to_enable:
-            print("No valid servers selected.")
+            print('No valid servers selected.')
             return
 
-        confirm = input(f"\nEnable {len(servers_to_enable)} servers? (y/N): ").strip().lower()
+        confirm = input(f'\nEnable {len(servers_to_enable)} servers? (y/N): ').strip().lower()
         if confirm != 'y':
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
         # Create backup and enable servers
@@ -820,73 +820,73 @@ class MCPManager:
 
         # Show backup info
         if backup_path:
-            print(f"\nBackup created: {backup_path}")
+            print(f'\nBackup created: {backup_path}')
 
     def interactive_add(self, config: MCPConfig) -> None:
         """Interactive MCP server addition."""
-        print("\n" + "=" * 60)
-        print(f"Add MCP Server to {config.name}")
-        print("=" * 60)
+        print('\n' + '=' * 60)
+        print(f'Add MCP Server to {config.name}')
+        print('=' * 60)
 
         # Get server details
-        server_name = input("Server name: ").strip()
+        server_name = input('Server name: ').strip()
         if not server_name:
-            print("Server name is required.")
+            print('Server name is required.')
             return
 
-        print("\nServer type:")
-        print("1. NPX package (e.g., @modelcontextprotocol/server-github)")
-        print("2. Direct command (e.g., python script.py)")
-        print("3. SSE URL (e.g., http://localhost:3000/sse)")
+        print('\nServer type:')
+        print('1. NPX package (e.g., @modelcontextprotocol/server-github)')
+        print('2. Direct command (e.g., python script.py)')
+        print('3. SSE URL (e.g., http://localhost:3000/sse)')
 
-        server_type = input("Choose type (1-3): ").strip()
+        server_type = input('Choose type (1-3): ').strip()
 
-        if server_type == "1":
-            package = input("NPX package name: ").strip()
-            args = input("Additional arguments (optional): ").strip()
+        if server_type == '1':
+            package = input('NPX package name: ').strip()
+            args = input('Additional arguments (optional): ').strip()
 
             server_config = {
-                "type": "stdio",
-                "command": "npx",
-                "args": [package] + (args.split() if args else [])
+                'type': 'stdio',
+                'command': 'npx',
+                'args': [package] + (args.split() if args else [])
             }
-        elif server_type == "2":
-            command = input("Command: ").strip()
-            args = input("Arguments (optional): ").strip()
+        elif server_type == '2':
+            command = input('Command: ').strip()
+            args = input('Arguments (optional): ').strip()
 
             server_config = {
-                "type": "stdio",
-                "command": command,
-                "args": args.split() if args else []
+                'type': 'stdio',
+                'command': command,
+                'args': args.split() if args else []
             }
-        elif server_type == "3":
-            url = input("SSE URL: ").strip()
+        elif server_type == '3':
+            url = input('SSE URL: ').strip()
 
             server_config = {
-                "type": "sse",
-                "url": url
+                'type': 'sse',
+                'url': url
             }
         else:
-            print("Invalid choice.")
+            print('Invalid choice.')
             return
 
         # Ask about environment variables
         env_vars = {}
         while True:
-            env_name = input("Environment variable name (or press Enter to finish): ").strip()
+            env_name = input('Environment variable name (or press Enter to finish): ').strip()
             if not env_name:
                 break
-            env_value = input(f"Value template for {env_name} (e.g., ${{env:GITHUB_TOKEN}}): ").strip()
+            env_value = input(f'Value template for {env_name} (e.g., ${{env:GITHUB_TOKEN}}): ').strip()
             env_vars[env_name] = env_value
 
         if env_vars:
-            server_config["env"] = env_vars
+            server_config['env'] = env_vars
 
         # Confirm addition
         print(f"\nAdding '{server_name}' to {config.name}")
-        confirm = input("Continue? (y/N): ").strip().lower()
+        confirm = input('Continue? (y/N): ').strip().lower()
         if confirm != 'y':
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
         # Create backup and add server
@@ -902,13 +902,13 @@ class MCPManager:
 
         # Show backup info
         if backup_path:
-            print(f"Backup created: {backup_path}")
+            print(f'Backup created: {backup_path}')
 
 
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="Multi-platform MCP server management tool",
+        description='Multi-platform MCP server management tool',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -997,33 +997,33 @@ Examples:
 
     # Handle single file mode (backward compatibility)
     if args.file:
-        config = MCPConfig("Custom", args.file, f"Custom config: {args.file}")
+        config = MCPConfig('Custom', args.file, f'Custom config: {args.file}')
         if config.load():
             pass  # Use this config
         else:
-            print(f"Error: Could not load config file: {args.file}")
+            print(f'Error: Could not load config file: {args.file}')
             sys.exit(1)
     else:
         # Platform selection mode
         config = manager.select_target_platform(args.platform)
 
         if not config:
-            print("No MCP configuration files found.")
+            print('No MCP configuration files found.')
             manager.show_platform_status()
             sys.exit(1)
 
         # Show which platform we're working with
         if not args.platform:
             platform_key = {v: k for k, v in manager.platform_map.items()}.get(config.name, config.name.lower())
-            print(f"Auto-detected platform: {platform_key} ({config.name})")
-            print("Use --platform <name> to specify a different platform\n")
+            print(f'Auto-detected platform: {platform_key} ({config.name})')
+            print('Use --platform <name> to specify a different platform\n')
 
     # Handle backup-only mode
     if args.backup_only:
-        print(f"Creating backup for {config.name}...")
+        print(f'Creating backup for {config.name}...')
         backup_path = config.backup()
         if backup_path:
-            print(f"Backup created: {backup_path}")
+            print(f'Backup created: {backup_path}')
         return
 
     # Handle server addition
@@ -1056,30 +1056,30 @@ Examples:
 
     # Ask if user wants to perform additional operations (only if not using --list)
     if not args.list and config.servers:
-        print("\nWould you like to perform additional operations? (y/N): ", end="")
+        print('\nWould you like to perform additional operations? (y/N): ', end='')
         if input().strip().lower() == 'y':
-            print("\nAvailable operations:")
-            print("1. Add server")
-            print("2. Remove servers")
-            print("3. Disable servers")
-            print("4. Enable servers")
-            print("5. Cancel")
+            print('\nAvailable operations:')
+            print('1. Add server')
+            print('2. Remove servers')
+            print('3. Disable servers')
+            print('4. Enable servers')
+            print('5. Cancel')
 
-            choice = input("\nEnter your choice (1-5): ").strip()
+            choice = input('\nEnter your choice (1-5): ').strip()
 
-            if choice == "1":
+            if choice == '1':
                 manager.interactive_add(config)
-            elif choice == "2":
+            elif choice == '2':
                 manager.interactive_remove(config)
-            elif choice == "3":
+            elif choice == '3':
                 manager.interactive_disable(config)
-            elif choice == "4":
+            elif choice == '4':
                 manager.interactive_enable(config)
-            elif choice == "5":
-                print("Operation cancelled.")
+            elif choice == '5':
+                print('Operation cancelled.')
             else:
-                print("Invalid choice.")
+                print('Invalid choice.')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
