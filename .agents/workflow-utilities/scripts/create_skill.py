@@ -33,9 +33,8 @@ Constants:
 import argparse
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 # Constants with documented rationale
 OFFICIAL_DOCS_URLS = {
@@ -94,7 +93,7 @@ def error_exit(message: str, code: int = 1) -> None:
         message: Error message to display
         code: Exit code (default 1)
     """
-    print(f"{Colors.RED}✗ Error:{Colors.END} {message}", file=sys.stderr)
+    print(f'{Colors.RED}✗ Error:{Colors.END} {message}', file=sys.stderr)
     sys.exit(code)
 
 
@@ -104,7 +103,7 @@ def success(message: str) -> None:
     Args:
         message: Success message to display
     """
-    print(f"{Colors.GREEN}✓{Colors.END} {message}")
+    print(f'{Colors.GREEN}✓{Colors.END} {message}')
 
 
 def info(message: str) -> None:
@@ -113,7 +112,7 @@ def info(message: str) -> None:
     Args:
         message: Info message to display
     """
-    print(f"{Colors.BLUE}ℹ{Colors.END} {message}")
+    print(f'{Colors.BLUE}ℹ{Colors.END} {message}')
 
 
 def warning(message: str) -> None:
@@ -122,11 +121,11 @@ def warning(message: str) -> None:
     Args:
         message: Warning message to display
     """
-    print(f"{Colors.YELLOW}⚠{Colors.END} {message}")
+    print(f'{Colors.YELLOW}⚠{Colors.END} {message}')
 
 
-def ask_question(prompt: str, options: Optional[List[str]] = None,
-                 default: Optional[str] = None) -> str:
+def ask_question(prompt: str, options: list[str] | None = None,
+                 default: str | None = None) -> str:
     """Ask user a question with optional choices.
 
     Args:
@@ -137,16 +136,16 @@ def ask_question(prompt: str, options: Optional[List[str]] = None,
     Returns:
         User's response or default value
     """
-    print(f"\n{Colors.BOLD}{prompt}{Colors.END}")
+    print(f'\n{Colors.BOLD}{prompt}{Colors.END}')
 
     if options:
         for i, option in enumerate(options, 1):
-            print(f"  {i}) {option}")
+            print(f'  {i}) {option}')
         if default:
-            print(f"  [default: {default}]")
+            print(f'  [default: {default}]')
 
     while True:
-        response = input("> ").strip()
+        response = input('> ').strip()
 
         if not response and default:
             return default
@@ -156,7 +155,7 @@ def ask_question(prompt: str, options: Optional[List[str]] = None,
                 idx = int(response) - 1
                 if 0 <= idx < len(options):
                     return options[idx]
-            print(f"{Colors.RED}Invalid selection. Please enter a number 1-{len(options)}.{Colors.END}")
+            print(f'{Colors.RED}Invalid selection. Please enter a number 1-{len(options)}.{Colors.END}')
         else:
             return response
 
@@ -171,8 +170,8 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
     Returns:
         True for yes, False for no
     """
-    default_str = "Y/n" if default else "y/N"
-    response = ask_question(f"{prompt} ({default_str})", default="y" if default else "n")
+    default_str = 'Y/n' if default else 'y/N'
+    response = ask_question(f'{prompt} ({default_str})', default='y' if default else 'n')
     return response.lower() in ['y', 'yes']
 
 
@@ -180,13 +179,13 @@ class SkillConfig:
     """Configuration for new skill."""
 
     def __init__(self):
-        self.name: str = ""
-        self.purpose: str = ""
-        self.description: str = ""
-        self.phase: str = ""
+        self.name: str = ''
+        self.purpose: str = ''
+        self.description: str = ''
+        self.phase: str = ''
         self.has_scripts: bool = False
         self.has_templates: bool = False
-        self.triggers: List[str] = []
+        self.triggers: list[str] = []
 
 
 class Discrepancy:
@@ -202,7 +201,7 @@ class Discrepancy:
         self.rationale = rationale
 
 
-def fetch_official_docs() -> Dict[str, str]:
+def fetch_official_docs() -> dict[str, str]:
     """Fetch official Claude Code documentation using WebFetch.
 
     Note: This function simulates WebFetch. In actual Claude Code execution,
@@ -211,7 +210,7 @@ def fetch_official_docs() -> Dict[str, str]:
     Returns:
         Dictionary of doc_name -> content
     """
-    info("Fetching official Claude Code documentation...")
+    info('Fetching official Claude Code documentation...')
 
     # In actual execution, WebFetch would be used here
     # For now, we document what would be fetched
@@ -244,15 +243,15 @@ Best Practices from Official Docs (Simulated):
 """
     }
 
-    success("Official documentation fetched (simulated)")
-    info("In production, WebFetch would retrieve:")
+    success('Official documentation fetched (simulated)')
+    info('In production, WebFetch would retrieve:')
     for name, url in OFFICIAL_DOCS_URLS.items():
-        print(f"  - {url}")
+        print(f'  - {url}')
 
     return official_docs
 
 
-def compare_with_official(official_docs: Dict[str, str]) -> List[Discrepancy]:
+def compare_with_official(official_docs: dict[str, str]) -> list[Discrepancy]:
     """Compare local workflow patterns with official best practices.
 
     Args:
@@ -261,7 +260,7 @@ def compare_with_official(official_docs: Dict[str, str]) -> List[Discrepancy]:
     Returns:
         List of discrepancies found
     """
-    info("Comparing local workflow patterns with official best practices...")
+    info('Comparing local workflow patterns with official best practices...')
 
     discrepancies = []
 
@@ -306,8 +305,8 @@ in the workflow system.
     # Directory organization discrepancy
     discrepancies.append(Discrepancy(
         disc_type='directory_organization',
-        local="scripts/, templates/ subdirectories",
-        official="Flat structure with skill.md",
+        local='scripts/, templates/ subdirectories',
+        official='Flat structure with skill.md',
         citation=OFFICIAL_DOCS_URLS['agent_skills'],
         severity='info',
         rationale="""
@@ -324,7 +323,7 @@ structure conventions.
     return discrepancies
 
 
-def alert_user_discrepancies(discrepancies: List[Discrepancy]) -> bool:
+def alert_user_discrepancies(discrepancies: list[Discrepancy]) -> bool:
     """Alert user about discrepancies and get confirmation.
 
     Args:
@@ -334,15 +333,15 @@ def alert_user_discrepancies(discrepancies: List[Discrepancy]) -> bool:
         True if user confirms to continue, False otherwise
     """
     if not discrepancies:
-        success("Local practices align with official best practices")
+        success('Local practices align with official best practices')
         return True
 
     print(f"\n{Colors.BOLD}{'=' * 70}{Colors.END}")
-    print(f"{Colors.YELLOW}⚠️  DISCREPANCY ALERT{Colors.END}")
+    print(f'{Colors.YELLOW}⚠️  DISCREPANCY ALERT{Colors.END}')
     print(f"{Colors.BOLD}{'=' * 70}{Colors.END}\n")
 
-    print("Local workflow patterns differ from official Claude Code best practices.\n")
-    print("This is EXPECTED and intentional for this workflow system.\n")
+    print('Local workflow patterns differ from official Claude Code best practices.\n')
+    print('This is EXPECTED and intentional for this workflow system.\n')
 
     for i, disc in enumerate(discrepancies, 1):
         severity_color = {
@@ -351,18 +350,18 @@ def alert_user_discrepancies(discrepancies: List[Discrepancy]) -> bool:
             'info': Colors.BLUE,
         }.get(disc.severity, Colors.BLUE)
 
-        print(f"{severity_color}[{disc.severity.upper()}]{Colors.END} {i}. {disc.type}")
-        print(f"  Local:    {disc.local}")
-        print(f"  Official: {disc.official}")
-        print(f"  Citation: {disc.citation}")
-        print(f"\n  Rationale:{disc.rationale}\n")
+        print(f'{severity_color}[{disc.severity.upper()}]{Colors.END} {i}. {disc.type}')
+        print(f'  Local:    {disc.local}')
+        print(f'  Official: {disc.official}')
+        print(f'  Citation: {disc.citation}')
+        print(f'\n  Rationale:{disc.rationale}\n')
 
-    print(f"{Colors.BOLD}Summary:{Colors.END}")
-    print("  - Official patterns: General-purpose Claude Code skills")
-    print("  - Local patterns: Optimized for multi-phase workflow system")
-    print("  - Discrepancies: Documented and intentional\n")
+    print(f'{Colors.BOLD}Summary:{Colors.END}')
+    print('  - Official patterns: General-purpose Claude Code skills')
+    print('  - Local patterns: Optimized for multi-phase workflow system')
+    print('  - Discrepancies: Documented and intentional\n')
 
-    return ask_yes_no("Continue with local workflow patterns?", default=True)
+    return ask_yes_no('Continue with local workflow patterns?', default=True)
 
 
 def phase1_configuration(skill_name: str) -> SkillConfig:
@@ -374,47 +373,47 @@ def phase1_configuration(skill_name: str) -> SkillConfig:
     Returns:
         SkillConfig with user selections
     """
-    print(f"\n{Colors.BOLD}=== Phase 1: Skill Configuration ==={Colors.END}")
+    print(f'\n{Colors.BOLD}=== Phase 1: Skill Configuration ==={Colors.END}')
 
     config = SkillConfig()
     config.name = skill_name
 
-    info(f"Skill name: {skill_name}")
+    info(f'Skill name: {skill_name}')
 
     # Purpose
     config.purpose = ask_question(
-        "What is the primary purpose of this skill?",
+        'What is the primary purpose of this skill?',
         options=[
-            "Coordination and orchestration",
-            "Data gathering and analysis",
-            "Code generation and transformation",
-            "Quality assurance and validation",
-            "Documentation generation",
-            "Other"
+            'Coordination and orchestration',
+            'Data gathering and analysis',
+            'Code generation and transformation',
+            'Quality assurance and validation',
+            'Documentation generation',
+            'Other'
         ]
     )
 
     # Description
     config.description = ask_question(
-        "Brief description of the skill (one line):"
+        'Brief description of the skill (one line):'
     )
 
     # Phase integration
     config.phase = ask_question(
-        "Which workflow phase does this skill support?",
+        'Which workflow phase does this skill support?',
         options=WORKFLOW_PHASES
     )
 
     # Scripts
     config.has_scripts = ask_yes_no(
-        "Will this skill have Python scripts (interactive tools)?",
+        'Will this skill have Python scripts (interactive tools)?',
         default=True
     )
 
     # Templates
     if config.has_scripts:
         config.has_templates = ask_yes_no(
-            "Will this skill generate documents from templates?",
+            'Will this skill generate documents from templates?',
             default=False
         )
 
@@ -424,17 +423,17 @@ def phase1_configuration(skill_name: str) -> SkillConfig:
     )
     config.triggers = [t.strip() for t in triggers_input.split(',') if t.strip()]
 
-    success("Configuration complete")
+    success('Configuration complete')
     return config
 
 
-def phase2_official_docs_review() -> Tuple[Dict[str, str], List[Discrepancy]]:
+def phase2_official_docs_review() -> tuple[dict[str, str], list[Discrepancy]]:
     """Phase 2: Fetch and compare official documentation.
 
     Returns:
         Tuple of (official_docs, discrepancies)
     """
-    print(f"\n{Colors.BOLD}=== Phase 2: Official Documentation Review ==={Colors.END}")
+    print(f'\n{Colors.BOLD}=== Phase 2: Official Documentation Review ==={Colors.END}')
 
     # Fetch official docs
     official_docs = fetch_official_docs()
@@ -444,9 +443,9 @@ def phase2_official_docs_review() -> Tuple[Dict[str, str], List[Discrepancy]]:
 
     # Alert user
     if not alert_user_discrepancies(discrepancies):
-        error_exit("User declined to proceed with local patterns")
+        error_exit('User declined to proceed with local patterns')
 
-    success("Official documentation review complete")
+    success('Official documentation review complete')
     return official_docs, discrepancies
 
 
@@ -457,7 +456,7 @@ def create_skill_directory(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    info(f"Creating skill directory: {skill_path}")
+    info(f'Creating skill directory: {skill_path}')
 
     # Create main directory
     skill_path.mkdir(parents=True, exist_ok=True)
@@ -476,11 +475,11 @@ def create_skill_directory(skill_path: Path, config: SkillConfig) -> None:
         templates_path = skill_path / 'templates'
         templates_path.mkdir(exist_ok=True)
 
-    success("Created directory structure")
+    success('Created directory structure')
 
 
 def generate_skill_md(skill_path: Path, config: SkillConfig,
-                      discrepancies: List[Discrepancy]) -> None:
+                      discrepancies: list[Discrepancy]) -> None:
     """Generate SKILL.md file.
 
     Args:
@@ -488,9 +487,9 @@ def generate_skill_md(skill_path: Path, config: SkillConfig,
         config: Skill configuration
         discrepancies: List of discrepancies for documentation
     """
-    info("Generating SKILL.md...")
+    info('Generating SKILL.md...')
 
-    triggers_str = ", ".join(f'"{t}"' for t in config.triggers)
+    triggers_str = ', '.join(f'"{t}"' for t in config.triggers)
 
     content = f"""---
 name: {config.name}
@@ -574,7 +573,7 @@ compatibility with core Claude Code concepts.
 
     skill_md_path = skill_path / 'SKILL.md'
     skill_md_path.write_text(content)
-    success("Generated SKILL.md")
+    success('Generated SKILL.md')
 
 
 def generate_claude_md(skill_path: Path, config: SkillConfig) -> None:
@@ -584,7 +583,7 @@ def generate_claude_md(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    info("Generating CLAUDE.md...")
+    info('Generating CLAUDE.md...')
 
     content = f"""# Claude Code Context: {config.name}
 
@@ -661,15 +660,15 @@ def generate_claude_md(skill_path: Path, config: SkillConfig) -> None:
 
 [List related skills]
 """.format(
-        config.triggers[0] if config.triggers else "use this skill",
-        config.triggers[1] if len(config.triggers) > 1 else "invoke skill",
-        config.triggers[2] if len(config.triggers) > 2 else "run skill",
+        config.triggers[0] if config.triggers else 'use this skill',
+        config.triggers[1] if len(config.triggers) > 1 else 'invoke skill',
+        config.triggers[2] if len(config.triggers) > 2 else 'run skill',
         config.phase
     )
 
     claude_md_path = skill_path / 'CLAUDE.md'
     claude_md_path.write_text(content)
-    success("Generated CLAUDE.md")
+    success('Generated CLAUDE.md')
 
 
 def generate_readme(skill_path: Path, config: SkillConfig) -> None:
@@ -679,7 +678,7 @@ def generate_readme(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    info("Generating README.md...")
+    info('Generating README.md...')
 
     content = f"""# {config.name.replace('-', ' ').title()} Skill
 
@@ -708,7 +707,7 @@ v1.0.0 - Initial release
 
     readme_path = skill_path / 'README.md'
     readme_path.write_text(content)
-    success("Generated README.md")
+    success('Generated README.md')
 
 
 def generate_changelog(skill_path: Path, config: SkillConfig) -> None:
@@ -718,9 +717,9 @@ def generate_changelog(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    info("Generating CHANGELOG.md...")
+    info('Generating CHANGELOG.md...')
 
-    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    today = datetime.now(UTC).strftime('%Y-%m-%d')
 
     content = f"""# Changelog - {config.name}
 
@@ -760,7 +759,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     changelog_path = skill_path / 'CHANGELOG.md'
     changelog_path.write_text(content)
-    success("Generated CHANGELOG.md")
+    success('Generated CHANGELOG.md')
 
 
 def generate_archived_files(skill_path: Path, config: SkillConfig) -> None:
@@ -770,7 +769,7 @@ def generate_archived_files(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    info("Generating ARCHIVED/ files...")
+    info('Generating ARCHIVED/ files...')
 
     archived_path = skill_path / 'ARCHIVED'
 
@@ -824,7 +823,7 @@ This creates a timestamped ZIP archive in this directory.
 - **[../CLAUDE.md](../CLAUDE.md)** - Current Claude Code context
 """)
 
-    success("Generated ARCHIVED/ files")
+    success('Generated ARCHIVED/ files')
 
 
 def generate_script_init(skill_path: Path, config: SkillConfig) -> None:
@@ -837,7 +836,7 @@ def generate_script_init(skill_path: Path, config: SkillConfig) -> None:
     if not config.has_scripts:
         return
 
-    info("Generating scripts/__init__.py...")
+    info('Generating scripts/__init__.py...')
 
     scripts_path = skill_path / 'scripts'
     init_path = scripts_path / '__init__.py'
@@ -847,11 +846,11 @@ def generate_script_init(skill_path: Path, config: SkillConfig) -> None:
 __version__ = "1.0.0"
 ''')
 
-    success("Generated scripts/__init__.py")
+    success('Generated scripts/__init__.py')
 
 
 def phase3_file_generation(skill_path: Path, config: SkillConfig,
-                           discrepancies: List[Discrepancy]) -> None:
+                           discrepancies: list[Discrepancy]) -> None:
     """Phase 3: Generate all skill files.
 
     Args:
@@ -859,7 +858,7 @@ def phase3_file_generation(skill_path: Path, config: SkillConfig,
         config: Skill configuration
         discrepancies: List of discrepancies for documentation
     """
-    print(f"\n{Colors.BOLD}=== Phase 3: File Generation ==={Colors.END}")
+    print(f'\n{Colors.BOLD}=== Phase 3: File Generation ==={Colors.END}')
 
     # Create directory structure
     create_skill_directory(skill_path, config)
@@ -872,7 +871,7 @@ def phase3_file_generation(skill_path: Path, config: SkillConfig,
     generate_archived_files(skill_path, config)
     generate_script_init(skill_path, config)
 
-    success("File generation complete")
+    success('File generation complete')
 
 
 def phase4_git_commit(skill_path: Path, config: SkillConfig) -> None:
@@ -882,18 +881,18 @@ def phase4_git_commit(skill_path: Path, config: SkillConfig) -> None:
         skill_path: Path to skill directory
         config: Skill configuration
     """
-    print(f"\n{Colors.BOLD}=== Phase 4: Git Commit ==={Colors.END}")
+    print(f'\n{Colors.BOLD}=== Phase 4: Git Commit ==={Colors.END}')
 
-    if not ask_yes_no("Commit changes to git?", default=True):
-        warning("Skipping git commit")
+    if not ask_yes_no('Commit changes to git?', default=True):
+        warning('Skipping git commit')
         return
 
     # Stage files
-    info("Staging files...")
+    info('Staging files...')
     subprocess.run(['git', 'add', str(skill_path)], check=True)
 
     # Create commit
-    info("Creating commit...")
+    info('Creating commit...')
     commit_msg = f"""feat(workflow): add {config.name} skill
 
 Added new skill for {config.phase}:
@@ -908,9 +907,9 @@ Skill Components:
 """
 
     if config.has_scripts:
-        commit_msg += "- scripts/ (Python scripts)\n"
+        commit_msg += '- scripts/ (Python scripts)\n'
     if config.has_templates:
-        commit_msg += "- templates/ (Document templates)\n"
+        commit_msg += '- templates/ (Document templates)\n'
 
     commit_msg += f"""
 Official Documentation:
@@ -926,7 +925,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 """
 
     subprocess.run(['git', 'commit', '-m', commit_msg], check=True)
-    success("Committed changes")
+    success('Committed changes')
 
 
 def print_summary(skill_path: Path, config: SkillConfig) -> None:
@@ -937,39 +936,39 @@ def print_summary(skill_path: Path, config: SkillConfig) -> None:
         config: Skill configuration
     """
     print(f"\n{Colors.BOLD}{'=' * 70}{Colors.END}")
-    print(f"{Colors.BOLD}✓ Skill Creation Complete{Colors.END}")
+    print(f'{Colors.BOLD}✓ Skill Creation Complete{Colors.END}')
     print(f"{Colors.BOLD}{'=' * 70}{Colors.END}\n")
 
-    print(f"{Colors.BLUE}Skill:{Colors.END} {config.name}")
-    print(f"{Colors.BLUE}Purpose:{Colors.END} {config.purpose}")
-    print(f"{Colors.BLUE}Phase:{Colors.END} {config.phase}")
-    print(f"{Colors.BLUE}Location:{Colors.END} {skill_path}")
+    print(f'{Colors.BLUE}Skill:{Colors.END} {config.name}')
+    print(f'{Colors.BLUE}Purpose:{Colors.END} {config.purpose}')
+    print(f'{Colors.BLUE}Phase:{Colors.END} {config.phase}')
+    print(f'{Colors.BLUE}Location:{Colors.END} {skill_path}')
 
-    print(f"\n{Colors.BOLD}Created Files:{Colors.END}")
-    print("  ✓ SKILL.md (complete documentation)")
-    print("  ✓ CLAUDE.md (Claude Code context)")
-    print("  ✓ README.md (human-readable overview)")
-    print("  ✓ CHANGELOG.md (version history)")
-    print("  ✓ ARCHIVED/ (directory structure)")
+    print(f'\n{Colors.BOLD}Created Files:{Colors.END}')
+    print('  ✓ SKILL.md (complete documentation)')
+    print('  ✓ CLAUDE.md (Claude Code context)')
+    print('  ✓ README.md (human-readable overview)')
+    print('  ✓ CHANGELOG.md (version history)')
+    print('  ✓ ARCHIVED/ (directory structure)')
 
     if config.has_scripts:
-        print("  ✓ scripts/__init__.py (package initialization)")
+        print('  ✓ scripts/__init__.py (package initialization)')
     if config.has_templates:
-        print("  ✓ templates/ (document templates)")
+        print('  ✓ templates/ (document templates)')
 
-    print(f"\n{Colors.BOLD}Next Steps:{Colors.END}")
-    print("  1. Implement skill functionality in scripts/")
-    print("  2. Update workflow-orchestrator to call this skill")
-    print("  3. Add integration tests")
-    print("  4. Update WORKFLOW.md with skill reference")
-    print("  5. Update root CLAUDE.md skill list")
+    print(f'\n{Colors.BOLD}Next Steps:{Colors.END}')
+    print('  1. Implement skill functionality in scripts/')
+    print('  2. Update workflow-orchestrator to call this skill')
+    print('  3. Add integration tests')
+    print('  4. Update WORKFLOW.md with skill reference')
+    print('  5. Update root CLAUDE.md skill list')
 
-    print(f"\n{Colors.BOLD}Official Documentation:{Colors.END}")
-    print("  - Fetched and compared with official patterns")
-    print("  - Discrepancies documented with rationale")
-    print("  - See SKILL.md for alignment details")
+    print(f'\n{Colors.BOLD}Official Documentation:{Colors.END}')
+    print('  - Fetched and compared with official patterns')
+    print('  - Discrepancies documented with rationale')
+    print('  - See SKILL.md for alignment details')
 
-    print(f"\n{Colors.GREEN}🎉 Happy coding!{Colors.END}\n")
+    print(f'\n{Colors.GREEN}🎉 Happy coding!{Colors.END}\n')
 
 
 def main() -> None:
@@ -996,12 +995,12 @@ Examples:
     args = parser.parse_args()
 
     print(f"\n{Colors.BOLD}{'=' * 70}{Colors.END}")
-    print(f"{Colors.BOLD}Workflow Skill Creation{Colors.END}")
+    print(f'{Colors.BOLD}Workflow Skill Creation{Colors.END}')
     print(f"{Colors.BOLD}{'=' * 70}{Colors.END}\n")
 
     # Validate skill name
     if not args.skill_name.replace('-', '').isalnum():
-        error_exit("Skill name must be kebab-case (lowercase with hyphens)")
+        error_exit('Skill name must be kebab-case (lowercase with hyphens)')
 
     # Determine skill path
     repo_root = Path(subprocess.run(['git', 'rev-parse', '--show-toplevel'],
@@ -1011,7 +1010,7 @@ Examples:
 
     # Check if skill already exists
     if skill_path.exists():
-        error_exit(f"Skill already exists: {skill_path}")
+        error_exit(f'Skill already exists: {skill_path}')
 
     # Phase 1: Configuration
     config = phase1_configuration(args.skill_name)

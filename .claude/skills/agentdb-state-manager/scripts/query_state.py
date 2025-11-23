@@ -38,9 +38,9 @@ def main() -> None:
         FROM current_states;
         """
 
-    print("SQL Query (to be executed via AgentDB):")
+    print('SQL Query (to be executed via AgentDB):')
     print(query)
-    print("\nNOTE: In actual execution, would query AgentDB and display results")
+    print('\nNOTE: In actual execution, would query AgentDB and display results')
 
 if __name__ == '__main__':
     main()

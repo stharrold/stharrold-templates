@@ -75,7 +75,7 @@ class GitHubAdapter(BaseVCSAdapter):
                 f"Error: {error_msg}"
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while getting GitHub username")
+            raise RuntimeError('Timeout while getting GitHub username')
 
     def create_pull_request(
         self,
@@ -122,11 +122,11 @@ class GitHubAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to create GitHub pull request.\n"
-                f"Error: {error_msg}"
+                f'Failed to create GitHub pull request.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while creating GitHub pull request")
+            raise RuntimeError('Timeout while creating GitHub pull request')
 
     def fetch_pr_comments(self, pr_number: int) -> list:
         """Fetch review comments from a GitHub pull request.
@@ -185,13 +185,13 @@ class GitHubAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to fetch PR comments.\n"
-                f"Error: {error_msg}"
+                f'Failed to fetch PR comments.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while fetching PR comments")
+            raise RuntimeError('Timeout while fetching PR comments')
         except (json.JSONDecodeError, KeyError) as e:
-            raise RuntimeError(f"Failed to parse PR comment data: {e}")
+            raise RuntimeError(f'Failed to parse PR comment data: {e}')
 
     def update_pr(
         self,
@@ -234,11 +234,11 @@ class GitHubAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to update PR.\n"
-                f"Error: {error_msg}"
+                f'Failed to update PR.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while updating PR")
+            raise RuntimeError('Timeout while updating PR')
 
     def get_pr_status(self, pr_number: int) -> dict:
         """Get GitHub pull request status.
@@ -279,13 +279,13 @@ class GitHubAdapter(BaseVCSAdapter):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(
-                f"Failed to fetch PR status.\n"
-                f"Error: {error_msg}"
+                f'Failed to fetch PR status.\n'
+                f'Error: {error_msg}'
             )
         except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while fetching PR status")
+            raise RuntimeError('Timeout while fetching PR status')
         except (json.JSONDecodeError, KeyError) as e:
-            raise RuntimeError(f"Failed to parse PR status data: {e}")
+            raise RuntimeError(f'Failed to parse PR status data: {e}')
 
     def get_provider_name(self) -> str:
         """Get provider name.
@@ -293,4 +293,4 @@ class GitHubAdapter(BaseVCSAdapter):
         Returns:
             "GitHub"
         """
-        return "GitHub"
+        return 'GitHub'

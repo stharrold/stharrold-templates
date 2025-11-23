@@ -57,7 +57,7 @@ Files are stored in timestamped zip archives for potential recovery.
 """)
 
     # Create zip archive
-    zip_name = f"{timestamp}_{description}.zip"
+    zip_name = f'{timestamp}_{description}.zip'
     zip_path = archived_dir / zip_name
 
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -65,18 +65,18 @@ Files are stored in timestamped zip archives for potential recovery.
             file_path = Path(file)
             if file_path.exists():
                 zipf.write(file_path, file_path.name)
-                print(f"  Archived: {file}")
+                print(f'  Archived: {file}')
                 file_path.unlink()  # Delete original
             else:
-                print(f"  Warning: {file} not found", file=sys.stderr)
+                print(f'  Warning: {file} not found', file=sys.stderr)
 
-    print(f"✓ Created archive: {zip_path}")
+    print(f'✓ Created archive: {zip_path}')
     return str(zip_path)
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        print("Usage: deprecate_files.py <todo_file> <description> <file1> [file2 ...]")
-        print("Example: deprecate_files.py TODO_feature_xxx.md old-impl src/old.py")
+        print('Usage: deprecate_files.py <todo_file> <description> <file1> [file2 ...]')
+        print('Example: deprecate_files.py TODO_feature_xxx.md old-impl src/old.py')
         sys.exit(1)
 
     deprecate_files(sys.argv[1], sys.argv[2], *sys.argv[3:])

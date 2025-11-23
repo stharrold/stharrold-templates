@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -30,7 +30,7 @@ class TestStateDirectoryCreation:
 
         assert state_dir.exists()
         assert state_dir.is_dir()
-        assert state_dir == ctx.worktree_root / ".claude-state"
+        assert state_dir == ctx.worktree_root / '.claude-state'
 
     def test_gitignore_file_created(self):
         """Given: get_state_dir() called.
@@ -39,11 +39,11 @@ class TestStateDirectoryCreation:
         from worktree_context import get_state_dir
 
         state_dir = get_state_dir()
-        gitignore = state_dir / ".gitignore"
+        gitignore = state_dir / '.gitignore'
 
         assert gitignore.exists()
         content = gitignore.read_text()
-        assert "*" in content
+        assert '*' in content
 
     def test_worktree_id_file_created(self):
         """Given: get_state_dir() called.
@@ -52,7 +52,7 @@ class TestStateDirectoryCreation:
         from worktree_context import get_state_dir, get_worktree_id
 
         state_dir = get_state_dir()
-        worktree_id_file = state_dir / ".worktree-id"
+        worktree_id_file = state_dir / '.worktree-id'
 
         assert worktree_id_file.exists()
         content = worktree_id_file.read_text().strip()
@@ -68,13 +68,13 @@ class TestStateDirectoryCreation:
 
         # First call
         state_dir1 = get_state_dir()
-        gitignore1 = (state_dir1 / ".gitignore").read_text()
-        worktree_id1 = (state_dir1 / ".worktree-id").read_text()
+        gitignore1 = (state_dir1 / '.gitignore').read_text()
+        worktree_id1 = (state_dir1 / '.worktree-id').read_text()
 
         # Second call
         state_dir2 = get_state_dir()
-        gitignore2 = (state_dir2 / ".gitignore").read_text()
-        worktree_id2 = (state_dir2 / ".worktree-id").read_text()
+        gitignore2 = (state_dir2 / '.gitignore').read_text()
+        worktree_id2 = (state_dir2 / '.worktree-id').read_text()
 
         assert state_dir1 == state_dir2
         assert gitignore1 == gitignore2
@@ -89,7 +89,7 @@ class TestStateDirectoryCreation:
         ctx = get_worktree_context()
         get_state_dir()  # Ensure it exists
 
-        root_gitignore = ctx.worktree_root / ".gitignore"
+        root_gitignore = ctx.worktree_root / '.gitignore'
         if root_gitignore.exists():
             content = root_gitignore.read_text()
-            assert ".claude-state" in content
+            assert '.claude-state' in content
