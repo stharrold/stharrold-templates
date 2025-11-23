@@ -15,9 +15,6 @@ sys.path.insert(
     ),
 )
 
-import pytest
-
-
 class TestMainRepoDetection:
     """Integration tests for main repository detection."""
 

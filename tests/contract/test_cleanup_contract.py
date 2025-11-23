@@ -15,9 +15,6 @@ sys.path.insert(
     ),
 )
 
-import pytest
-
-
 class TestCleanupOrphanedStateContract:
     """Contract tests for cleanup_orphaned_state() function."""
 

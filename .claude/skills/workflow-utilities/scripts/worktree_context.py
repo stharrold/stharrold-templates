@@ -226,8 +226,9 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
 
         # Look for any directories in the parent that contain a .claude-state subdirectory
         # This handles worktrees created with any naming convention
+        # Explicitly exclude repo_root to avoid marking main repo as orphaned
         for item in parent_dir.iterdir():
-            if item.is_dir():
+            if item.is_dir() and item != repo_root:
                 state_dir = item / ".claude-state"
                 if state_dir.exists() and item not in active_worktree_paths:
                     orphaned.append(state_dir)
