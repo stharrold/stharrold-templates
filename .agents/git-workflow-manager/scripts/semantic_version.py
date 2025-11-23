@@ -89,30 +89,30 @@ def bump_version(current_version, bump_type):
     else:  # patch
         patch += 1
 
-    return f"v{major}.{minor}.{patch}"
+    return f'v{major}.{minor}.{patch}'
 
 def calculate_semantic_version(base_branch, current_version):
     """Calculate next semantic version based on changes."""
     changed_files = get_changed_files(base_branch)
 
     if not changed_files:
-        print("No changed files detected")
+        print('No changed files detected')
         return current_version
 
     bump_type = analyze_changes(changed_files)
     new_version = bump_version(current_version, bump_type)
 
-    print(f"Changed files: {len(changed_files)}", file=sys.stderr)
-    print(f"Bump type: {bump_type}", file=sys.stderr)
-    print(f"Current version: {current_version}", file=sys.stderr)
-    print(f"New version: {new_version}", file=sys.stderr)
+    print(f'Changed files: {len(changed_files)}', file=sys.stderr)
+    print(f'Bump type: {bump_type}', file=sys.stderr)
+    print(f'Current version: {current_version}', file=sys.stderr)
+    print(f'New version: {new_version}', file=sys.stderr)
 
     return new_version
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print("Usage: semantic_version.py <base_branch> <current_version>")
-        print("Example: semantic_version.py develop v1.0.0")
+        print('Usage: semantic_version.py <base_branch> <current_version>')
+        print('Example: semantic_version.py develop v1.0.0')
         sys.exit(1)
 
     new_version = calculate_semantic_version(sys.argv[1], sys.argv[2])

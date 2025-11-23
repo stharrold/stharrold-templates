@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -28,7 +28,7 @@ class TestMainRepoDetection:
         ctx = get_worktree_context()
 
         # In the main repo, .git is a directory, not a file
-        git_path = ctx.worktree_root / ".git"
+        git_path = ctx.worktree_root / '.git'
         if git_path.is_dir():
             assert ctx.is_worktree is False
         else:
@@ -61,7 +61,7 @@ class TestMainRepoDetection:
 
         expected_root = Path(
             subprocess.check_output(
-                ["git", "rev-parse", "--show-toplevel"], text=True
+                ['git', 'rev-parse', '--show-toplevel'], text=True
             ).strip()
         )
 
@@ -79,7 +79,7 @@ class TestMainRepoDetection:
         ctx = get_worktree_context()
 
         expected_branch = subprocess.check_output(
-            ["git", "branch", "--show-current"], text=True
+            ['git', 'branch', '--show-current'], text=True
         ).strip()
 
         if expected_branch:
@@ -88,6 +88,6 @@ class TestMainRepoDetection:
         else:
             # Detached HEAD (e.g., in CI) - should return short commit hash
             expected_short_hash = subprocess.check_output(
-                ["git", "rev-parse", "--short", "HEAD"], text=True
+                ['git', 'rev-parse', '--short', 'HEAD'], text=True
             ).strip()
             assert ctx.branch_name == expected_short_hash
