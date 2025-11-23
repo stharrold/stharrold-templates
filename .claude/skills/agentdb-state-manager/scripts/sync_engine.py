@@ -22,7 +22,9 @@ import hashlib
 import json
 import logging
 import re
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -31,7 +33,28 @@ try:
 except ImportError:
     raise ImportError("duckdb package required. Run: uv add duckdb")
 
+# Add workflow-utilities to path for worktree_context
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
+)
+
 logger = logging.getLogger(__name__)
+
+
+def _get_worktree_defaults() -> tuple[Path, str]:
+    """Get default database path and worktree ID.
+
+    Returns:
+        Tuple of (db_path, worktree_id).
+        Falls back to current directory and empty string if detection fails.
+    """
+    try:
+        from worktree_context import get_state_dir, get_worktree_id
+
+        return get_state_dir() / "agentdb.duckdb", get_worktree_id()
+    except (ImportError, RuntimeError):
+        return Path("agentdb.duckdb"), ""
 
 
 class SynchronizationEngine:
@@ -58,14 +81,24 @@ class SynchronizationEngine:
         # Returns: ['exec-uuid-1', 'exec-uuid-2'] - IDs of triggered syncs
     """
 
-    def __init__(self, db_path: str, cache_ttl: int = 300):
+    def __init__(
+        self,
+        db_path: Optional[str] = None,
+        cache_ttl: int = 300,
+        worktree_id: Optional[str] = None,
+    ):
         """Initialize sync engine with database connection.
 
         Args:
-            db_path: Path to DuckDB database (e.g., "agentdb.duckdb")
+            db_path: Path to DuckDB database. If None, uses worktree state directory.
             cache_ttl: Cache TTL in seconds for active syncs (default 5 minutes)
+            worktree_id: Worktree identifier for scoping. If None, auto-detected.
         """
-        self.db_path = db_path
+        # Get worktree-aware defaults if not specified
+        default_db_path, default_worktree_id = _get_worktree_defaults()
+
+        self.db_path = db_path or str(default_db_path)
+        self.worktree_id = worktree_id or default_worktree_id
         self.cache_ttl = cache_ttl
         self._sync_cache: Dict[str, Any] = {}
         self._cache_invalidated_at: Optional[datetime] = None
@@ -73,7 +106,7 @@ class SynchronizationEngine:
         # Initialize database connection
         # Note: DuckDB supports concurrent readers but single writer
         # For production, consider connection pooling
-        self.conn = duckdb.connect(db_path, read_only=False)
+        self.conn = duckdb.connect(self.db_path, read_only=False)
 
     def _compute_provenance_hash(
         self,
