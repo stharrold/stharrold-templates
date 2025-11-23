@@ -207,6 +207,30 @@ gh --version              # GitHub CLI
 - **TODO files require YAML frontmatter**: status, feature, branch fields
 - **Quality gates must pass** before creating any PR
 
+## Worktree State Isolation
+
+Multiple Claude Code instances can work on different features concurrently using git worktrees. Each worktree has isolated state in `.claude-state/`:
+
+```
+repo/                         # Main repository
+├── .claude/skills/          # Shared (read-only)
+├── .claude-state/           # Per-worktree state
+│   ├── agentdb.duckdb       # Isolated database
+│   ├── workflow.json        # Workflow progress
+│   └── .worktree-id         # Stable identifier
+└── ...
+
+repo_feature_abc/            # Feature worktree
+├── .claude-state/           # Separate state
+│   └── ...                  # Independent from main
+└── ...
+```
+
+**Key utilities**:
+- `from worktree_context import get_state_dir` - Get worktree-specific state directory
+- `from worktree_context import get_worktree_id` - Get stable worktree identifier
+- State automatically isolated when using worktrees
+
 ## Common Issues
 
 | Issue | Solution |
@@ -216,6 +240,7 @@ gh --version              # GitHub CLI
 | Platform not found | `mcp_manager.py --status` to check |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
+| Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
 
 ## Reference Documentation
 

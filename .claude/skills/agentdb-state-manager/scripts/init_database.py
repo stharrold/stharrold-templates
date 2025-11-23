@@ -25,9 +25,31 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
+# Add workflow-utilities to path for worktree_context
+sys.path.insert(
+    0,
+    str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
+)
+
 # Constants with documented rationale
 SCHEMA_VERSION = "1.0.0"  # Current schema version for migrations
 WORKFLOW_STATES_PATH = Path(__file__).parent.parent / "templates" / "workflow-states.json"
+
+
+def get_default_db_path() -> Path:
+    """Get default database path in worktree state directory.
+
+    Returns:
+        Path to agentdb.duckdb in .claude-state/ directory.
+        Falls back to current directory if worktree detection fails.
+    """
+    try:
+        from worktree_context import get_state_dir
+
+        return get_state_dir() / "agentdb.duckdb"
+    except (ImportError, RuntimeError):
+        # Fallback for non-git environments or missing module
+        return Path("agentdb.duckdb")
 
 # ANSI color codes
 class Colors:
