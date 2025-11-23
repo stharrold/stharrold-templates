@@ -9,7 +9,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -58,7 +58,7 @@ class TestStateDirProperty:
         from worktree_context import get_worktree_context
 
         ctx = get_worktree_context()
-        assert ctx.state_dir.name == ".claude-state"
+        assert ctx.state_dir.name == '.claude-state'
         assert ctx.state_dir.parent == ctx.worktree_root
 
     def test_state_dir_uses_worktree_root(self):

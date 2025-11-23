@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -27,7 +27,7 @@ class TestGetStateDirContract:
 
         result = get_state_dir()
         assert isinstance(result, Path)
-        assert result.name == ".claude-state"
+        assert result.name == '.claude-state'
 
     def test_creates_directory_if_not_exists(self, tmp_path, monkeypatch):
         """Test: Creates directory if not exists."""
@@ -44,17 +44,17 @@ class TestGetStateDirContract:
         from worktree_context import get_state_dir
 
         result = get_state_dir()
-        gitignore = result / ".gitignore"
+        gitignore = result / '.gitignore'
         assert gitignore.exists()
         content = gitignore.read_text()
-        assert "*" in content
+        assert '*' in content
 
     def test_creates_worktree_id_file(self, tmp_path, monkeypatch):
         """Test: Creates .worktree-id file."""
         from worktree_context import get_state_dir
 
         result = get_state_dir()
-        worktree_id_file = result / ".worktree-id"
+        worktree_id_file = result / '.worktree-id'
         assert worktree_id_file.exists()
         content = worktree_id_file.read_text().strip()
         assert len(content) == 12
