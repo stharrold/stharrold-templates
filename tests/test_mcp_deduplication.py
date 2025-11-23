@@ -43,53 +43,30 @@ def test_remove_duplicate_servers():
         config = mcp_config_class("Test Platform", temp_path, "Test config for deduplication")
 
         # Load the config
-        if not config.load():
-            print("❌ Failed to load test config")
-            return False
+        assert config.load(), "Failed to load test config"
 
-        print(f"✓ Loaded test config with {len(config.servers)} active servers")
-        print(f"  Config data keys: {list(config.data.keys())}")
+        # Try to run remove_duplicate_servers
+        config.remove_duplicate_servers()
 
-        # Try to run remove_duplicate_servers - this should fail with AttributeError before fix
-        print("\nAttempting deduplication...")
-        try:
-            result = config.remove_duplicate_servers()
-            print(f"✓ Deduplication completed successfully: {result}")
-
-            # Verify the duplicate was removed
-            if 'github' not in config.data['mcpServers']:
-                print("✓ Active 'github' server was correctly removed")
-            else:
-                print("❌ Active 'github' server was not removed")
-
-            if 'DISABLED_github' in config.data['mcpServers']:
-                print("✓ DISABLED_github server was correctly kept")
-            else:
-                print("❌ DISABLED_github server was not kept")
-
-            return True
-
-        except AttributeError as e:
-            print(f"❌ AttributeError occurred: {e}")
-            print("   This is expected before the fix is applied")
-            return False
+        # Verify the duplicate was removed (active version removed, DISABLED kept)
+        assert 'github' not in config.data['mcpServers'], "Active 'github' server was not removed"
+        assert 'DISABLED_github' in config.data['mcpServers'], "DISABLED_github server was not kept"
 
     finally:
         # Clean up temp file
         if temp_path.exists():
             temp_path.unlink()
-            print(f"\n✓ Cleaned up temp file: {temp_path}")
 
 if __name__ == "__main__":
     print("Testing MCPConfig.remove_duplicate_servers() method")
     print("=" * 60)
 
-    success = test_remove_duplicate_servers()
-
-    print("\n" + "=" * 60)
-    if success:
+    try:
+        test_remove_duplicate_servers()
+        print("\n" + "=" * 60)
         print("✅ TEST PASSED: Deduplication works correctly")
         sys.exit(0)
-    else:
-        print("❌ TEST FAILED: Deduplication has errors")
+    except AssertionError as e:
+        print("\n" + "=" * 60)
+        print(f"❌ TEST FAILED: {e}")
         sys.exit(1)
