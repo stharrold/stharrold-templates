@@ -21,14 +21,14 @@ import argparse
 import re
 import shutil
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 try:
     import yaml
 except ImportError:
-    print("Error: PyYAML required. Install: pip install pyyaml", file=sys.stderr)
+    print('Error: PyYAML required. Install: pip install pyyaml', file=sys.stderr)
     sys.exit(1)
 
 # Constants
@@ -44,20 +44,20 @@ class Colors:
     END = '\033[0m'
 
 def error_exit(msg: str) -> None:
-    print(f"{Colors.RED}✗ Error:{Colors.END} {msg}", file=sys.stderr)
+    print(f'{Colors.RED}✗ Error:{Colors.END} {msg}', file=sys.stderr)
     sys.exit(1)
 
 def success(msg: str) -> None:
-    print(f"{Colors.GREEN}✓{Colors.END} {msg}")
+    print(f'{Colors.GREEN}✓{Colors.END} {msg}')
 
 def info(msg: str) -> None:
-    print(f"{Colors.BLUE}ℹ{Colors.END} {msg}")
+    print(f'{Colors.BLUE}ℹ{Colors.END} {msg}')
 
 def warning(msg: str) -> None:
-    print(f"{Colors.YELLOW}⚠{Colors.END} {msg}")
+    print(f'{Colors.YELLOW}⚠{Colors.END} {msg}')
 
 
-def extract_slug_from_filename(filename: str) -> Optional[str]:
+def extract_slug_from_filename(filename: str) -> str | None:
     """Extract slug from TODO filename.
 
     Args:
@@ -70,33 +70,33 @@ def extract_slug_from_filename(filename: str) -> Optional[str]:
     return match.group(1) if match else None
 
 
-def load_todo_md() -> tuple[Dict[str, Any], str]:
+def load_todo_md() -> tuple[dict[str, Any], str]:
     """Load TODO.md and parse YAML frontmatter.
 
     Returns:
         Tuple of (frontmatter dict, full content)
     """
     if not TODO_MD_PATH.exists():
-        error_exit(f"TODO.md not found: {TODO_MD_PATH}")
+        error_exit(f'TODO.md not found: {TODO_MD_PATH}')
 
     content = TODO_MD_PATH.read_text(encoding='utf-8')
 
     if not content.startswith('---'):
-        error_exit("TODO.md missing YAML frontmatter")
+        error_exit('TODO.md missing YAML frontmatter')
 
     parts = content.split('---', 2)
     if len(parts) < 3:
-        error_exit("Invalid TODO.md format")
+        error_exit('Invalid TODO.md format')
 
     try:
         frontmatter = yaml.safe_load(parts[1])
     except yaml.YAMLError as e:
-        error_exit(f"Invalid YAML in TODO.md: {e}")
+        error_exit(f'Invalid YAML in TODO.md: {e}')
 
     return frontmatter, content
 
 
-def save_todo_md(frontmatter: Dict[str, Any], content: str) -> None:
+def save_todo_md(frontmatter: dict[str, Any], content: str) -> None:
     """Save updated TODO.md with new frontmatter.
 
     Args:
@@ -105,12 +105,12 @@ def save_todo_md(frontmatter: Dict[str, Any], content: str) -> None:
     """
     parts = content.split('---', 2)
     new_yaml = yaml.dump(frontmatter, default_flow_style=False, sort_keys=False)
-    new_content = f"---\n{new_yaml}---{parts[2]}"
+    new_content = f'---\n{new_yaml}---{parts[2]}'
 
     TODO_MD_PATH.write_text(new_content, encoding='utf-8')
 
 
-def load_workflow_file(todo_file: Path) -> Dict[str, Any]:
+def load_workflow_file(todo_file: Path) -> dict[str, Any]:
     """Load workflow TODO file and extract metadata.
 
     Args:
@@ -122,22 +122,22 @@ def load_workflow_file(todo_file: Path) -> Dict[str, Any]:
     content = todo_file.read_text(encoding='utf-8')
 
     if not content.startswith('---'):
-        error_exit(f"{todo_file.name} missing YAML frontmatter")
+        error_exit(f'{todo_file.name} missing YAML frontmatter')
 
     parts = content.split('---', 2)
     if len(parts) < 3:
-        error_exit(f"Invalid format in {todo_file.name}")
+        error_exit(f'Invalid format in {todo_file.name}')
 
     try:
         frontmatter = yaml.safe_load(parts[1])
     except yaml.YAMLError as e:
-        error_exit(f"Invalid YAML in {todo_file.name}: {e}")
+        error_exit(f'Invalid YAML in {todo_file.name}: {e}')
 
     return frontmatter
 
 
-def archive_workflow(todo_file: Path, summary: Optional[str] = None,
-                     version: Optional[str] = None) -> None:
+def archive_workflow(todo_file: Path, summary: str | None = None,
+                     version: str | None = None) -> None:
     """Archive workflow: move file and update TODO.md.
 
     Args:
@@ -146,31 +146,31 @@ def archive_workflow(todo_file: Path, summary: Optional[str] = None,
         version: Optional semantic version for this workflow
     """
     if not todo_file.exists():
-        error_exit(f"TODO file not found: {todo_file}")
+        error_exit(f'TODO file not found: {todo_file}')
 
     slug = extract_slug_from_filename(todo_file.name)
     if not slug:
-        error_exit(f"Could not extract slug from filename: {todo_file.name}")
+        error_exit(f'Could not extract slug from filename: {todo_file.name}')
 
-    info(f"Archiving workflow: {slug}")
+    info(f'Archiving workflow: {slug}')
 
     # Load workflow file to get metadata
     workflow_data = load_workflow_file(todo_file)
 
     # Ensure ARCHIVED directory exists
     if not ARCHIVED_DIR.exists():
-        error_exit(f"ARCHIVED directory not found: {ARCHIVED_DIR}")
+        error_exit(f'ARCHIVED directory not found: {ARCHIVED_DIR}')
 
     # Move file to ARCHIVED/
     archived_path = ARCHIVED_DIR / todo_file.name
     if archived_path.exists():
-        warning(f"File already exists in ARCHIVED/: {archived_path.name}")
-        response = input("Overwrite? (y/N): ")
+        warning(f'File already exists in ARCHIVED/: {archived_path.name}')
+        response = input('Overwrite? (y/N): ')
         if response.lower() != 'y':
-            error_exit("Archival cancelled")
+            error_exit('Archival cancelled')
 
     shutil.move(str(todo_file), str(archived_path))
-    success(f"Moved {todo_file.name} → ARCHIVED/{todo_file.name}")
+    success(f'Moved {todo_file.name} → ARCHIVED/{todo_file.name}')
 
     # Load TODO.md
     frontmatter, content = load_todo_md()
@@ -201,8 +201,8 @@ def archive_workflow(todo_file: Path, summary: Optional[str] = None,
 
     # Update workflow entry for archival
     workflow_entry['status'] = 'completed'
-    workflow_entry['completed_at'] = datetime.now(timezone.utc).isoformat()
-    workflow_entry['file'] = f"ARCHIVED/{todo_file.name}"
+    workflow_entry['completed_at'] = datetime.now(UTC).isoformat()
+    workflow_entry['file'] = f'ARCHIVED/{todo_file.name}'
 
     if summary:
         workflow_entry['summary'] = summary
@@ -221,10 +221,10 @@ def archive_workflow(todo_file: Path, summary: Optional[str] = None,
 
     total_completed = frontmatter['context_stats'].get('total_workflows_completed', 0)
     frontmatter['context_stats']['total_workflows_completed'] = total_completed + 1
-    frontmatter['context_stats']['last_checkpoint'] = datetime.now(timezone.utc).isoformat()
+    frontmatter['context_stats']['last_checkpoint'] = datetime.now(UTC).isoformat()
 
     # Update last_update timestamp
-    frontmatter['last_update'] = datetime.now(timezone.utc).isoformat()
+    frontmatter['last_update'] = datetime.now(UTC).isoformat()
 
     # Save
     save_todo_md(frontmatter, content)

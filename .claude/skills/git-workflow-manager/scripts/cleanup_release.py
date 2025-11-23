@@ -101,7 +101,7 @@ def verify_tag_exists(version):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to check git tags: {e.stderr.strip()}"
+            f'Failed to check git tags: {e.stderr.strip()}'
         ) from e
 
 
@@ -144,7 +144,7 @@ def verify_tag_on_branch(version, branch_name):
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to verify tag on branch: {e.stderr.strip()}"
+            f'Failed to verify tag on branch: {e.stderr.strip()}'
         ) from e
 
 
@@ -173,14 +173,14 @@ def verify_commits_in_branch(release_branch, target_branch):
         if missing_commits:
             commit_count = len(missing_commits.split('\n'))
             raise ValueError(
-                f"Release not back-merged to {target_branch}. "
-                f"{commit_count} commit(s) from {release_branch} not in {target_branch}. "
-                f"Run: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py"
+                f'Release not back-merged to {target_branch}. '
+                f'{commit_count} commit(s) from {release_branch} not in {target_branch}. '
+                f'Run: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py'
             )
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
-            f"Failed to verify commits in branch: {e.stderr.strip()}"
+            f'Failed to verify commits in branch: {e.stderr.strip()}'
         ) from e
 
 
@@ -213,7 +213,7 @@ def delete_local_branch(branch_name):
             )
         else:
             raise RuntimeError(
-                f"Failed to delete local branch: {error_msg}"
+                f'Failed to delete local branch: {error_msg}'
             ) from e
 
 
@@ -237,7 +237,7 @@ def delete_remote_branch(branch_name):
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.decode() if e.stderr else 'Unknown error'
         raise RuntimeError(
-            f"Failed to delete remote branch: {error_msg}"
+            f'Failed to delete remote branch: {error_msg}'
         ) from e
 
 
@@ -291,7 +291,7 @@ def archive_todo_file(todo_path, version):
     deprecate_script = Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts' / 'deprecate_files.py'
 
     if not deprecate_script.exists():
-        print("Warning: deprecate_files.py not found, skipping TODO archival", file=sys.stderr)
+        print('Warning: deprecate_files.py not found, skipping TODO archival', file=sys.stderr)
         return
 
     try:
@@ -304,84 +304,84 @@ def archive_todo_file(todo_path, version):
         )
 
     except subprocess.CalledProcessError as e:
-        print(f"Warning: Failed to archive TODO file: {e.stderr.decode()}", file=sys.stderr)
-        print(f"You may need to manually archive: {todo_path}", file=sys.stderr)
+        print(f'Warning: Failed to archive TODO file: {e.stderr.decode()}', file=sys.stderr)
+        print(f'You may need to manually archive: {todo_path}', file=sys.stderr)
 
 
 def main():
     """Main entry point for cleanup_release.py script."""
     if len(sys.argv) != 2:
-        print("Usage: cleanup_release.py <version>", file=sys.stderr)
-        print("Example: cleanup_release.py v1.1.0", file=sys.stderr)
+        print('Usage: cleanup_release.py <version>', file=sys.stderr)
+        print('Example: cleanup_release.py v1.1.0', file=sys.stderr)
         sys.exit(1)
 
     version = sys.argv[1]
-    release_branch = f"{RELEASE_BRANCH_PREFIX}{version}"
+    release_branch = f'{RELEASE_BRANCH_PREFIX}{version}'
 
     try:
         # Step 1: Input Validation
-        print("Validating inputs...", file=sys.stderr)
+        print('Validating inputs...', file=sys.stderr)
         validate_version_format(version)
         verify_branch_exists(release_branch)
 
         # Step 2: Safety Checks
-        print("Running safety checks...", file=sys.stderr)
+        print('Running safety checks...', file=sys.stderr)
 
-        print("  Checking tag exists...", file=sys.stderr)
+        print('  Checking tag exists...', file=sys.stderr)
         verify_tag_exists(version)
 
-        print("  Checking tag on main...", file=sys.stderr)
+        print('  Checking tag on main...', file=sys.stderr)
         verify_tag_on_branch(version, 'main')
 
-        print("  Checking back-merge to develop...", file=sys.stderr)
+        print('  Checking back-merge to develop...', file=sys.stderr)
         verify_commits_in_branch(release_branch, 'develop')
 
         # Step 3: Delete Branches
-        print("Deleting branches...", file=sys.stderr)
+        print('Deleting branches...', file=sys.stderr)
 
-        print("  Deleting local branch...", file=sys.stderr)
+        print('  Deleting local branch...', file=sys.stderr)
         delete_local_branch(release_branch)
 
-        print("  Deleting remote branch...", file=sys.stderr)
+        print('  Deleting remote branch...', file=sys.stderr)
         delete_remote_branch(release_branch)
 
         # Step 4: Archive TODO File
-        print("Archiving TODO file...", file=sys.stderr)
+        print('Archiving TODO file...', file=sys.stderr)
         todo_path = find_todo_file(version)
 
         if todo_path:
             archive_todo_file(todo_path, version)
         else:
-            print(f"  Note: No TODO file found for {version}", file=sys.stderr)
+            print(f'  Note: No TODO file found for {version}', file=sys.stderr)
 
         # Success output
-        print(f"\n✓ Verified tag {version} exists")
-        print("✓ Verified tag on main branch")
-        print("✓ Verified back-merge to develop complete")
-        print(f"✓ Deleted local branch: {release_branch}")
-        print(f"✓ Deleted remote branch: origin/{release_branch}")
+        print(f'\n✓ Verified tag {version} exists')
+        print('✓ Verified tag on main branch')
+        print('✓ Verified back-merge to develop complete')
+        print(f'✓ Deleted local branch: {release_branch}')
+        print(f'✓ Deleted remote branch: origin/{release_branch}')
 
         if todo_path:
-            print(f"✓ Archived: {todo_path.name}")
+            print(f'✓ Archived: {todo_path.name}')
 
-        print(f"✓ Release workflow complete for {version}")
+        print(f'✓ Release workflow complete for {version}')
 
-        print("\nNext steps:")
-        print("  1. Update contrib branch: python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/<gh-user>")
-        print("  2. Continue development on develop or feature branches")
+        print('\nNext steps:')
+        print('  1. Update contrib branch: python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/<gh-user>')
+        print('  2. Continue development on develop or feature branches')
 
     except (ValueError, RuntimeError) as e:
-        print(f"\nERROR: {e}", file=sys.stderr)
-        print("\nSafety checks failed. Release branch NOT deleted.", file=sys.stderr)
-        print("\nManual cleanup commands (use with caution):", file=sys.stderr)
-        print(f"  git branch -D {release_branch}", file=sys.stderr)
-        print(f"  git push origin --delete {release_branch}", file=sys.stderr)
+        print(f'\nERROR: {e}', file=sys.stderr)
+        print('\nSafety checks failed. Release branch NOT deleted.', file=sys.stderr)
+        print('\nManual cleanup commands (use with caution):', file=sys.stderr)
+        print(f'  git branch -D {release_branch}', file=sys.stderr)
+        print(f'  git push origin --delete {release_branch}', file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
-        print("\nCleanup cancelled by user.", file=sys.stderr)
+        print('\nCleanup cancelled by user.', file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"UNEXPECTED ERROR: {e}", file=sys.stderr)
+        print(f'UNEXPECTED ERROR: {e}', file=sys.stderr)
         sys.exit(1)
 
 

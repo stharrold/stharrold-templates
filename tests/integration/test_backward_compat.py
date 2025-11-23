@@ -11,7 +11,7 @@ sys.path.insert(
     0,
     str(
         Path(__file__).parent.parent.parent
-        / ".claude/skills/workflow-utilities/scripts"
+        / '.claude/skills/workflow-utilities/scripts'
     ),
 )
 
@@ -84,7 +84,7 @@ class TestBackwardCompatibility:
 
         # In main repo, worktree_root should be the actual repo root
         assert ctx.worktree_root.exists()
-        assert (ctx.worktree_root / ".git").exists()
+        assert (ctx.worktree_root / '.git').exists()
 
         # State directory should be a child of worktree_root
         assert state_dir.parent == ctx.worktree_root
