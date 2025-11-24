@@ -272,7 +272,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
 podman --version          # 4.0+
 podman-compose --version
 git --version
-python3 --version         # 3.11+ (container uses 3.12)
+python3 --version         # 3.11+ (container uses 3.11)
 
 # VCS Provider CLI (one of):
 gh --version              # GitHub CLI (for GitHub repos)
@@ -345,7 +345,7 @@ repo_feature_abc/            # Feature worktree
 | Issue | Solution |
 |-------|----------|
 | Container not building | `podman info` to verify Podman running |
-| pytest not found in container | Use `uv run pytest` directly instead |
+| pytest not found in container | Use `podman-compose run --rm dev uv run pytest` (inside container) or `uv run pytest` (outside container) |
 | Import errors | Use `podman-compose run --rm dev python` |
 | Platform not found | `mcp_manager.py --status` to check |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
@@ -356,7 +356,7 @@ repo_feature_abc/            # Feature worktree
 
 ```bash
 # List stale feature branches (numbered prefixes from old specs)
-git branch | grep -E "^  [0-9]{3}-"
+git branch --list '[0-9][0-9][0-9]-*'
 
 # Delete merged local branches
 git branch -d <branch-name>
