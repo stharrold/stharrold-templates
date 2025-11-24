@@ -21,6 +21,44 @@ next: /3_tasks
 
 Given the feature context, do this:
 
+## Step 0: Verify Prerequisites (REQUIRED)
+
+**IMPORTANT: Always run these checks before proceeding.**
+
+1. **Verify feature branch:**
+   ```bash
+   git branch --show-current
+   ```
+   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+
+2. **Extract slug from branch name:**
+   Branch format: `feature/{timestamp}_{slug}`
+   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+
+3. **Check for planning documents in MAIN repo:**
+   The planning directory is in the main repository, not the worktree:
+   ```bash
+   ls ../stharrold-templates/planning/{slug}/requirements.md 2>/dev/null || \
+   ls ../planning/{slug}/requirements.md 2>/dev/null
+   ```
+
+4. **If planning documents missing, STOP and prompt user:**
+   ```
+   ❌ MISSING PREREQUISITES
+
+   Could not find planning/{slug}/requirements.md
+
+   The /2_plan command requires planning documents created by /1_specify.
+
+   Options:
+   1. Run /1_specify first to create planning documents
+   2. If you have requirements, I can help create planning/{slug}/requirements.md manually
+
+   Which would you like to do?
+   ```
+
+   **Do NOT proceed until user responds and artifacts exist.**
+
 ## Step 1: Verify Worktree Context
 
 Confirm you are in a feature worktree:

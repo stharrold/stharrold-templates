@@ -23,6 +23,42 @@ next: /4_implement
 
 Given the feature context, do this:
 
+## Step 0: Verify Prerequisites (REQUIRED)
+
+**IMPORTANT: Always run these checks before proceeding.**
+
+1. **Verify feature branch:**
+   ```bash
+   git branch --show-current
+   ```
+   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+
+2. **Extract slug from branch name:**
+   Branch format: `feature/{timestamp}_{slug}`
+   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+
+3. **Check for spec/plan documents:**
+   ```bash
+   ls specs/{slug}/plan.md specs/{slug}/spec.md 2>/dev/null
+   ```
+
+4. **If spec documents missing, STOP and prompt user:**
+   ```
+   ❌ MISSING PREREQUISITES
+
+   Could not find specs/{slug}/plan.md or specs/{slug}/spec.md
+
+   The /3_tasks command requires specifications created by /2_plan.
+
+   Options:
+   1. Run /2_plan first to create specifications
+   2. If you have a plan, I can help create specs/{slug}/plan.md manually
+
+   Which would you like to do?
+   ```
+
+   **Do NOT proceed until user responds and artifacts exist.**
+
 ## Step 1: Verify Worktree Context
 
 Confirm you are in a feature worktree (same as `/2_plan`).

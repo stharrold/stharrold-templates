@@ -23,6 +23,42 @@ next: /5_integrate
 
 Execute tasks automatically. User can stop/rewind via Claude Code controls at any time.
 
+## Step 0: Verify Prerequisites (REQUIRED)
+
+**IMPORTANT: Always run these checks before proceeding.**
+
+1. **Verify feature branch:**
+   ```bash
+   git branch --show-current
+   ```
+   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+
+2. **Extract slug from branch name:**
+   Branch format: `feature/{timestamp}_{slug}`
+   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+
+3. **Check for required artifacts:**
+   ```bash
+   ls specs/{slug}/tasks.md specs/{slug}/plan.md 2>/dev/null
+   ```
+
+4. **If artifacts missing, STOP and prompt user:**
+   ```
+   ❌ MISSING PREREQUISITES
+
+   Could not find specs/{slug}/tasks.md or specs/{slug}/plan.md
+
+   The /4_implement command requires task definitions created by /2_plan and /3_tasks.
+
+   Options:
+   1. Run /2_plan first → then /3_tasks → then retry /4_implement
+   2. If you have a clear task list, I can help create specs/{slug}/tasks.md manually
+
+   Which would you like to do?
+   ```
+
+   **Do NOT proceed until user responds and artifacts exist.**
+
 ## Step 1: Load Tasks
 
 Load tasks from `specs/{slug}/plan.md` or `specs/{slug}/tasks.md`:
