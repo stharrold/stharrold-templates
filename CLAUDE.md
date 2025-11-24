@@ -297,11 +297,12 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/r
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
+# NOTE: Step 7 requires release/* branch to exist (PR directly from release to develop)
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
 # ⚠️ CRITICAL: Backmerge direction
-# CORRECT: release/vX.Y.Z → develop (use backmerge_release.py)
+# CORRECT: release/vX.Y.Z → develop (PR from release branch directly)
 # WRONG:   main → develop (NEVER merge main to develop!)
 
 # Cleanup feature worktree (no TODO archival by default)
