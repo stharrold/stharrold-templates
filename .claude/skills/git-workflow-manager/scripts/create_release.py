@@ -27,17 +27,17 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Add VCS module to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
 from vcs import get_vcs_adapter
 
 # Constants with documented rationale
-RELEASE_BRANCH_PREFIX = 'release/'
+RELEASE_BRANCH_PREFIX = "release/"
 # Rationale: git-flow release branch naming convention for clarity and tooling compatibility
 
-VERSION_PATTERN = r'^v\d+\.\d+\.\d+$'
+VERSION_PATTERN = r"^v\d+\.\d+\.\d+$"
 # Rationale: Enforce semantic versioning (vMAJOR.MINOR.PATCH) for consistency
 
-TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'
+TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"
 # Rationale: Compact ISO8601 format that remains intact when parsed by underscores/hyphens
 
 
@@ -52,10 +52,7 @@ def validate_version_format(version):
         ValueError: If version doesn't match vX.Y.Z pattern
     """
     if not re.match(VERSION_PATTERN, version):
-        raise ValueError(
-            f"Invalid version format '{version}'. "
-            f"Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)"
-        )
+        raise ValueError(f"Invalid version format '{version}'. " f"Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)")
 
 
 def check_working_directory_clean():
@@ -66,23 +63,13 @@ def check_working_directory_clean():
         RuntimeError: If working directory has uncommitted changes
     """
     try:
-        result = subprocess.run(
-            ['git', 'status', '--porcelain'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=True)
 
         if result.stdout.strip():
-            raise RuntimeError(
-                'Working directory has uncommitted changes. '
-                'Please commit or stash changes before creating release branch.'
-            )
+            raise RuntimeError("Working directory has uncommitted changes. " "Please commit or stash changes before creating release branch.")
 
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f'Failed to check git status: {e.stderr.strip()}'
-        ) from e
+        raise RuntimeError(f"Failed to check git status: {e.stderr.strip()}") from e
 
 
 def verify_branch_exists(branch_name):
@@ -96,16 +83,9 @@ def verify_branch_exists(branch_name):
         ValueError: If branch doesn't exist
     """
     try:
-        subprocess.run(
-            ['git', 'rev-parse', '--verify', branch_name],
-            capture_output=True,
-            check=True
-        )
+        subprocess.run(["git", "rev-parse", "--verify", branch_name], capture_output=True, check=True)
     except subprocess.CalledProcessError:
-        raise ValueError(
-            f"Base branch '{branch_name}' does not exist. "
-            f"Use 'git branch -a' to list available branches."
-        )
+        raise ValueError(f"Base branch '{branch_name}' does not exist. " f"Use 'git branch -a' to list available branches.")
 
 
 def verify_tag_not_exists(version):
@@ -119,23 +99,13 @@ def verify_tag_not_exists(version):
         ValueError: If tag already exists
     """
     try:
-        result = subprocess.run(
-            ['git', 'tag', '-l', version],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["git", "tag", "-l", version], capture_output=True, text=True, check=True)
 
         if result.stdout.strip():
-            raise ValueError(
-                f"Tag '{version}' already exists. "
-                f"Use 'git tag -l' to list existing tags."
-            )
+            raise ValueError(f"Tag '{version}' already exists. " f"Use 'git tag -l' to list existing tags.")
 
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f'Failed to check git tags: {e.stderr.strip()}'
-        ) from e
+        raise RuntimeError(f"Failed to check git tags: {e.stderr.strip()}") from e
 
 
 def get_semantic_version_recommendation(base_branch):
@@ -148,35 +118,25 @@ def get_semantic_version_recommendation(base_branch):
     Returns:
         Recommended version string (e.g., 'v1.1.0'), or None if script unavailable
     """
-    script_path = Path(__file__).parent / 'semantic_version.py'
+    script_path = Path(__file__).parent / "semantic_version.py"
 
     if not script_path.exists():
-        print(f'Warning: semantic_version.py not found at {script_path}', file=sys.stderr)
+        print(f"Warning: semantic_version.py not found at {script_path}", file=sys.stderr)
         return None
 
     try:
         # Get latest tag to determine current version
-        result = subprocess.run(
-            ['git', 'describe', '--tags', '--abbrev=0'],
-            capture_output=True,
-            text=True,
-            check=False
-        )
+        result = subprocess.run(["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True, check=False)
 
-        current_version = result.stdout.strip() if result.returncode == 0 else 'v1.0.0'
+        current_version = result.stdout.strip() if result.returncode == 0 else "v1.0.0"
 
         # Call semantic_version.py to get recommendation
-        result = subprocess.run(
-            ['python3', str(script_path), base_branch, current_version],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["python3", str(script_path), base_branch, current_version], capture_output=True, text=True, check=True)
 
         return result.stdout.strip()
 
     except subprocess.CalledProcessError as e:
-        print(f'Warning: Failed to get semantic version recommendation: {e.stderr.strip()}', file=sys.stderr)
+        print(f"Warning: Failed to get semantic version recommendation: {e.stderr.strip()}", file=sys.stderr)
         return None
 
 
@@ -196,18 +156,18 @@ def confirm_version_mismatch(provided_version, recommended_version, auto_confirm
         return True
 
     if auto_confirm:
-        print(f'⚠️  Version mismatch: provided {provided_version}, recommended {recommended_version}', file=sys.stderr)
-        print(f'Continuing with {provided_version} (--yes flag enabled)', file=sys.stderr)
+        print(f"⚠️  Version mismatch: provided {provided_version}, recommended {recommended_version}", file=sys.stderr)
+        print(f"Continuing with {provided_version} (--yes flag enabled)", file=sys.stderr)
         return True
 
-    print('\n⚠️  Version Mismatch Warning', file=sys.stderr)
-    print(f'Provided version:    {provided_version}', file=sys.stderr)
-    print(f'Recommended version: {recommended_version}', file=sys.stderr)
-    print(f'\nSemantic versioning suggests {recommended_version} based on changes.', file=sys.stderr)
-    print(f'Do you want to continue with {provided_version}? (Y/n): ', end='', file=sys.stderr)
+    print("\n⚠️  Version Mismatch Warning", file=sys.stderr)
+    print(f"Provided version:    {provided_version}", file=sys.stderr)
+    print(f"Recommended version: {recommended_version}", file=sys.stderr)
+    print(f"\nSemantic versioning suggests {recommended_version} based on changes.", file=sys.stderr)
+    print(f"Do you want to continue with {provided_version}? (Y/n): ", end="", file=sys.stderr)
 
     response = input().strip().lower()
-    return response in ['y', 'yes', '']
+    return response in ["y", "yes", ""]
 
 
 def create_release_branch(version, base_branch):
@@ -224,56 +184,33 @@ def create_release_branch(version, base_branch):
     Raises:
         RuntimeError: If branch creation fails
     """
-    branch_name = f'{RELEASE_BRANCH_PREFIX}{version}'
+    branch_name = f"{RELEASE_BRANCH_PREFIX}{version}"
 
     try:
         # Get base commit SHA for reporting
-        result = subprocess.run(
-            ['git', 'rev-parse', '--short', base_branch],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["git", "rev-parse", "--short", base_branch], capture_output=True, text=True, check=True)
         base_commit = result.stdout.strip()
 
         # Create branch
-        subprocess.run(
-            ['git', 'checkout', '-b', branch_name, base_branch],
-            capture_output=True,
-            check=True
-        )
+        subprocess.run(["git", "checkout", "-b", branch_name, base_branch], capture_output=True, check=True)
 
         # Push to origin
-        subprocess.run(
-            ['git', 'push', '-u', 'origin', branch_name],
-            capture_output=True,
-            check=True
-        )
+        subprocess.run(["git", "push", "-u", "origin", branch_name], capture_output=True, check=True)
 
         return branch_name, base_commit
 
     except subprocess.CalledProcessError as e:
         # Cleanup on failure
-        print('ERROR: Failed to create release branch', file=sys.stderr)
-        print('Cleaning up...', file=sys.stderr)
+        print("ERROR: Failed to create release branch", file=sys.stderr)
+        print("Cleaning up...", file=sys.stderr)
 
         # Try to delete local branch if it was created
-        subprocess.run(
-            ['git', 'branch', '-D', branch_name],
-            capture_output=True,
-            check=False
-        )
+        subprocess.run(["git", "branch", "-D", branch_name], capture_output=True, check=False)
 
         # Try to return to base branch
-        subprocess.run(
-            ['git', 'checkout', base_branch],
-            capture_output=True,
-            check=False
-        )
+        subprocess.run(["git", "checkout", base_branch], capture_output=True, check=False)
 
-        raise RuntimeError(
-            f"Failed to create release branch: {e.stderr.decode() if e.stderr else 'Unknown error'}"
-        ) from e
+        raise RuntimeError(f"Failed to create release branch: {e.stderr.decode() if e.stderr else 'Unknown error'}") from e
 
 
 def create_todo_file(version, base_branch, base_commit):
@@ -292,13 +229,10 @@ def create_todo_file(version, base_branch, base_commit):
         RuntimeError: If TODO file creation fails
     """
     timestamp = datetime.now(UTC).strftime(TIMESTAMP_FORMAT)
-    version_slug = version.replace('.', '-')
-    todo_filename = f'TODO_release_{timestamp}_{version_slug}.md'
+    version_slug = version.replace(".", "-")
+    todo_filename = f"TODO_release_{timestamp}_{version_slug}.md"
 
-    repo_root = Path(subprocess.check_output(
-        ['git', 'rev-parse', '--show-toplevel'],
-        text=True
-    ).strip())
+    repo_root = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
 
     todo_path = repo_root / todo_filename
 
@@ -307,10 +241,10 @@ def create_todo_file(version, base_branch, base_commit):
         vcs = get_vcs_adapter()
         github_user = vcs.get_current_user()
     except Exception:
-        github_user = 'unknown'
+        github_user = "unknown"
 
     # Create TODO content
-    created_timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+    created_timestamp = datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
     todo_content = f"""---
 type: workflow-manifest
@@ -497,15 +431,13 @@ python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}
         return todo_path
 
     except Exception as e:
-        raise RuntimeError(
-            f'Failed to create TODO file at {todo_path}: {e}'
-        ) from e
+        raise RuntimeError(f"Failed to create TODO file at {todo_path}: {e}") from e
 
 
 def main():
     """Main entry point for create_release.py script."""
     parser = argparse.ArgumentParser(
-        description='Create release branch from base branch with TODO file generation',
+        description="Create release branch from base branch with TODO file generation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -513,15 +445,11 @@ Examples:
   %(prog)s v1.1.0 develop --yes
 
 For more information, see WORKFLOW.md Phase 5 (Release Workflow).
-        """
+        """,
     )
-    parser.add_argument('version', help='Release version (e.g., v1.1.0)')
-    parser.add_argument('base_branch', help='Base branch to create release from (e.g., develop)')
-    parser.add_argument(
-        '--yes', '-y',
-        action='store_true',
-        help='Skip confirmation prompts (non-interactive mode)'
-    )
+    parser.add_argument("version", help="Release version (e.g., v1.1.0)")
+    parser.add_argument("base_branch", help="Base branch to create release from (e.g., develop)")
+    parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompts (non-interactive mode)")
 
     args = parser.parse_args()
     version = args.version
@@ -530,49 +458,49 @@ For more information, see WORKFLOW.md Phase 5 (Release Workflow).
 
     try:
         # Step 1: Input Validation
-        print('Validating inputs...', file=sys.stderr)
+        print("Validating inputs...", file=sys.stderr)
         validate_version_format(version)
         verify_branch_exists(base_branch)
         check_working_directory_clean()
         verify_tag_not_exists(version)
 
         # Step 2: Version Verification
-        print('Checking semantic version recommendation...', file=sys.stderr)
+        print("Checking semantic version recommendation...", file=sys.stderr)
         recommended_version = get_semantic_version_recommendation(base_branch)
 
         if recommended_version and recommended_version != version:
             if not confirm_version_mismatch(version, recommended_version, auto_confirm):
-                print('Release creation cancelled by user.', file=sys.stderr)
+                print("Release creation cancelled by user.", file=sys.stderr)
                 sys.exit(1)
 
         # Step 3: Create Release Branch
-        print('Creating release branch...', file=sys.stderr)
+        print("Creating release branch...", file=sys.stderr)
         branch_name, base_commit = create_release_branch(version, base_branch)
 
         # Step 4: Create TODO File
-        print('Creating TODO file...', file=sys.stderr)
+        print("Creating TODO file...", file=sys.stderr)
         todo_path = create_todo_file(version, base_branch, base_commit)
 
         # Success output
-        print(f'\n✓ Created release branch: {branch_name}')
-        print(f'✓ Base: {base_branch} (commit {base_commit})')
-        print(f'✓ TODO file: {todo_path.name}')
-        print('✓ Ready for final QA and documentation updates')
-        print('\nNext steps:')
-        print('  1. Run quality gates: python .claude/skills/quality-enforcer/scripts/run_quality_gates.py')
-        print('  2. Update documentation and version in pyproject.toml')
+        print(f"\n✓ Created release branch: {branch_name}")
+        print(f"✓ Base: {base_branch} (commit {base_commit})")
+        print(f"✓ TODO file: {todo_path.name}")
+        print("✓ Ready for final QA and documentation updates")
+        print("\nNext steps:")
+        print("  1. Run quality gates: python .claude/skills/quality-enforcer/scripts/run_quality_gates.py")
+        print("  2. Update documentation and version in pyproject.toml")
         print(f"  3. Create PR to main: gh pr create --base main --title 'Release {version}'")
 
     except (ValueError, RuntimeError) as e:
-        print(f'ERROR: {e}', file=sys.stderr)
+        print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)
     except KeyboardInterrupt:
-        print('\nRelease creation cancelled by user.', file=sys.stderr)
+        print("\nRelease creation cancelled by user.", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f'UNEXPECTED ERROR: {e}', file=sys.stderr)
+        print(f"UNEXPECTED ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -9,10 +9,10 @@ import argparse
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='Analyze workflow metrics')
-    parser.add_argument('--trends', action='store_true', help='Show historical trends')
-    parser.add_argument('--bottlenecks', action='store_true', help='Identify bottlenecks')
-    parser.add_argument('--days', type=int, default=30, help='Days of history to analyze')
+    parser = argparse.ArgumentParser(description="Analyze workflow metrics")
+    parser.add_argument("--trends", action="store_true", help="Show historical trends")
+    parser.add_argument("--bottlenecks", action="store_true", help="Identify bottlenecks")
+    parser.add_argument("--days", type=int, default=30, help="Days of history to analyze")
     # Note: args are defined for future implementation but not yet used in current queries
     # parser.parse_args()
 
@@ -45,12 +45,13 @@ def main() -> None:
     GROUP BY json_extract_string(object_metadata, '$.gate_type');
     """
 
-    print('Metrics Queries (to be executed via AgentDB):\n')
-    print('1. Time-in-phase analysis:')
+    print("Metrics Queries (to be executed via AgentDB):\n")
+    print("1. Time-in-phase analysis:")
     print(time_in_phase_query)
-    print('\n2. Quality gate pass rates:')
+    print("\n2. Quality gate pass rates:")
     print(quality_query)
-    print('\nNOTE: In actual execution, would query AgentDB and generate metrics report')
+    print("\nNOTE: In actual execution, would query AgentDB and generate metrics report")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -42,34 +42,36 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Add VCS module to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
 from vcs import get_vcs_adapter
 
 # Constants with documented rationale
 SKILL_NAMES = [
-    'workflow-orchestrator',
-    'tech-stack-adapter',
-    'git-workflow-manager',
-    'bmad-planner',
-    'speckit-author',
-    'quality-enforcer',
-    'workflow-utilities',
-    'agentdb-state-manager',
-    'initialize-repository',  # Include this meta-skill
+    "workflow-orchestrator",
+    "tech-stack-adapter",
+    "git-workflow-manager",
+    "bmad-planner",
+    "speckit-author",
+    "quality-enforcer",
+    "workflow-utilities",
+    "agentdb-state-manager",
+    "initialize-repository",  # Include this meta-skill
 ]  # 9 skills that comprise the workflow system
 
-REQUIRED_TOOLS = ['git']  # Required for workflow functionality (VCS CLI detected automatically)
-TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'  # Compact ISO8601 for file names
+REQUIRED_TOOLS = ["git"]  # Required for workflow functionality (VCS CLI detected automatically)
+TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"  # Compact ISO8601 for file names
+
 
 # ANSI color codes for output
 class Colors:
     """ANSI color codes for terminal output."""
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BOLD = '\033[1m'
-    END = '\033[0m'
+
+    BLUE = "\033[94m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    END = "\033[0m"
 
 
 def error_exit(message: str, code: int = 1) -> None:
@@ -79,7 +81,7 @@ def error_exit(message: str, code: int = 1) -> None:
         message: Error message to display
         code: Exit code (default 1)
     """
-    print(f'{Colors.RED}✗ Error:{Colors.END} {message}', file=sys.stderr)
+    print(f"{Colors.RED}✗ Error:{Colors.END} {message}", file=sys.stderr)
     sys.exit(code)
 
 
@@ -89,7 +91,7 @@ def success(message: str) -> None:
     Args:
         message: Success message to display
     """
-    print(f'{Colors.GREEN}✓{Colors.END} {message}')
+    print(f"{Colors.GREEN}✓{Colors.END} {message}")
 
 
 def info(message: str) -> None:
@@ -98,7 +100,7 @@ def info(message: str) -> None:
     Args:
         message: Info message to display
     """
-    print(f'{Colors.BLUE}ℹ{Colors.END} {message}')
+    print(f"{Colors.BLUE}ℹ{Colors.END} {message}")
 
 
 def warning(message: str) -> None:
@@ -107,11 +109,10 @@ def warning(message: str) -> None:
     Args:
         message: Warning message to display
     """
-    print(f'{Colors.YELLOW}⚠{Colors.END} {message}')
+    print(f"{Colors.YELLOW}⚠{Colors.END} {message}")
 
 
-def ask_question(prompt: str, options: list[str] | None = None,
-                 default: str | None = None, allow_multiple: bool = False) -> str:
+def ask_question(prompt: str, options: list[str] | None = None, default: str | None = None, allow_multiple: bool = False) -> str:
     """Ask user a question with optional choices.
 
     Args:
@@ -126,18 +127,18 @@ def ask_question(prompt: str, options: list[str] | None = None,
     Raises:
         ValueError: If response is invalid
     """
-    print(f'\n{Colors.BOLD}{prompt}{Colors.END}')
+    print(f"\n{Colors.BOLD}{prompt}{Colors.END}")
 
     if options:
         for i, option in enumerate(options, 1):
-            print(f'  {i}) {option}')
+            print(f"  {i}) {option}")
         if default:
-            print(f'  [default: {default}]')
+            print(f"  [default: {default}]")
         if allow_multiple:
-            print('  (Enter comma-separated numbers for multiple selections)')
+            print("  (Enter comma-separated numbers for multiple selections)")
 
     while True:
-        response = input('> ').strip()
+        response = input("> ").strip()
 
         if not response and default:
             return default
@@ -146,19 +147,19 @@ def ask_question(prompt: str, options: list[str] | None = None,
             if allow_multiple:
                 # Handle multiple selections
                 try:
-                    indices = [int(x.strip()) - 1 for x in response.split(',')]
+                    indices = [int(x.strip()) - 1 for x in response.split(",")]
                     if all(0 <= idx < len(options) for idx in indices):
-                        return ','.join(options[idx] for idx in indices)
-                    print(f'{Colors.RED}Invalid selection. Please try again.{Colors.END}')
+                        return ",".join(options[idx] for idx in indices)
+                    print(f"{Colors.RED}Invalid selection. Please try again.{Colors.END}")
                 except ValueError:
-                    print(f'{Colors.RED}Invalid input. Enter comma-separated numbers.{Colors.END}')
+                    print(f"{Colors.RED}Invalid input. Enter comma-separated numbers.{Colors.END}")
             else:
                 # Single selection
                 if response.isdigit():
                     idx = int(response) - 1
                     if 0 <= idx < len(options):
                         return options[idx]
-                print(f'{Colors.RED}Invalid selection. Please enter a number 1-{len(options)}.{Colors.END}')
+                print(f"{Colors.RED}Invalid selection. Please enter a number 1-{len(options)}.{Colors.END}")
         else:
             return response
 
@@ -173,9 +174,9 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
     Returns:
         True for yes, False for no
     """
-    default_str = 'Y/n' if default else 'y/N'
-    response = ask_question(f'{prompt} ({default_str})', default='y' if default else 'n')
-    return response.lower() in ['y', 'yes']
+    default_str = "Y/n" if default else "y/N"
+    response = ask_question(f"{prompt} ({default_str})", default="y" if default else "n")
+    return response.lower() in ["y", "yes"]
 
 
 def validate_tools() -> None:
@@ -184,16 +185,16 @@ def validate_tools() -> None:
     Raises:
         SystemExit: If required tools are missing
     """
-    info('Validating required tools...')
+    info("Validating required tools...")
     missing = []
 
     for tool in REQUIRED_TOOLS:
         try:
-            subprocess.run([tool, '--version'], capture_output=True, check=True)
-            success(f'{tool} is installed')
+            subprocess.run([tool, "--version"], capture_output=True, check=True)
+            success(f"{tool} is installed")
         except (subprocess.CalledProcessError, FileNotFoundError):
             missing.append(tool)
-            error_exit(f'{tool} is not installed')
+            error_exit(f"{tool} is not installed")
 
     if missing:
         error_exit(f"Missing required tools: {', '.join(missing)}")
@@ -208,27 +209,27 @@ def validate_source_repo(source_path: Path) -> None:
     Raises:
         SystemExit: If source repository is invalid
     """
-    info(f'Validating source repository: {source_path}')
+    info(f"Validating source repository: {source_path}")
 
     if not source_path.exists():
-        error_exit(f'Source repository does not exist: {source_path}')
+        error_exit(f"Source repository does not exist: {source_path}")
 
     if not source_path.is_dir():
-        error_exit(f'Source path is not a directory: {source_path}')
+        error_exit(f"Source path is not a directory: {source_path}")
 
     # Check for .claude/skills/ directory
-    skills_dir = source_path / '.claude' / 'skills'
+    skills_dir = source_path / ".claude" / "skills"
     if not skills_dir.exists():
-        error_exit('Source repository missing .claude/skills/ directory')
+        error_exit("Source repository missing .claude/skills/ directory")
 
     # Check for required skills (at least some of them)
     found_skills = [d.name for d in skills_dir.iterdir() if d.is_dir()]
     required_count = len([s for s in SKILL_NAMES[:-1] if s in found_skills])  # Exclude initialize-repository
 
     if required_count < 3:
-        error_exit(f'Source repository has incomplete workflow system (found {required_count}/9 skills)')
+        error_exit(f"Source repository has incomplete workflow system (found {required_count}/9 skills)")
 
-    success(f'Source repository validated ({required_count}/9 skills found)')
+    success(f"Source repository validated ({required_count}/9 skills found)")
 
 
 def validate_target_repo(target_path: Path) -> None:
@@ -240,26 +241,29 @@ def validate_target_repo(target_path: Path) -> None:
     Raises:
         SystemExit: If target path is invalid
     """
-    info(f'Validating target repository path: {target_path}')
+    info(f"Validating target repository path: {target_path}")
 
     if target_path.exists():
         if any(target_path.iterdir()):
-            if not ask_yes_no(f'Target directory {target_path} is not empty. Continue?', default=False):
-                error_exit('Aborted by user')
-            warning('Target directory is not empty, will overwrite files')
+            if not ask_yes_no(f"Target directory {target_path} is not empty. Continue?", default=False):
+                error_exit("Aborted by user")
+            warning("Target directory is not empty, will overwrite files")
 
-    success('Target repository path validated')
+    success("Target repository path validated")
 
 
 class RepositoryConfig:
     """Configuration for new repository."""
 
     def __init__(self):
-        self.name: str = ''
-        self.purpose: str = ''
-        self.description: str = ''
-        self.gh_user: str = ''
-        self.python_version: str = '3.11'
+        self.name: str = ""
+        self.purpose: str = ""
+        self.description: str = ""
+        self.vcs_provider: str = "github"  # "github" or "azure_devops"
+        self.vcs_user: str = ""  # Username from VCS provider
+        self.azure_org: str | None = None  # Azure DevOps organization URL
+        self.azure_project: str | None = None  # Azure DevOps project name
+        self.python_version: str = "3.11"
         self.copy_workflow: bool = True
         self.copy_domain: bool = False
         self.copy_tests: bool = False
@@ -268,6 +272,16 @@ class RepositoryConfig:
         self.init_git: bool = True
         self.create_branches: bool = True
         self.remote_url: str | None = None
+
+    @property
+    def gh_user(self) -> str:
+        """Backward compatibility alias for vcs_user."""
+        return self.vcs_user
+
+    @gh_user.setter
+    def gh_user(self, value: str) -> None:
+        """Backward compatibility alias for vcs_user."""
+        self.vcs_user = value
 
 
 def phase1_configuration(source_path: Path, target_path: Path) -> RepositoryConfig:
@@ -280,75 +294,72 @@ def phase1_configuration(source_path: Path, target_path: Path) -> RepositoryConf
     Returns:
         RepositoryConfig with user selections
     """
-    print(f'\n{Colors.BOLD}=== Phase 1: Configuration Selection ==={Colors.END}')
+    print(f"\n{Colors.BOLD}=== Phase 1: Configuration Selection ==={Colors.END}")
 
     config = RepositoryConfig()
 
     # Repository details
     config.name = target_path.name
-    info(f'Repository name: {config.name}')
+    info(f"Repository name: {config.name}")
 
     config.purpose = ask_question(
-        'What is the primary purpose of this repository?',
-        options=[
-            'Web application',
-            'CLI tool',
-            'Library/package',
-            'Data analysis',
-            'Machine learning',
-            'Other'
-        ]
+        "What is the primary purpose of this repository?", options=["Web application", "CLI tool", "Library/package", "Data analysis", "Machine learning", "Other"]
     )
 
-    config.description = ask_question('Brief description of the repository (one line):')
+    config.description = ask_question("Brief description of the repository (one line):")
 
-    # VCS username (GitHub/Azure DevOps)
-    try:
-        vcs = get_vcs_adapter()
-        detected_user = vcs.get_current_user()
-        config.gh_user = ask_question(f'VCS username ({vcs.get_provider_name()})', default=detected_user)
-    except Exception:
-        config.gh_user = ask_question('VCS username:')
+    # VCS provider selection
+    config.vcs_provider = (
+        ask_question("Which VCS provider will this repository use?", options=["GitHub", "Azure DevOps"], default="GitHub").lower().replace(" ", "_")
+    )  # Normalize to "github" or "azure_devops"
+
+    # VCS username and provider-specific config
+    if config.vcs_provider == "azure_devops":
+        # Azure DevOps specific configuration
+        config.azure_org = ask_question("Azure DevOps organization URL (e.g., https://dev.azure.com/myorg):")
+        config.azure_project = ask_question("Azure DevOps project name:")
+        # Try to detect Azure DevOps user
+        try:
+            vcs = get_vcs_adapter()
+            if vcs.get_provider_name() == "Azure DevOps":
+                detected_user = vcs.get_current_user()
+                # Extract username from email (before @)
+                if "@" in detected_user:
+                    detected_user = detected_user.split("@")[0]
+                config.vcs_user = ask_question("Azure DevOps username", default=detected_user)
+            else:
+                config.vcs_user = ask_question("Azure DevOps username:")
+        except Exception:
+            config.vcs_user = ask_question("Azure DevOps username:")
+    else:
+        # GitHub configuration
+        try:
+            vcs = get_vcs_adapter()
+            detected_user = vcs.get_current_user()
+            config.vcs_user = ask_question("GitHub username", default=detected_user)
+        except Exception:
+            config.vcs_user = ask_question("GitHub username:")
 
     # Technology stack
-    config.python_version = ask_question(
-        'Python version',
-        options=['3.11', '3.12', '3.13'],
-        default='3.11'
-    )
+    config.python_version = ask_question("Python version", options=["3.11", "3.12", "3.13"], default="3.11")
 
     # Components to copy
-    print(f'\n{Colors.BOLD}Which components should be copied?{Colors.END}')
+    print(f"\n{Colors.BOLD}Which components should be copied?{Colors.END}")
 
-    config.copy_workflow = ask_yes_no(
-        'Copy workflow system (.claude/skills/, WORKFLOW.md, etc.)?',
-        default=True
-    )
+    config.copy_workflow = ask_yes_no("Copy workflow system (.claude/skills/, WORKFLOW.md, etc.)?", default=True)
 
     if not config.copy_workflow:
-        error_exit('Workflow system is required for initialization')
+        error_exit("Workflow system is required for initialization")
 
-    config.copy_domain = ask_yes_no(
-        'Copy domain-specific content (src/, resources/)?',
-        default=False
-    )
+    config.copy_domain = ask_yes_no("Copy domain-specific content (src/, resources/)?", default=False)
 
-    config.copy_tests = ask_yes_no(
-        'Copy sample tests (tests/)?',
-        default=False
-    )
+    config.copy_tests = ask_yes_no("Copy sample tests (tests/)?", default=False)
 
-    config.copy_containers = ask_yes_no(
-        'Copy container configs (Containerfile, podman-compose.yml)?',
-        default=False
-    )
+    config.copy_containers = ask_yes_no("Copy container configs (Containerfile, podman-compose.yml)?", default=False)
 
-    config.copy_cicd = ask_yes_no(
-        'Copy CI/CD pipelines (.github/workflows/tests.yml, azure-pipelines.yml)?',
-        default=True
-    )
+    config.copy_cicd = ask_yes_no("Copy CI/CD pipelines (.github/workflows/tests.yml, azure-pipelines.yml)?", default=True)
 
-    success('Configuration complete')
+    success("Configuration complete")
     return config
 
 
@@ -361,23 +372,17 @@ def phase2_git_setup(config: RepositoryConfig) -> RepositoryConfig:
     Returns:
         Updated RepositoryConfig
     """
-    print(f'\n{Colors.BOLD}=== Phase 2: Git Setup ==={Colors.END}')
+    print(f"\n{Colors.BOLD}=== Phase 2: Git Setup ==={Colors.END}")
 
-    config.init_git = ask_yes_no(
-        'Initialize git repository?',
-        default=True
-    )
+    config.init_git = ask_yes_no("Initialize git repository?", default=True)
 
     if config.init_git:
-        config.create_branches = ask_yes_no(
-            'Create branch structure (main, develop, contrib)?',
-            default=True
-        )
+        config.create_branches = ask_yes_no("Create branch structure (main, develop, contrib)?", default=True)
 
-        if ask_yes_no('Set up remote repository?', default=False):
-            config.remote_url = ask_question('Remote URL (e.g., https://github.com/user/repo.git):')
+        if ask_yes_no("Set up remote repository?", default=False):
+            config.remote_url = ask_question("Remote URL (e.g., https://github.com/user/repo.git):")
 
-    success('Git setup configuration complete')
+    success("Git setup configuration complete")
     return config
 
 
@@ -388,10 +393,10 @@ def copy_skills(source_path: Path, target_path: Path) -> None:
         source_path: Path to source repository
         target_path: Path to target repository
     """
-    info('Copying workflow skills...')
+    info("Copying workflow skills...")
 
-    source_skills = source_path / '.claude' / 'skills'
-    target_skills = target_path / '.claude' / 'skills'
+    source_skills = source_path / ".claude" / "skills"
+    target_skills = target_path / ".claude" / "skills"
 
     target_skills.mkdir(parents=True, exist_ok=True)
 
@@ -401,10 +406,10 @@ def copy_skills(source_path: Path, target_path: Path) -> None:
         if skill_source.exists():
             skill_target = target_skills / skill_name
             shutil.copytree(skill_source, skill_target, dirs_exist_ok=True)
-            success(f'Copied skill: {skill_name}')
+            success(f"Copied skill: {skill_name}")
             copied_count += 1
 
-    success(f'Copied {copied_count}/{len(SKILL_NAMES)} skills')
+    success(f"Copied {copied_count}/{len(SKILL_NAMES)} skills")
 
 
 def copy_documentation(source_path: Path, target_path: Path) -> None:
@@ -414,12 +419,12 @@ def copy_documentation(source_path: Path, target_path: Path) -> None:
         source_path: Path to source repository
         target_path: Path to target repository
     """
-    info('Copying workflow documentation...')
+    info("Copying workflow documentation...")
 
     docs = [
-        'WORKFLOW.md',
-        'CONTRIBUTING.md',
-        '.claude/skills/UPDATE_CHECKLIST.md',
+        "WORKFLOW.md",
+        "CONTRIBUTING.md",
+        ".claude/skills/UPDATE_CHECKLIST.md",
     ]
 
     for doc in docs:
@@ -428,7 +433,7 @@ def copy_documentation(source_path: Path, target_path: Path) -> None:
             target_file = target_path / doc
             target_file.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_file, target_file)
-            success(f'Copied: {doc}')
+            success(f"Copied: {doc}")
 
 
 def generate_readme(config: RepositoryConfig, target_path: Path) -> None:
@@ -438,7 +443,13 @@ def generate_readme(config: RepositoryConfig, target_path: Path) -> None:
         config: RepositoryConfig with user selections
         target_path: Path to target repository
     """
-    info('Generating README.md...')
+    info("Generating README.md...")
+
+    # Determine VCS CLI instructions based on provider
+    if config.vcs_provider == "azure_devops":
+        vcs_prereq = "- Git and Azure CLI (`az` with azure-devops extension)"
+    else:
+        vcs_prereq = "- Git and GitHub CLI (`gh`) OR Azure CLI (`az`)"
 
     readme_content = f"""# {config.name}
 
@@ -454,7 +465,7 @@ def generate_readme(config: RepositoryConfig, target_path: Path) -> None:
 
 - Python {config.python_version}+
 - uv package manager
-- Git and GitHub CLI (gh)
+{vcs_prereq}
 
 ### Installation
 
@@ -532,9 +543,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 Generated with workflow system v5.2.0
 """
 
-    target_file = target_path / 'README.md'
+    target_file = target_path / "README.md"
     target_file.write_text(readme_content)
-    success('Generated README.md')
+    success("Generated README.md")
 
 
 def generate_claude_md(config: RepositoryConfig, target_path: Path, source_path: Path) -> None:
@@ -545,15 +556,15 @@ def generate_claude_md(config: RepositoryConfig, target_path: Path, source_path:
         target_path: Path to target repository
         source_path: Path to source repository
     """
-    info('Generating CLAUDE.md...')
+    info("Generating CLAUDE.md...")
 
     # Read source CLAUDE.md to extract workflow sections
-    source_claude = source_path / 'CLAUDE.md'
-    source_content = source_claude.read_text() if source_claude.exists() else ''
+    source_claude = source_path / "CLAUDE.md"
+    source_content = source_claude.read_text() if source_claude.exists() else ""
 
     # Extract workflow architecture section (lines between ## Workflow and next ##)
-    workflow_match = re.search(r'(## Workflow.*?)(?=\n## [^#])', source_content, re.DOTALL)
-    workflow_section = workflow_match.group(1) if workflow_match else ''
+    workflow_match = re.search(r"(## Workflow.*?)(?=\n## [^#])", source_content, re.DOTALL)
+    workflow_section = workflow_match.group(1) if workflow_match else ""
 
     claude_content = f"""# CLAUDE.md
 
@@ -666,9 +677,9 @@ feature/<timestamp>_<slug>    ← Isolated feature (worktree)
 Generated with workflow system v5.2.0
 """
 
-    target_file = target_path / 'CLAUDE.md'
+    target_file = target_path / "CLAUDE.md"
     target_file.write_text(claude_content)
-    success('Generated CLAUDE.md')
+    success("Generated CLAUDE.md")
 
 
 def generate_pyproject_toml(config: RepositoryConfig, target_path: Path) -> None:
@@ -678,7 +689,7 @@ def generate_pyproject_toml(config: RepositoryConfig, target_path: Path) -> None
         config: RepositoryConfig with user selections
         target_path: Path to target repository
     """
-    info('Generating pyproject.toml...')
+    info("Generating pyproject.toml...")
 
     pyproject_content = f"""[project]
 name = "{config.name}"
@@ -716,9 +727,9 @@ python_version = "{config.python_version}"
 strict = true
 """
 
-    target_file = target_path / 'pyproject.toml'
+    target_file = target_path / "pyproject.toml"
     target_file.write_text(pyproject_content)
-    success('Generated pyproject.toml')
+    success("Generated pyproject.toml")
 
 
 def copy_gitignore(source_path: Path, target_path: Path) -> None:
@@ -728,13 +739,43 @@ def copy_gitignore(source_path: Path, target_path: Path) -> None:
         source_path: Path to source repository
         target_path: Path to target repository
     """
-    info('Copying .gitignore...')
+    info("Copying .gitignore...")
 
-    source_file = source_path / '.gitignore'
+    source_file = source_path / ".gitignore"
     if source_file.exists():
-        target_file = target_path / '.gitignore'
+        target_file = target_path / ".gitignore"
         shutil.copy2(source_file, target_file)
-        success('Copied .gitignore')
+        success("Copied .gitignore")
+
+
+def generate_vcs_config(config: RepositoryConfig, target_path: Path) -> None:
+    """Generate .vcs_config.yaml for VCS provider configuration.
+
+    Args:
+        config: RepositoryConfig with user selections
+        target_path: Path to target repository
+    """
+    # Only generate for Azure DevOps (GitHub is auto-detected and doesn't need config)
+    if config.vcs_provider != "azure_devops":
+        return
+
+    info("Generating .vcs_config.yaml for Azure DevOps...")
+
+    vcs_config_content = f"""# VCS Provider Configuration
+# This file configures the workflow system to use Azure DevOps instead of GitHub.
+# Auto-generated by initialize-repository.
+
+vcs_provider: azure_devops
+
+azure_devops:
+  organization: "{config.azure_org}"
+  project: "{config.azure_project}"
+  repository: "{config.name}"  # Defaults to project name if not specified
+"""
+
+    target_file = target_path / ".vcs_config.yaml"
+    target_file.write_text(vcs_config_content)
+    success("Generated .vcs_config.yaml")
 
 
 def create_directory_structure(target_path: Path, config: RepositoryConfig) -> None:
@@ -744,30 +785,31 @@ def create_directory_structure(target_path: Path, config: RepositoryConfig) -> N
         target_path: Path to target repository
         config: RepositoryConfig with user selections
     """
-    info('Creating directory structure...')
+    info("Creating directory structure...")
 
     # Required directories
     directories = [
-        'ARCHIVED',
-        'planning',
-        'specs',
+        "ARCHIVED",
+        "planning",
+        "specs",
     ]
 
     # Optional directories based on config
     if config.copy_domain:
-        directories.extend(['src', 'resources'])
+        directories.extend(["src", "resources"])
 
     if config.copy_tests:
-        directories.append('tests')
+        directories.append("tests")
 
     for dir_name in directories:
         dir_path = target_path / dir_name
         dir_path.mkdir(parents=True, exist_ok=True)
 
         # Create CLAUDE.md and README.md in each directory
-        if dir_name != 'ARCHIVED':
-            claude_md = dir_path / 'CLAUDE.md'
-            claude_md.write_text(f"""# Claude Code Context: {dir_name}
+        if dir_name != "ARCHIVED":
+            claude_md = dir_path / "CLAUDE.md"
+            claude_md.write_text(
+                f"""# Claude Code Context: {dir_name}
 
 ## Purpose
 
@@ -788,10 +830,12 @@ Context-specific guidance for {dir_name}
 ## Related Documentation
 
 - **[README.md](README.md)** - Human-readable documentation for this directory
-""")
+"""
+            )
 
-            readme_md = dir_path / 'README.md'
-            readme_md.write_text(f"""# {dir_name}
+            readme_md = dir_path / "README.md"
+            readme_md.write_text(
+                f"""# {dir_name}
 
 [Description of this directory's purpose]
 
@@ -802,28 +846,33 @@ Context-specific guidance for {dir_name}
 ## Usage
 
 [Instructions for working with this directory]
-""")
+"""
+            )
 
         # Create ARCHIVED subdirectory (except in ARCHIVED itself)
-        if dir_name != 'ARCHIVED':
-            archived_path = dir_path / 'ARCHIVED'
+        if dir_name != "ARCHIVED":
+            archived_path = dir_path / "ARCHIVED"
             archived_path.mkdir(exist_ok=True)
 
-            archived_claude = archived_path / 'CLAUDE.md'
-            archived_claude.write_text(f"""# Claude Code Context: {dir_name}/ARCHIVED
+            archived_claude = archived_path / "CLAUDE.md"
+            archived_claude.write_text(
+                f"""# Claude Code Context: {dir_name}/ARCHIVED
 
 Archived files from {dir_name}
-""")
+"""
+            )
 
-            archived_readme = archived_path / 'README.md'
-            archived_readme.write_text(f"""# {dir_name}/ARCHIVED
+            archived_readme = archived_path / "README.md"
+            archived_readme.write_text(
+                f"""# {dir_name}/ARCHIVED
 
 Archived files from {dir_name}
-""")
+"""
+            )
 
-        success(f'Created: {dir_name}/')
+        success(f"Created: {dir_name}/")
 
-    success('Directory structure created')
+    success("Directory structure created")
 
 
 def create_todo_manifest(target_path: Path, config: RepositoryConfig) -> None:
@@ -833,7 +882,7 @@ def create_todo_manifest(target_path: Path, config: RepositoryConfig) -> None:
         target_path: Path to target repository
         config: RepositoryConfig with user selections
     """
-    info('Creating TODO.md master manifest...')
+    info("Creating TODO.md master manifest...")
 
     timestamp = datetime.now(UTC).isoformat()
 
@@ -874,9 +923,9 @@ When you start a new workflow (feature, release, hotfix), a TODO file will be cr
 This master manifest is automatically updated when workflows are archived.
 """
 
-    target_file = target_path / 'TODO.md'
+    target_file = target_path / "TODO.md"
     target_file.write_text(todo_content)
-    success('Created TODO.md master manifest')
+    success("Created TODO.md master manifest")
 
 
 def create_changelog(target_path: Path) -> None:
@@ -885,9 +934,10 @@ def create_changelog(target_path: Path) -> None:
     Args:
         target_path: Path to target repository
     """
-    info('Creating CHANGELOG.md...')
+    info("Creating CHANGELOG.md...")
 
-    changelog_content = """# Changelog
+    changelog_content = (
+        """# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -899,7 +949,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial repository setup with workflow system v5.2.0
 
-## [0.1.0] - """ + datetime.now(UTC).strftime('%Y-%m-%d') + """
+## [0.1.0] - """
+        + datetime.now(UTC).strftime("%Y-%m-%d")
+        + """
 
 ### Added
 - Initialized repository with skill-based workflow architecture
@@ -908,10 +960,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git-flow + GitHub-flow hybrid with worktrees
 - Documentation system with WORKFLOW.md, CLAUDE.md, CONTRIBUTING.md
 """
+    )
 
-    target_file = target_path / 'CHANGELOG.md'
+    target_file = target_path / "CHANGELOG.md"
     target_file.write_text(changelog_content)
-    success('Created CHANGELOG.md')
+    success("Created CHANGELOG.md")
 
 
 def copy_optional_content(source_path: Path, target_path: Path, config: RepositoryConfig) -> None:
@@ -923,46 +976,46 @@ def copy_optional_content(source_path: Path, target_path: Path, config: Reposito
         config: RepositoryConfig with user selections
     """
     if config.copy_domain:
-        info('Copying domain-specific content...')
-        for dir_name in ['src', 'resources']:
+        info("Copying domain-specific content...")
+        for dir_name in ["src", "resources"]:
             source_dir = source_path / dir_name
             if source_dir.exists():
                 target_dir = target_path / dir_name
                 shutil.copytree(source_dir, target_dir, dirs_exist_ok=True)
-                success(f'Copied: {dir_name}/')
+                success(f"Copied: {dir_name}/")
 
     if config.copy_tests:
-        info('Copying tests...')
-        source_tests = source_path / 'tests'
+        info("Copying tests...")
+        source_tests = source_path / "tests"
         if source_tests.exists():
-            target_tests = target_path / 'tests'
+            target_tests = target_path / "tests"
             shutil.copytree(source_tests, target_tests, dirs_exist_ok=True)
-            success('Copied: tests/')
+            success("Copied: tests/")
 
     if config.copy_containers:
-        info('Copying container configs...')
-        for file_name in ['Containerfile', 'podman-compose.yml']:
+        info("Copying container configs...")
+        for file_name in ["Containerfile", "podman-compose.yml"]:
             source_file = source_path / file_name
             if source_file.exists():
                 target_file = target_path / file_name
                 shutil.copy2(source_file, target_file)
-                success(f'Copied: {file_name}')
+                success(f"Copied: {file_name}")
 
     if config.copy_cicd:
-        info('Copying CI/CD pipelines...')
+        info("Copying CI/CD pipelines...")
         # Copy GitHub Actions workflow
-        source_workflow = source_path / '.github' / 'workflows' / 'tests.yml'
+        source_workflow = source_path / ".github" / "workflows" / "tests.yml"
         if source_workflow.exists():
-            target_workflow = target_path / '.github' / 'workflows' / 'tests.yml'
+            target_workflow = target_path / ".github" / "workflows" / "tests.yml"
             target_workflow.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_workflow, target_workflow)
-            success('Copied: .github/workflows/tests.yml')
+            success("Copied: .github/workflows/tests.yml")
         # Copy Azure Pipelines config
-        source_azure = source_path / 'azure-pipelines.yml'
+        source_azure = source_path / "azure-pipelines.yml"
         if source_azure.exists():
-            target_azure = target_path / 'azure-pipelines.yml'
+            target_azure = target_path / "azure-pipelines.yml"
             shutil.copy2(source_azure, target_azure)
-            success('Copied: azure-pipelines.yml')
+            success("Copied: azure-pipelines.yml")
 
 
 def phase3_file_operations(source_path: Path, target_path: Path, config: RepositoryConfig) -> None:
@@ -973,7 +1026,7 @@ def phase3_file_operations(source_path: Path, target_path: Path, config: Reposit
         target_path: Path to target repository
         config: RepositoryConfig with user selections
     """
-    print(f'\n{Colors.BOLD}=== Phase 3: File Operations ==={Colors.END}')
+    print(f"\n{Colors.BOLD}=== Phase 3: File Operations ==={Colors.END}")
 
     # Create target directory
     target_path.mkdir(parents=True, exist_ok=True)
@@ -990,6 +1043,9 @@ def phase3_file_operations(source_path: Path, target_path: Path, config: Reposit
     # Copy supporting files
     copy_gitignore(source_path, target_path)
 
+    # Generate VCS config for Azure DevOps
+    generate_vcs_config(config, target_path)
+
     # Create directory structure
     create_directory_structure(target_path, config)
     create_todo_manifest(target_path, config)
@@ -998,7 +1054,7 @@ def phase3_file_operations(source_path: Path, target_path: Path, config: Reposit
     # Copy optional content
     copy_optional_content(source_path, target_path, config)
 
-    success('File operations complete')
+    success("File operations complete")
 
 
 def phase4_git_initialization(target_path: Path, config: RepositoryConfig) -> None:
@@ -1008,10 +1064,10 @@ def phase4_git_initialization(target_path: Path, config: RepositoryConfig) -> No
         target_path: Path to target repository
         config: RepositoryConfig with user selections
     """
-    print(f'\n{Colors.BOLD}=== Phase 4: Git Initialization ==={Colors.END}')
+    print(f"\n{Colors.BOLD}=== Phase 4: Git Initialization ==={Colors.END}")
 
     if not config.init_git:
-        warning('Skipping git initialization (user selected no)')
+        warning("Skipping git initialization (user selected no)")
         return
 
     # Change to target directory
@@ -1020,14 +1076,14 @@ def phase4_git_initialization(target_path: Path, config: RepositoryConfig) -> No
 
     try:
         # Initialize git
-        info('Initializing git repository...')
-        subprocess.run(['git', 'init'], check=True, capture_output=True)
-        subprocess.run(['git', 'config', 'init.defaultBranch', 'main'], check=True, capture_output=True)
-        success('Git initialized')
+        info("Initializing git repository...")
+        subprocess.run(["git", "init"], check=True, capture_output=True)
+        subprocess.run(["git", "config", "init.defaultBranch", "main"], check=True, capture_output=True)
+        success("Git initialized")
 
         # Create initial commit on main
-        info('Creating initial commit...')
-        subprocess.run(['git', 'add', '.'], check=True, capture_output=True)
+        info("Creating initial commit...")
+        subprocess.run(["git", "add", "."], check=True, capture_output=True)
         commit_msg = f"""chore: initialize repository with workflow system v5.2.0
 
 Initialized {config.name} with skill-based workflow architecture:
@@ -1042,37 +1098,37 @@ Repository purpose: {config.purpose}
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 """
-        subprocess.run(['git', 'commit', '-m', commit_msg], check=True, capture_output=True)
-        success('Initial commit created on main')
+        subprocess.run(["git", "commit", "-m", commit_msg], check=True, capture_output=True)
+        success("Initial commit created on main")
 
         if config.create_branches:
             # Create develop branch
-            info('Creating develop branch...')
-            subprocess.run(['git', 'checkout', '-b', 'develop'], check=True, capture_output=True)
-            success('Created develop branch')
+            info("Creating develop branch...")
+            subprocess.run(["git", "checkout", "-b", "develop"], check=True, capture_output=True)
+            success("Created develop branch")
 
             # Create contrib branch
-            info(f'Creating contrib/{config.gh_user} branch...')
-            subprocess.run(['git', 'checkout', '-b', f'contrib/{config.gh_user}'], check=True, capture_output=True)
-            success(f'Created contrib/{config.gh_user} branch')
+            info(f"Creating contrib/{config.gh_user} branch...")
+            subprocess.run(["git", "checkout", "-b", f"contrib/{config.gh_user}"], check=True, capture_output=True)
+            success(f"Created contrib/{config.gh_user} branch")
 
             # Switch back to main
-            subprocess.run(['git', 'checkout', 'main'], check=True, capture_output=True)
+            subprocess.run(["git", "checkout", "main"], check=True, capture_output=True)
 
         if config.remote_url:
             # Set up remote
-            info(f'Setting up remote: {config.remote_url}')
-            subprocess.run(['git', 'remote', 'add', 'origin', config.remote_url], check=True, capture_output=True)
-            success('Remote configured')
+            info(f"Setting up remote: {config.remote_url}")
+            subprocess.run(["git", "remote", "add", "origin", config.remote_url], check=True, capture_output=True)
+            success("Remote configured")
 
-            if ask_yes_no('Push to remote?', default=False):
-                subprocess.run(['git', 'push', '-u', 'origin', 'main'], check=True)
+            if ask_yes_no("Push to remote?", default=False):
+                subprocess.run(["git", "push", "-u", "origin", "main"], check=True)
                 if config.create_branches:
-                    subprocess.run(['git', 'push', '-u', 'origin', 'develop'], check=True)
-                    subprocess.run(['git', 'push', '-u', 'origin', f'contrib/{config.gh_user}'], check=True)
-                success('Pushed to remote')
+                    subprocess.run(["git", "push", "-u", "origin", "develop"], check=True)
+                    subprocess.run(["git", "push", "-u", "origin", f"contrib/{config.gh_user}"], check=True)
+                success("Pushed to remote")
 
-        success('Git initialization complete')
+        success("Git initialization complete")
 
     finally:
         # Return to original directory
@@ -1085,24 +1141,24 @@ def validate_target_structure(target_path: Path) -> None:
     Args:
         target_path: Path to target repository
     """
-    info('Validating repository structure...')
+    info("Validating repository structure...")
 
     required_files = [
-        'README.md',
-        'CLAUDE.md',
-        'WORKFLOW.md',
-        'CONTRIBUTING.md',
-        'CHANGELOG.md',
-        'TODO.md',
-        'pyproject.toml',
-        '.gitignore',
+        "README.md",
+        "CLAUDE.md",
+        "WORKFLOW.md",
+        "CONTRIBUTING.md",
+        "CHANGELOG.md",
+        "TODO.md",
+        "pyproject.toml",
+        ".gitignore",
     ]
 
     required_dirs = [
-        '.claude/skills',
-        'ARCHIVED',
-        'planning',
-        'specs',
+        ".claude/skills",
+        "ARCHIVED",
+        "planning",
+        "specs",
     ]
 
     missing_files = []
@@ -1117,13 +1173,13 @@ def validate_target_structure(target_path: Path) -> None:
             missing_dirs.append(dir_path)
 
     if missing_files or missing_dirs:
-        warning('Validation found missing items:')
+        warning("Validation found missing items:")
         for item in missing_files:
-            print(f'  - Missing file: {item}')
+            print(f"  - Missing file: {item}")
         for item in missing_dirs:
-            print(f'  - Missing directory: {item}')
+            print(f"  - Missing directory: {item}")
     else:
-        success('Repository structure validated')
+        success("Repository structure validated")
 
 
 def print_summary(target_path: Path, config: RepositoryConfig) -> None:
@@ -1134,57 +1190,64 @@ def print_summary(target_path: Path, config: RepositoryConfig) -> None:
         config: RepositoryConfig with user selections
     """
     print(f"\n{Colors.BOLD}{'=' * 60}{Colors.END}")
-    print(f'{Colors.BOLD}✓ Repository Initialization Complete{Colors.END}')
+    print(f"{Colors.BOLD}✓ Repository Initialization Complete{Colors.END}")
     print(f"{Colors.BOLD}{'=' * 60}{Colors.END}\n")
 
-    print(f'{Colors.BLUE}Repository:{Colors.END} {target_path}')
-    print(f'{Colors.BLUE}Name:{Colors.END} {config.name}')
-    print(f'{Colors.BLUE}Purpose:{Colors.END} {config.purpose}')
-    print(f'{Colors.BLUE}GitHub User:{Colors.END} {config.gh_user}')
+    print(f"{Colors.BLUE}Repository:{Colors.END} {target_path}")
+    print(f"{Colors.BLUE}Name:{Colors.END} {config.name}")
+    print(f"{Colors.BLUE}Purpose:{Colors.END} {config.purpose}")
+    vcs_display = "Azure DevOps" if config.vcs_provider == "azure_devops" else "GitHub"
+    print(f"{Colors.BLUE}VCS Provider:{Colors.END} {vcs_display}")
+    print(f"{Colors.BLUE}VCS User:{Colors.END} {config.vcs_user}")
+    if config.vcs_provider == "azure_devops":
+        print(f"{Colors.BLUE}Azure Org:{Colors.END} {config.azure_org}")
+        print(f"{Colors.BLUE}Azure Project:{Colors.END} {config.azure_project}")
 
-    print(f'\n{Colors.BOLD}Created:{Colors.END}')
-    print('  ✓ Workflow system (9 skills)')
-    print('  ✓ Documentation (WORKFLOW.md, CLAUDE.md, CONTRIBUTING.md)')
-    print('  ✓ Quality configs (pyproject.toml, .gitignore)')
-    print('  ✓ Directory structure (ARCHIVED/, planning/, specs/)')
+    print(f"\n{Colors.BOLD}Created:{Colors.END}")
+    print("  ✓ Workflow system (9 skills)")
+    print("  ✓ Documentation (WORKFLOW.md, CLAUDE.md, CONTRIBUTING.md)")
+    print("  ✓ Quality configs (pyproject.toml, .gitignore)")
+    if config.vcs_provider == "azure_devops":
+        print("  ✓ VCS config (.vcs_config.yaml for Azure DevOps)")
+    print("  ✓ Directory structure (ARCHIVED/, planning/, specs/)")
 
     if config.copy_domain:
-        print('  ✓ Domain content (src/, resources/)')
+        print("  ✓ Domain content (src/, resources/)")
     if config.copy_tests:
-        print('  ✓ Tests (tests/)')
+        print("  ✓ Tests (tests/)")
     if config.copy_containers:
-        print('  ✓ Container configs')
+        print("  ✓ Container configs")
     if config.copy_cicd:
-        print('  ✓ CI/CD pipelines (GitHub Actions + Azure Pipelines)')
+        print("  ✓ CI/CD pipelines (GitHub Actions + Azure Pipelines)")
 
     if config.init_git:
-        print(f'\n{Colors.BOLD}Git:{Colors.END}')
-        print('  ✓ Initialized repository')
+        print(f"\n{Colors.BOLD}Git:{Colors.END}")
+        print("  ✓ Initialized repository")
         if config.create_branches:
-            print(f'  ✓ Created branches: main, develop, contrib/{config.gh_user}')
+            print(f"  ✓ Created branches: main, develop, contrib/{config.gh_user}")
         if config.remote_url:
-            print(f'  ✓ Remote configured: {config.remote_url}')
+            print(f"  ✓ Remote configured: {config.remote_url}")
 
-    print(f'\n{Colors.BOLD}Next Steps:{Colors.END}')
-    print(f'  1. cd {target_path}')
-    print('  2. uv sync')
-    print('  3. Start first feature:')
-    print('     python .claude/skills/bmad-planner/scripts/create_planning.py \\')
-    print(f'       my-feature {config.gh_user}')
+    print(f"\n{Colors.BOLD}Next Steps:{Colors.END}")
+    print(f"  1. cd {target_path}")
+    print("  2. uv sync")
+    print("  3. Start first feature:")
+    print("     python .claude/skills/bmad-planner/scripts/create_planning.py \\")
+    print(f"       my-feature {config.gh_user}")
 
-    print(f'\n{Colors.BOLD}Documentation:{Colors.END}')
-    print('  - README.md - Project overview')
-    print('  - WORKFLOW.md - Complete workflow guide')
-    print('  - CLAUDE.md - Claude Code interaction guide')
-    print('  - CONTRIBUTING.md - Contributor guidelines')
+    print(f"\n{Colors.BOLD}Documentation:{Colors.END}")
+    print("  - README.md - Project overview")
+    print("  - WORKFLOW.md - Complete workflow guide")
+    print("  - CLAUDE.md - Claude Code interaction guide")
+    print("  - CONTRIBUTING.md - Contributor guidelines")
 
-    print(f'\n{Colors.GREEN}🎉 Happy coding!{Colors.END}\n')
+    print(f"\n{Colors.GREEN}🎉 Happy coding!{Colors.END}\n")
 
 
 def main() -> None:
     """Main entry point for repository initialization."""
     parser = argparse.ArgumentParser(
-        description='Initialize a new repository with workflow system from source repository',
+        description="Initialize a new repository with workflow system from source repository",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -1192,18 +1255,16 @@ Examples:
   python initialize_repository.py /path/to/german /path/to/my-new-repo
 
   # Interactive setup will guide you through configuration
-"""
+""",
     )
 
-    parser.add_argument('source_repo', type=Path,
-                       help='Path to source repository (with workflow system)')
-    parser.add_argument('target_repo', type=Path,
-                       help='Path to target repository (will be created)')
+    parser.add_argument("source_repo", type=Path, help="Path to source repository (with workflow system)")
+    parser.add_argument("target_repo", type=Path, help="Path to target repository (will be created)")
 
     args = parser.parse_args()
 
     print(f"\n{Colors.BOLD}{'=' * 60}{Colors.END}")
-    print(f'{Colors.BOLD}Repository Initialization (Meta-Skill){Colors.END}')
+    print(f"{Colors.BOLD}Repository Initialization (Meta-Skill){Colors.END}")
     print(f"{Colors.BOLD}{'=' * 60}{Colors.END}\n")
 
     # Validate environment
@@ -1218,19 +1279,24 @@ Examples:
     config = phase2_git_setup(config)
 
     # Confirm before proceeding
-    print(f'\n{Colors.BOLD}Review Configuration:{Colors.END}')
-    print(f'  Source: {args.source_repo}')
-    print(f'  Target: {args.target_repo}')
-    print(f'  Name: {config.name}')
-    print(f'  Purpose: {config.purpose}')
-    print(f'  GitHub User: {config.gh_user}')
-    print(f'  Copy workflow: {config.copy_workflow}')
-    print(f'  Copy domain: {config.copy_domain}')
-    print(f'  Copy CI/CD: {config.copy_cicd}')
-    print(f'  Initialize git: {config.init_git}')
+    print(f"\n{Colors.BOLD}Review Configuration:{Colors.END}")
+    print(f"  Source: {args.source_repo}")
+    print(f"  Target: {args.target_repo}")
+    print(f"  Name: {config.name}")
+    print(f"  Purpose: {config.purpose}")
+    vcs_display = "Azure DevOps" if config.vcs_provider == "azure_devops" else "GitHub"
+    print(f"  VCS Provider: {vcs_display}")
+    print(f"  VCS User: {config.vcs_user}")
+    if config.vcs_provider == "azure_devops":
+        print(f"  Azure Org: {config.azure_org}")
+        print(f"  Azure Project: {config.azure_project}")
+    print(f"  Copy workflow: {config.copy_workflow}")
+    print(f"  Copy domain: {config.copy_domain}")
+    print(f"  Copy CI/CD: {config.copy_cicd}")
+    print(f"  Initialize git: {config.init_git}")
 
-    if not ask_yes_no('\nProceed with initialization?', default=True):
-        error_exit('Aborted by user', code=0)
+    if not ask_yes_no("\nProceed with initialization?", default=True):
+        error_exit("Aborted by user", code=0)
 
     # Phase 3: File operations
     phase3_file_operations(args.source_repo, args.target_repo, config)
@@ -1245,5 +1311,5 @@ Examples:
     print_summary(args.target_repo, config)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -32,7 +32,12 @@ Ensure you have the required tools installed:
 podman --version          # Container runtime (Podman 4.0+)
 podman-compose --version  # Container orchestration
 git --version             # Version control
-gh --version              # GitHub CLI (for PR management)
+
+# VCS Provider CLI (one of):
+gh --version              # GitHub CLI (for GitHub repos)
+# OR
+az --version              # Azure CLI (for Azure DevOps repos)
+az extension add --name azure-devops  # Required extension for Azure DevOps
 ```
 
 ### Initial Setup
@@ -78,7 +83,7 @@ feature/* (individual features via worktrees)
 
 ```bash
 # Option 1: Using workflow tool (recommended)
-podman-compose run --rm dev python tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/stharrold
 
 # Option 2: Manual worktree creation
 git worktree add ../stharrold-templates.worktrees/my-feature -b feat/my-feature
@@ -281,8 +286,8 @@ podman-compose run --rm dev pytest test_mcp_deduplication.py
 podman-compose run --rm dev ./validate_documentation.sh
 
 # Workflow tools
-podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
-podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/archive_manager.py list
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
 ```
 
 **Automated Testing (CI/CD):**
@@ -292,25 +297,25 @@ podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop
 
 ## Workflow Tools Integration
 
-This repository includes selective tools from german workflow v5.3.0:
+This repository includes workflow automation tools in `.claude/skills/`:
 
 ### Using Workflow Tools
 
 ```bash
 # Archive management
-podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Directory structure validation
-podman-compose run --rm dev python tools/workflow-utilities/directory_structure.py docs/guides/
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/directory_structure.py docs/guides/
 
 # Version consistency checking
-podman-compose run --rm dev python tools/workflow-utilities/validate_versions.py
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/validate_versions.py
 
 # Semantic versioning
-podman-compose run --rm dev python tools/git-helpers/semantic_version.py develop v5.0.0
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
 
 # Worktree creation
-podman-compose run --rm dev python tools/git-helpers/create_worktree.py feature my-feature contrib/stharrold
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/stharrold
 ```
 
 ### NOT Included from German Workflow

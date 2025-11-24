@@ -50,7 +50,7 @@ class WorktreeContext:
     @property
     def state_dir(self) -> Path:
         """Get the path to the worktree-specific state directory."""
-        return self.worktree_root / '.claude-state'
+        return self.worktree_root / ".claude-state"
 
 
 def compute_worktree_id(path: Path) -> str:
@@ -85,7 +85,7 @@ def get_worktree_context() -> WorktreeContext:
         # Get worktree root (current working tree)
         worktree_root = Path(
             subprocess.check_output(
-                ['git', 'rev-parse', '--show-toplevel'],
+                ["git", "rev-parse", "--show-toplevel"],
                 text=True,
                 stderr=subprocess.PIPE,
             ).strip()
@@ -94,7 +94,7 @@ def get_worktree_context() -> WorktreeContext:
         # Get the common git directory (shared .git for worktrees)
         git_common_dir = Path(
             subprocess.check_output(
-                ['git', 'rev-parse', '--git-common-dir'],
+                ["git", "rev-parse", "--git-common-dir"],
                 text=True,
                 stderr=subprocess.PIPE,
             ).strip()
@@ -105,7 +105,7 @@ def get_worktree_context() -> WorktreeContext:
             git_common_dir = (worktree_root / git_common_dir).resolve()
 
         # Check if .git is a file (worktree) or directory (main repo)
-        git_path = worktree_root / '.git'
+        git_path = worktree_root / ".git"
         is_worktree = git_path.is_file()
 
         # Generate stable worktree ID from path hash
@@ -114,19 +114,19 @@ def get_worktree_context() -> WorktreeContext:
         # Get current branch name
         try:
             branch_name = subprocess.check_output(
-                ['git', 'branch', '--show-current'],
+                ["git", "branch", "--show-current"],
                 text=True,
                 stderr=subprocess.PIPE,
             ).strip()
             # Handle detached HEAD
             if not branch_name:
                 branch_name = subprocess.check_output(
-                    ['git', 'rev-parse', '--short', 'HEAD'],
+                    ["git", "rev-parse", "--short", "HEAD"],
                     text=True,
                     stderr=subprocess.PIPE,
                 ).strip()
         except subprocess.CalledProcessError:
-            branch_name = 'unknown'
+            branch_name = "unknown"
 
         return WorktreeContext(
             worktree_root=worktree_root,
@@ -137,9 +137,7 @@ def get_worktree_context() -> WorktreeContext:
         )
 
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f'Not in a git repository: {e.stderr if e.stderr else str(e)}'
-        ) from e
+        raise RuntimeError(f"Not in a git repository: {e.stderr if e.stderr else str(e)}") from e
 
 
 def get_state_dir() -> Path:
@@ -162,12 +160,12 @@ def get_state_dir() -> Path:
     state_dir.mkdir(exist_ok=True)
 
     # Create .gitignore if not exists
-    gitignore_path = state_dir / '.gitignore'
+    gitignore_path = state_dir / ".gitignore"
     if not gitignore_path.exists():
-        gitignore_path.write_text('# Ignore all files in state directory\n*\n')
+        gitignore_path.write_text("# Ignore all files in state directory\n*\n")
 
     # Create .worktree-id if not exists
-    worktree_id_path = state_dir / '.worktree-id'
+    worktree_id_path = state_dir / ".worktree-id"
     if not worktree_id_path.exists():
         worktree_id_path.write_text(ctx.worktree_id)
 
@@ -209,16 +207,16 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
     try:
         # Get list of active worktrees
         result = subprocess.check_output(
-            ['git', '-C', str(repo_root), 'worktree', 'list', '--porcelain'],
+            ["git", "-C", str(repo_root), "worktree", "list", "--porcelain"],
             text=True,
             stderr=subprocess.PIPE,
         )
 
         # Parse active worktree paths
         active_worktree_paths: set[Path] = set()
-        for line in result.strip().split('\n'):
-            if line.startswith('worktree '):
-                path = Path(line.split(' ', 1)[1])
+        for line in result.strip().split("\n"):
+            if line.startswith("worktree "):
+                path = Path(line.split(" ", 1)[1])
                 active_worktree_paths.add(path)
 
         # Check for state directories in parent directory of repo
@@ -229,7 +227,7 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
         # Explicitly exclude repo_root to avoid marking main repo as orphaned
         for item in parent_dir.iterdir():
             if item.is_dir() and item != repo_root:
-                state_dir = item / '.claude-state'
+                state_dir = item / ".claude-state"
                 if state_dir.exists() and item not in active_worktree_paths:
                     orphaned.append(state_dir)
 
@@ -240,23 +238,23 @@ def cleanup_orphaned_state(repo_root: Path) -> list[Path]:
     return orphaned
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Quick test when run directly
     import sys
 
     try:
         ctx = get_worktree_context()
-        print(f'Worktree root: {ctx.worktree_root}')
-        print(f'Git common dir: {ctx.git_common_dir}')
-        print(f'Is worktree: {ctx.is_worktree}')
-        print(f'Worktree ID: {ctx.worktree_id}')
-        print(f'Branch: {ctx.branch_name}')
-        print(f'State dir: {ctx.state_dir}')
+        print(f"Worktree root: {ctx.worktree_root}")
+        print(f"Git common dir: {ctx.git_common_dir}")
+        print(f"Is worktree: {ctx.is_worktree}")
+        print(f"Worktree ID: {ctx.worktree_id}")
+        print(f"Branch: {ctx.branch_name}")
+        print(f"State dir: {ctx.state_dir}")
 
         state_dir = get_state_dir()
-        print(f'\nState directory created/verified: {state_dir}')
-        print(f'Contents: {list(state_dir.iterdir())}')
+        print(f"\nState directory created/verified: {state_dir}")
+        print(f"Contents: {list(state_dir.iterdir())}")
 
     except RuntimeError as e:
-        print(f'Error: {e}', file=sys.stderr)
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
