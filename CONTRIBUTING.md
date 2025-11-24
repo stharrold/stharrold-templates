@@ -329,6 +329,31 @@ The following are intentionally NOT integrated:
 
 See `docs/reference/german-workflow-v5.3.0.md` for complete workflow documentation.
 
+## AI Configuration Guidelines
+
+### Where to Make Changes
+
+| To change... | Edit this | NOT this |
+|--------------|-----------|----------|
+| Skills | `.claude/skills/` | `.agents/` |
+| Commands | `.claude/commands/` | N/A |
+| Root instructions | `CLAUDE.md` | `AGENTS.md` |
+
+### Why?
+
+- `.claude/` is the **PRIMARY** source
+- `.agents/` is automatically synced (read-only mirror)
+- `AGENTS.md` is automatically generated from `CLAUDE.md`
+
+Changes to `.agents/` or `AGENTS.md` will be overwritten on next sync.
+
+### Sync Mechanism
+
+The sync happens:
+1. **Pre-commit hook** - `sync-ai-config` runs automatically
+2. **Manual** - `uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py sync`
+3. **PR workflow** - `pr_workflow.py sync-agents` during integration
+
 ## Questions or Issues?
 
 - Open an issue on GitHub
