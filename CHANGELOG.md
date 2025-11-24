@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.15.0] - 2025-11-24
+
+### Added
+- **Cross-platform Unicode support** - Workflow scripts now work on all systems
+  - Created `safe_output.py` utility module with UTF-8 reconfiguration and ASCII fallbacks
+  - Added fallback output functions: ✓ → [OK], ✗ → [X], → → ->, ⚠ → !
+  - Windows consoles with cp1252 encoding now fully supported
+
+### Fixed
+- **Windows console encoding errors** - Resolved UnicodeEncodeError in workflow scripts
+  - `verify_workflow_context.py` - Uses safe_print with format helpers
+  - `sync_ai_config.py` - Uses safe_print with format helpers
+  - `pr_workflow.py` - Uses safe_print with fallback implementation
+  - `release_workflow.py` - Uses safe_print with fallback implementation
+  - `run_quality_gates.py` - Uses safe_print with fallback implementation
+  - Pattern is reusable for remaining scripts that need Unicode output
+
+### Changed
+- **Improved error handling** - Scripts gracefully handle encoding issues
+  - Automatic UTF-8 reconfiguration attempted first
+  - ASCII fallbacks used when UTF-8 unavailable
+  - Non-breaking: existing behavior preserved on UTF-8 systems
+
 ## [5.6.0] - 2025-11-21
 
 ### Added

@@ -42,9 +42,9 @@ def run_tests():
     passed = result.returncode == 0
 
     if passed:
-        print("✓ All tests passed")
+        print("[OK] All tests passed")
     else:
-        print("✗ Some tests failed")
+        print("[X] Some tests failed")
         print(result.stdout)
         print(result.stderr)
 
@@ -53,7 +53,7 @@ def run_tests():
 
 def check_coverage(threshold=80):
     """Check test coverage meets threshold."""
-    print(f"Checking coverage (≥{threshold}%)...")
+    print(f"Checking coverage (>={threshold}%)...")
 
     # Call check_coverage.py script using repo-relative path for container compatibility
     script_path = ".claude/skills/quality-enforcer/scripts/check_coverage.py"
@@ -75,9 +75,9 @@ def check_build():
     passed = result.returncode == 0
 
     if passed:
-        print("✓ Build successful")
+        print("[OK] Build successful")
     else:
-        print("✗ Build failed")
+        print("[X] Build failed")
         print(result.stderr)
 
     return passed
@@ -93,9 +93,9 @@ def check_linting():
     passed = result.returncode == 0
 
     if passed:
-        print("✓ Linting passed")
+        print("[OK] Linting passed")
     else:
-        print("✗ Linting failed")
+        print("[X] Linting failed")
         print(result.stdout)
 
     return passed
@@ -127,15 +127,15 @@ def sync_ai_config():
         success, modified = sync_all()
 
         if not success:
-            print("✗ AI config sync failed")
+            print("[X] AI config sync failed")
             return False
 
         # Then verify everything is in sync
         if not verify_sync():
-            print("✗ AI config verification failed - files still out of sync")
+            print("[X] AI config verification failed - files still out of sync")
             return False
 
-        print("✓ AI assistant configuration synced and verified")
+        print("[OK] AI assistant configuration synced and verified")
         return True
 
     except ImportError:
@@ -156,10 +156,10 @@ def sync_ai_config():
 
         if Path("CLAUDE.md").exists():
             shutil.copy("CLAUDE.md", "AGENTS.md")
-            print("  ✓ Synced CLAUDE.md → AGENTS.md")
+            print("  [OK] Synced CLAUDE.md → AGENTS.md")
             Path(".github").mkdir(exist_ok=True)
             shutil.copy("CLAUDE.md", ".github/copilot-instructions.md")
-            print("  ✓ Synced CLAUDE.md → .github/copilot-instructions.md")
+            print("  [OK] Synced CLAUDE.md → .github/copilot-instructions.md")
 
         if Path(".claude/skills").exists():
             Path(".agents").mkdir(exist_ok=True)
@@ -169,9 +169,9 @@ def sync_ai_config():
                     if dest.exists():
                         shutil.rmtree(dest)
                     shutil.copytree(skill_dir, dest)
-            print("  ✓ Synced .claude/skills/ → .agents/")
+            print("  [OK] Synced .claude/skills/ → .agents/")
 
-        print("✓ AI assistant configuration synced")
+        print("[OK] AI assistant configuration synced")
         return True
 
     except Exception as e:
@@ -240,10 +240,10 @@ def run_all_quality_gates(coverage_threshold=80):
         if gate in non_gate_keys:
             continue
         if isinstance(result, dict):
-            status = "✓ PASS" if result.get("passed", False) else "✗ FAIL"
+            status = "[OK] PASS" if result.get("passed", False) else "[X] FAIL"
             print(f"{gate.upper()}: {status}")
 
-    print("\n" + ("✓ ALL GATES PASSED" if all_passed else "✗ SOME GATES FAILED"))
+    print("\n" + ("[OK] ALL GATES PASSED" if all_passed else "[X] SOME GATES FAILED"))
 
     # Trigger sync engine (Phase 3 integration)
     try:
