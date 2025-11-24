@@ -27,12 +27,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Safe cross-platform output
-try:
-    from .safe_output import safe_print, format_check, format_cross
-except ImportError:
-    from safe_output import safe_print, format_check, format_cross
-
 # Step definitions: (require_worktree, require_main_repo, branch_prefix, step_name)
 STEP_REQUIREMENTS = {
     1: (False, True, "contrib/", "/1_specify - Create feature spec"),
@@ -221,21 +215,21 @@ Step shortcuts:
     if success:
         if not args.quiet:
             if step_name:
-                safe_print(format_check(f"Context valid for {step_name}"))
+                print(f"✓ Context valid for {step_name}")
             else:
-                safe_print(format_check("Context valid"))
-            safe_print(f"  {message}")
+                print("✓ Context valid")
+            print(f"  {message}")
         sys.exit(0)
     else:
-        safe_print("=" * 70)
-        safe_print(format_cross("WORKFLOW CONTEXT VALIDATION FAILED"))
-        safe_print("=" * 70)
+        print("=" * 70)
+        print("❌ WORKFLOW CONTEXT VALIDATION FAILED")
+        print("=" * 70)
         if step_name:
-            safe_print(f"\nStep: {step_name}")
-        safe_print(f"\n{message}")
-        safe_print("\n" + "=" * 70)
-        safe_print("STOP: Fix the context issue above before proceeding.")
-        safe_print("=" * 70)
+            print(f"\nStep: {step_name}")
+        print(f"\n{message}")
+        print("\n" + "=" * 70)
+        print("STOP: Fix the context issue above before proceeding.")
+        print("=" * 70)
         sys.exit(1)
 
 

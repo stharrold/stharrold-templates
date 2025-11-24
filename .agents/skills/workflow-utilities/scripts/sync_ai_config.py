@@ -36,12 +36,6 @@ import shutil
 import sys
 from pathlib import Path
 
-# Safe cross-platform output
-try:
-    from .safe_output import safe_print, format_check, format_cross, format_warning, format_arrow
-except ImportError:
-    from safe_output import safe_print, format_check, format_cross, format_warning, format_arrow
-
 
 def sync_claude_md_to_agents() -> tuple[bool, bool]:
     """
@@ -54,7 +48,7 @@ def sync_claude_md_to_agents() -> tuple[bool, bool]:
     dest = Path("AGENTS.md")
 
     if not source.exists():
-        safe_print("  " + format_warning("CLAUDE.md not found, skipping AGENTS.md sync"))
+        print("  ⚠️  CLAUDE.md not found, skipping AGENTS.md sync")
         return True, False
 
     # Check if already in sync
@@ -63,10 +57,10 @@ def sync_claude_md_to_agents() -> tuple[bool, bool]:
 
     try:
         shutil.copy(source, dest)
-        safe_print("  " + format_arrow("CLAUDE.md", "AGENTS.md"))
+        print("  ✓ CLAUDE.md → AGENTS.md")
         return True, True
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync AGENTS.md: {e}"))
+        print(f"  ✗ Failed to sync AGENTS.md: {e}")
         return False, False
 
 
@@ -81,7 +75,7 @@ def sync_claude_md_to_copilot() -> tuple[bool, bool]:
     dest = Path(".github/copilot-instructions.md")
 
     if not source.exists():
-        safe_print("  " + format_warning("CLAUDE.md not found, skipping copilot-instructions.md sync"))
+        print("  ⚠️  CLAUDE.md not found, skipping copilot-instructions.md sync")
         return True, False
 
     # Ensure .github directory exists
@@ -93,10 +87,10 @@ def sync_claude_md_to_copilot() -> tuple[bool, bool]:
 
     try:
         shutil.copy(source, dest)
-        safe_print("  " + format_arrow("CLAUDE.md", ".github/copilot-instructions.md"))
+        print("  ✓ CLAUDE.md → .github/copilot-instructions.md")
         return True, True
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync copilot-instructions.md: {e}"))
+        print(f"  ✗ Failed to sync copilot-instructions.md: {e}")
         return False, False
 
 
@@ -111,7 +105,7 @@ def sync_skills_to_agents_dir() -> tuple[bool, bool]:
     dest_dir = Path(".agents")
 
     if not source_dir.exists():
-        safe_print("  " + format_warning(".claude/skills/ not found, skipping .agents/ sync"))
+        print("  ⚠️  .claude/skills/ not found, skipping .agents/ sync")
         return True, False
 
     # Ensure .agents directory exists
@@ -136,10 +130,10 @@ def sync_skills_to_agents_dir() -> tuple[bool, bool]:
                 modified = True
 
         if modified:
-            safe_print("  " + format_arrow(".claude/skills/", ".agents/"))
+            print("  ✓ .claude/skills/ → .agents/")
         return True, modified
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync .agents/: {e}"))
+        print(f"  ✗ Failed to sync .agents/: {e}")
         return False, False
 
 
@@ -165,7 +159,7 @@ def sync_all() -> tuple[bool, bool]:
     Returns:
         (all_success: bool, any_modified: bool)
     """
-    safe_print("Syncing AI configuration files...")
+    print("Syncing AI configuration files...")
 
     all_success = True
     any_modified = False
@@ -186,11 +180,11 @@ def sync_all() -> tuple[bool, bool]:
     any_modified |= modified
 
     if all_success and not any_modified:
-        safe_print(format_check("All files already in sync"))
+        print("✓ All files already in sync")
     elif all_success and any_modified:
-        safe_print(format_check("Sync complete (files modified)"))
+        print("✓ Sync complete (files modified)")
     else:
-        safe_print(format_cross("Sync completed with errors"))
+        print("✗ Sync completed with errors")
 
     return all_success, any_modified
 
@@ -202,7 +196,7 @@ def verify_sync() -> bool:
     Returns:
         True if all files are in sync
     """
-    safe_print("Verifying AI configuration sync...")
+    print("Verifying AI configuration sync...")
     all_synced = True
 
     # Verify CLAUDE.md → AGENTS.md
@@ -210,32 +204,32 @@ def verify_sync() -> bool:
     dest = Path("AGENTS.md")
     if source.exists():
         if not dest.exists():
-            safe_print("  " + format_cross("AGENTS.md missing"))
+            print("  ✗ AGENTS.md missing")
             all_synced = False
         elif not filecmp.cmp(source, dest, shallow=False):
-            safe_print("  " + format_cross("AGENTS.md differs from CLAUDE.md"))
+            print("  ✗ AGENTS.md differs from CLAUDE.md")
             all_synced = False
         else:
-            safe_print("  " + format_check("AGENTS.md in sync"))
+            print("  ✓ AGENTS.md in sync")
 
     # Verify CLAUDE.md → .github/copilot-instructions.md
     dest = Path(".github/copilot-instructions.md")
     if source.exists():
         if not dest.exists():
-            safe_print("  " + format_cross(".github/copilot-instructions.md missing"))
+            print("  ✗ .github/copilot-instructions.md missing")
             all_synced = False
         elif not filecmp.cmp(source, dest, shallow=False):
-            safe_print("  " + format_cross(".github/copilot-instructions.md differs from CLAUDE.md"))
+            print("  ✗ .github/copilot-instructions.md differs from CLAUDE.md")
             all_synced = False
         else:
-            safe_print("  " + format_check(".github/copilot-instructions.md in sync"))
+            print("  ✓ .github/copilot-instructions.md in sync")
 
     # Verify .claude/skills/ → .agents/
     source_dir = Path(".claude/skills")
     dest_dir = Path(".agents")
     if source_dir.exists():
         if not dest_dir.exists():
-            safe_print("  " + format_cross(".agents/ directory missing"))
+            print("  ✗ .agents/ directory missing")
             all_synced = False
         else:
             skills_synced = True
@@ -243,22 +237,22 @@ def verify_sync() -> bool:
                 if skill_dir.is_dir():
                     dest = dest_dir / skill_dir.name
                     if not dest.exists():
-                        safe_print(f"  " + format_cross(f".agents/{skill_dir.name}/ missing"))
+                        print(f"  ✗ .agents/{skill_dir.name}/ missing")
                         skills_synced = False
                     else:
                         comparison = filecmp.dircmp(skill_dir, dest)
                         if _dirs_differ(comparison):
-                            safe_print(f"  " + format_cross(f".agents/{skill_dir.name}/ differs from .claude/skills/{skill_dir.name}/"))
+                            print(f"  ✗ .agents/{skill_dir.name}/ differs from .claude/skills/{skill_dir.name}/")
                             skills_synced = False
             if skills_synced:
-                safe_print("  " + format_check(".agents/ in sync with .claude/skills/"))
+                print("  ✓ .agents/ in sync with .claude/skills/")
             else:
                 all_synced = False
 
     if all_synced:
-        safe_print(format_check("All AI configuration files in sync"))
+        print("✓ All AI configuration files in sync")
     else:
-        safe_print(format_cross("AI configuration files out of sync - run 'sync_ai_config.py sync'"))
+        print("✗ AI configuration files out of sync - run 'sync_ai_config.py sync'")
 
     return all_synced
 
