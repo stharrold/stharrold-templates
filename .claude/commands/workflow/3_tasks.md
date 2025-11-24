@@ -23,15 +23,25 @@ next: /4_implement
 
 Given the feature context, do this:
 
-## Step 1: Verify Worktree Context
+## Step 0: Verify Context (REQUIRED - STOP if fails)
 
-Confirm you are in a feature worktree (same as `/2_plan`).
+**Run this first. If it fails, STOP and tell the user to fix the context.**
 
-## Step 2: Locate Plan File
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 3
+```
 
-Find the plan file at `specs/{slug}/plan.md` where `{slug}` is extracted from the current branch name.
+Expected: Worktree directory, `feature/*` branch
 
-## Step 3: Validate Task Structure
+---
+
+## Step 1: Detect Feature Slug and Locate Plan File
+
+Extract slug from branch (`feature/{timestamp}_{slug}`) and find plan at `specs/{slug}/plan.md`.
+
+If plan file missing, STOP and prompt user to run `/2_plan` first.
+
+## Step 2: Validate Task Structure
 
 Read `specs/{slug}/plan.md` and verify it contains:
 - A `## Tasks` or `## Task Breakdown` section
@@ -42,7 +52,7 @@ If tasks are missing or incomplete:
 - Check `specs/{slug}/tasks.md` as an alternative location
 - If no tasks found, prompt user to complete the plan first
 
-## Step 4: Parse and Display Tasks
+## Step 3: Parse and Display Tasks
 
 Parse the tasks from plan.md and display:
 - Total task count
@@ -50,7 +60,7 @@ Parse the tasks from plan.md and display:
 - Parallel execution opportunities (tasks marked [P])
 - Dependencies between tasks
 
-## Step 5: Record State in AgentDB
+## Step 4: Record State in AgentDB
 
 Record the workflow transition:
 ```bash
@@ -60,7 +70,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --source "specs/{slug}/plan.md"
 ```
 
-## Step 6: Report Readiness
+## Step 5: Report Readiness
 
 Report to the user:
 - Tasks validated and ready for execution

@@ -8,6 +8,7 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 - **Containerized development** - Podman + uv + Python 3.11 for consistent environments
 - **Workflow automation** - Git helpers, archive management, semantic versioning
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
+- **Cross-tool AI compatibility** - Configuration syncs to `.agents/` ([OpenAI agents.md spec](https://github.com/openai/agents.md)) and `.github/copilot-instructions.md` for Cursor, Windsurf, GitHub Copilot, and other AI assistants
 
 ## Prerequisites
 

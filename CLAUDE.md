@@ -212,6 +212,52 @@ uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py check
 
 **Automation**: Pre-commit hook syncs automatically when CLAUDE.md or .claude/ is modified.
 
+### AI Configuration Architecture
+
+This repository follows a **Claude-first development model** with cross-tool compatibility.
+
+**Directory Roles:**
+
+| Directory | Role | Editable |
+|-----------|------|----------|
+| `.claude/` | **PRIMARY** source for AI configuration | Yes |
+| `.agents/` | Read-only mirror ([OpenAI agents.md spec](https://github.com/openai/agents.md)) | No |
+
+**Sync Flow:**
+
+```
+.claude/                          .agents/
+├── commands/    (Claude-specific) │
+├── skills/      ─────sync─────>  ├── (mirrored skills)
+├── settings.local.json           │
+└── CLAUDE.md                     └── CLAUDE.md
+
+CLAUDE.md ─────sync─────> AGENTS.md
+          └────sync─────> .github/copilot-instructions.md
+```
+
+**What Gets Synced vs Claude-Specific:**
+
+| Source | Target | Synced |
+|--------|--------|--------|
+| `.claude/skills/` | `.agents/` | Yes |
+| `CLAUDE.md` | `AGENTS.md` | Yes |
+| `CLAUDE.md` | `.github/copilot-instructions.md` | Yes |
+| `.claude/commands/` | - | No (Claude-specific) |
+| `.claude/settings.local.json` | - | No (Claude-specific) |
+| `.claude-state/` | - | No (runtime state) |
+
+**Cross-Tool Compatibility:**
+
+The `.agents/` directory follows the emerging [OpenAI agents.md spec](https://github.com/openai/agents.md) ([directory support proposal](https://github.com/openai/agents.md/issues/9)).
+
+Compatible tools:
+- **Claude Code** - Primary (reads `.claude/` directly)
+- **GitHub Copilot** - Via `.github/copilot-instructions.md`
+- **Cursor** - Reads `.agents/` or `AGENTS.md`
+- **Windsurf** - Reads `AGENTS.md`
+- **Other AI assistants** - Via standard `AGENTS.md`
+
 ## Git Workflow Commands
 
 ```bash
@@ -257,6 +303,30 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --source "planning/{slug}" \
   --target "worktree"
 ```
+
+## Workflow Artifact Directories
+
+**IMPORTANT**: Different workflow phases create artifacts in different locations:
+
+| Directory | Created By | Purpose | Location |
+|-----------|------------|---------|----------|
+| `planning/{slug}/` | `/1_specify` | Initial requirements (BMAD docs) | Main repo |
+| `specs/{slug}/` | `/2_plan` | Detailed specs and task lists | Feature worktree |
+
+**Workflow artifact flow:**
+```
+/1_specify (main repo)     /2_plan (worktree)        /3_tasks (worktree)
+        │                         │                         │
+        ▼                         ▼                         ▼
+planning/{slug}/           specs/{slug}/              specs/{slug}/
+├── requirements.md        ├── spec.md                ├── plan.md (validated)
+├── architecture.md        ├── plan.md                └── tasks.md
+└── epics.md               └── CLAUDE.md
+```
+
+**Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
+
+**See also**: [AI Configuration Architecture](#ai-configuration-architecture) section for `.claude/` vs `.agents/` directory structure and sync patterns.
 
 ## MCP Configuration Paths
 

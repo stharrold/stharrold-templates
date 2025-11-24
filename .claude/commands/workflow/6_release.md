@@ -19,6 +19,18 @@ next: /7_backmerge
 
 ---
 
+## Step 0: Verify Context (REQUIRED - STOP if fails)
+
+**Run this first. If it fails, STOP and tell the user to fix the context.**
+
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 6
+```
+
+Expected: Main repo, `contrib/*` branch
+
+---
+
 # Release Workflow Command
 
 Create a release and deploy to production.
