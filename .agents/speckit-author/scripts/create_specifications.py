@@ -25,6 +25,7 @@ Constants:
 """
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -35,6 +36,48 @@ from pathlib import Path
 TIMESTAMP_FORMAT = "%Y-%m-%d"  # Human-readable date for documentation
 VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow types
 TASK_PATTERN = re.compile(r"^####\s+Task\s+(\w+_\d+):\s+(.+)$", re.MULTILINE)  # Parse tasks from plan.md
+
+# Global config for non-interactive mode
+_CONFIG: dict | None = None
+_CONFIG_PATH: list[str] = []  # Tracks path through nested config for lookups
+
+
+def load_config(config_path: Path) -> dict:
+    """Load configuration from YAML or JSON file."""
+    content = config_path.read_text()
+    if config_path.suffix in [".yaml", ".yml"]:
+        try:
+            import yaml
+
+            return yaml.safe_load(content)
+        except ImportError:
+            error_exit("PyYAML not installed. Use JSON config or: uv add pyyaml")
+    else:
+        return json.loads(content)
+
+
+def get_config_value(key: str, default: str | None = None) -> str | None:
+    """Get value from config at current path + key."""
+    if _CONFIG is None:
+        return None
+
+    # Navigate to current path
+    obj = _CONFIG
+    for path_key in _CONFIG_PATH:
+        if isinstance(obj, dict) and path_key in obj:
+            obj = obj[path_key]
+        else:
+            return default
+
+    # Get the value
+    if isinstance(obj, dict) and key in obj:
+        return obj[key]
+    return default
+
+
+def is_non_interactive() -> bool:
+    """Check if running in non-interactive mode."""
+    return _CONFIG is not None
 
 
 def error_exit(message: str, code: int = 1) -> None:
@@ -111,9 +154,25 @@ def find_bmad_planning(slug: str) -> dict[str, Path] | None:
     return available
 
 
-def ask_question(prompt: str, options: list[str] | None = None, default: str | None = None) -> str:
-    """Ask user a question and return response."""
+def ask_question(prompt: str, options: list[str] | None = None, default: str | None = None, config_key: str | None = None) -> str:
+    """Ask user a question and return response.
 
+    In non-interactive mode, returns value from config file using config_key.
+    Falls back to default if config_key not found.
+    """
+    # Non-interactive mode: return config value or default
+    if is_non_interactive():
+        if config_key:
+            value = get_config_value(config_key, default)
+            if value is not None:
+                print(f"[config] {prompt}: {value}")
+                return value
+        if default:
+            print(f"[default] {prompt}: {default}")
+            return default
+        error_exit(f"Non-interactive mode: no config value for '{config_key}' and no default")
+
+    # Interactive mode
     if options:
         print(f"\n{prompt}")
         for i, option in enumerate(options, 1):
@@ -149,8 +208,30 @@ def ask_question(prompt: str, options: list[str] | None = None, default: str | N
         return response if response else (default or "")
 
 
-def ask_yes_no(prompt: str, default: bool = True) -> bool:
-    """Ask yes/no question."""
+def ask_yes_no(prompt: str, default: bool = True, config_key: str | None = None) -> bool:
+    """Ask yes/no question.
+
+    In non-interactive mode, returns value from config file using config_key.
+    Falls back to default if config_key not found.
+    """
+    # Non-interactive mode: return config value or default
+    if is_non_interactive():
+        if config_key:
+            value = get_config_value(config_key)
+            if value is not None:
+                # Handle various truthy representations
+                if isinstance(value, bool):
+                    result = value
+                elif isinstance(value, str):
+                    result = value.lower() in ["y", "yes", "true", "1"]
+                else:
+                    result = bool(value)
+                print(f"[config] {prompt}: {'yes' if result else 'no'}")
+                return result
+        print(f"[default] {prompt}: {'yes' if default else 'no'}")
+        return default
+
+    # Interactive mode
     default_str = "Y/n" if default else "y/N"
     response = input(f"\n{prompt} ({default_str}) > ").strip().lower()
 
@@ -162,6 +243,7 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
 
 def interactive_qa_with_bmad(bmad_docs: dict[str, Path], slug: str) -> dict[str, any]:
     """Conduct interactive Q&A when BMAD planning exists."""
+    global _CONFIG_PATH
 
     print("\n" + "=" * 70)
     print("SpecKit Interactive Specification Tool")
@@ -192,6 +274,9 @@ def interactive_qa_with_bmad(bmad_docs: dict[str, Path], slug: str) -> dict[str,
     print("\nImplementation Questions:")
     print("-" * 70)
 
+    # Set config path for with_bmad section
+    _CONFIG_PATH = ["with_bmad"]
+
     responses = {}
 
     # Database migrations (if database mentioned in architecture)
@@ -199,35 +284,60 @@ def interactive_qa_with_bmad(bmad_docs: dict[str, Path], slug: str) -> dict[str,
         arch_text = bmad_docs["architecture"].read_text().lower()
         if "database" in arch_text or "postgresql" in arch_text or "mysql" in arch_text:
             responses["migration_strategy"] = ask_question(
-                "Database migrations strategy?", options=["Alembic (recommended)", "Manual SQL migrations", "None needed"], default="Alembic (recommended)"
+                "Database migrations strategy?",
+                options=["Alembic (recommended)", "Manual SQL migrations", "None needed"],
+                default="Alembic (recommended)",
+                config_key="migration_strategy",
             )
 
     # Testing approach
-    responses["include_e2e_tests"] = ask_yes_no("Include end-to-end (E2E) tests?", default=False)
+    responses["include_e2e_tests"] = ask_yes_no(
+        "Include end-to-end (E2E) tests?",
+        default=False,
+        config_key="include_e2e_tests",
+    )
 
-    responses["include_performance_tests"] = ask_yes_no("Include performance/load tests?", default=False)
+    responses["include_performance_tests"] = ask_yes_no(
+        "Include performance/load tests?",
+        default=False,
+        config_key="include_performance_tests",
+    )
 
-    responses["include_security_tests"] = ask_yes_no("Include security tests (OWASP checks)?", default=False)
+    responses["include_security_tests"] = ask_yes_no(
+        "Include security tests (OWASP checks)?",
+        default=False,
+        config_key="include_security_tests",
+    )
 
     # Task granularity
     responses["task_granularity"] = ask_question(
         "Task granularity preference?",
         options=["Small tasks (1-2 hours each)", "Medium tasks (half-day each)", "Large tasks (full-day each)"],
         default="Small tasks (1-2 hours each)",
+        config_key="task_granularity",
     )
 
     # Epic implementation order
     if "epics" in bmad_docs:
-        responses["follow_epic_order"] = ask_yes_no("Follow epic priority order from epics.md?", default=True)
+        responses["follow_epic_order"] = ask_yes_no(
+            "Follow epic priority order from epics.md?",
+            default=True,
+            config_key="follow_epic_order",
+        )
 
     # Additional implementation notes
-    responses["additional_notes"] = ask_question("Any additional implementation notes or constraints? (optional)")
+    responses["additional_notes"] = ask_question(
+        "Any additional implementation notes or constraints? (optional)",
+        config_key="additional_notes",
+        default="",
+    )
 
     return responses
 
 
 def interactive_qa_without_bmad(slug: str) -> dict[str, any]:
     """Conduct interactive Q&A when no BMAD planning exists."""
+    global _CONFIG_PATH
 
     print("\n" + "=" * 70)
     print("SpecKit Interactive Specification Tool")
@@ -237,42 +347,97 @@ def interactive_qa_without_bmad(slug: str) -> dict[str, any]:
     print("\nRecommendation: Use BMAD planning for future features")
     print("=" * 70)
 
+    # Set config path for without_bmad section
+    _CONFIG_PATH = ["without_bmad"]
+
     responses = {}
 
     # Core requirements
-    responses["purpose"] = ask_question("What is the main purpose of this feature?")
+    responses["purpose"] = ask_question(
+        "What is the main purpose of this feature?",
+        config_key="purpose",
+    )
 
-    responses["users"] = ask_question("Who are the primary users of this feature?")
+    responses["users"] = ask_question(
+        "Who are the primary users of this feature?",
+        config_key="users",
+    )
 
-    responses["success_criteria"] = ask_question("How will success be measured? (metrics, goals)")
+    responses["success_criteria"] = ask_question(
+        "How will success be measured? (metrics, goals)",
+        config_key="success_criteria",
+    )
 
     # Technology stack
     print("\nTechnology Stack:")
 
-    responses["web_framework"] = ask_question("Web framework (if applicable)?", options=["FastAPI", "Flask", "Django", "None"], default="None")
+    responses["web_framework"] = ask_question(
+        "Web framework (if applicable)?",
+        options=["FastAPI", "Flask", "Django", "None"],
+        default="None",
+        config_key="web_framework",
+    )
 
-    responses["database"] = ask_question("Database?", options=["SQLite (dev)", "PostgreSQL", "MySQL", "None"], default="None")
+    responses["database"] = ask_question(
+        "Database?",
+        options=["SQLite (dev)", "PostgreSQL", "MySQL", "None"],
+        default="None",
+        config_key="database",
+    )
 
     if responses["database"] != "None":
-        responses["migration_strategy"] = ask_question("Database migration strategy?", options=["Alembic", "Manual SQL", "None"], default="Alembic")
+        responses["migration_strategy"] = ask_question(
+            "Database migration strategy?",
+            options=["Alembic", "Manual SQL", "None"],
+            default="Alembic",
+            config_key="migration_strategy",
+        )
 
-    responses["testing_framework"] = ask_question("Testing framework?", options=["pytest (recommended)", "unittest", "other"], default="pytest (recommended)")
+    responses["testing_framework"] = ask_question(
+        "Testing framework?",
+        options=["pytest (recommended)", "unittest", "other"],
+        default="pytest (recommended)",
+        config_key="testing_framework",
+    )
 
     # Performance & security
-    responses["performance_target"] = ask_question("Performance target? (e.g., '<200ms response time', 'not critical')")
+    responses["performance_target"] = ask_question(
+        "Performance target? (e.g., '<200ms response time', 'not critical')",
+        config_key="performance_target",
+        default="Standard performance",
+    )
 
-    responses["security_requirements"] = ask_question("Security requirements? (e.g., 'authentication', 'encryption', 'none')")
+    responses["security_requirements"] = ask_question(
+        "Security requirements? (e.g., 'authentication', 'encryption', 'none')",
+        config_key="security_requirements",
+        default="none",
+    )
 
     # Testing preferences
-    responses["target_coverage"] = ask_question("Test coverage target?", default="80%")
+    responses["target_coverage"] = ask_question(
+        "Test coverage target?",
+        default="80%",
+        config_key="target_coverage",
+    )
 
-    responses["include_e2e_tests"] = ask_yes_no("Include E2E tests?", default=False)
+    responses["include_e2e_tests"] = ask_yes_no(
+        "Include E2E tests?",
+        default=False,
+        config_key="include_e2e_tests",
+    )
 
-    responses["include_performance_tests"] = ask_yes_no("Include performance tests?", default=False)
+    responses["include_performance_tests"] = ask_yes_no(
+        "Include performance tests?",
+        default=False,
+        config_key="include_performance_tests",
+    )
 
     # Task breakdown
     responses["task_granularity"] = ask_question(
-        "Task size preference?", options=["Small (1-2 hours)", "Medium (half-day)", "Large (full-day)"], default="Small (1-2 hours)"
+        "Task size preference?",
+        options=["Small (1-2 hours)", "Medium (half-day)", "Large (full-day)"],
+        default="Small (1-2 hours)",
+        config_key="task_granularity",
     )
 
     return responses
@@ -543,6 +708,7 @@ Generated by SpecKit Interactive Tool:
 
 def main():
     """Main entry point for SpecKit interactive tool."""
+    global _CONFIG
 
     parser = argparse.ArgumentParser(description="Interactive SpecKit tool - creates spec.md and plan.md in worktree")
     parser.add_argument("workflow_type", choices=VALID_WORKFLOW_TYPES, help="Workflow type: feature, release, or hotfix")
@@ -550,8 +716,20 @@ def main():
     parser.add_argument("gh_user", help="GitHub username")
     parser.add_argument("--issue", type=int, default=None, help="GitHub Issue number to link (e.g., --issue 42)")
     parser.add_argument("--no-commit", action="store_true", help="Skip git commit (for testing)")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="Path to YAML/JSON config file for non-interactive mode. " "Config should have section: with_bmad (if BMAD planning exists) or without_bmad (if not).",
+    )
 
     args = parser.parse_args()
+
+    # Load config for non-interactive mode
+    if args.config:
+        if not args.config.exists():
+            error_exit(f"Config file not found: {args.config}")
+        _CONFIG = load_config(args.config)
+        print(f"✓ Running in non-interactive mode with config: {args.config}")
 
     # 1. Detect context
     context = detect_context()

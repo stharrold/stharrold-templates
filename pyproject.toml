@@ -7,9 +7,10 @@ version = "5.10.0"
 description = "Templates and utilities for MCP server configuration and agentic development workflows"
 requires-python = ">=3.11"
 dependencies = [
-    "rich>=13.9.0",       # Better terminal output
-    "click>=8.1.0",       # CLI framework
-    "httpx>=0.27.0",      # Modern HTTP client
+    "rich>=13.9.0", # Better terminal output
+    "click>=8.1.0", # CLI framework
+    "httpx>=0.27.0", # Modern HTTP client
+    "duckdb>=1.4.2",
 ]
 
 [tool.pytest.ini_options]

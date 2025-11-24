@@ -21,15 +21,19 @@ next: /3_tasks
 
 Given the feature context, do this:
 
-## Step 1: Verify Worktree Context
+## Step 0: Verify Context (REQUIRED - STOP if fails)
 
-Confirm you are in a feature worktree:
-- Current directory should be `../{project}_feature_{timestamp}_{slug}/`
-- Not the main repository root
+**Run this first. If it fails, STOP and tell the user to fix the context.**
 
-If not in worktree, prompt user to `cd` to the worktree first.
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 2
+```
 
-## Step 2: Detect Feature Slug
+Expected: Worktree directory, `feature/*` branch
+
+---
+
+## Step 1: Detect Feature Slug
 
 Extract the slug from the current branch name:
 ```bash
@@ -37,16 +41,16 @@ git branch --show-current
 ```
 Branch format: `feature/{timestamp}_{slug}` → extract `{slug}`
 
-## Step 3: Verify Planning Documents
+## Step 2: Verify Planning Documents
 
-Check that BMAD planning documents exist:
-- `../planning/{slug}/requirements.md`
-- `../planning/{slug}/architecture.md`
-- `../planning/{slug}/epics.md`
+Check that BMAD planning documents exist in the **main repo**:
+```bash
+ls ../planning/{slug}/requirements.md ../planning/{slug}/architecture.md ../planning/{slug}/epics.md 2>/dev/null
+```
 
-If missing, prompt user to run `/1_specify` first.
+If missing, STOP and prompt user to run `/1_specify` first.
 
-## Step 4: Create Specifications
+## Step 3: Create Specifications
 
 Run the SpecKit author to create specifications:
 ```bash
@@ -61,7 +65,7 @@ This creates `specs/{slug}/` with:
 - `CLAUDE.md` - AI context
 - `README.md` - Overview
 
-## Step 5: Record State in AgentDB
+## Step 4: Record State in AgentDB
 
 Record the workflow transition:
 ```bash
@@ -72,7 +76,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --target "specs/{slug}"
 ```
 
-## Step 6: Report Completion
+## Step 5: Report Completion
 
 Report to the user:
 - Specifications created at `specs/{slug}/`
