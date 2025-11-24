@@ -8,31 +8,31 @@
 ## Execution Flow (main)
 ```
 1. Parse user description from Input
-   � Extracted: remove TODO*.md files, archive them, update quality gates, update docs
+   - Extracted: remove TODO*.md files, archive them, update quality gates, update docs
 2. Extract key concepts from description
-   � Actors: developers, CI/CD pipeline, Claude Code
-   � Actions: archive files, update quality gate, update documentation
-   � Data: TODO*.md files, CLAUDE.md, quality gate scripts
-   � Constraints: maintain backward compatibility during transition
+   - Actors: developers, CI/CD pipeline, Claude Code
+   - Actions: archive files, update quality gate, update documentation
+   - Data: TODO*.md files, CLAUDE.md, quality gate scripts
+   - Constraints: maintain backward compatibility during transition
 3. For each unclear aspect:
-   � None identified - feature is well-defined cleanup task
+   - None identified - feature is well-defined cleanup task
 4. Fill User Scenarios & Testing section
-   � Primary flow: developer runs quality gates without TODO*.md requirement
+   - Primary flow: developer runs quality gates without TODO*.md requirement
 5. Generate Functional Requirements
-   � 7 requirements identified, all testable
+   - 7 requirements identified, all testable
 6. Identify Key Entities
-   � TODO*.md files, quality gate configuration, documentation
+   - TODO*.md files, quality gate configuration, documentation
 7. Run Review Checklist
-   � All items pass
+   - All items pass
 8. Return: SUCCESS (spec ready for planning)
 ```
 
 ---
 
-## � Quick Guidelines
--  Focus on WHAT users need and WHY
-- L Avoid HOW to implement (no tech stack, APIs, code structure)
-- =e Written for business stakeholders, not developers
+## Quick Guidelines
+- Focus on WHAT users need and WHY
+- Avoid HOW to implement (no tech stack, APIs, code structure)
+- Written for business stakeholders, not developers
 
 ---
 
@@ -48,8 +48,8 @@ As a developer, I want the TODO*.md system removed from quality gates and docume
 4. **Given** a developer creates a new feature, **When** they follow the documented workflow, **Then** they use GitHub Issues and Speckit instead of TODO*.md files
 
 ### Edge Cases
-- What happens when archived TODO files already exist in `docs/archived/`? � Use timestamped prefix to avoid collisions
-- How does system handle worktrees with local TODO*.md files? � Each worktree archives independently
+- What happens when archived TODO files already exist in `docs/archived/`? -> Use timestamped prefix to avoid collisions
+- How does system handle worktrees with local TODO*.md files? -> Each worktree archives independently
 
 ---
 
