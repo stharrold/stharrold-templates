@@ -75,7 +75,7 @@ def get_latest_version() -> str | None:
     return None
 
 
-def find_release_branch(version: str = None) -> str | None:
+def find_release_branch(version: str | None = None) -> str | None:
     """Find the release branch for a version, or the most recent release branch.
 
     Args:
@@ -94,16 +94,21 @@ def find_release_branch(version: str = None) -> str | None:
             return branch
         return None
 
-    # Find most recent release branch
-    result = run_cmd(["git", "branch", "-r", "--list", "origin/release/*"], check=False)
-    branches = result.stdout.strip().split("\n")
-    if branches and branches[0]:
-        # Return the most recent (last) release branch
-        return branches[-1].strip().replace("origin/", "")
-    return None
+    # Find most recent release branch using semantic version sorting
+    # Use git for-each-ref with version sorting to handle v1.10.0 > v1.9.0 correctly
+    result = run_cmd(
+        ["git", "for-each-ref", "--sort=-version:refname", "--format=%(refname:short)", "refs/remotes/origin/release/"],
+        check=False,
+    )
+    output = result.stdout.strip()
+    if not output:
+        return None
+    # First line is the highest version
+    latest = output.split("\n")[0].strip()
+    return latest.replace("origin/", "")
 
 
-def step_pr_develop(version: str = None) -> bool:
+def step_pr_develop(version: str | None = None) -> bool:
     """Create PR from release branch to develop.
 
     Requires the release/* branch to exist. PRs directly from release to develop.
@@ -257,7 +262,7 @@ def step_rebase_contrib() -> bool:
     return True
 
 
-def step_cleanup_release(version: str = None) -> bool:
+def step_cleanup_release(version: str | None = None) -> bool:
     """Delete release branch locally and remotely."""
     print("\n" + "=" * 60)
     print("STEP 3: Cleanup Release Branch")
@@ -352,7 +357,7 @@ def show_status() -> None:
         print("Status: All synced, ready for next feature")
 
 
-def run_full_workflow(version: str = None) -> bool:
+def run_full_workflow(version: str | None = None) -> bool:
     """Run all workflow steps in sequence."""
     print("\n" + "=" * 60)
     print("FULL BACKMERGE WORKFLOW")
