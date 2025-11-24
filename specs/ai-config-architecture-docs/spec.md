@@ -139,9 +139,9 @@ See also: [Directory support proposal](https://github.com/openai/agents.md/issue
 ### Compatible Tools
 
 Tools that read this directory:
-- Cursor
-- Windsurf
-- Other AI coding assistants following the agents.md spec
+- **Cursor** - Reads `.agents/` or `AGENTS.md`
+- **Windsurf** - Reads `AGENTS.md`
+- **Other AI coding assistants** - Following the agents.md spec
 
 Claude Code reads `.claude/` directly (does not use this mirror).
 ```

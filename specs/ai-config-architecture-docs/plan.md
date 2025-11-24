@@ -141,7 +141,7 @@ Add "AI Configuration Guidelines" section to CONTRIBUTING.md with clear editing 
 **Verification:**
 ```bash
 grep -q "AI Configuration Guidelines" CONTRIBUTING.md && echo "OK: Section exists"
-grep -q "edit .claude/" CONTRIBUTING.md && echo "OK: Edit guidance exists"
+grep -q "\\.claude/skills/" CONTRIBUTING.md && echo "OK: Edit guidance exists"
 ```
 
 **Dependencies:**
