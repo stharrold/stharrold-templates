@@ -10,7 +10,7 @@ prev: /6_release
 
 **Purpose**: Sync release changes back to development branches (PR release to develop, rebase contrib on develop).
 
-**Prerequisites**: Release PR merged to main (from `/6_release`), tag created on main, **release branch still exists**
+**Prerequisites**: Release PR merged to main (from `/6_release`), tag created on main, release branch still exists
 
 **Outputs**: PR release to develop merged, contrib rebased on develop, release branch cleaned up
 
@@ -26,7 +26,7 @@ prev: /6_release
 python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7
 ```
 
-Expected: Main repo, `release/*` branch
+Expected: Main repo, `contrib/*` branch
 
 ---
 

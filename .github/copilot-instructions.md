@@ -155,7 +155,7 @@ python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --st
 | `/4_implement` | **Worktree** | `feature/*` | `--step 4` |
 | `/5_integrate` | Main repo | `contrib/*` | `--step 5` |
 | `/6_release` | Main repo | `contrib/*` | `--step 6` |
-| `/7_backmerge` | Main repo | `release/*` | `--step 7` |
+| `/7_backmerge` | Main repo | `contrib/*` | `--step 7` |
 
 **Key rule**: Steps 2-4 must run in the feature worktree, not the main repo.
 
