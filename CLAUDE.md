@@ -84,11 +84,11 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
-| 1 | `/1_specify` | (start) → 1 → 2 | Create feature branch and specification |
-| 2 | `/2_plan` | 1 → 2 → 3 | Generate design artifacts (research, data model, contracts) |
-| 3 | `/3_tasks` | 2 → 3 → 4 | Generate ordered task list from design artifacts |
-| 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks automatically with progress tracking |
-| 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs (feature→contrib→develop) |
+| 1 | `/1_specify` | (start) → 1 → 2 | Create planning docs + worktree via bmad-planner |
+| 2 | `/2_plan` | 1 → 2 → 3 | Generate specs via speckit-author |
+| 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
+| 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
+| 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs, cleanup worktree |
 | 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
 | 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
 
@@ -135,7 +135,7 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | speckit-author | Specifications |
 | tech-stack-adapter | Python/uv/Podman detection |
 | workflow-utilities | Archive, directory structure |
-| agentdb-state-manager | DuckDB state sync |
+| agentdb-state-manager | Workflow state tracking (AgentDB) |
 | initialize-repository | Bootstrap new repos |
 
 ### Document Lifecycle
@@ -155,14 +155,15 @@ CLAUDE.md automatically syncs to:
 ## Git Workflow Commands
 
 ```bash
-# Create feature worktree
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/stharrold
+# Create feature worktree (no TODO file by default)
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+  feature my-feature contrib/stharrold --no-todo
 
 # Semantic version calculation
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
 
 # Archive management
-podman-compose run --rm dev python tools/workflow-utilities/archive_manager.py list
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Release workflow (develop → release → main)
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
@@ -175,7 +176,29 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/b
 # ⚠️ CRITICAL: Backmerge direction
 # CORRECT: release/vX.Y.Z → develop (use backmerge_release.py)
 # WRONG:   main → develop (NEVER merge main to develop!)
+
+# Cleanup feature worktree (no TODO archival by default)
+podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py \
+  my-feature --no-archive
 ```
+
+## Workflow State Tracking (AgentDB)
+
+Workflow state is tracked in AgentDB (DuckDB) instead of TODO*.md files:
+
+```bash
+# Query current workflow phase
+podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+
+# Record workflow transition (called by slash commands)
+podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+  --sync-type workflow_transition \
+  --pattern phase_1_specify \
+  --source "planning/{slug}" \
+  --target "worktree"
+```
+
+**Note**: `.specify/` is deprecated. Use `.claude/skills/` for all workflow automation.
 
 ## MCP Configuration Paths
 
@@ -242,6 +265,6 @@ repo_feature_abc/            # Feature worktree
 
 - `WORKFLOW.md` - Complete 7-phase workflow guide
 - `ARCHITECTURE.md` - System architecture analysis
-- `CHANGELOG.md` - Version history (current: v5.9.0)
+- `CHANGELOG.md` - Version history (current: v5.11.0)
 - `docs/reference/` - Workflow reference docs
 - `specs/` - Feature specifications with design artifacts
