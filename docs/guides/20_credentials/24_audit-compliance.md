@@ -414,17 +414,17 @@ policies:
     retention_days: 365
     archive_after_days: 90
     purge_method: "secure_delete"
-    
+
   - classification: "internal"
     retention_days: 1825  # 5 years
     archive_after_days: 365
     purge_method: "cryptographic_erasure"
-    
+
   - classification: "confidential"
     retention_days: 2555  # 7 years
     archive_after_days: 730
     purge_method: "dod_5220_3_pass"
-    
+
   - classification: "restricted"
     retention_days: 3650  # 10 years
     archive_after_days: 1095
@@ -560,13 +560,13 @@ def test_authentication_security():
     """Security-focused tests for AI-generated auth code."""
     # SQL injection attempts
     assert not vulnerable_to_sql_injection(malicious_input)
-    
+
     # XSS prevention
     assert sanitized_output_prevents_xss(user_input)
-    
+
     # Session management security
     assert secure_session_handling(session_data)
-    
+
     # Rate limiting effectiveness
     assert rate_limiting_blocks_brute_force(auth_attempts)
 ```
@@ -594,7 +594,7 @@ claude mcp add sentry "python -m sentry_mcp" \
 
 **Industry-Standard Rotation Frequencies:**
 - **GitHub Personal Access Tokens**: Every 90 days
-- **Database credentials**: Every 60 days  
+- **Database credentials**: Every 60 days
 - **Cloud provider keys (AWS, Azure, GCP)**: Every 30 days
 - **API keys (third-party services)**: Based on provider recommendations (typically 30-90 days)
 - **Certificate-based authentication**: 12 months before expiration
@@ -611,14 +611,14 @@ ALERT_EMAIL="security@company.com"
 
 rotate_github_token() {
     echo "$(date): Starting GitHub token rotation" >> $ROTATION_LOG
-    
+
     # Generate new token via GitHub CLI
     NEW_TOKEN=$(gh auth token --scopes repo,workflow,read:org)
-    
+
     # Update keychain
     security delete-generic-password -a "$USER" -s "GITHUB_TOKEN"
     security add-generic-password -a "$USER" -s "GITHUB_TOKEN" -w "$NEW_TOKEN"
-    
+
     # Test new token
     if curl -H "Authorization: token $NEW_TOKEN" https://api.github.com/user > /dev/null 2>&1; then
         echo "$(date): GitHub token rotation successful" >> $ROTATION_LOG
@@ -640,22 +640,22 @@ function Rotate-GitHubToken {
         [Parameter(Mandatory)]
         [string]$NewToken
     )
-    
+
     $LogPath = "C:\Logs\mcp-token-rotation.log"
     $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    
+
     try {
         # Remove old credential
         Remove-StoredCredential -Target "GITHUB_TOKEN" -ErrorAction SilentlyContinue
-        
+
         # Add new credential
         $SecureToken = ConvertTo-SecureString $NewToken -AsPlainText -Force
         New-StoredCredential -Target "GITHUB_TOKEN" -UserName "token" -SecurePassword $SecureToken -Persist LocalMachine
-        
+
         # Test new token
         $Headers = @{ "Authorization" = "token $NewToken"; "User-Agent" = "PowerShell-Token-Test" }
         $Response = Invoke-RestMethod -Uri "https://api.github.com/user" -Headers $Headers
-        
+
         Add-Content -Path $LogPath -Value "$Timestamp: GitHub token rotation successful"
     }
     catch {
@@ -686,8 +686,8 @@ grep "security find-generic-password" /var/log/system.log | \
 auditpol /set /subcategory:"Credential Validation" /success:enable /failure:enable
 
 # Review credential access events
-Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) | 
-  Select-Object TimeGenerated, Message | 
+Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) |
+  Select-Object TimeGenerated, Message |
   Format-Table -AutoSize
 ```
 
@@ -716,7 +716,7 @@ Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) 
    ```bash
    # Update all MCP server configurations
    claude mcp update-credentials --interactive
-   
+
    # Restart services with new credentials
    claude mcp restart --all
    ```
@@ -771,15 +771,15 @@ tasks:
   - name: "Credential rotation audit"
     command: "python3 scripts/audit-token-ages.py"
     threshold: "warning_if_older_than_60_days"
-    
+
   - name: "Access pattern analysis"
     command: "claude audit --weekly-report --anomaly-detection"
     alert_on: "unusual_patterns"
-    
+
   - name: "Dependency security scan"
     command: "npm audit --audit-level high && pip-audit"
     action: "create_jira_ticket_if_high_severity"
-    
+
   - name: "MCP server health check"
     command: "claude mcp health-check --all --detailed"
     alert_on: "any_failures"
@@ -794,7 +794,7 @@ from datetime import datetime, timedelta
 
 def generate_compliance_report():
     """Generate monthly compliance report for audit purposes."""
-    
+
     report = {
         "reporting_period": {
             "start": (datetime.now() - timedelta(days=30)).isoformat(),
@@ -813,7 +813,7 @@ def generate_compliance_report():
             "sox_compliant": check_sox_compliance()
         }
     }
-    
+
     return json.dumps(report, indent=2)
 
 # Export for compliance team

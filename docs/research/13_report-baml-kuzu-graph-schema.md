@@ -46,19 +46,19 @@ function TransformGraphToKuzuDDL(
   client "openai/gpt-4o"
   prompt #"
     Transform this DocumentationGraph into Kuzu DDL statements following these rules:
-    
+
     1. Entity nodes become NODE TABLEs with naming: TABLE_{NODE_TYPE}
     2. All columns follow pattern: column_{attribute_name}
     3. Each table MUST have:
        - column_primary_key (SERIAL PRIMARY KEY, NOT NULL)
        - At least one column_foreign_key_to_table_{NAME} (NOT NULL, enforced)
        - column_datetime_utc_row_last_modified (TIMESTAMP DEFAULT current_timestamp())
-    
+
     4. Map node.primary_key to table primary key columns
     5. Map node.key_description to REL TABLE definitions (verb-like entities)
-    
+
     {{ ctx.output_format }}
-    
+
     Graph Nodes: {{ documentation_graph }}
     Configuration: {{ mapping_config }}
   "#
@@ -119,17 +119,17 @@ from baml_client.type_builder import TypeBuilder
 
 def generate_kuzu_schema(documentation_graph):
     tb = TypeBuilder()
-    
+
     # Dynamically create table classes based on graph nodes
     node_types = {node['node_type'] for node in documentation_graph}
-    
+
     for node_type in node_types:
         table_class = tb.add_class(f"TABLE_{node_type}")
-        
+
         # Add mandatory columns
         table_class.add_property("column_primary_key", tb.string())
         table_class.add_property("column_datetime_utc_row_last_modified", tb.string())
-        
+
         # Extract foreign keys from key_descriptions
         for node in documentation_graph:
             if node['node_type'] == node_type:
@@ -137,7 +137,7 @@ def generate_kuzu_schema(documentation_graph):
                 for rel in relationships:
                     fk_column = f"column_foreign_key_to_table_{rel['target']}"
                     table_class.add_property(fk_column, tb.string())
-    
+
     # Generate DDL statements
     response = b.TransformGraphToKuzuDDL(documentation_graph, {"tb": tb})
     return response
@@ -158,7 +158,7 @@ CREATE NODE TABLE TABLE_AI_MAPPINGS(
 );
 
 -- Insert mapping records with BAML
-INSERT INTO TABLE_AI_MAPPINGS 
+INSERT INTO TABLE_AI_MAPPINGS
 VALUES (
     1,
     'graph_node_123',
@@ -231,13 +231,13 @@ function ParseKeyDescription(description: string) -> RelationshipDefinition[] {
   prompt #"
     Extract relationship patterns from this description:
     '{{ description }}'
-    
+
     Identify:
     1. Verb phrases indicating relationships (e.g., 'belongs to', 'references')
     2. Target entities referenced
     3. Cardinality indicators (one-to-many, many-to-one)
     4. Temporal aspects if present
-    
+
     Generate REL TABLE definitions following Kuzu syntax.
   "#
 }
@@ -264,7 +264,7 @@ function ValidateKuzuConstraints(ddl_statements: string[]) -> ConstraintValidati
     2. Foreign key column existence and NOT NULL enforcement
     3. Datetime column presence and format
     4. Relationship multiplicity correctness
-    
+
     Return validation results with any corrections needed.
   "#
 }
@@ -282,7 +282,7 @@ class SchemaVersion:
         self.version = version_id
         self.timestamp = datetime.utcnow()
         self.graph_hash = hash(str(graph_snapshot))
-    
+
     def generate_migration(self, new_graph):
         # BAML function to generate ALTER statements
         migration = b.GenerateSchemaMigration(
@@ -322,15 +322,15 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 
 async def batch_generate_ddl(documentation_graph, batch_size=10):
-    batches = [documentation_graph[i:i+batch_size] 
+    batches = [documentation_graph[i:i+batch_size]
                for i in range(0, len(documentation_graph), batch_size)]
-    
+
     async def process_batch(batch):
         return await b.TransformGraphToKuzuDDL(batch)
-    
+
     tasks = [process_batch(batch) for batch in batches]
     results = await asyncio.gather(*tasks)
-    
+
     # Merge DDL statements and resolve conflicts
     merged_ddl = merge_ddl_statements(results)
     return merged_ddl
@@ -379,7 +379,7 @@ import { Database } from 'kuzu'
 async function deploySchema(graph: DocumentationNode[]): Promise<void> {
   const ddl = await b.TransformGraphToKuzuDDL(graph)
   const db = new Database('./my_database')
-  
+
   // Execute DDL statements with proper ordering
   await executeInOrder(db, ddl.node_tables)
   await executeInOrder(db, ddl.relationship_tables)

@@ -37,7 +37,7 @@ Secure storage and management of API tokens for MCP servers, including OS-native
 
 **Security-First Approach:**
 - **OS-native credential stores** for encrypted token storage
-- **Regular credential rotation** to minimize exposure windows  
+- **Regular credential rotation** to minimize exposure windows
 - **Access auditing** to track credential usage
 - **Principle of least privilege** for all tokens
 

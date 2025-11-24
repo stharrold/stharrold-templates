@@ -31,12 +31,12 @@ from uuid import uuid4
 try:
     import duckdb
 except ImportError:
-    raise ImportError('duckdb package required. Run: uv add duckdb')
+    raise ImportError("duckdb package required. Run: uv add duckdb")
 
 # Add workflow-utilities to path for worktree_context
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'),
+    str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
 )
 
 logger = logging.getLogger(__name__)
@@ -52,9 +52,9 @@ def _get_worktree_defaults() -> tuple[Path, str]:
     try:
         from worktree_context import get_state_dir, get_worktree_id
 
-        return get_state_dir() / 'agentdb.duckdb', get_worktree_id()
+        return get_state_dir() / "agentdb.duckdb", get_worktree_id()
     except (ImportError, RuntimeError):
-        return Path('agentdb.duckdb'), ''
+        return Path("agentdb.duckdb"), ""
 
 
 class SynchronizationEngine:
@@ -108,12 +108,7 @@ class SynchronizationEngine:
         # For production, consider connection pooling
         self.conn = duckdb.connect(self.db_path, read_only=False)
 
-    def _compute_provenance_hash(
-        self,
-        sync_id: str,
-        flow_token: str,
-        state: dict[str, Any]
-    ) -> str:
+    def _compute_provenance_hash(self, sync_id: str, flow_token: str, state: dict[str, Any]) -> str:
         """Compute SHA-256 content-addressed hash for idempotency.
 
         Performance Target: <1ms p99
@@ -144,13 +139,13 @@ class SynchronizationEngine:
             # Returns: "a3f2b8..." (64 chars)
         """
         # Deterministic JSON serialization (sort keys for consistency)
-        state_json = json.dumps(state, sort_keys=True, separators=(',', ':'))
+        state_json = json.dumps(state, sort_keys=True, separators=(",", ":"))
 
         # Combine components with delimiter
-        content = f'{sync_id}:{flow_token}:{state_json}'
+        content = f"{sync_id}:{flow_token}:{state_json}"
 
         # SHA-256 hash
-        hash_bytes = hashlib.sha256(content.encode('utf-8')).digest()
+        hash_bytes = hashlib.sha256(content.encode("utf-8")).digest()
         return hash_bytes.hex()
 
     def _get_nested_value(self, obj: dict[str, Any], path: str) -> Any:
@@ -168,7 +163,7 @@ class SynchronizationEngine:
             value = _get_nested_value(obj, "coverage.percentage")
             # Returns: 85
         """
-        keys = path.split('.')
+        keys = path.split(".")
         current = obj
 
         for key in keys:
@@ -178,11 +173,7 @@ class SynchronizationEngine:
 
         return current
 
-    def _resolve_params(
-        self,
-        action_spec: dict[str, Any],
-        trigger_state: dict[str, Any]
-    ) -> dict[str, Any]:
+    def _resolve_params(self, action_spec: dict[str, Any], trigger_state: dict[str, Any]) -> dict[str, Any]:
         """Resolve ${trigger_state.path} placeholders in action spec.
 
         Template Syntax:
@@ -211,15 +202,15 @@ class SynchronizationEngine:
         spec_json = json.dumps(action_spec)
 
         # Pattern: ${trigger_state.path.to.value}
-        pattern = r'\$\{trigger_state\.([^}]+)\}'
+        pattern = r"\$\{trigger_state\.([^}]+)\}"
 
         def replacer(match):
             path = match.group(1)
             value = self._get_nested_value(trigger_state, path)
 
             if value is None:
-                logger.warning(f'Missing path in trigger_state: {path}')
-                return 'null'
+                logger.warning(f"Missing path in trigger_state: {path}")
+                return "null"
 
             # Return JSON-encoded value (handles strings, numbers, objects)
             return json.dumps(value) if not isinstance(value, str) else value
@@ -272,12 +263,7 @@ class SynchronizationEngine:
 
         return True
 
-    def _find_matching_syncs(
-        self,
-        agent_id: str,
-        action: str,
-        state: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def _find_matching_syncs(self, agent_id: str, action: str, state: dict[str, Any]) -> list[dict[str, Any]]:
         """Find synchronization rules matching current agent/action/state.
 
         Query Pattern (DuckDB):
@@ -319,15 +305,14 @@ class SynchronizationEngine:
         results = self.conn.execute(query, [agent_id, action]).fetchall()
 
         # Convert to list of dicts
-        columns = ['sync_id', 'trigger_agent_id', 'trigger_action', 'trigger_pattern',
-                   'target_agent_id', 'target_action', 'priority', 'enabled']
+        columns = ["sync_id", "trigger_agent_id", "trigger_action", "trigger_pattern", "target_agent_id", "target_action", "priority", "enabled"]
         syncs = [dict(zip(columns, row)) for row in results]
 
         # Filter by pattern matching (state must contain pattern)
         matched_syncs = []
         for sync in syncs:
             # Parse trigger_pattern JSON
-            pattern_json = sync['trigger_pattern']
+            pattern_json = sync["trigger_pattern"]
             if pattern_json:
                 try:
                     pattern = json.loads(pattern_json) if isinstance(pattern_json, str) else pattern_json
@@ -362,14 +347,7 @@ class SynchronizationEngine:
         # For Phase 2, return False (defer to Phase 3)
         return False
 
-    def _log_audit_trail(
-        self,
-        sync_id: str,
-        execution_id: str,
-        event_type: str,
-        phi_involved: bool,
-        event_details: dict[str, Any]
-    ):
+    def _log_audit_trail(self, sync_id: str, execution_id: str, event_type: str, phi_involved: bool, event_details: dict[str, Any]):
         """Log event to sync_audit_trail (APPEND-ONLY compliance log).
 
         Healthcare Compliance Requirements:
@@ -386,7 +364,8 @@ class SynchronizationEngine:
         """
         audit_id = str(uuid4())
 
-        self.conn.execute("""
+        self.conn.execute(
+            """
             INSERT INTO sync_audit_trail (
                 audit_id,
                 sync_id,
@@ -398,28 +377,21 @@ class SynchronizationEngine:
                 compliance_context,
                 event_details
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, [
-            audit_id,
-            sync_id,
-            execution_id,
-            event_type,
-            'sync_engine',  # Actor
-            'autonomous_agent',  # Role
-            phi_involved,
-            json.dumps({
-                'purpose': 'Workflow synchronization',
-                'legal_basis': 'Research protocol'
-            }),
-            json.dumps(event_details)
-        ])
+        """,
+            [
+                audit_id,
+                sync_id,
+                execution_id,
+                event_type,
+                "sync_engine",  # Actor
+                "autonomous_agent",  # Role
+                phi_involved,
+                json.dumps({"purpose": "Workflow synchronization", "legal_basis": "Research protocol"}),
+                json.dumps(event_details),
+            ],
+        )
 
-    def _execute_sync(
-        self,
-        sync: dict[str, Any],
-        flow_token: str,
-        trigger_state: dict[str, Any],
-        prov_hash: str
-    ) -> str:
+    def _execute_sync(self, sync: dict[str, Any], flow_token: str, trigger_state: dict[str, Any], prov_hash: str) -> str:
         """Record sync execution and trigger target agent.
 
         Database Operations:
@@ -440,14 +412,12 @@ class SynchronizationEngine:
 
         # Resolve parameters from trigger state
         # Example: "${trigger_state.coverage.percentage}" → 85
-        action_spec = {
-            'action': sync['target_action'],
-            'agent_id': sync['target_agent_id']
-        }
+        action_spec = {"action": sync["target_action"], "agent_id": sync["target_agent_id"]}
         resolved_params = self._resolve_params(action_spec, trigger_state)
 
         # Insert execution record (append-only)
-        self.conn.execute("""
+        self.conn.execute(
+            """
             INSERT INTO sync_executions (
                 execution_id,
                 sync_id,
@@ -459,30 +429,32 @@ class SynchronizationEngine:
                 operation_result,
                 phi_accessed
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, [
-            execution_id,
-            sync['sync_id'],
-            prov_hash,
-            json.dumps(trigger_state),
-            'pending',
-            1,  # TODO: Proper sequence number (query max order + 1)
-            'read',  # Phase 2: placeholder operation type
-            'success',  # Phase 2: execution just recorded, not actually run yet
-            False  # No PHI in Phase 2 (defer to Phase 3)
-        ])
+        """,
+            [
+                execution_id,
+                sync["sync_id"],
+                prov_hash,
+                json.dumps(trigger_state),
+                "pending",
+                1,  # TODO: Proper sequence number (query max order + 1)
+                "read",  # Phase 2: placeholder operation type
+                "success",  # Phase 2: execution just recorded, not actually run yet
+                False,  # No PHI in Phase 2 (defer to Phase 3)
+            ],
+        )
 
         # Log to audit trail (healthcare compliance)
         self._log_audit_trail(
-            sync_id=sync['sync_id'],
+            sync_id=sync["sync_id"],
             execution_id=execution_id,
-            event_type='sync_initiated',
+            event_type="sync_initiated",
             phi_involved=self._detect_phi(trigger_state),
             event_details={
-                'trigger_agent': sync['trigger_agent_id'],
-                'target_agent': sync['target_agent_id'],
-                'flow_token': flow_token,
-                'resolved_params': resolved_params
-            }
+                "trigger_agent": sync["trigger_agent_id"],
+                "target_agent": sync["target_agent_id"],
+                "flow_token": flow_token,
+                "resolved_params": resolved_params,
+            },
         )
 
         # TODO (Phase 3): Actually trigger target agent
@@ -497,13 +469,7 @@ class SynchronizationEngine:
 
         return execution_id
 
-    def on_agent_action_complete(
-        self,
-        agent_id: str,
-        action: str,
-        flow_token: str,
-        state_snapshot: dict[str, Any]
-    ) -> list[str]:
+    def on_agent_action_complete(self, agent_id: str, action: str, flow_token: str, state_snapshot: dict[str, Any]) -> list[str]:
         """Main entry point - called after any agent action completes.
 
         Performance Requirements:
@@ -536,40 +502,22 @@ class SynchronizationEngine:
         # Find matching synchronization rules
         matching_syncs = self._find_matching_syncs(agent_id, action, state_snapshot)
 
-        logger.info(
-            f'Agent action: {agent_id}.{action} (flow_token={flow_token}) '
-            f'matched {len(matching_syncs)} sync rules'
-        )
+        logger.info(f"Agent action: {agent_id}.{action} (flow_token={flow_token}) " f"matched {len(matching_syncs)} sync rules")
 
         for sync in matching_syncs:
             # Compute provenance hash for idempotency
-            prov_hash = self._compute_provenance_hash(
-                sync_id=sync['sync_id'],
-                flow_token=flow_token,
-                state=state_snapshot
-            )
+            prov_hash = self._compute_provenance_hash(sync_id=sync["sync_id"], flow_token=flow_token, state=state_snapshot)
 
             # Check if this sync already executed for this exact state
-            existing = self.conn.execute(
-                'SELECT execution_id FROM sync_executions WHERE provenance_hash = ?',
-                [prov_hash]
-            ).fetchone()
+            existing = self.conn.execute("SELECT execution_id FROM sync_executions WHERE provenance_hash = ?", [prov_hash]).fetchone()
 
             if existing:
-                logger.info(
-                    f"Idempotency: Sync {sync['sync_id']} already executed "
-                    f"(hash={prov_hash[:8]}...)"
-                )
+                logger.info(f"Idempotency: Sync {sync['sync_id']} already executed " f"(hash={prov_hash[:8]}...)")
                 continue
 
             # Execute sync (trigger target agent)
             try:
-                execution_id = self._execute_sync(
-                    sync=sync,
-                    flow_token=flow_token,
-                    trigger_state=state_snapshot,
-                    prov_hash=prov_hash
-                )
+                execution_id = self._execute_sync(sync=sync, flow_token=flow_token, trigger_state=state_snapshot, prov_hash=prov_hash)
                 execution_ids.append(execution_id)
                 logger.info(f"Triggered sync {sync['sync_id']} → execution {execution_id}")
             except Exception as e:

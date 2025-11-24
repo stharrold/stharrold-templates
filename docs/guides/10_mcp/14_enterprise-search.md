@@ -72,11 +72,11 @@ policies:
     max_age_days: 365
     review_required: true
     auto_archive: false
-  
+
   access_controls:
     classification_levels: ["public", "internal", "confidential", "restricted"]
     default_level: "internal"
-  
+
   data_stewardship:
     owner_required: true
     backup_owner_required: true
@@ -169,13 +169,13 @@ parsing:
   extract_tables: true
   preserve_formatting: true
   identify_sections: true
-  
+
 metadata_extraction:
   authors: true
   creation_date: true
   modification_history: true
   classification_level: true
-  
+
 provenance_tracking:
   source_system: required
   processing_pipeline: logged
@@ -272,15 +272,15 @@ rules:
   - condition: "document_type == 'FDA_APPROVED'"
     boost: 2.0
     priority: 1
-    
+
   - condition: "author_role == 'senior_partner'"
     boost: 1.5
     priority: 2
-    
+
   - condition: "last_updated > 30_days_ago"
     boost: 1.2
     priority: 3
-    
+
   - condition: "classification_level == 'public'"
     boost: 0.8
     priority: 4
@@ -289,7 +289,7 @@ penalties:
   - condition: "last_updated > 365_days_ago"
     penalty: 0.5
     reason: "Potentially outdated content"
-    
+
   - condition: "author_status == 'former_employee'"
     penalty: 0.3
     reason: "Author no longer with organization"
@@ -358,12 +358,12 @@ Based on project context template patterns:
 - **Confluence Space**: [Space key, primary purpose]
   - Access: [Authentication method]
   - Update Frequency: [How often content refreshes]
-  
+
 - **SharePoint Site**: [Site URL, document types]
   - Permissions: [Access levels and requirements]
   - Sync Strategy: [Real-time vs. batch updates]
 
-### Search System Integrations  
+### Search System Integrations
 - **Enterprise Search Platform**: [Platform name and API endpoints]
   - Index Strategy: [What content types are indexed]
   - Query Language: [Supported search syntax]
@@ -387,7 +387,7 @@ Policy -> approved_by -> Department
 ```bash
 # Standard web app search integration
 claude mcp add user-docs "python -m user_documentation_engine"
-claude mcp add api-docs "python -m api_documentation_engine"  
+claude mcp add api-docs "python -m api_documentation_engine"
 claude mcp add feature-specs "python -m feature_specification_engine"
 ```
 

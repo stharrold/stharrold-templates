@@ -19,11 +19,7 @@ def is_inside_container() -> bool:
     Returns:
         True if running inside a container, False otherwise.
     """
-    return (
-        Path('/.dockerenv').exists()
-        or Path('/run/.containerenv').exists()
-        or (Path('/app').exists() and Path('/app/pyproject.toml').exists())
-    )
+    return Path("/.dockerenv").exists() or Path("/run/.containerenv").exists() or (Path("/app").exists() and Path("/app/pyproject.toml").exists())
 
 
 def get_command_prefix() -> list[str]:
@@ -34,8 +30,8 @@ def get_command_prefix() -> list[str]:
         ['podman-compose', 'run', '--rm', 'dev'] if on host.
     """
     if is_inside_container():
-        return ['uv', 'run']
-    return ['podman-compose', 'run', '--rm', 'dev']
+        return ["uv", "run"]
+    return ["podman-compose", "run", "--rm", "dev"]
 
 
 def get_uv_command_prefix() -> list[str]:
@@ -46,5 +42,5 @@ def get_uv_command_prefix() -> list[str]:
         ['podman-compose', 'run', '--rm', 'dev', 'uv'] if on host.
     """
     if is_inside_container():
-        return ['uv']
-    return ['podman-compose', 'run', '--rm', 'dev', 'uv']
+        return ["uv"]
+    return ["podman-compose", "run", "--rm", "dev", "uv"]
