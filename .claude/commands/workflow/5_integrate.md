@@ -19,6 +19,18 @@ next: /6_release
 
 ---
 
+## Step 0: Verify Context (REQUIRED - STOP if fails)
+
+**Run this first. If it fails, STOP and tell the user to fix the context.**
+
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 5
+```
+
+Expected: Main repo, `contrib/*` branch
+
+---
+
 ## Step 1: Create PR feature → contrib
 
 Create a pull request from the feature branch to contrib:
