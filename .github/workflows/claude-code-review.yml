@@ -3,12 +3,16 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize]
+    # Only run on PRs to main or develop (claude-code-action requires default branch validation)
+    branches:
+      - main
+      - develop
     # Optional: Only run on specific file changes
     # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    #   - "*.py"
+    #   - "src/**/*.py"
+    #   - "tests/**/*.py"
+    #   - ".claude/skills/**/*.py"
 
 jobs:
   claude-review:
