@@ -55,16 +55,16 @@ Create a class that models the tuple structure while enforcing uniqueness and cr
 class DocumentationNode {
     primary_key string @description("Unique identifier for this documentation element")
                       @assert(this | length > 0, "key_required")
-    
+
     key_description string @description("Detailed description that references this key and others")
                           @assert(this | length >= 20, "description_too_short")
                           @assert(this | contains(primary_key), "must_reference_own_key")
-    
+
     referenced_keys string[] @description("Other primary_keys referenced in the description")
                             @assert(this | length > 0, "must_reference_others")
-    
+
     node_type string @description("Type: module, class, function, variable, concept")
-    
+
     source_location SourceInfo? @description("Where this was extracted from")
 }
 
@@ -82,21 +82,21 @@ Build a comprehensive schema that ensures all nodes form a connected graph[^12]:
 ```baml
 class DocumentationGraph {
     repository_name string @description("Repository/Project name as the graph head")
-    
+
     nodes DocumentationNode[] @assert(this | length > 0, "nodes_required")
-    
+
     edges GraphEdge[] @description("Explicit relationships between nodes")
-    
+
     metadata ExtractionMetadata
-    
+
     // Ensure uniqueness of primary keys
-    @@assert(nodes | map(attribute="primary_key") | unique | length == (nodes | length), 
+    @@assert(nodes | map(attribute="primary_key") | unique | length == (nodes | length),
              "duplicate_primary_keys")
-    
+
     // Ensure uniqueness of descriptions
     @@assert(nodes | map(attribute="key_description") | unique | length == (nodes | length),
              "duplicate_descriptions")
-    
+
     // Validate that all referenced keys exist
     @@check(all_references_valid, "Some referenced keys don't exist in the graph")
 }
@@ -128,10 +128,10 @@ function ExtractDocumentationGraph(
     extraction_mode: string  // "code", "markdown", "mixed", "structured", "unstructured"
 ) -> DocumentationGraph {
     client DocumentationExtractor
-    
+
     prompt #"
     You are an expert at extracting structured documentation from various file types.
-    
+
     CRITICAL REQUIREMENTS:
     1. Every primary_key must be UNIQUE across all nodes
     2. Every key_description must be UNIQUE across all nodes
@@ -140,18 +140,18 @@ function ExtractDocumentationGraph(
     5. Every key_description must reference at least one other primary_key
     6. All descriptions must be causal, explaining relationships and purposes
     7. The project/repository name serves as the root/head of the graph
-    
+
     FILE TYPE HANDLING:
     - Code files (.py, .js, .java, etc.): Extract classes, functions, modules
     - Markdown/Docs (.md, .rst, .txt): Extract sections, concepts, references
     - Config files (.json, .yaml, .toml): Extract settings, dependencies
     - Data files (.csv, .parquet): Extract schema, relationships
     - Binary docs (.pdf, .docx): Extract from provided text representation
-    
+
     EXTRACTION MODE: {{ extraction_mode }}
-    
+
     SOURCE: {{ source_identifier }}
-    
+
     Files to Process:
     {% for file in file_contents %}
     ---
@@ -162,7 +162,7 @@ function ExtractDocumentationGraph(
     Content:
     {{ file.content }}
     {% endfor %}
-    
+
     {{ ctx.output_format }}
     "#
 }
@@ -198,30 +198,30 @@ import toml
 
 class UniversalFileExtractor:
     """Extract content from any file type for BAML processing"""
-    
+
     async def extract_from_file(self, file_path: str) -> dict:
         """Extract content from any local or remote file"""
-        
+
         if file_path.startswith(('http://', 'https://')):
             return await self._extract_from_url(file_path)
         else:
             return await self._extract_from_local(Path(file_path))
-    
+
     async def _extract_from_url(self, url: str) -> dict:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 content_type = response.headers.get('content-type', '')
                 content = await response.read()
-                
+
                 return self._process_content(
                     content=content,
                     file_type=content_type,
                     path=url
                 )
-    
+
     async def _extract_from_local(self, path: Path) -> dict:
         mime_type, _ = mimetypes.guess_type(str(path))
-        
+
         # Read file based on type
         if path.suffix in ['.pdf']:
             text = self._extract_pdf(path)
@@ -248,7 +248,7 @@ class UniversalFileExtractor:
             except UnicodeDecodeError:
                 # Read as binary and encode
                 text = base64.b64encode(path.read_bytes()).decode('utf-8')
-        
+
         return {
             'path': str(path),
             'file_type': path.suffix,
@@ -256,7 +256,7 @@ class UniversalFileExtractor:
             'size_bytes': path.stat().st_size,
             'content': text
         }
-    
+
     def _extract_pdf(self, path: Path) -> str:
         """Extract text from PDF files"""
         text = []
@@ -266,13 +266,13 @@ class UniversalFileExtractor:
                 page = pdf_reader.pages[page_num]
                 text.append(f"[Page {page_num + 1}]\n{page.extract_text()}")
         return '\n'.join(text)
-    
+
     def _extract_docx(self, path: Path) -> str:
         """Extract text from Word documents"""
         doc = docx.Document(str(path))
         paragraphs = [para.text for para in doc.paragraphs]
         return '\n'.join(paragraphs)
-    
+
     def _extract_excel(self, path: Path) -> str:
         """Extract data from Excel files"""
         xls = pd.ExcelFile(path)
@@ -281,35 +281,35 @@ class UniversalFileExtractor:
             df = pd.read_excel(xls, sheet_name)
             sheets_text.append(f"[Sheet: {sheet_name}]\n{df.to_string()}")
         return '\n'.join(sheets_text)
-    
+
     def _extract_csv(self, path: Path) -> str:
         """Extract data from CSV files"""
         df = pd.read_csv(path)
         return f"[CSV Schema]\nColumns: {', '.join(df.columns)}\nRows: {len(df)}\n\n{df.head(20).to_string()}"
-    
+
     def _extract_json(self, path: Path) -> str:
         """Extract and format JSON content"""
         with open(path) as f:
             data = json.load(f)
         return json.dumps(data, indent=2)
-    
+
     def _extract_yaml(self, path: Path) -> str:
         """Extract and format YAML content"""
         with open(path) as f:
             data = yaml.safe_load(f)
         return yaml.dump(data, default_flow_style=False)
-    
+
     def _extract_toml(self, path: Path) -> str:
         """Extract and format TOML content"""
         with open(path) as f:
             data = toml.load(f)
         return toml.dumps(data)
-    
+
     def _extract_parquet(self, path: Path) -> str:
         """Extract schema and sample from Parquet files"""
         df = pd.read_parquet(path)
         return f"[Parquet Schema]\nColumns: {df.dtypes.to_string()}\nRows: {len(df)}\n\n{df.head(10).to_string()}"
-    
+
     def _extract_image_metadata(self, path: Path) -> str:
         """Extract metadata from image files"""
         from PIL import Image
@@ -327,16 +327,16 @@ async def extract_documentation_from_any_source(
 ):
     """
     Extract documentation from any source type
-    
+
     Args:
         source_path: File path, directory, URL, or repository
         file_patterns: List of glob patterns to match files
         extraction_mode: "code", "markdown", "mixed", "structured", "unstructured"
     """
-    
+
     extractor = UniversalFileExtractor()
     file_contents = []
-    
+
     # Determine source type
     if source_path.startswith(('http://', 'https://')):
         # Handle URLs
@@ -345,12 +345,12 @@ async def extract_documentation_from_any_source(
         else:
             content = await extractor.extract_from_file(source_path)
             file_contents.append(content)
-    
+
     elif Path(source_path).is_dir():
         # Handle directories
         directory = Path(source_path)
         patterns = file_patterns or ['**/*']
-        
+
         for pattern in patterns:
             for file_path in directory.glob(pattern):
                 if file_path.is_file():
@@ -359,19 +359,19 @@ async def extract_documentation_from_any_source(
                         file_contents.append(content)
                     except Exception as e:
                         print(f"Skipping {file_path}: {e}")
-    
+
     else:
         # Handle single file
         content = await extractor.extract_from_file(source_path)
         file_contents.append(content)
-    
+
     # Execute BAML extraction
     result = b.ExtractDocumentationGraph(
         source_identifier=source_path,
         file_contents=file_contents,
         extraction_mode=extraction_mode
     )
-    
+
     return result
 ```
 
@@ -385,28 +385,28 @@ function ExtractFromSpreadsheet(
     sheet_names: string[]
 ) -> DocumentationNode[] {
     client DocumentationExtractor
-    
+
     prompt #"
     Extract documentation from spreadsheet data.
-    
+
     Focus on:
     1. Column names and their purposes (as primary_keys)
     2. Relationships between sheets (foreign keys, lookups)
     3. Calculated fields and their dependencies
     4. Data validation rules and constraints
     5. Named ranges and their uses
-    
+
     Create nodes for:
     - Each significant column or field
     - Each sheet as a module
     - Formulas as functions
     - Validation rules as constraints
-    
+
     Spreadsheet Content:
     {{ spreadsheet_content }}
-    
+
     Sheet Names: {{ sheet_names | join(", ") }}
-    
+
     {{ ctx.output_format }}
     "#
 }
@@ -415,23 +415,23 @@ function ExtractFromNotebook(
     notebook_cells: NotebookCell[]
 ) -> DocumentationGraph {
     client DocumentationExtractor
-    
+
     prompt #"
     Extract documentation from Jupyter/Colab notebook.
-    
+
     Focus on:
     1. Code cells defining functions and classes
     2. Markdown cells explaining concepts
     3. Variable definitions and data transformations
     4. Import statements and dependencies
     5. Output visualizations and their inputs
-    
+
     Cell Types:
     {% for cell in notebook_cells %}
     [Cell {{ cell.index }}] Type: {{ cell.cell_type }}
     {{ cell.content }}
     {% endfor %}
-    
+
     {{ ctx.output_format }}
     "#
 }
@@ -483,7 +483,7 @@ test ExtractFromMultipleFormats {
         ]
         extraction_mode: "mixed"
     }
-    
+
     @@assert(this.nodes | length >= 4, "should_extract_from_both_files")
     @@check(cross_file_references, "should_link_config_to_code")
 }
@@ -518,7 +518,7 @@ class RobustExtractor:
             'binary': [self._hex_dump, self._file_info_only],
             'corrupted': [self._partial_extraction, self._skip_with_note]
         }
-    
+
     async def extract_with_fallback(self, file_path: str):
         try:
             return await self.primary_extraction(file_path)
@@ -550,7 +550,7 @@ async def extract_documentation(
 ):
     extractor = UniversalFileExtractor()
     file_contents = []
-    
+
     for file in files:
         content = await file.read()
         processed = extractor._process_content(
@@ -559,17 +559,17 @@ async def extract_documentation(
             path=file.filename
         )
         file_contents.append(processed)
-    
+
     graph = b.ExtractDocumentationGraph(
         source_identifier=f"upload_{datetime.now().isoformat()}",
         file_contents=file_contents,
         extraction_mode=extraction_mode
     )
-    
+
     # Validate graph connectivity
     if not validate_graph_connectivity(graph):
         return {"error": "Graph not fully connected"}
-    
+
     return {
         "project": graph.repository_name,
         "nodes": len(graph.nodes),

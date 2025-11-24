@@ -1,20 +1,4 @@
 {
   "version": "2.0.0",
-  "tasks": [
-    // Disabled: This task used to run sync-mcp.sh on folder open
-    // The repository now uses mcp_manager.py for platform-specific management
-    // instead of cross-platform synchronization
-    // {
-    //   "label": "Sync MCP on startup",
-    //   "type": "shell",
-    //   "command": "~/bin/sync-mcp.sh",
-    //   "runOptions": {
-    //     "runOn": "folderOpen"
-    //   },
-    //   "presentation": {
-    //     "reveal": "silent",
-    //     "panel": "new"
-    //   }
-    // }
-  ]
+  "tasks": []
 }

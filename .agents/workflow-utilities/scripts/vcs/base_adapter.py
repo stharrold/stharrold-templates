@@ -48,13 +48,7 @@ class BaseVCSAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_pull_request(
-        self,
-        source_branch: str,
-        target_branch: str,
-        title: str,
-        body: str
-    ) -> str:
+    def create_pull_request(self, source_branch: str, target_branch: str, title: str, body: str) -> str:
         """Create a pull request.
 
         Args:
@@ -100,12 +94,7 @@ class BaseVCSAdapter(ABC):
         pass
 
     @abstractmethod
-    def update_pr(
-        self,
-        pr_number: int,
-        title: str = None,
-        body: str = None
-    ) -> None:
+    def update_pr(self, pr_number: int, title: str = None, body: str = None) -> None:
         """Update pull request title or description.
 
         Args:
@@ -155,4 +144,4 @@ class BaseVCSAdapter(ABC):
             This is a concrete method with a default implementation.
             Subclasses can override if needed.
         """
-        return self.__class__.__name__.replace('Adapter', '')
+        return self.__class__.__name__.replace("Adapter", "")

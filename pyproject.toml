@@ -21,28 +21,29 @@ line-length = 170
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "B", "Q", "UP"]
+select = ["E", "F", "I", "N", "W", "B", "UP"]
 # E: pycodestyle errors
 # F: pyflakes
 # I: isort
 # N: pep8-naming
 # W: pycodestyle warnings
 # B: flake8-bugbear
-# Q: flake8-quotes
 # UP: pyupgrade
+# Note: Q (flake8-quotes) removed - formatter handles quote style
 
-[tool.ruff.lint.flake8-quotes]
-# Use single quotes to match existing codebase style
-inline-quotes = "single"
-docstring-quotes = "double"
+ignore = ["E402"]
+# E402: Module level import not at top of file
+# Ignored because skill scripts use sys.path.insert before imports
 
 [tool.ruff.lint.per-file-ignores]
 "tools/**/*.py" = ["N999", "B007", "B904", "B905"]
 ".agents/**/*.py" = ["N999", "B007", "B904", "B905"]
 ".claude/**/*.py" = ["N999", "B007", "B904", "B905"]
+"tests/**/*.py" = ["N999"]
 
 [tool.uv]
 dev-dependencies = [
+    "pre-commit>=4.5.0",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.1",

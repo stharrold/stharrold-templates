@@ -19,23 +19,23 @@ import json
 import subprocess
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Valid sync types (from agentdb_sync_schema.sql)
-VALID_SYNC_TYPES = ['workflow_transition', 'quality_gate', 'file_update']
+VALID_SYNC_TYPES = ["workflow_transition", "quality_gate", "file_update"]
 
 # Valid workflow patterns
 VALID_PATTERNS = [
-    'phase_1_specify',
-    'phase_2_plan',
-    'phase_3_tasks',
-    'phase_4_implement',
-    'phase_5_integrate',
-    'phase_6_release',
-    'phase_7_backmerge',
-    'quality_gate_passed',
-    'quality_gate_failed',
+    "phase_1_specify",
+    "phase_2_plan",
+    "phase_3_tasks",
+    "phase_4_implement",
+    "phase_5_integrate",
+    "phase_6_release",
+    "phase_7_backmerge",
+    "quality_gate_passed",
+    "quality_gate_failed",
 ]
 
 
@@ -47,11 +47,7 @@ def get_worktree_path() -> str | None:
     """
     try:
         # Get git toplevel
-        toplevel = subprocess.check_output(
-            ['git', 'rev-parse', '--show-toplevel'],
-            text=True,
-            stderr=subprocess.PIPE
-        ).strip()
+        toplevel = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True, stderr=subprocess.PIPE).strip()
 
         # Get current directory
         cwd = str(Path.cwd())
@@ -74,18 +70,18 @@ def get_database_path() -> Path:
     cwd = Path.cwd()
 
     # Check current directory
-    state_dir = cwd / '.claude-state'
+    state_dir = cwd / ".claude-state"
     if state_dir.exists():
-        return state_dir / 'agentdb.duckdb'
+        return state_dir / "agentdb.duckdb"
 
     # Check parent (if in worktree)
-    parent_state = cwd.parent / '.claude-state'
+    parent_state = cwd.parent / ".claude-state"
     if parent_state.exists():
-        return parent_state / 'agentdb.duckdb'
+        return parent_state / "agentdb.duckdb"
 
     # Default to current directory's .claude-state
     state_dir.mkdir(parents=True, exist_ok=True)
-    return state_dir / 'agentdb.duckdb'
+    return state_dir / "agentdb.duckdb"
 
 
 def init_database_if_needed(db_path: Path) -> None:
@@ -99,24 +95,13 @@ def init_database_if_needed(db_path: Path) -> None:
 
     # Find and run init script
     script_dir = Path(__file__).parent
-    init_script = script_dir / 'init_database.py'
+    init_script = script_dir / "init_database.py"
 
     if init_script.exists():
-        subprocess.run(
-            [sys.executable, str(init_script)],
-            check=True,
-            capture_output=True
-        )
+        subprocess.run([sys.executable, str(init_script)], check=True, capture_output=True)
 
 
-def record_sync(
-    sync_type: str,
-    pattern: str,
-    source: str = '',
-    target: str = '',
-    worktree: str | None = None,
-    metadata: dict | None = None
-) -> str:
+def record_sync(sync_type: str, pattern: str, source: str = "", target: str = "", worktree: str | None = None, metadata: dict | None = None) -> str:
     """Record a synchronization event in AgentDB.
 
     Args:
@@ -156,11 +141,11 @@ def record_sync(
     init_database_if_needed(db_path)
 
     # Prepare timestamps
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     timestamp = now.isoformat()
 
     # Prepare metadata JSON
-    metadata_json = json.dumps(metadata) if metadata else '{}'
+    metadata_json = json.dumps(metadata) if metadata else "{}"
 
     # Build SQL
     sql = f"""
@@ -187,16 +172,13 @@ def record_sync(
     # Execute using DuckDB CLI or Python
     try:
         import duckdb
+
         conn = duckdb.connect(str(db_path))
         conn.execute(sql)
         conn.close()
     except ImportError:
         # Fallback to CLI if duckdb not available
-        result = subprocess.run(
-            ['duckdb', str(db_path), '-c', sql],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["duckdb", str(db_path), "-c", sql], capture_output=True, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"Database error: {result.stderr}")
 
@@ -206,7 +188,7 @@ def record_sync(
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description='Record workflow transitions in AgentDB',
+        description="Record workflow transitions in AgentDB",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -219,40 +201,15 @@ Examples:
 
   # Record quality gate result
   python record_sync.py --sync-type quality_gate --pattern quality_gate_passed
-"""
+""",
     )
 
-    parser.add_argument(
-        '--sync-type',
-        required=True,
-        choices=VALID_SYNC_TYPES,
-        help='Type of synchronization'
-    )
-    parser.add_argument(
-        '--pattern',
-        required=True,
-        help='Phase pattern (e.g., phase_1_specify)'
-    )
-    parser.add_argument(
-        '--source',
-        default='',
-        help='Source location'
-    )
-    parser.add_argument(
-        '--target',
-        default='',
-        help='Target location'
-    )
-    parser.add_argument(
-        '--worktree',
-        default=None,
-        help='Worktree path (auto-detected if not provided)'
-    )
-    parser.add_argument(
-        '--metadata',
-        default=None,
-        help='Additional JSON metadata'
-    )
+    parser.add_argument("--sync-type", required=True, choices=VALID_SYNC_TYPES, help="Type of synchronization")
+    parser.add_argument("--pattern", required=True, help="Phase pattern (e.g., phase_1_specify)")
+    parser.add_argument("--source", default="", help="Source location")
+    parser.add_argument("--target", default="", help="Target location")
+    parser.add_argument("--worktree", default=None, help="Worktree path (auto-detected if not provided)")
+    parser.add_argument("--metadata", default=None, help="Additional JSON metadata")
 
     args = parser.parse_args()
 
@@ -266,14 +223,7 @@ Examples:
             sys.exit(1)
 
     try:
-        sync_id = record_sync(
-            sync_type=args.sync_type,
-            pattern=args.pattern,
-            source=args.source,
-            target=args.target,
-            worktree=args.worktree,
-            metadata=metadata
-        )
+        sync_id = record_sync(sync_type=args.sync_type, pattern=args.pattern, source=args.source, target=args.target, worktree=args.worktree, metadata=metadata)
 
         print(f"✓ Recorded sync: {sync_id}")
         print(f"  Type: {args.sync_type}")
@@ -291,5 +241,5 @@ Examples:
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -173,7 +173,7 @@ git worktree add ../project-security-review security/review
 
 # Run independent Claude sessions in each worktree
 # - One instance implements new functionality
-# - Another performs security reviews  
+# - Another performs security reviews
 # - Third generates comprehensive tests
 ```
 

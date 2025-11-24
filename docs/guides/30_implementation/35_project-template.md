@@ -50,7 +50,7 @@ Complete project configuration template for Claude Code development workflows, i
 project_template:
   name: "MyProject"
   purpose: "Customer relationship management system"
-  stage: "development" 
+  stage: "development"
   critical_systems: "authentication,user_data"
 ```
 
@@ -202,7 +202,7 @@ function processUser(user) {
   if (!user) return null;
   if (!user.isActive) return handleInactiveUser(user);
   if (user.needsVerification) return handleVerification(user);
-  
+
   return processActiveUser(user);
 }
 
