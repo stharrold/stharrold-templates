@@ -110,8 +110,8 @@ def create_backmerge_branch(version: str) -> str | None:
     result = run_cmd(['git', 'branch', '-r', '--list', f'origin/{backmerge_branch}'], check=False)
     if result.stdout.strip():
         print(f'  Backmerge branch {backmerge_branch} already exists')
-        # Checkout existing branch
-        run_cmd(['git', 'checkout', backmerge_branch], check=False)
+        # Force local branch to match remote (handles local/remote mismatch)
+        run_cmd(['git', 'checkout', '-B', backmerge_branch, f'origin/{backmerge_branch}'], check=False)
         return backmerge_branch
 
     # Create branch from main
@@ -167,8 +167,15 @@ def step_pr_develop(version: str = None) -> bool:
     )
     commits_behind = result.stdout.strip()
 
+    # Handle git rev-list command failure
+    if result.returncode != 0:
+        print(f'✗ Failed to check commits behind: {result.stderr}')
+        return_to_editable_branch()
+        return False
+
     if commits_behind == '0':
         print('⚠️  develop is already up to date with main')
+        return_to_editable_branch()
         return True
 
     print(f'  develop is {commits_behind} commits behind main')
@@ -196,6 +203,8 @@ def step_pr_develop(version: str = None) -> bool:
     if result.returncode != 0:
         if 'already exists' in result.stderr:
             print('⚠️  PR already exists')
+            return_to_editable_branch()
+            return True
         else:
             print(f'✗ PR creation failed: {result.stderr}')
             return_to_editable_branch()
