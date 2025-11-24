@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Create feature/release/hotfix worktree with TODO file.
+"""Create feature/release/hotfix worktree with optional TODO file.
 
 Constants:
 - TIMESTAMP_FORMAT: YYYYMMDDTHHMMSSZ (compact ISO8601)
   Rationale: Compact format that remains intact when branch names are parsed
   by underscores and hyphens. No colons/hyphens avoid shell escaping issues.
+
+Note: The --no-todo flag (default) skips TODO file creation since TODO*.md
+files are deprecated in favor of GitHub Issues and specs/*/tasks.md.
 """
 
+import argparse
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -21,7 +25,7 @@ from worktree_context import compute_worktree_id
 TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'  # Compact ISO8601 for filename/branch safety
 VALID_WORKFLOW_TYPES = ['feature', 'release', 'hotfix']  # Supported workflow types
 
-def create_worktree(workflow_type, slug, base_branch):
+def create_worktree(workflow_type, slug, base_branch, create_todo=False):
     """
     Create a worktree for feature/release/hotfix development.
 
@@ -29,9 +33,10 @@ def create_worktree(workflow_type, slug, base_branch):
         workflow_type: 'feature' | 'release' | 'hotfix'
         slug: Short descriptive name (e.g., 'json-validator')
         base_branch: Branch to create from (e.g., 'contrib/username')
+        create_todo: If True, create TODO file (default False, deprecated)
 
     Returns:
-        dict with worktree_path, branch_name, todo_file
+        dict with worktree_path, branch_name, todo_file (None if not created)
 
     Raises:
         ValueError: If inputs are invalid
@@ -103,64 +108,67 @@ def create_worktree(workflow_type, slug, base_branch):
         print(f'Git error: {e.stderr.strip()}', file=sys.stderr)
         raise
 
-    # Get VCS username (GitHub/Azure DevOps)
-    try:
-        vcs = get_vcs_adapter()
-        gh_user = vcs.get_current_user()
-    except RuntimeError as e:
-        print('ERROR: Failed to get VCS username', file=sys.stderr)
-        print(f'Error: {e}', file=sys.stderr)
-        raise
+    # TODO file creation (deprecated, only if explicitly requested)
+    todo_filename = None
+    if create_todo:
+        # Get VCS username (GitHub/Azure DevOps)
+        try:
+            vcs = get_vcs_adapter()
+            gh_user = vcs.get_current_user()
+        except RuntimeError as e:
+            print('ERROR: Failed to get VCS username', file=sys.stderr)
+            print(f'Error: {e}', file=sys.stderr)
+            raise
 
-    todo_filename = f'TODO_{workflow_type}_{timestamp}_{slug}.md'
-    todo_path = repo_root / todo_filename
+        todo_filename = f'TODO_{workflow_type}_{timestamp}_{slug}.md'
+        todo_path = repo_root / todo_filename
 
-    # Check if TODO file already exists
-    if todo_path.exists():
-        print(
-            f'WARNING: TODO file already exists: {todo_filename}\n'
-            f'This worktree may have been created before.',
-            file=sys.stderr
-        )
+        # Check if TODO file already exists
+        if todo_path.exists():
+            print(
+                f'WARNING: TODO file already exists: {todo_filename}\n'
+                f'This worktree may have been created before.',
+                file=sys.stderr
+            )
 
-    # Copy template and customize
-    template_path = repo_root / '.claude' / 'skills' / 'workflow-orchestrator' / 'templates' / 'TODO_template.md'
+        # Copy template and customize
+        template_path = repo_root / '.claude' / 'skills' / 'workflow-orchestrator' / 'templates' / 'TODO_template.md'
 
-    # Use timezone-aware datetime for creation timestamp
-    created_timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+        # Use timezone-aware datetime for creation timestamp
+        created_timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
 
-    try:
-        if template_path.exists():
-            try:
-                with open(template_path) as f:
-                    content = f.read()
-            except (OSError, PermissionError) as e:
-                print(f'ERROR: Cannot read template file: {template_path}', file=sys.stderr)
-                print(f'Error: {e}', file=sys.stderr)
-                raise
+        try:
+            if template_path.exists():
+                try:
+                    with open(template_path) as f:
+                        content = f.read()
+                except (OSError, PermissionError) as e:
+                    print(f'ERROR: Cannot read template file: {template_path}', file=sys.stderr)
+                    print(f'Error: {e}', file=sys.stderr)
+                    raise
 
-            # Replace placeholders
-            content = content.replace('{{WORKFLOW_TYPE}}', workflow_type)
-            content = content.replace('{{SLUG}}', slug)
-            content = content.replace('{{TIMESTAMP}}', timestamp)
-            content = content.replace('{{GH_USER}}', gh_user)
-            content = content.replace('{{TITLE}}', slug.replace('-', ' ').title())
-            content = content.replace('{{DESCRIPTION}}', f'{workflow_type.title()} for {slug}')
-            content = content.replace('{{CREATED}}', created_timestamp)
+                # Replace placeholders
+                content = content.replace('{{WORKFLOW_TYPE}}', workflow_type)
+                content = content.replace('{{SLUG}}', slug)
+                content = content.replace('{{TIMESTAMP}}', timestamp)
+                content = content.replace('{{GH_USER}}', gh_user)
+                content = content.replace('{{TITLE}}', slug.replace('-', ' ').title())
+                content = content.replace('{{DESCRIPTION}}', f'{workflow_type.title()} for {slug}')
+                content = content.replace('{{CREATED}}', created_timestamp)
 
-            try:
-                with open(todo_path, 'w') as f:
-                    f.write(content)
-            except (OSError, PermissionError) as e:
-                print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
-                print(f'Error: {e}', file=sys.stderr)
-                raise
-        else:
-            # Create minimal TODO if template doesn't exist
-            print(f'WARNING: Template not found at {template_path}, using minimal TODO', file=sys.stderr)
-            try:
-                with open(todo_path, 'w') as f:
-                    f.write(f"""---
+                try:
+                    with open(todo_path, 'w') as f:
+                        f.write(content)
+                except (OSError, PermissionError) as e:
+                    print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
+                    print(f'Error: {e}', file=sys.stderr)
+                    raise
+            else:
+                # Create minimal TODO if template doesn't exist
+                print(f'WARNING: Template not found at {template_path}, using minimal TODO', file=sys.stderr)
+                try:
+                    with open(todo_path, 'w') as f:
+                        f.write(f"""---
 type: workflow-manifest
 workflow_type: {workflow_type}
 slug: {slug}
@@ -173,23 +181,23 @@ github_user: {gh_user}
 Workflow: {workflow_type}
 Created: {created_timestamp}
 """)
-            except (OSError, PermissionError) as e:
-                print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
-                print(f'Error: {e}', file=sys.stderr)
-                raise
-    except Exception:
-        # Cleanup worktree if TODO creation failed
-        print('ERROR: TODO file creation failed, cleaning up worktree...', file=sys.stderr)
-        try:
-            subprocess.run(['git', 'worktree', 'remove', str(worktree_path)],
-                         stderr=subprocess.DEVNULL, check=False)
-            subprocess.run(['git', 'branch', '-D', branch_name],
-                         stderr=subprocess.DEVNULL, check=False)
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            # Ignore errors during cleanup: worktree/branch may not exist or removal may fail,
-            # but the original error is more important and will be re-raised.
-            pass
-        raise
+                except (OSError, PermissionError) as e:
+                    print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
+                    print(f'Error: {e}', file=sys.stderr)
+                    raise
+        except Exception:
+            # Cleanup worktree if TODO creation failed
+            print('ERROR: TODO file creation failed, cleaning up worktree...', file=sys.stderr)
+            try:
+                subprocess.run(['git', 'worktree', 'remove', str(worktree_path)],
+                             stderr=subprocess.DEVNULL, check=False)
+                subprocess.run(['git', 'branch', '-D', branch_name],
+                             stderr=subprocess.DEVNULL, check=False)
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                # Ignore errors during cleanup: worktree/branch may not exist or removal may fail,
+                # but the original error is more important and will be re-raised.
+                pass
+            raise
 
     # Initialize .claude-state/ directory in new worktree
     state_dir = worktree_path / '.claude-state'
@@ -206,7 +214,10 @@ Created: {created_timestamp}
 
     print(f'✓ Worktree created: {worktree_path}')
     print(f'✓ Branch: {branch_name}')
-    print(f'✓ TODO file: {todo_filename}')
+    if todo_filename:
+        print(f'✓ TODO file: {todo_filename}')
+    else:
+        print('ℹ️  TODO file: skipped (deprecated)')
 
     return {
         'worktree_path': str(worktree_path),
@@ -215,15 +226,64 @@ Created: {created_timestamp}
         'state_dir': str(state_dir) if state_dir.exists() else None
     }
 
-if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print('Usage: create_worktree.py <feature|release|hotfix> <slug> <base_branch>', file=sys.stderr)
-        print(f"\nValid workflow types: {', '.join(VALID_WORKFLOW_TYPES)}", file=sys.stderr)
-        print('\nExample: create_worktree.py feature my-feature contrib/username', file=sys.stderr)
-        sys.exit(1)
+
+def main():
+    """Main entry point with argparse."""
+    parser = argparse.ArgumentParser(
+        description='Create feature/release/hotfix worktree',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Create feature worktree (no TODO file by default)
+  python create_worktree.py feature my-feature contrib/stharrold
+
+  # Create feature worktree with TODO file (deprecated)
+  python create_worktree.py feature my-feature contrib/stharrold --create-todo
+
+  # Create release worktree
+  python create_worktree.py release v1.6.0 develop
+"""
+    )
+
+    parser.add_argument(
+        'workflow_type',
+        choices=VALID_WORKFLOW_TYPES,
+        help='Workflow type'
+    )
+    parser.add_argument(
+        'slug',
+        help='Short descriptive name (e.g., my-feature, v1.6.0)'
+    )
+    parser.add_argument(
+        'base_branch',
+        help='Branch to create from (e.g., contrib/username, develop)'
+    )
+    parser.add_argument(
+        '--create-todo',
+        action='store_true',
+        default=False,
+        help='Create TODO file (deprecated, defaults to False)'
+    )
+    parser.add_argument(
+        '--no-todo',
+        action='store_true',
+        default=True,
+        help='Skip TODO file creation (default, for backward compatibility)'
+    )
+
+    args = parser.parse_args()
+
+    # Determine if we should create TODO
+    # --create-todo explicitly enables it, otherwise default is False
+    create_todo = args.create_todo
 
     try:
-        result = create_worktree(sys.argv[1], sys.argv[2], sys.argv[3])
+        result = create_worktree(
+            args.workflow_type,
+            args.slug,
+            args.base_branch,
+            create_todo=create_todo
+        )
 
         import json
         print(json.dumps(result))
@@ -236,3 +296,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f'\nUnexpected error: {e}', file=sys.stderr)
         sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

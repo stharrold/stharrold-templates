@@ -6,12 +6,14 @@ parent: null
 sibling_readme: README.md
 children:
   - ARCHIVED/CLAUDE.md
+  - scripts/CLAUDE.md
 related_skills:
-  - **workflow-orchestrator** - Calls git-workflow-manager scripts
-  - **speckit-author** - Runs in worktrees created by this skill
-  - **quality-enforcer** - Uses semantic_version.py
-  - **workflow-utilities** - Provides VCS abstraction and TODO utilities
-  - **bmad-planner** - Planning happens before worktree creation
+  - workflow-orchestrator
+  - speckit-author
+  - quality-enforcer
+  - workflow-utilities
+  - bmad-planner
+  - agentdb-state-manager
 ---
 
 # Claude Code Context: git-workflow-manager
@@ -19,6 +21,8 @@ related_skills:
 ## Purpose
 
 Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub/Azure DevOps).
+
+> **Note**: As of v5.12.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
 
 ## Directory Structure
 
