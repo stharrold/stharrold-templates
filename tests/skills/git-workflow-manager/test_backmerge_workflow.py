@@ -125,9 +125,10 @@ class TestFindReleaseBranch:
         mock_run.side_effect = [
             MagicMock(returncode=0),  # git fetch
             MagicMock(
-                stdout="  origin/release/v1.4.0\n  origin/release/v1.5.0\n",
+                # git for-each-ref --sort=-version:refname returns highest version first
+                stdout="origin/release/v1.5.0\norigin/release/v1.4.0\n",
                 returncode=0,
-            ),  # git branch -r
+            ),  # git for-each-ref
         ]
 
         result = find_release_branch(None)
@@ -139,7 +140,7 @@ class TestFindReleaseBranch:
         """Should return None when no release branches exist."""
         mock_run.side_effect = [
             MagicMock(returncode=0),  # git fetch
-            MagicMock(stdout="", returncode=0),  # git branch -r (empty)
+            MagicMock(stdout="", returncode=0),  # git for-each-ref (empty)
         ]
 
         result = find_release_branch(None)
@@ -221,16 +222,17 @@ class TestBackmergeWorkflowEdgeCases:
         assert result == "v5.13.0"
 
     @patch("backmerge_workflow.run_cmd")
-    def test_multiple_release_branches_returns_last(self, mock_run):
-        """Should return last branch when multiple exist (most recent)."""
+    def test_multiple_release_branches_returns_highest_version(self, mock_run):
+        """Should return highest version when multiple exist (semantic sort)."""
         mock_run.side_effect = [
-            MagicMock(returncode=0),
+            MagicMock(returncode=0),  # git fetch
             MagicMock(
-                stdout="  origin/release/v1.0.0\n  origin/release/v1.1.0\n  origin/release/v1.2.0\n",
+                # git for-each-ref --sort=-version:refname returns highest first
+                stdout="origin/release/v1.10.0\norigin/release/v1.9.0\norigin/release/v1.2.0\n",
                 returncode=0,
             ),
         ]
 
         result = find_release_branch(None)
 
-        assert result == "release/v1.2.0"
+        assert result == "release/v1.10.0"
