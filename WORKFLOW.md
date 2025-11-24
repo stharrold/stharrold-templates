@@ -72,7 +72,7 @@ For explicit config, create `.vcs_config.yaml` (see CLAUDE.md for format).
 │   └── scripts/
 │       ├── deprecate_files.py
 │       ├── archive_manager.py
-│       ├── todo_updater.py
+│       ├── worktree_context.py
 │       └── directory_structure.py
 └── initialize-repository/     # Bootstrap new repos (Phase 0 meta-skill) (~1000 lines)
     └── scripts/
@@ -124,16 +124,12 @@ hotfix/vX.Y.Z-hotfix.N        ← Production hotfix (worktree)
 
 **ALL merges** to `main` and `develop` go through pull requests. There are no exceptions.
 
-**backmerge_release.py** follows PR workflow (as of v1.8.0):
-- **Purpose:** Back-merge release branches to develop (Phase 5.5)
-- **Process:** Rebases release branch onto develop, then creates PR
-- **Why rebase first:**
-  - Clean, linear git history (no merge commits)
-  - PR is up-to-date with target branch (no "branch out-of-date" warnings)
-  - Easier code review (only shows actual changes from release)
-  - Follows git best practices
-- **Location:** `.claude/skills/git-workflow-manager/scripts/backmerge_release.py`
+**backmerge_workflow.py** follows PR workflow:
+- **Purpose:** Back-merge release branches to develop (Step 7)
+- **Process:** Creates PR directly from release branch to develop
+- **Location:** `.claude/skills/git-workflow-manager/scripts/backmerge_workflow.py`
 - **No direct commits:** Script creates PR only (merge happens in GitHub/Azure DevOps UI)
+- **Note:** `backmerge_release.py` has been archived (redundant with backmerge_workflow.py)
 
 #### Technical Enforcement (Recommended)
 
