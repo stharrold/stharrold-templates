@@ -138,6 +138,27 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 | 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
 | 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
 
+## Workflow Context Validation
+
+Each workflow step validates it's running in the correct location/branch:
+
+```bash
+# Validate context before running a step
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+```
+
+| Step | Location | Branch | Validation |
+|------|----------|--------|------------|
+| `/1_specify` | Main repo | `contrib/*` | `--step 1` |
+| `/2_plan` | **Worktree** | `feature/*` | `--step 2` |
+| `/3_tasks` | **Worktree** | `feature/*` | `--step 3` |
+| `/4_implement` | **Worktree** | `feature/*` | `--step 4` |
+| `/5_integrate` | Main repo | `contrib/*` | `--step 5` |
+| `/6_release` | Main repo | `contrib/*` | `--step 6` |
+| `/7_backmerge` | Main repo | `release/*` | `--step 7` |
+
+**Key rule**: Steps 2-4 must run in the feature worktree, not the main repo.
+
 ## Core Architecture
 
 ### MCP Manager (`mcp_manager.py`)
