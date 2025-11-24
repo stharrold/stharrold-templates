@@ -164,10 +164,11 @@ def get_state_dir() -> Path:
     if not gitignore_path.exists():
         gitignore_path.write_text("# Ignore all files in state directory\n*\n")
 
-    # Create .worktree-id if not exists
+    # Create or update .worktree-id (update if stale, e.g., container path changed)
     worktree_id_path = state_dir / ".worktree-id"
-    if not worktree_id_path.exists():
-        worktree_id_path.write_text(ctx.worktree_id)
+    current_id = ctx.worktree_id
+    if not worktree_id_path.exists() or worktree_id_path.read_text().strip() != current_id:
+        worktree_id_path.write_text(current_id)
 
     return state_dir
 

@@ -326,6 +326,8 @@ planning/{slug}/           specs/{slug}/              specs/{slug}/
 
 **Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
 
+**See also**: [AI Configuration Architecture](#ai-configuration-architecture) section for `.claude/` vs `.agents/` directory structure and sync patterns.
+
 ## MCP Configuration Paths
 
 | Platform | macOS | Windows | Linux |
