@@ -258,6 +258,28 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --target "worktree"
 ```
 
+## Workflow Artifact Directories
+
+**IMPORTANT**: Different workflow phases create artifacts in different locations:
+
+| Directory | Created By | Purpose | Location |
+|-----------|------------|---------|----------|
+| `planning/{slug}/` | `/1_specify` | Initial requirements (BMAD docs) | Main repo |
+| `specs/{slug}/` | `/2_plan` | Detailed specs and task lists | Feature worktree |
+
+**Workflow artifact flow:**
+```
+/1_specify (main repo)     /2_plan (worktree)        /3_tasks (worktree)
+        │                         │                         │
+        ▼                         ▼                         ▼
+planning/{slug}/           specs/{slug}/              specs/{slug}/
+├── requirements.md        ├── spec.md                ├── plan.md (validated)
+├── architecture.md        ├── plan.md                └── tasks.md
+└── epics.md               └── CLAUDE.md
+```
+
+**Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
+
 ## MCP Configuration Paths
 
 | Platform | macOS | Windows | Linux |
