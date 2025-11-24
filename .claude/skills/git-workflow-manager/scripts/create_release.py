@@ -385,7 +385,7 @@ Release workflow for version {version} created from {base_branch} branch.
   - Command: `python .claude/skills/git-workflow-manager/scripts/tag_release.py {version} main`
 
 - [ ] **int_004**: Back-merge release to develop
-  - Command: `python .claude/skills/git-workflow-manager/scripts/backmerge_release.py {version} develop`
+  - Command: `python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop`
 
 - [ ] **int_005**: Cleanup release branch
   - Command: `python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}`
@@ -415,7 +415,7 @@ gh pr create --base main --title "Release {version}" --body "Release {version} f
 python .claude/skills/git-workflow-manager/scripts/tag_release.py {version} main
 
 # Back-merge to develop
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py {version} develop
+python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop
 
 # Cleanup release branch
 python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}
