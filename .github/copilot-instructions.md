@@ -189,7 +189,7 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | Deleted after merge |
+| `release/*` | Ephemeral | Step 6 creates → Step 7 deletes after backmerge |
 
 ### Skills System (9 skills in `.claude/skills/`)
 
@@ -297,12 +297,13 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/r
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
-# NOTE: Step 7 requires release/* branch to exist (PR directly from release to develop)
+# Pattern: release/vX.Y.Z ──PR──> develop (direct, no intermediate branch)
+# Requires: release/* branch must exist when starting step 7
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
 # ⚠️ CRITICAL: Backmerge direction
-# CORRECT: release/vX.Y.Z → develop (PR from release branch directly)
+# CORRECT: release/vX.Y.Z → develop (direct PR from release branch)
 # WRONG:   main → develop (NEVER merge main to develop!)
 
 # Cleanup feature worktree (no TODO archival by default)
@@ -443,6 +444,28 @@ repo_feature_abc/            # Feature worktree
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
+
+## Quick Debugging
+
+```bash
+# Where am I in the workflow?
+python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+
+# Am I in the right context for this step?
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+
+# What branches exist?
+git branch -a | grep -E "(feature|release|contrib)"
+
+# What worktrees exist?
+git worktree list
+
+# What's the current branch?
+git branch --show-current
+
+# Is this a worktree or main repo?
+git rev-parse --git-dir  # .git = main repo, .git/worktrees/* = worktree
+```
 
 ## Branch Cleanup
 
