@@ -21,53 +21,19 @@ next: /3_tasks
 
 Given the feature context, do this:
 
-## Step 0: Verify Prerequisites (REQUIRED)
+## Step 0: Verify Context (REQUIRED - STOP if fails)
 
-**IMPORTANT: Always run these checks before proceeding.**
+**Run this first. If it fails, STOP and tell the user to fix the context.**
 
-1. **Verify feature branch:**
-   ```bash
-   git branch --show-current
-   ```
-   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 2
+```
 
-2. **Extract slug from branch name:**
-   Branch format: `feature/{timestamp}_{slug}`
-   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+Expected: Worktree directory, `feature/*` branch
 
-3. **Check for planning documents in MAIN repo:**
-   The planning directory is in the main repository, not the worktree:
-   ```bash
-   ls ../stharrold-templates/planning/{slug}/requirements.md 2>/dev/null || \
-   ls ../planning/{slug}/requirements.md 2>/dev/null
-   ```
+---
 
-4. **If planning documents missing, STOP and prompt user:**
-   ```
-   ❌ MISSING PREREQUISITES
-
-   Could not find planning/{slug}/requirements.md
-
-   The /2_plan command requires planning documents created by /1_specify.
-
-   Options:
-   1. Run /1_specify first to create planning documents
-   2. If you have requirements, I can help create planning/{slug}/requirements.md manually
-
-   Which would you like to do?
-   ```
-
-   **Do NOT proceed until user responds and artifacts exist.**
-
-## Step 1: Verify Worktree Context
-
-Confirm you are in a feature worktree:
-- Current directory should be `../{project}_feature_{timestamp}_{slug}/`
-- Not the main repository root
-
-If not in worktree, prompt user to `cd` to the worktree first.
-
-## Step 2: Detect Feature Slug
+## Step 1: Detect Feature Slug
 
 Extract the slug from the current branch name:
 ```bash
@@ -75,16 +41,16 @@ git branch --show-current
 ```
 Branch format: `feature/{timestamp}_{slug}` → extract `{slug}`
 
-## Step 3: Verify Planning Documents
+## Step 2: Verify Planning Documents
 
-Check that BMAD planning documents exist:
-- `../planning/{slug}/requirements.md`
-- `../planning/{slug}/architecture.md`
-- `../planning/{slug}/epics.md`
+Check that BMAD planning documents exist in the **main repo**:
+```bash
+ls ../planning/{slug}/requirements.md ../planning/{slug}/architecture.md ../planning/{slug}/epics.md 2>/dev/null
+```
 
-If missing, prompt user to run `/1_specify` first.
+If missing, STOP and prompt user to run `/1_specify` first.
 
-## Step 4: Create Specifications
+## Step 3: Create Specifications
 
 Run the SpecKit author to create specifications:
 ```bash
@@ -99,7 +65,7 @@ This creates `specs/{slug}/` with:
 - `CLAUDE.md` - AI context
 - `README.md` - Overview
 
-## Step 5: Record State in AgentDB
+## Step 4: Record State in AgentDB
 
 Record the workflow transition:
 ```bash
@@ -110,7 +76,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --target "specs/{slug}"
 ```
 
-## Step 6: Report Completion
+## Step 5: Report Completion
 
 Report to the user:
 - Specifications created at `specs/{slug}/`

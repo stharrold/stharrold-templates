@@ -23,51 +23,25 @@ next: /4_implement
 
 Given the feature context, do this:
 
-## Step 0: Verify Prerequisites (REQUIRED)
+## Step 0: Verify Context (REQUIRED - STOP if fails)
 
-**IMPORTANT: Always run these checks before proceeding.**
+**Run this first. If it fails, STOP and tell the user to fix the context.**
 
-1. **Verify feature branch:**
-   ```bash
-   git branch --show-current
-   ```
-   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 3
+```
 
-2. **Extract slug from branch name:**
-   Branch format: `feature/{timestamp}_{slug}`
-   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+Expected: Worktree directory, `feature/*` branch
 
-3. **Check for spec/plan documents:**
-   ```bash
-   ls specs/{slug}/plan.md specs/{slug}/spec.md 2>/dev/null
-   ```
+---
 
-4. **If spec documents missing, STOP and prompt user:**
-   ```
-   ❌ MISSING PREREQUISITES
+## Step 1: Detect Feature Slug and Locate Plan File
 
-   Could not find specs/{slug}/plan.md or specs/{slug}/spec.md
+Extract slug from branch (`feature/{timestamp}_{slug}`) and find plan at `specs/{slug}/plan.md`.
 
-   The /3_tasks command requires specifications created by /2_plan.
+If plan file missing, STOP and prompt user to run `/2_plan` first.
 
-   Options:
-   1. Run /2_plan first to create specifications
-   2. If you have a plan, I can help create specs/{slug}/plan.md manually
-
-   Which would you like to do?
-   ```
-
-   **Do NOT proceed until user responds and artifacts exist.**
-
-## Step 1: Verify Worktree Context
-
-Confirm you are in a feature worktree (same as `/2_plan`).
-
-## Step 2: Locate Plan File
-
-Find the plan file at `specs/{slug}/plan.md` where `{slug}` is extracted from the current branch name.
-
-## Step 3: Validate Task Structure
+## Step 2: Validate Task Structure
 
 Read `specs/{slug}/plan.md` and verify it contains:
 - A `## Tasks` or `## Task Breakdown` section
@@ -78,7 +52,7 @@ If tasks are missing or incomplete:
 - Check `specs/{slug}/tasks.md` as an alternative location
 - If no tasks found, prompt user to complete the plan first
 
-## Step 4: Parse and Display Tasks
+## Step 3: Parse and Display Tasks
 
 Parse the tasks from plan.md and display:
 - Total task count
@@ -86,7 +60,7 @@ Parse the tasks from plan.md and display:
 - Parallel execution opportunities (tasks marked [P])
 - Dependencies between tasks
 
-## Step 5: Record State in AgentDB
+## Step 4: Record State in AgentDB
 
 Record the workflow transition:
 ```bash
@@ -96,7 +70,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --source "specs/{slug}/plan.md"
 ```
 
-## Step 6: Report Readiness
+## Step 5: Report Readiness
 
 Report to the user:
 - Tasks validated and ready for execution

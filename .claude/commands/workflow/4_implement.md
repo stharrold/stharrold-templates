@@ -23,54 +23,39 @@ next: /5_integrate
 
 Execute tasks automatically. User can stop/rewind via Claude Code controls at any time.
 
-## Step 0: Verify Prerequisites (REQUIRED)
+## Step 0: Verify Context (REQUIRED - STOP if fails)
 
-**IMPORTANT: Always run these checks before proceeding.**
+**Run this first. If it fails, STOP and tell the user to fix the context.**
 
-1. **Verify feature branch:**
-   ```bash
-   git branch --show-current
-   ```
-   Must start with `feature/`. If not, STOP and tell user to switch to feature worktree.
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 4
+```
 
-2. **Extract slug from branch name:**
-   Branch format: `feature/{timestamp}_{slug}`
-   Example: `feature/20251124T111020Z_ai-config-architecture-docs` → slug = `ai-config-architecture-docs`
+Expected: Worktree directory, `feature/*` branch
 
-3. **Check for required artifacts:**
-   ```bash
-   ls specs/{slug}/tasks.md specs/{slug}/plan.md 2>/dev/null
-   ```
+---
 
-4. **If artifacts missing, STOP and prompt user:**
-   ```
-   ❌ MISSING PREREQUISITES
+## Step 1: Verify Task Artifacts
 
-   Could not find specs/{slug}/tasks.md or specs/{slug}/plan.md
+Extract slug from branch (`feature/{timestamp}_{slug}`) and verify task artifacts exist:
+```bash
+ls specs/{slug}/plan.md specs/{slug}/tasks.md 2>/dev/null
+```
 
-   The /4_implement command requires task definitions created by /2_plan and /3_tasks.
+If artifacts missing, STOP and prompt user to run `/2_plan` and `/3_tasks` first.
 
-   Options:
-   1. Run /2_plan first → then /3_tasks → then retry /4_implement
-   2. If you have a clear task list, I can help create specs/{slug}/tasks.md manually
-
-   Which would you like to do?
-   ```
-
-   **Do NOT proceed until user responds and artifacts exist.**
-
-## Step 1: Load Tasks
+## Step 2: Load Tasks
 
 Load tasks from `specs/{slug}/plan.md` or `specs/{slug}/tasks.md`:
 - Extract all tasks (T001, T002, etc.)
 - Identify task dependencies
 - Identify [P] marked tasks that can run in parallel
 
-## Step 2: Initialize Progress Tracking
+## Step 3: Initialize Progress Tracking
 
 Initialize TodoWrite with all tasks from the plan.
 
-## Step 3: Execute Tasks
+## Step 4: Execute Tasks
 
 Execute tasks in dependency order:
 1. For each task:
@@ -80,7 +65,7 @@ Execute tasks in dependency order:
    - If task fails, keep as `in_progress` and report error
 2. Run [P] marked tasks in parallel using Task tool when dependencies allow
 
-## Step 4: Run Quality Gates
+## Step 5: Run Quality Gates
 
 After all tasks complete, run quality gates:
 ```bash
@@ -94,7 +79,7 @@ Quality gates must pass (5/5):
 4. Linting clean
 5. AI config sync
 
-## Step 5: Calculate Semantic Version
+## Step 6: Calculate Semantic Version
 
 Calculate the next version based on changes:
 ```bash
@@ -102,7 +87,7 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/s
   develop v{current-version}
 ```
 
-## Step 6: Record State in AgentDB
+## Step 7: Record State in AgentDB
 
 Record the workflow transition:
 ```bash
@@ -111,7 +96,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --pattern phase_4_implement
 ```
 
-## Step 7: Report Completion
+## Step 8: Report Completion
 
 Report to the user:
 - All tasks completed

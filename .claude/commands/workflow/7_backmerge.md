@@ -18,6 +18,18 @@ prev: /6_release
 
 ---
 
+## Step 0: Verify Context (REQUIRED - STOP if fails)
+
+**Run this first. If it fails, STOP and tell the user to fix the context.**
+
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7
+```
+
+Expected: Main repo, `release/*` branch
+
+---
+
 # Backmerge Workflow Command
 
 Sync release changes back to development branches.
