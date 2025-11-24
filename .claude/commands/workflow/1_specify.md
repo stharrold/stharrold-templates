@@ -18,6 +18,18 @@ next: /2_plan
 
 Given the feature description provided as an argument, do this:
 
+## Step 0: Verify Context (REQUIRED - STOP if fails)
+
+**Run this first. If it fails, STOP and tell the user to fix the context.**
+
+```bash
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 1
+```
+
+Expected: Main repo, `contrib/*` branch
+
+---
+
 ## Step 1: Extract Feature Slug
 
 Parse the feature description to create a kebab-case slug (e.g., "add user authentication" → "user-authentication").
