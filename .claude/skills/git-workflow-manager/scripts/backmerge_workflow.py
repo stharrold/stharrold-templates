@@ -110,6 +110,18 @@ def create_backmerge_branch(version: str) -> str | None:
     result = run_cmd(['git', 'branch', '-r', '--list', f'origin/{backmerge_branch}'], check=False)
     if result.stdout.strip():
         print(f'  Backmerge branch {backmerge_branch} already exists')
+        # Check for local branch with uncommitted changes or unpushed commits
+        local_check = run_cmd(['git', 'rev-parse', '--verify', backmerge_branch], check=False)
+        if local_check.returncode == 0:
+            # Local branch exists - check for uncommitted changes
+            status_check = run_cmd(['git', 'status', '--porcelain'], check=False)
+            # Check for unpushed commits (local ahead of remote)
+            log_check = run_cmd(
+                ['git', 'log', f'origin/{backmerge_branch}..{backmerge_branch}', '--oneline'],
+                check=False
+            )
+            if status_check.stdout.strip() or log_check.stdout.strip():
+                print(f'  WARNING: Resetting local {backmerge_branch} to match remote')
         # Force local branch to match remote (handles local/remote mismatch)
         run_cmd(['git', 'checkout', '-B', backmerge_branch, f'origin/{backmerge_branch}'], check=False)
         return backmerge_branch
@@ -339,13 +351,21 @@ def show_status() -> None:
     # Check if develop is behind main
     run_cmd(['git', 'fetch', 'origin'], check=False)
     result = run_cmd(['git', 'rev-list', '--count', 'origin/develop..origin/main'], check=False)
-    behind_main = result.stdout.strip()
+    if result.returncode != 0:
+        print(f'⚠️  Could not check develop status: {result.stderr.strip()}')
+        behind_main = None
+    else:
+        behind_main = result.stdout.strip()
     if behind_main and behind_main != '0':
         print(f'\n⚠️  develop is {behind_main} commits behind main')
 
     # Check if contrib is behind develop
     result = run_cmd(['git', 'rev-list', '--count', f'{contrib}..origin/develop'], check=False)
-    behind_develop = result.stdout.strip()
+    if result.returncode != 0:
+        print(f'⚠️  Could not check {contrib} status: {result.stderr.strip()}')
+        behind_develop = None
+    else:
+        behind_develop = result.stdout.strip()
     if behind_develop and behind_develop != '0':
         print(f'⚠️  {contrib} is {behind_develop} commits behind develop')
 
