@@ -135,6 +135,7 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 | 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
 | 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
 | 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs, cleanup worktree |
+| 5 | `/5_integrate from contrib to develop` | contrib → 6 | PR contrib→develop only (no worktree) |
 | 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
 | 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
 
