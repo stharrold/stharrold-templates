@@ -353,14 +353,14 @@ function Add-MCPCredential {
     param(
         [Parameter(Mandatory)]
         [string]$Target,
-        
+
         [Parameter(Mandatory)]
         [string]$Description
     )
-    
+
     Write-Host ""
     $token = Read-Host "Enter $Description" -AsSecureString
-    
+
     if ($token.Length -gt 0) {
         try {
             New-StoredCredential -Target $Target -UserName "token" -SecurePassword $token -Persist LocalMachine -ErrorAction Stop
@@ -408,7 +408,7 @@ Set-Alias -Name Reload-MCPCreds -Value Load-MCPCredentials
 '@
 
 # Add to PowerShell profile if not present
-if (!(Test-Path $PROFILE)) { 
+if (!(Test-Path $PROFILE)) {
     New-Item -Path $PROFILE -ItemType File -Force | Out-Null
     Write-Host "✅ Created PowerShell profile at: $PROFILE" -ForegroundColor Green
 }
@@ -513,7 +513,7 @@ Test-Path $PROFILE               # Check if PowerShell profile exists
 
 ### Development Workflow
 - **Session Start**: Automatically load credentials via PowerShell profile
-- **Credential Rotation**: Use setup script for periodic token updates  
+- **Credential Rotation**: Use setup script for periodic token updates
 - **Team Onboarding**: Share setup script for consistent Windows configuration
 
 ### Security Best Practices

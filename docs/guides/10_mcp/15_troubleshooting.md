@@ -126,7 +126,7 @@ claude mcp add-from-claude-desktop
 jq '.mcpServers' "$HOME/Library/Application Support/Claude/config.json" | \
   jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 
-# Windows  
+# Windows
 jq '.mcpServers' "$HOME/AppData/Roaming/Claude/config.json" | \
   jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 

@@ -1,3 +1,16 @@
+---
+type: claude-context
+directory: .
+purpose: Templates and utilities for MCP server configuration with containerized development (Podman + uv + Python 3.11)
+parent: null
+sibling_readme: README.md
+children:
+  - .claude/CLAUDE.md
+  - docs/CLAUDE.md
+  - tests/CLAUDE.md
+  - specs/CLAUDE.md
+---
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -37,6 +50,23 @@ uv run pytest -v -k test_name
 uv run ruff check .
 ```
 
+## Pre-commit Hooks
+
+```bash
+# Install hooks (one-time)
+uv run pre-commit install
+
+# Run manually on all files
+uv run pre-commit run --all-files
+```
+
+Hooks run automatically on commit:
+- **sync-ai-config** - Syncs CLAUDE.md → AGENTS.md, .github/copilot-instructions.md, .agents/ (runs first)
+- trailing whitespace, YAML/JSON validation
+- ruff linting/formatting
+- CLAUDE.md frontmatter check
+- skill structure validation
+
 ## Quality Gates (5 gates, all must pass before PR)
 
 ```bash
@@ -50,6 +80,22 @@ podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_q
 | 3. Build | `uv build` succeeds |
 | 4. Linting | `ruff check .` clean |
 | 5. AI Config Sync | CLAUDE.md → AGENTS.md synced |
+
+## Test Organization
+
+```
+tests/
+├── unit/           # Single component tests
+├── contract/       # Interface compliance tests
+├── integration/    # End-to-end scenarios
+└── skills/         # Skill-specific tests (quality-enforcer, git-workflow-manager)
+```
+
+Run specific test categories:
+```bash
+uv run pytest tests/skills/ -v          # Skill tests only
+uv run pytest tests/contract/ -v        # Contract tests only
+```
 
 ## PR Workflow (Enforced Sequence)
 
@@ -145,12 +191,26 @@ docs/research/ → docs/guides/ → docs/archived/
 (research)       (production)   (compressed)
 ```
 
-### AI Config Sync
+### AI Config Sync (Model-Agnostic)
 
 CLAUDE.md automatically syncs to:
 - `AGENTS.md` (cross-tool)
 - `.github/copilot-instructions.md` (GitHub Copilot)
 - `.agents/` (mirrored skills)
+
+**Sync utility** (`sync_ai_config.py`):
+```bash
+# Manual sync
+uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py sync
+
+# Verify files are in sync
+uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py verify
+
+# Check if sync needed
+uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py check
+```
+
+**Automation**: Pre-commit hook syncs automatically when CLAUDE.md or .claude/ is modified.
 
 ## Git Workflow Commands
 
@@ -212,8 +272,39 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
 podman --version          # 4.0+
 podman-compose --version
 git --version
-gh --version              # GitHub CLI
+
+# VCS Provider CLI (one of):
+gh --version              # GitHub CLI (for GitHub repos)
+# OR
+az --version              # Azure CLI (for Azure DevOps repos)
+az extension add --name azure-devops  # Required extension
 ```
+
+## VCS Provider Configuration
+
+The workflow **auto-detects** GitHub or Azure DevOps from your git remote URL:
+- `github.com` → GitHub adapter (uses `gh` CLI)
+- `dev.azure.com`, `*.visualstudio.com` → Azure DevOps adapter (uses `az` CLI)
+
+For explicit configuration (or when auto-detection fails), create `.vcs_config.yaml`:
+
+```yaml
+# GitHub (usually auto-detected)
+vcs_provider: github
+
+# OR Azure DevOps
+vcs_provider: azure_devops
+azure_devops:
+  organization: "https://dev.azure.com/myorg"
+  project: "MyProject"
+  repository: "MyRepo"  # Optional, defaults to project name
+```
+
+**VCS abstraction layer:** `.claude/skills/workflow-utilities/scripts/vcs/`
+- `provider.py` - Auto-detection from git remote
+- `github_adapter.py` - GitHub CLI operations
+- `azure_adapter.py` - Azure DevOps CLI operations
+- `config.py` - Configuration file loader
 
 ## Critical Guidelines
 
@@ -259,13 +350,44 @@ repo_feature_abc/            # Feature worktree
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
 
+## Apply This Workflow to Another Repository (Phase 0)
+
+This repository can bootstrap new projects with the full workflow system:
+
+```bash
+# From any location with stharrold-templates available:
+python stharrold-templates/.claude/skills/initialize-repository/scripts/initialize_repository.py \
+  stharrold-templates /path/to/target-repo
+```
+
+**Interactive 4-phase Q&A:**
+1. **Configuration** - Project name, description, VCS provider (GitHub/Azure DevOps)
+2. **Component selection** - Which skills to include
+3. **File generation** - Creates pyproject.toml, README.md, CLAUDE.md, etc.
+4. **Git initialization** - Sets up main/develop/contrib branch structure
+
+**Requirements for target repo:**
+- Python 3.11+ with `uv`
+- `pytest` for testing
+- `ruff` + `mypy` for linting
+- Podman for containerization
+- GitHub (`gh`) OR Azure DevOps (`az`) CLI
+
+**See:** `.claude/skills/initialize-repository/CLAUDE.md` for full documentation.
+
 ## Reference Documentation
 
 - `WORKFLOW.md` - Workflow overview (14KB) with phase index
 - `docs/reference/workflow-*.md` - Phase-specific workflow docs (≤20KB each)
 - `ARCHITECTURE.md` - System architecture analysis
-- `CHANGELOG.md` - Version history (current: v5.12.0)
+- `CHANGELOG.md` - Version history
 - `specs/` - Feature specifications with design artifacts
+- `specs/STATUS.md` - Specification status tracking (completed/active/paused/abandoned)
+
+Archive completed specs:
+```bash
+uv run python .claude/skills/git-workflow-manager/scripts/archive_spec.py <spec-id>
+```
 
 ## CLAUDE.md Hierarchy
 

@@ -16,7 +16,7 @@ This repository uses a modular skill-based git workflow for Python feature devel
 ## Prerequisites
 
 Required tools:
-- **gh CLI** - GitHub API access (for username extraction)
+- **VCS CLI** - GitHub (`gh`) OR Azure DevOps (`az`) for PR operations
 - **uv** - Python package manager
 - **git** - Version control with worktree support
 - **Python 3.11+** - Language runtime
@@ -24,11 +24,19 @@ Required tools:
 
 Verify prerequisites:
 ```bash
-gh auth status          # Must be authenticated
+# VCS Provider (one of):
+gh auth status          # GitHub: Must be authenticated
+# OR
+az account show         # Azure DevOps: Must be logged in
+az extension add --name azure-devops  # Required for Azure DevOps
+
 uv --version            # Must be installed
 python3 --version       # Must be 3.11+
 podman --version        # Optional
 ```
+
+**VCS auto-detection:** The workflow detects your VCS provider from git remote URL.
+For explicit config, create `.vcs_config.yaml` (see CLAUDE.md for format).
 
 ## Architecture
 
@@ -341,13 +349,16 @@ The workflow consists of 7 phases. Detailed documentation for each phase is in `
 
 ```bash
 # Phase 0: Setup (one-time)
+# For GitHub:
 gh auth status && git checkout -b contrib/$(gh api user --jq '.login')
+# For Azure DevOps:
+az account show && git checkout -b contrib/$(az devops user show --user me --query user.emailAddress -o tsv | cut -d@ -f1)
 
-# Phase 1: Planning
-python .claude/skills/bmad-planner/scripts/create_planning.py my-feature $(gh api user --jq '.login')
+# Phase 1: Planning (replace <username> with your VCS username)
+python .claude/skills/bmad-planner/scripts/create_planning.py my-feature <username>
 
 # Phase 2: Development
-python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/$(gh api user --jq '.login')
+python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/<username>
 
 # Phase 3: Quality
 podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py

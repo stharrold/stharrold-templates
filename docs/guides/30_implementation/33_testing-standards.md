@@ -449,7 +449,7 @@ Where:
 ```bash
 # Common error patterns
 "Authentication failed: Invalid or expired token"
-"Server connection timeout after 30 seconds"  
+"Server connection timeout after 30 seconds"
 "Rate limit exceeded: 5000/5000 requests used"
 ```
 
@@ -460,7 +460,7 @@ Where:
 security find-generic-password -a "$USER" -s "GITHUB_TOKEN" -w
 echo $GITHUB_TOKEN | head -c 10  # Verify environment variable loading
 
-# Windows troubleshooting  
+# Windows troubleshooting
 Get-StoredCredential -Target "GITHUB_TOKEN"
 $env:GITHUB_TOKEN.Substring(0,10)  # Verify environment variable
 ```
@@ -568,7 +568,7 @@ claude /debug --performance-profiling --detailed
 
 **Optimization Strategies:**
 - **Context compression** and optimization
-- **Session management** with strategic clearing and compaction  
+- **Session management** with strategic clearing and compaction
 - **Model selection** optimization for task complexity
 - **Caching strategies** for frequently accessed information
 
@@ -645,7 +645,7 @@ claude /usage --inefficiency-detection --recommendations
 ```bash
 # Switch between environment configurations
 claude config set-environment development
-claude config set-environment staging  
+claude config set-environment staging
 claude config set-environment production
 
 # Validate environment-specific configurations
@@ -746,7 +746,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # Implement custom logic
         result = await execute_enterprise_operation(arguments)
         return [TextContent(type="text", text=result)]
-    
+
     raise ValueError(f"Unknown tool: {name}")
 
 if __name__ == "__main__":
@@ -833,24 +833,24 @@ npm run test:performance  # Performance and load testing
 def handle_mcp_operation_error(operation: str, error: Exception) -> ErrorResponse:
     """
     Standardized error handling for MCP operations.
-    
+
     Template requirements:
     - Log errors with appropriate severity
     - Provide helpful error messages
     - Never expose sensitive data in errors
     - Include recovery suggestions when possible
     """
-    
+
     error_context = {
         "operation": operation,
         "error_type": type(error).__name__,
         "timestamp": datetime.utcnow().isoformat(),
         "session_id": get_session_id()
     }
-    
+
     # Log with structured data for analysis
     logger.error("MCP operation failed", extra=error_context)
-    
+
     # Return user-friendly error message
     return ErrorResponse(
         message=f"Operation '{operation}' failed. Please check your credentials and try again.",

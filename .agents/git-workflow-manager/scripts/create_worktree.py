@@ -17,13 +17,14 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Add workflow-utilities to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
 from vcs import get_vcs_adapter
 from worktree_context import compute_worktree_id
 
 # Constants with documented rationale
-TIMESTAMP_FORMAT = '%Y%m%dT%H%M%SZ'  # Compact ISO8601 for filename/branch safety
-VALID_WORKFLOW_TYPES = ['feature', 'release', 'hotfix']  # Supported workflow types
+TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"  # Compact ISO8601 for filename/branch safety
+VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow types
+
 
 def create_worktree(workflow_type, slug, base_branch, create_todo=False):
     """
@@ -45,67 +46,45 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
     """
     # Input validation
     if workflow_type not in VALID_WORKFLOW_TYPES:
-        raise ValueError(
-            f"Invalid workflow_type '{workflow_type}'. "
-            f"Must be one of: {', '.join(VALID_WORKFLOW_TYPES)}"
-        )
+        raise ValueError(f"Invalid workflow_type '{workflow_type}'. " f"Must be one of: {', '.join(VALID_WORKFLOW_TYPES)}")
 
-    if not slug or not slug.replace('-', '').replace('_', '').isalnum():
-        raise ValueError(
-            f"Invalid slug '{slug}'. Must contain only letters, numbers, hyphens, and underscores."
-        )
+    if not slug or not slug.replace("-", "").replace("_", "").isalnum():
+        raise ValueError(f"Invalid slug '{slug}'. Must contain only letters, numbers, hyphens, and underscores.")
 
     # Use timezone-aware datetime (datetime.utcnow() is deprecated in Python 3.12+)
     timestamp = datetime.now(UTC).strftime(TIMESTAMP_FORMAT)
-    branch_name = f'{workflow_type}/{timestamp}_{slug}'
+    branch_name = f"{workflow_type}/{timestamp}_{slug}"
 
     # Get repository root
     try:
-        repo_root = Path(subprocess.check_output(
-            ['git', 'rev-parse', '--show-toplevel'],
-            text=True,
-            stderr=subprocess.PIPE
-        ).strip())
+        repo_root = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True, stderr=subprocess.PIPE).strip())
     except subprocess.CalledProcessError as e:
-        print('ERROR: Not in a git repository', file=sys.stderr)
-        print(f'Git error: {e.stderr.strip()}', file=sys.stderr)
+        print("ERROR: Not in a git repository", file=sys.stderr)
+        print(f"Git error: {e.stderr.strip()}", file=sys.stderr)
         raise
 
     # Verify base branch exists
     try:
-        subprocess.run(
-            ['git', 'rev-parse', '--verify', base_branch],
-            check=True,
-            capture_output=True,
-            text=True
-        )
+        subprocess.run(["git", "rev-parse", "--verify", base_branch], check=True, capture_output=True, text=True)
     except subprocess.CalledProcessError:
         print(f"ERROR: Base branch '{base_branch}' does not exist", file=sys.stderr)
-        print('Available branches:', file=sys.stderr)
-        subprocess.run(['git', 'branch', '-a'], stderr=subprocess.DEVNULL)
+        print("Available branches:", file=sys.stderr)
+        subprocess.run(["git", "branch", "-a"], stderr=subprocess.DEVNULL)
         raise
 
-    worktree_path = repo_root.parent / f'{repo_root.name}_{workflow_type}_{timestamp}_{slug}'
+    worktree_path = repo_root.parent / f"{repo_root.name}_{workflow_type}_{timestamp}_{slug}"
 
     # Check if worktree path already exists
     if worktree_path.exists():
-        raise FileExistsError(
-            f'Worktree path already exists: {worktree_path}\n'
-            f'Remove it first with: git worktree remove {worktree_path}'
-        )
+        raise FileExistsError(f"Worktree path already exists: {worktree_path}\n" f"Remove it first with: git worktree remove {worktree_path}")
 
     # Create worktree
     try:
-        subprocess.run([
-            'git', 'worktree', 'add',
-            str(worktree_path),
-            '-b', branch_name,
-            base_branch
-        ], check=True, stderr=subprocess.PIPE, text=True)
+        subprocess.run(["git", "worktree", "add", str(worktree_path), "-b", branch_name, base_branch], check=True, stderr=subprocess.PIPE, text=True)
     except subprocess.CalledProcessError as e:
-        print('ERROR: Failed to create worktree', file=sys.stderr)
-        print(f'Command: git worktree add {worktree_path} -b {branch_name} {base_branch}', file=sys.stderr)
-        print(f'Git error: {e.stderr.strip()}', file=sys.stderr)
+        print("ERROR: Failed to create worktree", file=sys.stderr)
+        print(f"Command: git worktree add {worktree_path} -b {branch_name} {base_branch}", file=sys.stderr)
+        print(f"Git error: {e.stderr.strip()}", file=sys.stderr)
         raise
 
     # TODO file creation (deprecated, only if explicitly requested)
@@ -116,26 +95,22 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
             vcs = get_vcs_adapter()
             gh_user = vcs.get_current_user()
         except RuntimeError as e:
-            print('ERROR: Failed to get VCS username', file=sys.stderr)
-            print(f'Error: {e}', file=sys.stderr)
+            print("ERROR: Failed to get VCS username", file=sys.stderr)
+            print(f"Error: {e}", file=sys.stderr)
             raise
 
-        todo_filename = f'TODO_{workflow_type}_{timestamp}_{slug}.md'
+        todo_filename = f"TODO_{workflow_type}_{timestamp}_{slug}.md"
         todo_path = repo_root / todo_filename
 
         # Check if TODO file already exists
         if todo_path.exists():
-            print(
-                f'WARNING: TODO file already exists: {todo_filename}\n'
-                f'This worktree may have been created before.',
-                file=sys.stderr
-            )
+            print(f"WARNING: TODO file already exists: {todo_filename}\n" f"This worktree may have been created before.", file=sys.stderr)
 
         # Copy template and customize
-        template_path = repo_root / '.claude' / 'skills' / 'workflow-orchestrator' / 'templates' / 'TODO_template.md'
+        template_path = repo_root / ".claude" / "skills" / "workflow-orchestrator" / "templates" / "TODO_template.md"
 
         # Use timezone-aware datetime for creation timestamp
-        created_timestamp = datetime.now(UTC).isoformat().replace('+00:00', 'Z')
+        created_timestamp = datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
         try:
             if template_path.exists():
@@ -143,32 +118,33 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
                     with open(template_path) as f:
                         content = f.read()
                 except (OSError, PermissionError) as e:
-                    print(f'ERROR: Cannot read template file: {template_path}', file=sys.stderr)
-                    print(f'Error: {e}', file=sys.stderr)
+                    print(f"ERROR: Cannot read template file: {template_path}", file=sys.stderr)
+                    print(f"Error: {e}", file=sys.stderr)
                     raise
 
                 # Replace placeholders
-                content = content.replace('{{WORKFLOW_TYPE}}', workflow_type)
-                content = content.replace('{{SLUG}}', slug)
-                content = content.replace('{{TIMESTAMP}}', timestamp)
-                content = content.replace('{{GH_USER}}', gh_user)
-                content = content.replace('{{TITLE}}', slug.replace('-', ' ').title())
-                content = content.replace('{{DESCRIPTION}}', f'{workflow_type.title()} for {slug}')
-                content = content.replace('{{CREATED}}', created_timestamp)
+                content = content.replace("{{WORKFLOW_TYPE}}", workflow_type)
+                content = content.replace("{{SLUG}}", slug)
+                content = content.replace("{{TIMESTAMP}}", timestamp)
+                content = content.replace("{{GH_USER}}", gh_user)
+                content = content.replace("{{TITLE}}", slug.replace("-", " ").title())
+                content = content.replace("{{DESCRIPTION}}", f"{workflow_type.title()} for {slug}")
+                content = content.replace("{{CREATED}}", created_timestamp)
 
                 try:
-                    with open(todo_path, 'w') as f:
+                    with open(todo_path, "w") as f:
                         f.write(content)
                 except (OSError, PermissionError) as e:
-                    print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
-                    print(f'Error: {e}', file=sys.stderr)
+                    print(f"ERROR: Cannot write TODO file: {todo_path}", file=sys.stderr)
+                    print(f"Error: {e}", file=sys.stderr)
                     raise
             else:
                 # Create minimal TODO if template doesn't exist
-                print(f'WARNING: Template not found at {template_path}, using minimal TODO', file=sys.stderr)
+                print(f"WARNING: Template not found at {template_path}, using minimal TODO", file=sys.stderr)
                 try:
-                    with open(todo_path, 'w') as f:
-                        f.write(f"""---
+                    with open(todo_path, "w") as f:
+                        f.write(
+                            f"""---
 type: workflow-manifest
 workflow_type: {workflow_type}
 slug: {slug}
@@ -180,19 +156,18 @@ github_user: {gh_user}
 
 Workflow: {workflow_type}
 Created: {created_timestamp}
-""")
+"""
+                        )
                 except (OSError, PermissionError) as e:
-                    print(f'ERROR: Cannot write TODO file: {todo_path}', file=sys.stderr)
-                    print(f'Error: {e}', file=sys.stderr)
+                    print(f"ERROR: Cannot write TODO file: {todo_path}", file=sys.stderr)
+                    print(f"Error: {e}", file=sys.stderr)
                     raise
         except Exception:
             # Cleanup worktree if TODO creation failed
-            print('ERROR: TODO file creation failed, cleaning up worktree...', file=sys.stderr)
+            print("ERROR: TODO file creation failed, cleaning up worktree...", file=sys.stderr)
             try:
-                subprocess.run(['git', 'worktree', 'remove', str(worktree_path)],
-                             stderr=subprocess.DEVNULL, check=False)
-                subprocess.run(['git', 'branch', '-D', branch_name],
-                             stderr=subprocess.DEVNULL, check=False)
+                subprocess.run(["git", "worktree", "remove", str(worktree_path)], stderr=subprocess.DEVNULL, check=False)
+                subprocess.run(["git", "branch", "-D", branch_name], stderr=subprocess.DEVNULL, check=False)
             except (subprocess.CalledProcessError, FileNotFoundError):
                 # Ignore errors during cleanup: worktree/branch may not exist or removal may fail,
                 # but the original error is more important and will be re-raised.
@@ -200,37 +175,32 @@ Created: {created_timestamp}
             raise
 
     # Initialize .claude-state/ directory in new worktree
-    state_dir = worktree_path / '.claude-state'
+    state_dir = worktree_path / ".claude-state"
     try:
         state_dir.mkdir(exist_ok=True)
         # Create .gitignore in state dir
-        (state_dir / '.gitignore').write_text('# Ignore all files in state directory\n*\n')
+        (state_dir / ".gitignore").write_text("# Ignore all files in state directory\n*\n")
         # Create .worktree-id with hash of worktree path (using shared implementation)
         worktree_id = compute_worktree_id(worktree_path)
-        (state_dir / '.worktree-id').write_text(worktree_id)
-        print(f'✓ State directory: {state_dir}')
+        (state_dir / ".worktree-id").write_text(worktree_id)
+        print(f"✓ State directory: {state_dir}")
     except (OSError, PermissionError) as e:
-        print(f'⚠️  Could not create state directory: {e}', file=sys.stderr)
+        print(f"⚠️  Could not create state directory: {e}", file=sys.stderr)
 
-    print(f'✓ Worktree created: {worktree_path}')
-    print(f'✓ Branch: {branch_name}')
+    print(f"✓ Worktree created: {worktree_path}")
+    print(f"✓ Branch: {branch_name}")
     if todo_filename:
-        print(f'✓ TODO file: {todo_filename}')
+        print(f"✓ TODO file: {todo_filename}")
     else:
-        print('ℹ️  TODO file: skipped (deprecated)')
+        print("ℹ️  TODO file: skipped (deprecated)")
 
-    return {
-        'worktree_path': str(worktree_path),
-        'branch_name': branch_name,
-        'todo_file': todo_filename,
-        'state_dir': str(state_dir) if state_dir.exists() else None
-    }
+    return {"worktree_path": str(worktree_path), "branch_name": branch_name, "todo_file": todo_filename, "state_dir": str(state_dir) if state_dir.exists() else None}
 
 
 def main():
     """Main entry point with argparse."""
     parser = argparse.ArgumentParser(
-        description='Create feature/release/hotfix worktree',
+        description="Create feature/release/hotfix worktree",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -242,34 +212,14 @@ Examples:
 
   # Create release worktree
   python create_worktree.py release v1.6.0 develop
-"""
+""",
     )
 
-    parser.add_argument(
-        'workflow_type',
-        choices=VALID_WORKFLOW_TYPES,
-        help='Workflow type'
-    )
-    parser.add_argument(
-        'slug',
-        help='Short descriptive name (e.g., my-feature, v1.6.0)'
-    )
-    parser.add_argument(
-        'base_branch',
-        help='Branch to create from (e.g., contrib/username, develop)'
-    )
-    parser.add_argument(
-        '--create-todo',
-        action='store_true',
-        default=False,
-        help='Create TODO file (deprecated, defaults to False)'
-    )
-    parser.add_argument(
-        '--no-todo',
-        action='store_true',
-        default=True,
-        help='Skip TODO file creation (default, for backward compatibility)'
-    )
+    parser.add_argument("workflow_type", choices=VALID_WORKFLOW_TYPES, help="Workflow type")
+    parser.add_argument("slug", help="Short descriptive name (e.g., my-feature, v1.6.0)")
+    parser.add_argument("base_branch", help="Branch to create from (e.g., contrib/username, develop)")
+    parser.add_argument("--create-todo", action="store_true", default=False, help="Create TODO file (deprecated, defaults to False)")
+    parser.add_argument("--no-todo", action="store_true", default=True, help="Skip TODO file creation (default, for backward compatibility)")
 
     args = parser.parse_args()
 
@@ -278,25 +228,21 @@ Examples:
     create_todo = args.create_todo
 
     try:
-        result = create_worktree(
-            args.workflow_type,
-            args.slug,
-            args.base_branch,
-            create_todo=create_todo
-        )
+        result = create_worktree(args.workflow_type, args.slug, args.base_branch, create_todo=create_todo)
 
         import json
+
         print(json.dumps(result))
     except (ValueError, FileExistsError) as e:
-        print(f'\n{e}', file=sys.stderr)
+        print(f"\n{e}", file=sys.stderr)
         sys.exit(1)
     except (subprocess.CalledProcessError, FileNotFoundError):
         # Error already printed in function
         sys.exit(1)
     except Exception as e:
-        print(f'\nUnexpected error: {e}', file=sys.stderr)
+        print(f"\nUnexpected error: {e}", file=sys.stderr)
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

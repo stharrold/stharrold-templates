@@ -69,7 +69,7 @@ claude /init
 
 # This creates a starting template that should be customized with:
 # - Project-specific conventions
-# - Architectural patterns  
+# - Architectural patterns
 # - Workflow requirements
 # - Explicit "do not" instructions
 ```
@@ -145,7 +145,7 @@ claude mcp list
 
 2. **Configure**: Edit platform-specific configuration file:
    - **macOS**: `~/Library/Application Support/Code/User/mcp.json`
-   - **Windows**: `~/AppData/Roaming/Code/User/mcp.json`  
+   - **Windows**: `~/AppData/Roaming/Code/User/mcp.json`
    - **Linux**: `~/.config/Code/User/mcp.json`
 
 ```json
@@ -574,21 +574,21 @@ jq -s '
     (.[0].servers // {}) as $vscode |
     (.[1].mcpServers // {}) as $claude_code |
     (.[2].mcpServers // {}) as $claude_desktop |
-    
+
     # Merge all servers (later sources override earlier)
     ($vscode + $claude_code + $claude_desktop) as $merged |
-    
+
     # Add type fields where missing
     ($merged | with_entries(
         .value |= (
-            if .url then 
+            if .url then
                 .type = "sse"
-            elif .command then 
+            elif .command then
                 .type = "stdio"
             else . end
         )
     )) as $typed |
-    
+
     # Return all three configs
     [
         {servers: $typed},
@@ -696,7 +696,7 @@ launchctl unload ~/Library/LaunchAgents/com.user.sync-mcp.plist 2>/dev/null
 launchctl load ~/Library/LaunchAgents/com.user.sync-mcp.plist
 ```
 
-Service persists across restarts. To disable: 
+Service persists across restarts. To disable:
 ```bash
 launchctl unload -w ~/Library/LaunchAgents/com.user.sync-mcp.plist
 ```

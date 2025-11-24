@@ -32,7 +32,12 @@ Ensure you have the required tools installed:
 podman --version          # Container runtime (Podman 4.0+)
 podman-compose --version  # Container orchestration
 git --version             # Version control
-gh --version              # GitHub CLI (for PR management)
+
+# VCS Provider CLI (one of):
+gh --version              # GitHub CLI (for GitHub repos)
+# OR
+az --version              # Azure CLI (for Azure DevOps repos)
+az extension add --name azure-devops  # Required extension for Azure DevOps
 ```
 
 ### Initial Setup

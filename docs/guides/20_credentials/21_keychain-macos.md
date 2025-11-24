@@ -186,7 +186,7 @@ Create or update your Claude Code configuration file:
       }
     },
     "github": {
-      "command": "npx", 
+      "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
@@ -328,11 +328,11 @@ prompt_token() {
     local service_name="$1"
     local label="$2"
     local token
-    
+
     echo
     echo "Enter $label:"
     read -s token
-    
+
     if [ -n "$token" ]; then
         security add-generic-password -a "$USER" -s "$service_name" -l "$label" -w "$token"
         echo "✅ $label stored securely"
@@ -428,7 +428,7 @@ security find-generic-password     # Query keychain for stored credentials
 security delete-generic-password   # Remove outdated credentials
 echo $TOKEN_NAME | head -c 10     # Safely verify token is loaded
 
-# Credential rotation commands  
+# Credential rotation commands
 ./setup-credentials-macos.sh      # Re-run setup for token updates
 security add-generic-password     # Add new or updated token
 git config --global credential.helper osxkeychain  # Git keychain integration

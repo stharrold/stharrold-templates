@@ -44,25 +44,25 @@ def get_workflow_progress() -> dict[str, Any]:
         - last_updated: str (ISO format)
     """
     state_dir = get_state_dir()
-    progress_file = state_dir / 'workflow.json'
+    progress_file = state_dir / "workflow.json"
 
     if progress_file.exists():
         try:
             return json.loads(progress_file.read_text())
         except json.JSONDecodeError:
             logger.warning(
-                'Corrupted workflow.json at %s, returning default state',
+                "Corrupted workflow.json at %s, returning default state",
                 progress_file,
             )
             pass
 
     # Return default structure
     return {
-        'worktree_id': get_worktree_id(),
-        'current_step': 0,
-        'steps_completed': [],
-        'artifacts': {},
-        'last_updated': None,
+        "worktree_id": get_worktree_id(),
+        "current_step": 0,
+        "steps_completed": [],
+        "artifacts": {},
+        "last_updated": None,
     }
 
 
@@ -92,45 +92,45 @@ def update_workflow_progress(
 
     # Update current step
     if step is not None:
-        progress['current_step'] = step
-        if step not in progress['steps_completed']:
-            progress['steps_completed'].append(step)
-            progress['steps_completed'].sort()
+        progress["current_step"] = step
+        if step not in progress["steps_completed"]:
+            progress["steps_completed"].append(step)
+            progress["steps_completed"].sort()
 
     # Add artifact if provided
     if artifact is not None:
-        progress.setdefault('artifacts', {})
+        progress.setdefault("artifacts", {})
         if step is not None:
-            progress['artifacts'][f'step_{step}'] = artifact
+            progress["artifacts"][f"step_{step}"] = artifact
         else:
             # Use timestamp if no step provided
-            progress['artifacts'][f"artifact_{len(progress['artifacts'])}"] = artifact
+            progress["artifacts"][f"artifact_{len(progress['artifacts'])}"] = artifact
 
     # Update optional fields
     if feature_branch is not None:
-        progress['feature_branch'] = feature_branch
+        progress["feature_branch"] = feature_branch
 
     if session_id is not None:
-        progress['session_id'] = session_id
+        progress["session_id"] = session_id
 
     # Add any additional kwargs
     for key, value in kwargs.items():
         progress[key] = value
 
     # Update timestamp
-    progress['last_updated'] = datetime.now(UTC).isoformat()
+    progress["last_updated"] = datetime.now(UTC).isoformat()
 
     # Ensure worktree_id is set
-    progress['worktree_id'] = get_worktree_id()
+    progress["worktree_id"] = get_worktree_id()
 
     # Write to file atomically (write to temp, then rename)
     state_dir = get_state_dir()
-    progress_file = state_dir / 'workflow.json'
+    progress_file = state_dir / "workflow.json"
 
     # Create temp file in same directory to ensure atomic rename
-    fd, temp_path = tempfile.mkstemp(dir=state_dir, suffix='.tmp')
+    fd, temp_path = tempfile.mkstemp(dir=state_dir, suffix=".tmp")
     try:
-        with os.fdopen(fd, 'w') as f:
+        with os.fdopen(fd, "w") as f:
             json.dump(progress, f, indent=2)
         # Atomic rename (works on POSIX systems)
         os.replace(temp_path, progress_file)
@@ -149,7 +149,7 @@ def clear_workflow_progress() -> None:
     Removes the workflow.json file from the state directory.
     """
     state_dir = get_state_dir()
-    progress_file = state_dir / 'workflow.json'
+    progress_file = state_dir / "workflow.json"
 
     if progress_file.exists():
         progress_file.unlink()
@@ -165,15 +165,15 @@ def is_step_completed(step: int) -> bool:
         True if step is in completed steps list.
     """
     progress = get_workflow_progress()
-    return step in progress.get('steps_completed', [])
+    return step in progress.get("steps_completed", [])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Quick test when run directly
-    print('Current progress:')
+    print("Current progress:")
     progress = get_workflow_progress()
     print(json.dumps(progress, indent=2))
 
-    print('\nUpdating progress to step 1...')
-    progress = update_workflow_progress(step=1, artifact='specs/test/spec.md')
+    print("\nUpdating progress to step 1...")
+    progress = update_workflow_progress(step=1, artifact="specs/test/spec.md")
     print(json.dumps(progress, indent=2))

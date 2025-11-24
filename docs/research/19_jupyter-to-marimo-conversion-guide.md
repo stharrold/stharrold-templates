@@ -32,11 +32,11 @@ class JupyterToMarimoConverter:
             r'(\w+)\s*=\s*%sql\s+(.+)': r'\1 = mo.sql(f"""\2""")',
             r'pd\.read_sql\(([^,]+),\s*(\w+)\)': r'mo.sql(f"\1", con=\2)',
         }
-    
+
     def convert(self) -> str:
         with open(self.notebook_path, 'r') as f:
             nb = nbformat.read(f, as_version=4)
-        
+
         converted_cells = []
         for i, cell in enumerate(nb.cells):
             if cell.cell_type == 'code':
@@ -44,18 +44,18 @@ class JupyterToMarimoConverter:
             elif cell.cell_type == 'markdown':
                 converted = self._convert_markdown_cell(cell.source)
             converted_cells.append(converted)
-        
+
         return self._generate_marimo_notebook(converted_cells)
-    
+
     def _convert_code_cell(self, source: str, cell_index: int) -> str:
         # Handle SQL magic commands
         if '%%sql' in source or '%sql' in source:
             for pattern, replacement in self.sql_patterns.items():
                 source = re.sub(pattern, replacement, source, flags=re.MULTILINE|re.DOTALL)
-        
+
         # Analyze variable dependencies using AST
         defined, used = self._analyze_variables(source)
-        
+
         # Generate Marimo cell structure
         return f'''
 @app.cell
@@ -63,19 +63,19 @@ def __({', '.join(sorted(used))}):
 {self._indent_code(source)}
     return {', '.join(sorted(defined))}
 '''
-    
+
     def _analyze_variables(self, source: str) -> Tuple[Set[str], Set[str]]:
         tree = ast.parse(source)
         defined = set()
         used = set()
-        
+
         for node in ast.walk(tree):
             if isinstance(node, ast.Name):
                 if isinstance(node.ctx, ast.Store):
                     defined.add(node.id)
                 elif isinstance(node.ctx, ast.Load):
                     used.add(node.id)
-        
+
         return defined, used
 ```
 
@@ -101,34 +101,34 @@ class SecureConnectionManager:
         self.service_name = service_name
         self.cipher_suite = self._init_encryption()
         self.config_path = self._get_config_path()
-    
+
     def _init_encryption(self) -> Fernet:
         key = keyring.get_password(self.service_name, "encryption_key")
         if not key:
             key = Fernet.generate_key().decode()
             keyring.set_password(self.service_name, "encryption_key", key)
         return Fernet(key.encode())
-    
+
     def _get_config_path(self) -> Path:
         if os.name == 'nt':  # Windows
             base_dir = Path(os.environ.get('APPDATA', '.'))
         else:  # Unix-like systems
             base_dir = Path.home() / '.config'
         return base_dir / self.service_name / 'connections.json'
-    
+
     def save_connection_config(self, name: str, config: Dict[str, Any]):
         """Save encrypted connection configuration"""
         config['password'] = self.cipher_suite.encrypt(
             config['password'].encode()
         ).decode()
-        
+
         all_configs = self._load_all_configs()
         all_configs[name] = config
-        
+
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_path, 'w') as f:
             json.dump(all_configs, f, indent=2)
-    
+
     @contextmanager
     def get_connection(self, name: str):
         """Get database connection with automatic cleanup"""
@@ -136,7 +136,7 @@ class SecureConnectionManager:
         config['password'] = self.cipher_suite.decrypt(
             config['password'].encode()
         ).decode()
-        
+
         conn_str = self._build_connection_string(config)
         connection = None
         try:
@@ -145,14 +145,14 @@ class SecureConnectionManager:
         finally:
             if connection:
                 connection.close()
-    
+
     def _build_connection_string(self, config: Dict[str, Any]) -> str:
         driver_map = {
             'mssql': 'ODBC Driver 18 for SQL Server',
             'postgresql': 'PostgreSQL Unicode',
             'mysql': 'MariaDB Unicode',
         }
-        
+
         driver = driver_map.get(config['db_type'])
         return (
             f"DRIVER={{{driver}}};"
@@ -276,20 +276,20 @@ class NotebookOutputPreserver:
             'metadata': Path('output/metadata')
         }
         self._create_directories()
-    
-    def preserve_dataframe(self, df: pd.DataFrame, name: str, 
+
+    def preserve_dataframe(self, df: pd.DataFrame, name: str,
                           format: str = 'parquet'):
         """Save DataFrame with compression and metadata"""
         filename = f"{self.project_name}_{name}_{self.timestamp}.{format}"
         filepath = self.output_structure['dataframes'] / filename
-        
+
         if format == 'parquet':
             df.to_parquet(filepath, compression='zstd', engine='pyarrow')
         elif format == 'csv':
             df.to_csv(filepath, index=False, compression='gzip')
         elif format == 'hdf5':
             df.to_hdf(filepath, key='data', mode='w', complib='zstd')
-        
+
         # Save metadata
         metadata = {
             'shape': df.shape,
@@ -298,24 +298,24 @@ class NotebookOutputPreserver:
             'memory_usage': df.memory_usage(deep=True).sum(),
             'timestamp': self.timestamp
         }
-        
+
         meta_file = self.output_structure['metadata'] / f"{name}_metadata.json"
         with open(meta_file, 'w') as f:
             json.dump(metadata, f, indent=2)
-        
+
         return filepath
-    
+
     def preserve_visualization(self, fig, name: str, formats: List[str] = None):
         """Save visualization in multiple formats"""
         if formats is None:
             formats = ['png', 'svg', 'html']
-        
+
         base_name = f"{self.project_name}_{name}_{self.timestamp}"
         saved_files = []
-        
+
         for fmt in formats:
             filepath = self.output_structure['visualizations'] / f"{base_name}.{fmt}"
-            
+
             if hasattr(fig, 'savefig'):  # Matplotlib/Seaborn
                 if fmt == 'png':
                     fig.savefig(filepath, dpi=300, bbox_inches='tight')
@@ -326,30 +326,30 @@ class NotebookOutputPreserver:
                     fig.write_html(filepath)
                 elif fmt == 'png':
                     fig.write_image(filepath, width=1200, height=800)
-            
+
             saved_files.append(filepath)
-        
+
         return saved_files
-    
+
     def extract_notebook_outputs(self, notebook_path: str):
         """Extract all outputs from notebook cells"""
         with open(notebook_path, 'r') as f:
             nb = nbformat.read(f, as_version=4)
-        
+
         for cell_idx, cell in enumerate(nb.cells):
             if cell.cell_type == 'code' and hasattr(cell, 'outputs'):
                 for output_idx, output in enumerate(cell.outputs):
                     self._save_cell_output(cell_idx, output_idx, output)
-    
+
     def _save_cell_output(self, cell_idx: int, output_idx: int, output):
         """Save individual cell output"""
         base_name = f"cell_{cell_idx:03d}_output_{output_idx:02d}"
-        
+
         if output.output_type == 'stream':
             filepath = self.output_structure['cell_outputs'] / f"{base_name}.txt"
             with open(filepath, 'w') as f:
                 f.write(''.join(output.text))
-        
+
         elif output.output_type in ['display_data', 'execute_result']:
             for mime_type, content in output.data.items():
                 if mime_type.startswith('image/'):
@@ -380,7 +380,7 @@ class CrossPlatformConfig:
         self.is_macos = self.system == 'Darwin'
         self.is_linux = self.system == 'Linux'
         self._setup_environment()
-    
+
     def _setup_environment(self):
         """Configure platform-specific environment"""
         env_vars = {
@@ -388,35 +388,35 @@ class CrossPlatformConfig:
             'NOTEBOOK_OUTPUT_DIR': str(Path.cwd() / 'output'),
             'LOG_LEVEL': 'INFO'
         }
-        
+
         if self.is_windows:
             env_vars['ODBC_DRIVER'] = 'ODBC Driver 18 for SQL Server'
             env_vars['CONFIG_DIR'] = str(Path(os.environ.get('APPDATA', '.')))
         else:
             env_vars['ODBC_DRIVER'] = self._detect_odbc_driver()
             env_vars['CONFIG_DIR'] = str(Path.home() / '.config')
-        
+
         for key, value in env_vars.items():
             os.environ.setdefault(key, value)
-    
+
     def _detect_odbc_driver(self) -> str:
         """Detect available ODBC driver"""
         import pyodbc
         drivers = pyodbc.drivers()
-        
+
         preferred_drivers = [
             'ODBC Driver 18 for SQL Server',
             'ODBC Driver 17 for SQL Server',
             'PostgreSQL Unicode',
             'MariaDB Unicode'
         ]
-        
+
         for driver in preferred_drivers:
             if driver in drivers:
                 return driver
-        
+
         return drivers[0] if drivers else 'ODBC Driver 18 for SQL Server'
-    
+
     def get_odbc_install_command(self) -> str:
         """Get platform-specific ODBC installation command"""
         if self.is_windows:

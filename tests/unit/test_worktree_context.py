@@ -7,11 +7,9 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(
-        Path(__file__).parent.parent.parent
-        / '.claude/skills/workflow-utilities/scripts'
-    ),
+    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
 )
+
 
 class TestWorktreeIdGeneration:
     """Unit tests for worktree ID generation."""
@@ -58,7 +56,7 @@ class TestStateDirProperty:
         from worktree_context import get_worktree_context
 
         ctx = get_worktree_context()
-        assert ctx.state_dir.name == '.claude-state'
+        assert ctx.state_dir.name == ".claude-state"
         assert ctx.state_dir.parent == ctx.worktree_root
 
     def test_state_dir_uses_worktree_root(self):
