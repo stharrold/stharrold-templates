@@ -673,7 +673,7 @@ Different MCP clients use slightly different configuration schemas:
 {
   "servers": {
     "server-name": {
-      "command": "command", 
+      "command": "command",
       "args": ["arg1", "arg2"],
       "env": {
         "VAR": "${env:VAR}"

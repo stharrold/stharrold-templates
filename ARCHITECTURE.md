@@ -607,4 +607,3 @@ related_skills:
 **Respect branch protection:** main and develop are protected. All changes via PR.
 
 **VCS abstraction exists:** Use it for GitHub/Azure DevOps portability.
-

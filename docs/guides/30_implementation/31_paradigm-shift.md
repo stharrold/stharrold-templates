@@ -116,13 +116,13 @@ Following our Django patterns in CLAUDE.md"
 ```bash
 # Set up parallel development environments
 git worktree add ../project-auth feature/authentication
-git worktree add ../project-ui feature/user-interface  
+git worktree add ../project-ui feature/user-interface
 git worktree add ../project-tests feature/test-suite
 git worktree add ../project-api feature/api-endpoints
 
 # Run independent Claude Code sessions:
 # Instance 1: Implements authentication system
-# Instance 2: Builds UI components  
+# Instance 2: Builds UI components
 # Instance 3: Generates comprehensive test suite
 # Instance 4: Develops API endpoints
 ```
@@ -163,13 +163,13 @@ project:
   stage: "development"
   primary_language: "python"
   framework: "django"
-  
+
 architecture:
   pattern: "MVC"
   authentication: "JWT"
   state_management: "Redux"
   api_style: "REST"
-  
+
 standards:
   code_style: "PEP8 with type hints"
   testing: "pytest with >80% coverage"
@@ -207,12 +207,12 @@ constraints:
     page_load: "<2s LCP"
     api_response: "<200ms p95"
     database_queries: "<50ms"
-  
+
   security:
     authentication: "Multi-factor required"
     data_encryption: "AES-256"
     api_rate_limiting: "100 requests/minute"
-  
+
   compliance:
     frameworks: ["GDPR", "HIPAA"]
     audit_trails: "Required"
@@ -262,7 +262,7 @@ claude /model sonnet-4
 claude "Implement user registration form with validation"
 
 # Switch to Opus for architectural decisions
-claude /model opus-4  
+claude /model opus-4
 claude "Design database schema for multi-tenant e-commerce platform with complex inventory management"
 
 # Switch to Haiku for simple operations
@@ -295,7 +295,7 @@ project_overview:
   target_users: "Enterprise data analysts and business intelligence teams"
   core_value: "Real-time data visualization with AI-powered insights"
   current_phase: "MVP development with enterprise pilot program"
-  
+
 key_business_rules:
   - "Data isolation between tenants must be absolute"
   - "Response times under 200ms for dashboard queries"
@@ -342,22 +342,22 @@ domain_knowledge:
     - "Dashboard": "Customizable real-time data visualization interface"
     - "Pipeline": "Automated data processing workflow from source to insight"
     - "Insight": "AI-generated analysis highlighting trends and anomalies"
-  
+
   external_integrations:
     - name: "Salesforce API"
       purpose: "CRM data synchronization"
       rate_limit: "200 requests/hour"
       auth_method: "OAuth2"
-    
+
     - name: "Stripe Webhooks"
       purpose: "Payment and subscription management"
       endpoint: "/api/webhooks/stripe"
       security: "Webhook signature validation"
-  
+
   data_models:
     relationships: |
       Organization -> has_many -> Users
-      Organization -> has_many -> Dashboards  
+      Organization -> has_many -> Dashboards
       Dashboard -> has_many -> Widgets
       Widget -> belongs_to -> DataSource
       User -> has_many -> AccessPermissions

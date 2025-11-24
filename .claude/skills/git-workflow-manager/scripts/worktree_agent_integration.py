@@ -15,7 +15,7 @@ from typing import Any
 # Add workflow-utilities to path for worktree_context
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / 'workflow-utilities' / 'scripts'),
+    str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
 )
 
 
@@ -35,21 +35,21 @@ def get_flow_token() -> str:
         ctx = get_worktree_context()
 
         # Use branch name if it's a feature/hotfix/release branch
-        if ctx.branch_name.startswith(('feature/', 'hotfix/', 'release/')):
+        if ctx.branch_name.startswith(("feature/", "hotfix/", "release/")):
             return ctx.branch_name
 
         # For contrib branches, use the branch name
-        if ctx.branch_name.startswith('contrib/'):
+        if ctx.branch_name.startswith("contrib/"):
             return ctx.branch_name
 
         # Fallback to worktree ID
-        return f'worktree-{ctx.worktree_id}'
+        return f"worktree-{ctx.worktree_id}"
 
     except (ImportError, RuntimeError):
         # Fallback for non-git environments
         from uuid import uuid4
 
-        return f'ad-hoc-{uuid4().hex[:8]}'
+        return f"ad-hoc-{uuid4().hex[:8]}"
 
 
 def get_worktree_info() -> dict[str, Any]:
@@ -68,19 +68,19 @@ def get_worktree_info() -> dict[str, Any]:
 
         ctx = get_worktree_context()
         return {
-            'worktree_root': str(ctx.worktree_root),
-            'is_worktree': ctx.is_worktree,
-            'worktree_id': ctx.worktree_id,
-            'branch_name': ctx.branch_name,
-            'flow_token': get_flow_token(),
+            "worktree_root": str(ctx.worktree_root),
+            "is_worktree": ctx.is_worktree,
+            "worktree_id": ctx.worktree_id,
+            "branch_name": ctx.branch_name,
+            "flow_token": get_flow_token(),
         }
     except (ImportError, RuntimeError):
         return {
-            'worktree_root': str(Path.cwd()),
-            'is_worktree': False,
-            'worktree_id': '',
-            'branch_name': 'unknown',
-            'flow_token': get_flow_token(),
+            "worktree_root": str(Path.cwd()),
+            "is_worktree": False,
+            "worktree_id": "",
+            "branch_name": "unknown",
+            "flow_token": get_flow_token(),
         }
 
 
@@ -106,11 +106,7 @@ async def trigger_sync_completion(
     """
     try:
         # Import sync engine
-        agentdb_path = (
-            Path(__file__).parent.parent.parent
-            / 'agentdb-state-manager'
-            / 'scripts'
-        )
+        agentdb_path = Path(__file__).parent.parent.parent / "agentdb-state-manager" / "scripts"
         if str(agentdb_path) not in sys.path:
             sys.path.insert(0, str(agentdb_path))
 
@@ -136,17 +132,15 @@ async def trigger_sync_completion(
         # Graceful degradation - don't fail the workflow
         import logging
 
-        logging.getLogger(__name__).warning(
-            f'Sync completion trigger failed (non-critical): {e}'
-        )
+        logging.getLogger(__name__).warning(f"Sync completion trigger failed (non-critical): {e}")
         return []
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Quick test when run directly
-    print('Worktree Agent Integration')
-    print('=' * 40)
+    print("Worktree Agent Integration")
+    print("=" * 40)
 
     info = get_worktree_info()
     for key, value in info.items():
-        print(f'{key}: {value}')
+        print(f"{key}: {value}")

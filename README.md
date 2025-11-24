@@ -15,7 +15,11 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 podman --version          # 4.0+
 podman-compose --version
 git --version
-gh --version              # GitHub CLI
+
+# VCS Provider CLI (one of):
+gh --version              # GitHub CLI (for GitHub repos)
+# OR
+az --version              # Azure CLI (for Azure DevOps repos)
 ```
 
 ## Quick Start

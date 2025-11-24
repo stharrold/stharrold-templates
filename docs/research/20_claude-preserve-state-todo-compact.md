@@ -48,11 +48,11 @@ WORKFLOW RULES
 4. Session Handoff: Before ending, write detailed "NEXT SESSION START HERE" section in TODO.md
 
 AUTO-MAINTENANCE TRIGGERS
-- Run /init when: 
+- Run /init when:
   - First time in project
   - Major structural changes detected
   - CLAUDE.md is older than 7 days
-  
+
 - Run /compact when:
   - Context usage exceeds 80%
   - Before starting new major task

@@ -89,9 +89,9 @@ const ExpensiveComponent = React.memo(({ data }) => {
 });
 
 // Image optimization
-<img 
-  src="image.webp" 
-  loading="lazy" 
+<img
+  src="image.webp"
+  loading="lazy"
   alt="Description"
   srcSet="image-320w.webp 320w, image-640w.webp 640w"
   sizes="(max-width: 320px) 280px, 640px"
@@ -281,7 +281,7 @@ context_architecture:
   global_config: ~/.claude/CLAUDE.md        # Universal preferences
   project_config: ./CLAUDE.md               # Project-specific context
   feature_config: ./features/CLAUDE.md      # Feature-specific patterns
-  
+
 context_loading_strategy:
   inheritance: "parent_to_child"
   lazy_loading: "on_demand"
@@ -317,7 +317,7 @@ git worktree add ../project-feature-b feature/user-interface
 **Performance Management Results:**
 Teams implementing proper usage management report 40-60% cost reductions while maintaining or improving productivity through:
 - **Aggressive clearing patterns** between unrelated development tasks
-- **Strategic compaction usage** for natural workflow breakpoints  
+- **Strategic compaction usage** for natural workflow breakpoints
 - **Batch processing optimization** for large-scale operations
 - **Standardized workflow patterns** that leverage caching effectively
 
@@ -440,7 +440,7 @@ performance_targets:
   database_queries: "<50ms average response time"
   bundle_size: "<500KB for frontend applications"
   test_coverage: ">80% with comprehensive edge case testing"
-  
+
 mcp_specific_targets:
   server_response: "<3s for complex queries"
   context_loading: "<5s for large CLAUDE.md files"

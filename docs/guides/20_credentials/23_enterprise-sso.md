@@ -41,7 +41,7 @@ Enterprise search typically integrates multiple data sources, each requiring sec
 
 **Security Architecture:**
 - **Separate credential stores per data source** to minimize breach impact
-- **Service-specific tokens** with minimum required permissions  
+- **Service-specific tokens** with minimum required permissions
 - **Time-bounded access tokens** with automatic refresh capabilities
 - **Audit logging** for all credential access and usage
 
@@ -63,7 +63,7 @@ New-StoredCredential -Target "CONFLUENCE_API_TOKEN" -UserName "token" -SecurePas
 
 **SharePoint Integration:**
 ```bash
-# macOS Keychain  
+# macOS Keychain
 security add-generic-password \
   -a "$USER" \
   -s "SHAREPOINT_CLIENT_SECRET" \
@@ -109,17 +109,17 @@ claude mcp add access-control "python -m enterprise_acl" \
 # confidentiality_rules.yaml
 classification_rules:
   - pattern: "customer_data|financial_records|employee_info"
-    classification: "confidential" 
+    classification: "confidential"
     external_lookup: false
     retention_days: 2555  # 7 years
     audit_level: "detailed"
-    
+
   - pattern: "public_documentation|marketing_content"
     classification: "public"
     external_lookup: true
     retention_days: 365
     audit_level: "summary"
-    
+
   - pattern: "trade_secrets|strategic_plans|m&a_documents"
     classification: "restricted"
     external_lookup: false
@@ -135,7 +135,7 @@ Prevent sensitive information leakage when using external enrichment sources or 
 
 **Pre-Query Screening Process:**
 1. **Sensitive term identification** using NLP and pattern matching
-2. **Confidentiality classification** of all retrieved content  
+2. **Confidentiality classification** of all retrieved content
 3. **External lookup restrictions** based on data classification
 4. **Audit trail logging** for all external data requests
 
@@ -412,7 +412,7 @@ claude config set-session-timeout 480  # 8 hours in minutes
 **Supported SSO Providers:**
 - **Okta**: Full SAML 2.0 and OpenID Connect support
 - **Azure Active Directory**: Native Microsoft 365 integration
-- **Ping Identity**: Enterprise federation capabilities  
+- **Ping Identity**: Enterprise federation capabilities
 - **Auth0**: Developer-friendly configuration
 - **Google Workspace**: G Suite integration
 - **OneLogin**: Comprehensive enterprise features
@@ -421,7 +421,7 @@ claude config set-session-timeout 480  # 8 hours in minutes
 
 **Organizational Roles:**
 - **Developer roles**: Limited MCP server access, read-only on sensitive data
-- **Senior Developer roles**: Full MCP server access, limited administrative functions  
+- **Senior Developer roles**: Full MCP server access, limited administrative functions
 - **Admin roles**: Full configuration capabilities, user management
 - **Security roles**: Audit access, compliance reporting, incident response
 - **Project-specific permissions**: Fine-grained control per repository/project
@@ -435,7 +435,7 @@ claude config set-session-timeout 480  # 8 hours in minutes
       "data_classification_access": ["public", "internal"],
       "session_duration": 240
     },
-    "senior_developer": {  
+    "senior_developer": {
       "mcp_servers": ["github", "postgres", "slack", "aws", "terraform"],
       "data_classification_access": ["public", "internal", "confidential"],
       "session_duration": 480
@@ -482,7 +482,7 @@ claude /cost --breakdown-by-model --time-period=24h
 
 # Dynamic model switching based on complexity
 claude /model sonnet-4    # For most development tasks
-claude /model opus-4      # For complex architecture work  
+claude /model opus-4      # For complex architecture work
 claude /model haiku       # For simple operations
 
 # Enable intelligent cost optimization
@@ -507,7 +507,7 @@ claude /cost --efficiency-report --compare-last-month
 1. **Never commit secrets** - Use environment variables and OS credential stores only
 2. **Validate all inputs** - Assume all user input and API responses are potentially malicious
 3. **Parameterize queries** - Prevent SQL injection in database MCP servers
-4. **Sanitize outputs** - Prevent XSS attacks when displaying retrieved content  
+4. **Sanitize outputs** - Prevent XSS attacks when displaying retrieved content
 5. **Check dependencies** - Run security audits on all MCP server dependencies regularly
 
 ### Sensitive Areas Identification
@@ -595,7 +595,7 @@ enterprise_config:
 ## Next Steps for Enterprise Deployment
 
 1. **Assess current identity infrastructure** - Evaluate existing SSO/LDAP systems
-2. **Plan credential migration strategy** - Move from individual to centralized management  
+2. **Plan credential migration strategy** - Move from individual to centralized management
 3. **Configure audit and compliance** - Set up logging and monitoring per [24_audit-compliance.md](./24_audit-compliance.md)
 4. **Implement cost optimization** - Deploy intelligent model selection and caching
 5. **Train development teams** - Establish enterprise workflow patterns

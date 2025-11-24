@@ -42,21 +42,21 @@ class TextComplexityScorer:
         # Readability
         flesch = textstat.flesch_reading_ease(text)
         fog = textstat.gunning_fog(text)
-        
+
         # Lexical diversity
         lex = LexicalRichness(text)
         ttr = lex.ttr
         mtld = lex.mtld() if len(text.split()) > 50 else 0
-        
+
         # Information theory
         probs = compute_word_probabilities(text)
         shannon_entropy = entropy(probs, base=2)
         compression_ratio = len(gzip.compress(text.encode())) / len(text.encode())
-        
+
         # Syntactic (using spaCy)
         doc = nlp(text)
         avg_dep_dist = mean([abs(token.head.i - token.i) for token in doc])
-        
+
         return normalize_features(features)
 ```
 
