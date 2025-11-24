@@ -110,17 +110,15 @@ def create_backmerge_branch(version: str) -> str | None:
     result = run_cmd(['git', 'branch', '-r', '--list', f'origin/{backmerge_branch}'], check=False)
     if result.stdout.strip():
         print(f'  Backmerge branch {backmerge_branch} already exists')
-        # Check for local branch with uncommitted changes or unpushed commits
+        # Check for local branch with unpushed commits
         local_check = run_cmd(['git', 'rev-parse', '--verify', backmerge_branch], check=False)
         if local_check.returncode == 0:
-            # Local branch exists - check for uncommitted changes
-            status_check = run_cmd(['git', 'status', '--porcelain'], check=False)
-            # Check for unpushed commits (local ahead of remote)
+            # Local branch exists - check for unpushed commits (local ahead of remote)
             log_check = run_cmd(
                 ['git', 'log', f'origin/{backmerge_branch}..{backmerge_branch}', '--oneline'],
                 check=False
             )
-            if status_check.stdout.strip() or log_check.stdout.strip():
+            if log_check.stdout.strip():
                 print(f'  WARNING: Resetting local {backmerge_branch} to match remote')
         # Force local branch to match remote (handles local/remote mismatch)
         run_cmd(['git', 'checkout', '-B', backmerge_branch, f'origin/{backmerge_branch}'], check=False)
@@ -164,7 +162,7 @@ def step_pr_develop(version: str = None) -> bool:
         version = get_latest_version()
 
     if not version:
-        print('✗ Could not determine version. Specify --version.')
+        print('✗ Could not determine version (no tags on origin/main?). Specify --version.')
         return False
 
     print(f'  Backmerging version: {version}')
