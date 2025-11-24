@@ -7,6 +7,12 @@ on:
     branches:
       - main
       - develop
+    # Optional: Only run on specific file changes
+    # paths:
+    #   - "*.py"
+    #   - "src/**/*.py"
+    #   - "tests/**/*.py"
+    #   - ".claude/skills/**/*.py"
 
 jobs:
   claude-review:
