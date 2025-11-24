@@ -131,8 +131,8 @@ def step_pr_develop(version: str = None) -> bool:
         print(f"✗ Release branch release/{version} not found.")
         print("  Step 7 requires the release branch to exist.")
         print("  If the release branch was already deleted, you may need to:")
-        print("    1. Recreate it from main: git checkout -b release/{version} origin/main")
-        print("    2. Push it: git push -u origin release/{version}")
+        print(f"    1. Recreate it from main: git checkout -b release/{version} origin/main")
+        print(f"    2. Push it: git push -u origin release/{version}")
         return_to_editable_branch()
         return False
 
@@ -180,12 +180,13 @@ def step_pr_develop(version: str = None) -> bool:
             "--title",
             f"backmerge: {version} → develop",
             "--body",
-            (
-                f"## Summary\n\n"
-                f"Backmerge release {version} to develop.\n\n"
-                f"Keeps develop in sync with production.\n\n"
-                f"🤖 Generated with [Claude Code](https://claude.com/claude-code)"
-            ),
+            f"""## Summary
+
+Backmerge release {version} to develop.
+
+Keeps develop in sync with production.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)""",
         ],
         check=False,
     )
