@@ -212,6 +212,52 @@ uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py check
 
 **Automation**: Pre-commit hook syncs automatically when CLAUDE.md or .claude/ is modified.
 
+### AI Configuration Architecture
+
+This repository follows a **Claude-first development model** with cross-tool compatibility.
+
+**Directory Roles:**
+
+| Directory | Role | Editable |
+|-----------|------|----------|
+| `.claude/` | **PRIMARY** source for AI configuration | Yes |
+| `.agents/` | Read-only mirror ([OpenAI agents.md spec](https://github.com/openai/agents.md)) | No |
+
+**Sync Flow:**
+
+```
+.claude/                          .agents/
+├── commands/    (Claude-specific) │
+├── skills/      ─────sync─────>  ├── (mirrored skills)
+├── settings.local.json           │
+└── CLAUDE.md                     └── CLAUDE.md
+
+CLAUDE.md ─────sync─────> AGENTS.md
+          └────sync─────> .github/copilot-instructions.md
+```
+
+**What Gets Synced vs Claude-Specific:**
+
+| Source | Target | Synced |
+|--------|--------|--------|
+| `.claude/skills/` | `.agents/` | Yes |
+| `CLAUDE.md` | `AGENTS.md` | Yes |
+| `CLAUDE.md` | `.github/copilot-instructions.md` | Yes |
+| `.claude/commands/` | - | No (Claude-specific) |
+| `.claude/settings.local.json` | - | No (Claude-specific) |
+| `.claude-state/` | - | No (runtime state) |
+
+**Cross-Tool Compatibility:**
+
+The `.agents/` directory follows the emerging [OpenAI agents.md spec](https://github.com/openai/agents.md) ([directory support proposal](https://github.com/openai/agents.md/issues/9)).
+
+Compatible tools:
+- **Claude Code** - Primary (reads `.claude/` directly)
+- **GitHub Copilot** - Via `.github/copilot-instructions.md`
+- **Cursor** - Reads `.agents/` or `AGENTS.md`
+- **Windsurf** - Reads `AGENTS.md`
+- **Other AI assistants** - Via standard `AGENTS.md`
+
 ## Git Workflow Commands
 
 ```bash

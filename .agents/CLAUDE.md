@@ -25,6 +25,27 @@ Auto-synced mirror of `.claude/skills/` for cross-tool AI compatibility.
 
 **WARNING: Do not edit files in this directory directly. Changes will be overwritten.**
 
+## Directory Status
+
+**This directory (`.agents/`) is a READ-ONLY mirror of `.claude/skills/`.**
+
+Do NOT edit files here. Edit `.claude/` instead.
+
+### Specification
+
+This directory follows the [OpenAI agents.md specification](https://github.com/openai/agents.md).
+
+See also: [Directory support proposal](https://github.com/openai/agents.md/issues/9)
+
+### Compatible Tools
+
+Tools that read this directory:
+- **Cursor** - Reads `.agents/` or `AGENTS.md`
+- **Windsurf** - Reads `AGENTS.md`
+- **Other AI coding assistants** - Following the agents.md spec
+
+Claude Code reads `.claude/` directly (does not use this mirror).
+
 ## Relationship with .claude/skills/
 
 | Directory | Purpose | Editable |
