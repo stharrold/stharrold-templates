@@ -31,7 +31,7 @@ from container_utils import get_command_prefix
 
 # Safe cross-platform output
 try:
-    from safe_output import safe_print, format_check, format_cross, format_warning
+    from safe_output import safe_print
 except ImportError:
     # Fallback if module not found
     def safe_print(*args, **kwargs):
@@ -39,12 +39,8 @@ except ImportError:
             print(*args, **kwargs)
         except UnicodeEncodeError:
             message = ' '.join(str(arg) for arg in args)
-            message = message.replace('[OK]', '[OK]').replace('[X]', '[X]').replace('->', '->').replace('!', '!')
+            message = message.replace('✓', '[OK]').replace('✗', '[X]').replace('→', '->').replace('⚠', '!')
             print(message, **kwargs)
-
-    def format_check(msg): return f"[OK] {msg}"
-    def format_cross(msg): return f"[X] {msg}"
-    def format_warning(msg): return f"! {msg}"
 
 
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -111,7 +107,7 @@ def run_quality_gates() -> bool:
     script_path = Path(".claude/skills/quality-enforcer/scripts/run_quality_gates.py")
 
     if not script_path.exists():
-        print("!️  Quality gates script not found, skipping")
+        print("!  Quality gates script not found, skipping")
         return True
 
     prefix = get_command_prefix()
@@ -141,7 +137,7 @@ def step_create_release(version: str = None) -> bool:
     # Check if release branch already exists
     result = run_cmd(["git", "branch", "-r", "--list", f"origin/{release_branch}"], check=False)
     if result.stdout.strip():
-        print(f"!️  Release branch {release_branch} already exists")
+        print(f"!  Release branch {release_branch} already exists")
         return True
 
     # Create release branch from develop
@@ -209,7 +205,7 @@ def step_pr_main() -> bool:
 
     if result.returncode != 0:
         if "already exists" in result.stderr:
-            print("!️  PR already exists")
+            print("!  PR already exists")
         else:
             print(f"[X] PR creation failed: {result.stderr}")
             return False
@@ -252,7 +248,7 @@ def step_tag_release() -> bool:
     result = run_cmd(["git", "tag", "-a", version, "-m", f"Release {version}"], check=False)
     if result.returncode != 0:
         if "already exists" in result.stderr:
-            print(f"!️  Tag {version} already exists")
+            print(f"!  Tag {version} already exists")
         else:
             print(f"[X] Tag creation failed: {result.stderr}")
             return False
@@ -261,7 +257,7 @@ def step_tag_release() -> bool:
     print(f"\n[Push] Pushing tag {version}...")
     result = run_cmd(["git", "push", "origin", version], check=False)
     if result.returncode != 0:
-        print(f"!️  Tag push warning: {result.stderr}")
+        print(f"!  Tag push warning: {result.stderr}")
 
     # Return to editable branch
     return_to_editable_branch()
