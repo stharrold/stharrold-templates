@@ -35,7 +35,7 @@ STEP_REQUIREMENTS = {
     4: (True, False, "feature/", "/4_implement - Execute tasks"),
     5: (False, True, "contrib/", "/5_integrate - Integrate feature"),
     6: (False, True, "contrib/", "/6_release - Create release"),
-    7: (False, True, "release/", "/7_backmerge - Sync release"),
+    7: (False, True, "contrib/", "/7_backmerge - Sync release"),
 }
 
 

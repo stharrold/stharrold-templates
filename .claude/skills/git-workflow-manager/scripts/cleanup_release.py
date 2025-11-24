@@ -138,7 +138,7 @@ def verify_commits_in_branch(release_branch, target_branch):
             raise ValueError(
                 f"Release not back-merged to {target_branch}. "
                 f"{commit_count} commit(s) from {release_branch} not in {target_branch}. "
-                f"Run: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py"
+                f"Run: python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop"
             )
 
     except subprocess.CalledProcessError as e:
