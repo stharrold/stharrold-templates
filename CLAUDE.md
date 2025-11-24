@@ -84,7 +84,7 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 
 | Step | Command | Navigation | Purpose |
 |------|---------|------------|---------|
-| 1 | `/1_specify` | (start) → 1 → 2 | Create planning docs + worktree via bmad-planner |
+| 1 | `/1_specify` | (start) → 1 → 2 | Create feature branch and specification |
 | 2 | `/2_plan` | 1 → 2 → 3 | Generate specs via speckit-author |
 | 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
 | 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
@@ -198,8 +198,6 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
   --target "worktree"
 ```
 
-**Note**: `.specify/` is deprecated. Use `.claude/skills/` for all workflow automation.
-
 ## MCP Configuration Paths
 
 | Platform | macOS | Windows | Linux |
@@ -263,8 +261,23 @@ repo_feature_abc/            # Feature worktree
 
 ## Reference Documentation
 
-- `WORKFLOW.md` - Complete 7-phase workflow guide
+- `WORKFLOW.md` - Workflow overview (14KB) with phase index
+- `docs/reference/workflow-*.md` - Phase-specific workflow docs (≤20KB each)
 - `ARCHITECTURE.md` - System architecture analysis
-- `CHANGELOG.md` - Version history (current: v5.11.0)
-- `docs/reference/` - Workflow reference docs
+- `CHANGELOG.md` - Version history (current: v5.12.0)
 - `specs/` - Feature specifications with design artifacts
+
+## CLAUDE.md Hierarchy
+
+Every directory has a CLAUDE.md with YAML frontmatter for AI navigation:
+- `parent` - Link to parent directory's CLAUDE.md
+- `children` - Links to child directories' CLAUDE.md files
+- `sibling_readme` - Link to same-level README.md
+
+```bash
+# Generate missing CLAUDE.md files
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/generate_claude_md.py
+
+# Update children references in existing CLAUDE.md files
+podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/update_claude_md_refs.py
+```
