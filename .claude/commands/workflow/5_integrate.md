@@ -19,6 +19,28 @@ next: /6_release
 
 ---
 
+## Usage Modes
+
+This command supports two modes based on user input:
+
+### Full Integration (default)
+- **Trigger**: `/5_integrate` (no additional arguments)
+- **Use when**: Completing a feature worktree workflow (steps 1-4 completed)
+- **Runs**: feature → contrib PR, worktree cleanup, contrib → develop PR
+
+### Contrib-Only Integration
+- **Trigger**: `/5_integrate from contrib to develop` or similar phrasing
+- **Use when**: Changes made directly on `contrib/*` branch (no feature worktree)
+- **Runs**: contrib → develop PR only (skips steps 1-3)
+- **Examples**:
+  - `/5_integrate from contrib to develop`
+  - `/5_integrate contrib only`
+  - `/5_integrate just pr to develop`
+
+**Detection**: If user mentions "contrib to develop", "contrib only", "no worktree", or "direct", use Contrib-Only mode.
+
+---
+
 ## Step 0: Verify Context (REQUIRED - STOP if fails)
 
 **Run this first. If it fails, STOP and tell the user to fix the context.**
@@ -31,7 +53,9 @@ Expected: Main repo, `contrib/*` branch
 
 ---
 
-## Step 1: Create PR feature → contrib
+## Step 1: Create PR feature → contrib [FULL MODE ONLY]
+
+**Skip this step in Contrib-Only mode.**
 
 Create a pull request from the feature branch to contrib:
 ```bash
@@ -40,7 +64,9 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 
 **MANUAL GATE**: Wait for PR approval and merge in GitHub UI.
 
-## Step 2: Cleanup Feature Worktree
+## Step 2: Cleanup Feature Worktree [FULL MODE ONLY]
+
+**Skip this step in Contrib-Only mode.**
 
 After PR is merged, cleanup the worktree (no TODO archival):
 ```bash
@@ -53,7 +79,9 @@ This deletes:
 - Local feature branch
 - Remote feature branch
 
-## Step 3: Close GitHub Issue
+## Step 3: Close GitHub Issue [FULL MODE ONLY]
+
+**Skip this step in Contrib-Only mode.**
 
 If a GitHub Issue was linked, close it:
 ```bash
@@ -78,18 +106,34 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 
 ## Step 6: Record State in AgentDB
 
-Record the workflow transition:
+Record the workflow transition (use appropriate pattern based on mode):
+
+**Full mode:**
 ```bash
 podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_5_integrate
 ```
 
+**Contrib-Only mode:**
+```bash
+podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+  --sync-type workflow_transition \
+  --pattern phase_5_integrate_contrib_only
+```
+
 ## Step 7: Report Completion
 
-Report to the user:
+Report to the user based on mode:
+
+**Full mode:**
 - Feature PR merged to contrib
 - Worktree cleaned up
 - GitHub Issue closed (if applicable)
 - Contrib → develop PR created
+- Next step: Run `/6_release` when ready for production
+
+**Contrib-Only mode:**
+- Contrib → develop PR created
+- No worktree cleanup needed (changes were made directly on contrib)
 - Next step: Run `/6_release` when ready for production

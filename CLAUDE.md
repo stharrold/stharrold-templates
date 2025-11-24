@@ -135,8 +135,30 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/p
 | 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
 | 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
 | 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs, cleanup worktree |
+| 5b | `/5_integrate from contrib to develop` | contrib → 6 | PR contrib→develop only (no worktree) |
 | 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
 | 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
+
+## Workflow Context Validation
+
+Each workflow step validates that it is running in the correct location/branch:
+
+```bash
+# Validate context before running a step
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+```
+
+| Step | Location | Branch | Validation |
+|------|----------|--------|------------|
+| `/1_specify` | Main repo | `contrib/*` | `--step 1` |
+| `/2_plan` | **Worktree** | `feature/*` | `--step 2` |
+| `/3_tasks` | **Worktree** | `feature/*` | `--step 3` |
+| `/4_implement` | **Worktree** | `feature/*` | `--step 4` |
+| `/5_integrate` | Main repo | `contrib/*` | `--step 5` |
+| `/6_release` | Main repo | `contrib/*` | `--step 6` |
+| `/7_backmerge` | Main repo | `contrib/*` | `--step 7` |
+
+**Key rule**: Steps 2-4 must run in the feature worktree, not the main repo.
 
 ## Core Architecture
 
@@ -168,7 +190,7 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | Deleted after merge |
+| `release/*` | Ephemeral | Step 6 creates → Step 7 deletes after backmerge |
 
 ### Skills System (9 skills in `.claude/skills/`)
 
@@ -276,11 +298,13 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/r
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
+# Pattern: release/vX.Y.Z ──PR──> develop (direct, no intermediate branch)
+# Requires: release/* branch must exist when starting step 7
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
 # ⚠️ CRITICAL: Backmerge direction
-# CORRECT: release/vX.Y.Z → develop (use backmerge_release.py)
+# CORRECT: release/vX.Y.Z → develop (direct PR from release branch)
 # WRONG:   main → develop (NEVER merge main to develop!)
 
 # Cleanup feature worktree (no TODO archival by default)
@@ -421,6 +445,28 @@ repo_feature_abc/            # Feature worktree
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
+
+## Quick Debugging
+
+```bash
+# Where am I in the workflow?
+python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+
+# Am I in the right context for this step?
+python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+
+# What branches exist?
+git branch -a | grep -E "(feature|release|contrib)"
+
+# What worktrees exist?
+git worktree list
+
+# What's the current branch?
+git branch --show-current
+
+# Is this a worktree or main repo?
+git rev-parse --git-dir  # .git = main repo, .git/worktrees/* = worktree
+```
 
 ## Branch Cleanup
 

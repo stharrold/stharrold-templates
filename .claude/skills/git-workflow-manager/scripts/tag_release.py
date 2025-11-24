@@ -342,8 +342,9 @@ def main():
             print("  GitHub release: skipped (gh CLI not available or failed)")
 
         print("\nNext steps:")
-        print(f"  1. Back-merge to develop: python .claude/skills/git-workflow-manager/scripts/backmerge_release.py {version} develop")
-        print(f"  2. Cleanup release branch: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py {version}")
+        print("  1. Back-merge to develop: python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop")
+        print("  2. After PR merged, rebase contrib: python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py rebase-contrib")
+        print("  3. Cleanup release branch: python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release")
 
     except (ValueError, RuntimeError) as e:
         print(f"ERROR: {e}", file=sys.stderr)
