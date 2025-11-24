@@ -8,11 +8,11 @@ prev: /6_release
 
 **Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate` → `/6_release` → `/7_backmerge`
 
-**Purpose**: Sync release changes back to development branches (PR backmerge to develop, rebase contrib on develop).
+**Purpose**: Sync release changes back to development branches (PR release to develop, rebase contrib on develop).
 
-**Prerequisites**: Release PR merged to main (from `/6_release`), tag created on main
+**Prerequisites**: Release PR merged to main (from `/6_release`), tag created on main, **release branch still exists**
 
-**Outputs**: PR backmerge to develop merged, contrib rebased on develop, branches cleaned up
+**Outputs**: PR release to develop merged, contrib rebased on develop, release branch cleaned up
 
 **Next**: Workflow complete. Return to `/1_specify` for next feature.
 
@@ -34,26 +34,26 @@ Expected: Main repo, `release/*` branch
 
 Sync release changes back to development branches.
 
-## Backmerge-from-Main Pattern
+## Release-to-Develop Pattern
 
-The backmerge creates a `backmerge/*` branch **from main** (not from release/*) to ensure:
-
-1. **Independence**: Backmerge can run anytime after main is updated
-2. **Completeness**: Includes the merge commit on main
-3. **Decoupling**: No dependency on release branch existing
+The backmerge uses the **release branch directly** to PR to develop:
 
 ```
-release/vX.Y.Z ──PR──> main ──(tag vX.Y.Z)──> (delete release/*)
-                         │
-                         └──> backmerge/vX.Y.Z ──PR──> develop
+release/vX.Y.Z ──PR──> main ──(tag vX.Y.Z)
+       │
+       └──────────PR──> develop
+                        │
+                        └──> (delete release/* after merge)
 ```
+
+**Important**: The release branch must still exist when running step 7.
 
 ## Workflow Steps (in order)
 
-1. **pr-develop** - Create PR from backmerge branch to develop
+1. **pr-develop** - Create PR from release branch to develop
 2. **(Manual)** - Merge the PR in GitHub UI after approval
 3. **rebase-contrib** - Rebase contrib branch on updated develop
-4. **cleanup-release** - Delete release and backmerge branches
+4. **cleanup-release** - Delete release branch
 
 ## Version Auto-Detection
 
@@ -71,17 +71,17 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/b
 
 ## Available Steps
 
-- `pr-develop` - Create PR from backmerge branch to develop
+- `pr-develop` - Create PR from release branch to develop
 - **(Manual step)** - Merge the PR in GitHub UI after approval
 - `rebase-contrib` - Rebase contrib/* on develop
-- `cleanup-release` - Delete release and backmerge branches
+- `cleanup-release` - Delete release branch
 - `full` - Run all steps in sequence
 - `status` - Show current backmerge status
 
 ## Example Session
 
 ```bash
-# 1. Create PR from backmerge branch to develop (version auto-detected)
+# 1. Create PR from release branch to develop (version auto-detected)
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop
 
 # Or specify version explicitly
@@ -90,15 +90,19 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/b
 # 2. After PR approved and merged
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py rebase-contrib
 
-# 3. Cleanup release and backmerge branches
+# 3. Cleanup release branch
 podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release
 ```
 
 ## Key Features
 
-### Independence from Release Branch
-- Works even if release branch is already deleted
-- Only requires the tag on main to exist
+### Requires Release Branch
+- Release branch must exist when running step 7
+- If release branch was deleted early, recreate from main:
+  ```bash
+  git checkout -b release/vX.Y.Z origin/main
+  git push -u origin release/vX.Y.Z
+  ```
 
 ### Idempotency
 - Running `pr-develop` twice reports "already exists" for existing PRs
@@ -129,7 +133,7 @@ podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/
 ## Notes
 
 - Always ends on editable branch (`contrib/*`)
-- Both release and backmerge branches are deleted after completion
+- Release branch is deleted after backmerge PR is merged
 - All branches synced and ready for next feature cycle
 - AgentDB records the backmerge completion for workflow tracking
 - Workflow complete - return to `/1_specify` for next feature

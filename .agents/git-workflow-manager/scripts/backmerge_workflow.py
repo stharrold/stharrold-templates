@@ -4,18 +4,20 @@ Backmerge Workflow Script
 
 Syncs release changes back to development branches.
 
-Creates a backmerge/* branch from main (not from release/*) to ensure:
-1. Independence: Backmerge can run anytime after main is updated
-2. Completeness: Includes the merge commit on main
-3. Decoupling: No dependency on release branch existing
+Uses the release/* branch directly to PR to develop (no separate backmerge branch).
+This requires the release branch to still exist when running step 7.
+
+Pattern:
+    release/vX.Y.Z ──PR──> develop
+                    └──> (delete release/* after merge)
 
 Usage:
     podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 
 Steps:
-    pr-develop      - Create PR from backmerge branch to develop
+    pr-develop      - Create PR from release branch to develop
     rebase-contrib  - Rebase contrib branch on develop
-    cleanup-release - Delete release and backmerge branches
+    cleanup-release - Delete release branch
     full            - Run all steps in sequence
     status          - Show current backmerge status
 """
@@ -73,8 +75,26 @@ def get_latest_version() -> str | None:
     return None
 
 
-def find_release_branch() -> str | None:
-    """Find the most recent release branch."""
+def find_release_branch(version: str = None) -> str | None:
+    """Find the release branch for a version, or the most recent release branch.
+
+    Args:
+        version: Specific version to find (e.g., 'v1.6.0'). If None, finds most recent.
+
+    Returns:
+        Release branch name (e.g., 'release/v1.6.0') or None if not found.
+    """
+    run_cmd(["git", "fetch", "origin"], check=False)
+
+    if version:
+        # Look for specific version
+        branch = f"release/{version}"
+        result = run_cmd(["git", "branch", "-r", "--list", f"origin/{branch}"], check=False)
+        if result.stdout.strip():
+            return branch
+        return None
+
+    # Find most recent release branch
     result = run_cmd(["git", "branch", "-r", "--list", "origin/release/*"], check=False)
     branches = result.stdout.strip().split("\n")
     if branches and branches[0]:
@@ -83,69 +103,13 @@ def find_release_branch() -> str | None:
     return None
 
 
-def find_backmerge_branch() -> str | None:
-    """Find the most recent backmerge branch."""
-    result = run_cmd(["git", "branch", "-r", "--list", "origin/backmerge/*"], check=False)
-    branches = result.stdout.strip().split("\n")
-    if branches and branches[0]:
-        return branches[-1].strip().replace("origin/", "")
-    return None
-
-
-def create_backmerge_branch(version: str) -> str | None:
-    """Create backmerge branch from main.
-
-    Args:
-        version: Version string (e.g., 'v1.6.0')
-
-    Returns:
-        Branch name if successful, None otherwise.
-    """
-    backmerge_branch = f"backmerge/{version}"
-
-    # Fetch latest
-    run_cmd(["git", "fetch", "origin"], check=False)
-
-    # Check if backmerge branch already exists
-    result = run_cmd(["git", "branch", "-r", "--list", f"origin/{backmerge_branch}"], check=False)
-    if result.stdout.strip():
-        print(f"  Backmerge branch {backmerge_branch} already exists")
-        # Check for local branch with unpushed commits
-        local_check = run_cmd(["git", "rev-parse", "--verify", backmerge_branch], check=False)
-        if local_check.returncode == 0:
-            # Local branch exists - check for unpushed commits (local ahead of remote)
-            log_check = run_cmd(["git", "log", f"origin/{backmerge_branch}..{backmerge_branch}", "--oneline"], check=False)
-            if log_check.stdout.strip():
-                print(f"  WARNING: Resetting local {backmerge_branch} to match remote")
-        # Force local branch to match remote (handles local/remote mismatch)
-        run_cmd(["git", "checkout", "-B", backmerge_branch, f"origin/{backmerge_branch}"], check=False)
-        return backmerge_branch
-
-    # Create branch from main
-    print(f"\n[Branch] Creating {backmerge_branch} from origin/main...")
-    result = run_cmd(["git", "checkout", "-b", backmerge_branch, "origin/main"], check=False)
-    if result.returncode != 0:
-        print(f"✗ Failed to create {backmerge_branch}: {result.stderr}")
-        return None
-
-    # Push branch
-    print(f"\n[Push] Pushing {backmerge_branch}...")
-    result = run_cmd(["git", "push", "-u", "origin", backmerge_branch], check=False)
-    if result.returncode != 0:
-        print(f"✗ Failed to push {backmerge_branch}: {result.stderr}")
-        return None
-
-    return backmerge_branch
-
-
 def step_pr_develop(version: str = None) -> bool:
-    """Create PR from backmerge branch to develop.
+    """Create PR from release branch to develop.
 
-    Creates backmerge/<version> from main, then PRs to develop.
-    This ensures the merge commit from main is included.
+    Requires the release/* branch to exist. PRs directly from release to develop.
     """
     print("\n" + "=" * 60)
-    print("STEP 1: PR Backmerge → Develop")
+    print("STEP 1: PR Release → Develop")
     print("=" * 60)
 
     # Determine version from latest tag if not provided
@@ -160,6 +124,19 @@ def step_pr_develop(version: str = None) -> bool:
 
     # Fetch latest
     run_cmd(["git", "fetch", "origin"], check=False)
+
+    # Find release branch
+    release_branch = find_release_branch(version)
+    if not release_branch:
+        print(f"✗ Release branch release/{version} not found.")
+        print("  Step 7 requires the release branch to exist.")
+        print("  If the release branch was already deleted, you may need to:")
+        print("    1. Recreate it from main: git checkout -b release/{version} origin/main")
+        print("    2. Push it: git push -u origin release/{version}")
+        return_to_editable_branch()
+        return False
+
+    print(f"  Found release branch: {release_branch}")
 
     # Check if develop is behind main
     result = run_cmd(["git", "rev-list", "--count", "origin/develop..origin/main"], check=False)
@@ -178,14 +155,19 @@ def step_pr_develop(version: str = None) -> bool:
 
     print(f"  develop is {commits_behind} commits behind main")
 
-    # Create backmerge branch from main
-    backmerge_branch = create_backmerge_branch(version)
-    if not backmerge_branch:
-        return_to_editable_branch()
-        return False
+    # Checkout release branch
+    print(f"\n[Checkout] Switching to {release_branch}...")
+    result = run_cmd(["git", "checkout", release_branch], check=False)
+    if result.returncode != 0:
+        # Try checking out from remote
+        result = run_cmd(["git", "checkout", "-b", release_branch, f"origin/{release_branch}"], check=False)
+        if result.returncode != 0:
+            print(f"✗ Failed to checkout {release_branch}: {result.stderr}")
+            return_to_editable_branch()
+            return False
 
     # Create PR
-    print(f"\n[PR] Creating PR: {backmerge_branch} → develop...")
+    print(f"\n[PR] Creating PR: {release_branch} → develop...")
     result = run_cmd(
         [
             "gh",
@@ -194,14 +176,15 @@ def step_pr_develop(version: str = None) -> bool:
             "--base",
             "develop",
             "--head",
-            backmerge_branch,
+            release_branch,
             "--title",
-            f"Backmerge {version} to develop",
+            f"backmerge: {version} → develop",
             "--body",
             (
-                f"Backmerge main ({version}) to develop.\n\n"
-                "Keeps develop in sync with production.\n\n"
-                "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+                f"## Summary\n\n"
+                f"Backmerge release {version} to develop.\n\n"
+                f"Keeps develop in sync with production.\n\n"
+                f"🤖 Generated with [Claude Code](https://claude.com/claude-code)"
             ),
         ],
         check=False,
@@ -220,7 +203,7 @@ def step_pr_develop(version: str = None) -> bool:
     # Return to editable branch
     return_to_editable_branch()
 
-    print(f"✓ Step 1 complete: PR created {backmerge_branch} → develop")
+    print(f"✓ Step 1 complete: PR created {release_branch} → develop")
     print("\nNext: Merge PR in GitHub, then run: backmerge_workflow.py rebase-contrib")
     return True
 
@@ -274,9 +257,9 @@ def step_rebase_contrib() -> bool:
 
 
 def step_cleanup_release(version: str = None) -> bool:
-    """Delete release and backmerge branches locally and remotely."""
+    """Delete release branch locally and remotely."""
     print("\n" + "=" * 60)
-    print("STEP 3: Cleanup Branches")
+    print("STEP 3: Cleanup Release Branch")
     print("=" * 60)
 
     # Determine version
@@ -301,18 +284,7 @@ def step_cleanup_release(version: str = None) -> bool:
         else:
             print(f"⚠️  Release branch delete warning: {result.stderr}")
 
-    # Cleanup backmerge branch
-    backmerge_branch = f"backmerge/{version}"
-    print(f"\n[Delete] Cleaning up {backmerge_branch}...")
-    run_cmd(["git", "branch", "-D", backmerge_branch], check=False)
-    result = run_cmd(["git", "push", "origin", "--delete", backmerge_branch], check=False)
-    if result.returncode != 0:
-        if "remote ref does not exist" in result.stderr:
-            print("  Backmerge branch already deleted or never existed")
-        else:
-            print(f"⚠️  Backmerge branch delete warning: {result.stderr}")
-
-    print("✓ Step 3 complete: Branches cleaned up")
+    print("✓ Step 3 complete: Release branch cleaned up")
     return True
 
 
@@ -335,13 +307,12 @@ def show_status() -> None:
     else:
         print("Latest version: None")
 
-    # Show release/backmerge branches
+    # Show release branch
     release_branch = find_release_branch()
-    backmerge_branch = find_backmerge_branch()
     if release_branch:
         print(f"Release branch: {release_branch}")
-    if backmerge_branch:
-        print(f"Backmerge branch: {backmerge_branch}")
+    else:
+        print("Release branch: None (already cleaned up)")
 
     # Check if develop is behind main
     run_cmd(["git", "fetch", "origin"], check=False)
@@ -367,10 +338,14 @@ def show_status() -> None:
     # Determine next step
     print("\n" + "-" * 40)
     if behind_main and behind_main != "0":
-        print("Next step: backmerge_workflow.py pr-develop")
+        if release_branch:
+            print("Next step: backmerge_workflow.py pr-develop")
+        else:
+            print("⚠️  develop behind main but no release branch found.")
+            print("    Recreate release branch from main if needed.")
     elif behind_develop and behind_develop != "0":
         print("Next step: backmerge_workflow.py rebase-contrib")
-    elif release_branch or backmerge_branch:
+    elif release_branch:
         print("Next step: backmerge_workflow.py cleanup-release")
     else:
         print("Status: All synced, ready for next feature")
