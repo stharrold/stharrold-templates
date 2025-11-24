@@ -105,8 +105,19 @@ If rebase conflicts occur:
 3. Run `git rebase --continue`
 4. Run `git push --force-with-lease`
 
+## Step 4: Record State in AgentDB
+
+After cleanup, record the workflow transition:
+```bash
+podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+  --sync-type workflow_transition \
+  --pattern phase_7_backmerge
+```
+
 ## Notes
 
 - Always ends on editable branch (`contrib/*`)
 - Both release and backmerge branches are deleted after completion
 - All branches synced and ready for next feature cycle
+- AgentDB records the backmerge completion for workflow tracking
+- Workflow complete - return to `/1_specify` for next feature

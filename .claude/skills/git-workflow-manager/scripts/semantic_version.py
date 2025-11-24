@@ -15,13 +15,11 @@ def get_changed_files(base_branch):
     that will be included in a PR/merge, not just uncommitted working directory changes.
     """
     try:
-        result = subprocess.check_output(
-            ['git', 'diff', '--name-only', f'{base_branch}...HEAD'],
-            text=True
-        )
-        return [f for f in result.strip().split('\n') if f]
+        result = subprocess.check_output(["git", "diff", "--name-only", f"{base_branch}...HEAD"], text=True)
+        return [f for f in result.strip().split("\n") if f]
     except subprocess.CalledProcessError:
         return []
+
 
 def analyze_changes(changed_files):
     """
@@ -41,78 +39,81 @@ def analyze_changes(changed_files):
 
     for file in changed_files:
         # API changes are potentially breaking
-        if file.startswith('src/api/') or file.startswith('src/*/api/'):
+        if file.startswith("src/api/") or file.startswith("src/*/api/"):
             # Check if file existed before (new = feature, modified = potentially breaking)
             if Path(file).exists():
                 has_breaking = True
 
         # New Python files in src/ are features
-        elif file.startswith('src/') and file.endswith('.py'):
+        elif file.startswith("src/") and file.endswith(".py"):
             if Path(file).exists():
                 has_feature = True
 
         # Tests, docs, config are patches
-        elif any(file.startswith(prefix) for prefix in ['tests/', 'docs/', 'resources/']):
+        elif any(file.startswith(prefix) for prefix in ["tests/", "docs/", "resources/"]):
             has_fix = True
 
         # Configuration changes
-        elif file in ['pyproject.toml', 'requirements.txt', 'uv.lock']:
+        elif file in ["pyproject.toml", "requirements.txt", "uv.lock"]:
             has_fix = True
 
     # Determine bump type (priority: major > minor > patch)
     if has_breaking:
-        return 'major'
+        return "major"
     elif has_feature:
-        return 'minor'
+        return "minor"
     elif has_fix:
-        return 'patch'
+        return "patch"
     else:
-        return 'patch'  # Default to patch if unsure
+        return "patch"  # Default to patch if unsure
+
 
 def bump_version(current_version, bump_type):
     """Increment version based on bump type."""
     # Parse version (handle vX.Y.Z or X.Y.Z format)
-    match = re.match(r'v?(\d+)\.(\d+)\.(\d+)', current_version)
+    match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", current_version)
     if not match:
         print(f"Warning: Invalid version format '{current_version}', defaulting to v1.0.0")
-        return 'v1.0.0'
+        return "v1.0.0"
 
     major, minor, patch = map(int, match.groups())
 
-    if bump_type == 'major':
+    if bump_type == "major":
         major += 1
         minor = 0
         patch = 0
-    elif bump_type == 'minor':
+    elif bump_type == "minor":
         minor += 1
         patch = 0
     else:  # patch
         patch += 1
 
-    return f'v{major}.{minor}.{patch}'
+    return f"v{major}.{minor}.{patch}"
+
 
 def calculate_semantic_version(base_branch, current_version):
     """Calculate next semantic version based on changes."""
     changed_files = get_changed_files(base_branch)
 
     if not changed_files:
-        print('No changed files detected')
+        print("No changed files detected")
         return current_version
 
     bump_type = analyze_changes(changed_files)
     new_version = bump_version(current_version, bump_type)
 
-    print(f'Changed files: {len(changed_files)}', file=sys.stderr)
-    print(f'Bump type: {bump_type}', file=sys.stderr)
-    print(f'Current version: {current_version}', file=sys.stderr)
-    print(f'New version: {new_version}', file=sys.stderr)
+    print(f"Changed files: {len(changed_files)}", file=sys.stderr)
+    print(f"Bump type: {bump_type}", file=sys.stderr)
+    print(f"Current version: {current_version}", file=sys.stderr)
+    print(f"New version: {new_version}", file=sys.stderr)
 
     return new_version
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print('Usage: semantic_version.py <base_branch> <current_version>')
-        print('Example: semantic_version.py develop v1.0.0')
+        print("Usage: semantic_version.py <base_branch> <current_version>")
+        print("Example: semantic_version.py develop v1.0.0")
         sys.exit(1)
 
     new_version = calculate_semantic_version(sys.argv[1], sys.argv[2])

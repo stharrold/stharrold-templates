@@ -15,6 +15,6 @@ def repo_root() -> Path:
 @pytest.fixture
 def test_data_dir(repo_root: Path) -> Path:
     """Return the test data directory."""
-    data_dir = repo_root / 'tests' / 'data'
+    data_dir = repo_root / "tests" / "data"
     data_dir.mkdir(exist_ok=True)
     return data_dir

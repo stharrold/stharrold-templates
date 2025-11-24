@@ -158,21 +158,21 @@ class OfflineSemanticSearch:
         # Ensure offline operation
         os.environ["HF_HUB_OFFLINE"] = "1"
         os.environ["TRANSFORMERS_OFFLINE"] = "1"
-        
+
         # Load from cache or download once
         model_path = os.path.join(cache_dir, model_name.replace("/", "_"))
-        
+
         if os.path.exists(model_path):
             self.model = SentenceTransformer(model_path)
         else:
             # One-time download
             self.model = SentenceTransformer(model_name)
             self.model.save(model_path)
-        
+
         # Optimize for production
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = self.model.to(self.device)
-    
+
     def encode_batch(self, texts, batch_size=32):
         """Memory-efficient batch encoding"""
         embeddings = self.model.encode(
