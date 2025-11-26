@@ -248,6 +248,36 @@ def step_rebase_contrib() -> bool:
         safe_print("✗ Uncommitted changes detected. Commit or stash before rebase.")
         return False
 
+    # DIVERGENCE CHECK: Ensure local and remote are not diverged
+    # This prevents creating parallel histories when multiple sessions run backmerge
+    safe_print(f"\n[Check] Verifying {contrib} is not diverged from origin...")
+    result = run_cmd(
+        ["git", "rev-list", "--left-right", "--count", f"{contrib}...origin/{contrib}"],
+        check=False,
+    )
+    if result.returncode == 0:
+        counts = result.stdout.strip().split()
+        if len(counts) == 2:
+            local_ahead, remote_ahead = int(counts[0]), int(counts[1])
+            if local_ahead > 0 and remote_ahead > 0:
+                safe_print(f"✗ DIVERGENCE DETECTED: {contrib} has diverged from origin/{contrib}")
+                safe_print(f"  Local has {local_ahead} commits not on remote")
+                safe_print(f"  Remote has {remote_ahead} commits not on local")
+                safe_print("\n  To resolve, choose one of:")
+                safe_print(f"    1. Accept remote: git reset --hard origin/{contrib}")
+                safe_print(f"    2. Force push local: git push --force-with-lease origin {contrib}")
+                safe_print("    3. Merge: git pull --no-rebase (creates merge commit)")
+                return False
+            elif remote_ahead > 0:
+                # Remote is ahead - pull before rebase to avoid divergence
+                safe_print(f"  Remote is {remote_ahead} commits ahead, pulling first...")
+                pull_result = run_cmd(["git", "pull", "--rebase", "origin", contrib], check=False)
+                if pull_result.returncode != 0:
+                    safe_print(f"✗ Pull failed: {pull_result.stderr}")
+                    safe_print("  Resolve manually, then retry.")
+                    return False
+                safe_print("  ✓ Synced with remote")
+
     # Rebase on develop
     safe_print(f"\n[Rebase] Rebasing {contrib} onto origin/develop...")
     result = run_cmd(["git", "rebase", "origin/develop"], check=False)
