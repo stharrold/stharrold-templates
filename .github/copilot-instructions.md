@@ -445,6 +445,7 @@ repo_feature_abc/            # Feature worktree
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
+| Branch divergence | See [Preventing Branch Divergence](#preventing-branch-divergence) section |
 
 ## Quick Debugging
 
@@ -467,6 +468,44 @@ git branch --show-current
 # Is this a worktree or main repo?
 git rev-parse --git-dir  # .git = main repo, .git/worktrees/* = worktree
 ```
+
+## Preventing Branch Divergence
+
+**Problem**: When multiple sessions run `rebase-contrib` or `daily_rebase.py`, local and remote branches can diverge with same content but different SHAs.
+
+**Root cause**: Rebasing creates new commit SHAs. If session A rebases and pushes while session B has old history, session B's subsequent rebase creates parallel history.
+
+**Built-in safeguards** (v5.16.0+):
+- `backmerge_workflow.py` and `daily_rebase.py` now check for divergence before rebasing
+- If divergence detected, scripts halt with resolution options
+- If remote is ahead, scripts auto-pull before rebasing
+
+**Manual detection**:
+```bash
+# Check for divergence
+git fetch origin
+git rev-list --left-right --count contrib/stharrold...origin/contrib/stharrold
+# Output: "X Y" where X=local-only commits, Y=remote-only commits
+# If both > 0: DIVERGED
+```
+
+**Resolution options**:
+```bash
+# Option 1: Accept remote (recommended if remote has newer work)
+git reset --hard origin/contrib/stharrold
+
+# Option 2: Force push local (if local has work you want to keep)
+git push --force-with-lease origin contrib/stharrold
+
+# Option 3: Merge (creates merge commit, less clean history)
+git pull --no-rebase
+```
+
+**Best practices**:
+1. Always push after running backmerge or daily rebase
+2. Pull before starting new work in a session
+3. Avoid running backmerge from multiple machines simultaneously
+4. Use single source of truth for rebase operations
 
 ## Branch Cleanup
 

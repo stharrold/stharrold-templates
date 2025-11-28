@@ -171,6 +171,8 @@ All directories must have:
 - All files in `docs/guides/` must be ≤30KB
 - Use modular structure with cross-references
 - ARCHIVED/ uses compressed date-based archives (YYYYMMDD.tar.gz)
+  - Archives are located in the `ARCHIVED/` directory at the repository root
+  - To extract an archive: `tar -xzf ARCHIVED/YYYYMMDD.tar.gz` (Unix-like systems)
 
 ### Validation
 

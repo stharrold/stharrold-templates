@@ -43,7 +43,7 @@ def check_coverage(threshold=80):
 
         print(f"Coverage: {total_coverage:.1f}%")
         print(f"Threshold: {threshold}%")
-        print(f"Status: {'✓ PASS' if passed else '✗ FAIL'}")
+        print(f"Status: {'[OK] PASS' if passed else '[FAIL]'}")
 
         if not passed:
             print(f"\nCoverage is below {threshold}%. Add more tests.")
