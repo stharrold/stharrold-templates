@@ -12,9 +12,9 @@ Track the status of all feature specifications in this repository.
 | 006 | make-the-entire | completed | 2025-11 |
 | 007 | remove-redundant-todo | completed | 2025-11 |
 | 008 | workflow-skill-integration | completed | 2025-11 |
-| - | ai-config-architecture-docs | completed | 2025-11 |
-| - | ascii-only-output | completed | 2025-11 |
-| - | copilot-review-batch-fix | completed | 2025-11 |
+| 009 | ai-config-architecture-docs | completed | 2025-11 |
+| 010 | ascii-only-output | completed | 2025-11 |
+| 011 | copilot-review-batch-fix | completed | 2025-11 |
 
 ## Status Legend
 
