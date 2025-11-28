@@ -111,14 +111,17 @@ def detect_context() -> dict[str, any]:
     current_dir = Path.cwd()
     current_branch = run_command(["git", "branch", "--show-current"])
 
-    # Determine if in worktree (different from repo root)
-    is_worktree = current_dir != repo_root
+    # Determine if in worktree by checking git-dir path
+    # Worktrees have git-dir like: /path/to/main/.git/worktrees/<name>
+    # Main repo has git-dir like: /path/to/main/.git
+    git_dir = run_command(["git", "rev-parse", "--git-dir"])
+    is_worktree = "/worktrees/" in git_dir
 
     if not is_worktree:
         error_exit(
             "Not in a worktree. This script must be run from a feature/release/hotfix worktree.\n"
             f"Current directory: {current_dir}\n"
-            f"Repository root: {repo_root}\n"
+            f"Git directory: {git_dir}\n"
             "Create a worktree first using create_worktree.py"
         )
 
@@ -131,9 +134,18 @@ def detect_context() -> dict[str, any]:
 
 
 def find_bmad_planning(slug: str) -> dict[str, Path] | None:
-    """Check for BMAD planning documents in ../planning/<slug>/."""
+    """Check for BMAD planning documents.
 
-    planning_dir = Path("..") / "planning" / slug
+    Searches in order:
+    1. planning/<slug>/ (in worktree - planning docs included via rebase)
+    2. ../planning/<slug>/ (fallback for nested worktree layout)
+    """
+    # Try current directory first (worktree includes planning via rebase)
+    planning_dir = Path("planning") / slug
+
+    # Fallback to parent directory (nested worktree layout)
+    if not planning_dir.exists():
+        planning_dir = Path("..") / "planning" / slug
 
     if not planning_dir.exists():
         return None
