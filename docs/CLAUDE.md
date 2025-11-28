@@ -8,6 +8,7 @@ children:
   - archived/CLAUDE.md
   - guides/CLAUDE.md
   - reference/CLAUDE.md
+  - research/CLAUDE.md
 ---
 
 # Claude Code Context: docs
@@ -29,3 +30,4 @@ Documentation root for guides, references, and archives.
 - **archived**: [archived/CLAUDE.md](archived/CLAUDE.md)
 - **guides**: [guides/CLAUDE.md](guides/CLAUDE.md)
 - **reference**: [reference/CLAUDE.md](reference/CLAUDE.md)
+- **research**: [research/CLAUDE.md](research/CLAUDE.md)
