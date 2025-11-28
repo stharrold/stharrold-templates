@@ -15,8 +15,10 @@ from safe_output import (
     format_arrow,
     format_check,
     format_cross,
+    format_info,
     format_warning,
     print_error,
+    print_info,
     print_success,
     print_warning,
     safe_print,
@@ -28,7 +30,7 @@ class TestSymbols:
 
     def test_symbols_keys(self):
         """Test SYMBOLS has expected keys."""
-        expected_keys = {"checkmark", "cross", "arrow", "bullet", "warning"}
+        expected_keys = {"checkmark", "cross", "arrow", "bullet", "warning", "info"}
         assert set(SYMBOLS.keys()) == expected_keys
 
     def test_symbols_values_are_strings(self):
@@ -49,6 +51,7 @@ class TestSymbols:
         assert SYMBOLS["arrow"] == "->"
         assert SYMBOLS["bullet"] == "*"
         assert SYMBOLS["warning"] == "[WARN]"
+        assert SYMBOLS["info"] == "[INFO]"
 
 
 class TestSafePrint:
@@ -101,6 +104,12 @@ class TestFormatFunctions:
         assert result == "[WARN] Warning"
         assert result.isascii()
 
+    def test_format_info(self):
+        """Test format_info adds [INFO] prefix."""
+        result = format_info("Info message")
+        assert result == "[INFO] Info message"
+        assert result.isascii()
+
 
 class TestPrintConvenience:
     """Test print_* convenience functions."""
@@ -124,6 +133,13 @@ class TestPrintConvenience:
         print_warning("Deprecated feature")
         captured = capsys.readouterr()
         assert "[WARN] Deprecated feature" in captured.out
+        assert captured.out.isascii()
+
+    def test_print_info(self, capsys):
+        """Test print_info outputs [INFO] formatted message."""
+        print_info("Information message")
+        captured = capsys.readouterr()
+        assert "[INFO] Information message" in captured.out
         assert captured.out.isascii()
 
 

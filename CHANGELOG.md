@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [5.17.0] - 2025-11-26
+## [5.16.0] - 2025-11-26
 
 ### Changed
 - **ASCII-only output** - Simplified output to use only ASCII characters (Issue #102)

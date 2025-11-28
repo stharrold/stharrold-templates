@@ -19,6 +19,7 @@ SYMBOLS = {
     "arrow": "->",
     "bullet": "*",
     "warning": "[WARN]",
+    "info": "[INFO]",
 }
 
 
@@ -51,6 +52,11 @@ def format_warning(message: str) -> str:
     return f"{SYMBOLS['warning']} {message}"
 
 
+def format_info(message: str) -> str:
+    """Format an info message."""
+    return f"{SYMBOLS['info']} {message}"
+
+
 # Convenience functions
 def print_success(message: str) -> None:
     """Print a success message."""
@@ -65,3 +71,8 @@ def print_error(message: str) -> None:
 def print_warning(message: str) -> None:
     """Print a warning message."""
     safe_print(format_warning(message))
+
+
+def print_info(message: str) -> None:
+    """Print an info message."""
+    safe_print(format_info(message))
