@@ -260,7 +260,7 @@ def interactive_qa_with_bmad(bmad_docs: dict[str, Path], slug: str) -> dict[str,
     print("\n" + "=" * 70)
     print("SpecKit Interactive Specification Tool")
     print("=" * 70)
-    print(f"\n✓ Detected BMAD planning context: ../planning/{slug}/")
+    print(f"\n✓ Detected BMAD planning context: {bmad_docs['planning_dir']}/")
 
     # Display BMAD summary
     print("\nBMAD Summary:")
@@ -493,7 +493,8 @@ def generate_spec_md(
         context_section += f"**GitHub Issue:** #{issue_number}\n\n"
 
     if bmad_docs:
-        context_section += f"**BMAD Planning:** See `../planning/{slug}/` for complete requirements and architecture.\n\n"
+        planning_path = bmad_docs.get("planning_dir", f"planning/{slug}")
+        context_section += f"**BMAD Planning:** See `{planning_path}/` for complete requirements and architecture.\n\n"
 
     context_section += "**Implementation Preferences:**\n\n"
     for key, value in qa_responses.items():
@@ -609,11 +610,14 @@ def update_todo_file(todo_path: Path, tasks: list[dict[str, str]]) -> None:
     print(f"  Added {len(tasks)} tasks across {len(tasks_by_category)} categories")
 
 
-def create_specs_directory(slug: str, workflow_type: str) -> Path:
+def create_specs_directory(slug: str, workflow_type: str, planning_path: str | None = None) -> Path:
     """Create specs/<slug>/ directory with required structure."""
 
     specs_dir = Path("specs") / slug
     specs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Use provided planning path or default
+    planning_ref = planning_path if planning_path else f"planning/{slug}"
 
     # Create CLAUDE.md
     claude_md = f"""# Claude Code Context: specs/{slug}
@@ -644,12 +648,12 @@ When implementing this feature:
 1. Read spec.md for technical details
 2. Follow plan.md task order
 3. Update TODO_*.md task status as you complete each task
-4. Refer to ../planning/{slug}/ for BMAD context (if available)
+4. Refer to {planning_ref}/ for BMAD context (if available)
 
 ## Related Documentation
 
 - **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../../planning/{slug}/CLAUDE.md](../../planning/{slug}/CLAUDE.md)** - BMAD Planning (if available)
+- **[{planning_ref}/CLAUDE.md]({planning_ref}/CLAUDE.md)** - BMAD Planning (if available)
 """
 
     (specs_dir / "CLAUDE.md").write_text(claude_md)
@@ -672,7 +676,7 @@ SpecKit Interactive Tool - `.claude/skills/speckit-author/scripts/create_specifi
 
 ## Related
 
-- BMAD Planning: `../../planning/{slug}/` (if available)
+- BMAD Planning: `{planning_ref}/` (if available)
 - Implementation: `../../src/`
 - Tests: `../../tests/`
 """
@@ -775,7 +779,8 @@ def main():
     plan_md = generate_plan_md(args.slug, args.workflow_type, date, qa_responses, bmad_docs)
 
     # 6. Create specs directory
-    specs_dir = create_specs_directory(args.slug, args.workflow_type)
+    planning_path = str(bmad_docs["planning_dir"]) if bmad_docs else None
+    specs_dir = create_specs_directory(args.slug, args.workflow_type, planning_path)
 
     # Write spec.md and plan.md
     spec_path = specs_dir / "spec.md"
@@ -852,7 +857,7 @@ def main():
         print("  3. Track progress via GitHub Issues or specs/*/tasks.md")
 
     if bmad_docs:
-        print(f"  4. Refer to ../planning/{args.slug}/ for BMAD context")
+        print(f"  4. Refer to {bmad_docs['planning_dir']}/ for BMAD context")
 
     print("")
 
