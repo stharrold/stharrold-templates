@@ -29,9 +29,9 @@ from pathlib import Path
 
 # Safe cross-platform output
 try:
-    from .safe_output import safe_print, format_check, format_cross
+    from .safe_output import format_check, format_cross, safe_print
 except ImportError:
-    from safe_output import safe_print, format_check, format_cross
+    from safe_output import format_check, format_cross, safe_print
 
 # Step definitions: (require_worktree, require_main_repo, branch_prefix, step_name)
 STEP_REQUIREMENTS = {

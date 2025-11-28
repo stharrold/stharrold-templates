@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.17.0] - 2025-11-26
+
+### Changed
+- **ASCII-only output** - Simplified output to use only ASCII characters (Issue #102)
+  - Replaced Unicode symbols with ASCII equivalents for maximum compatibility:
+    - `✓` → `[OK]`
+    - `✗` → `[FAIL]`
+    - `→` → `->`
+    - `⚠` → `[WARN]`
+    - `ℹ` → `[INFO]`
+  - Removed UTF-8 detection and fallback logic from `safe_output.py`
+  - Simplified `safe_print()` to just call `print()` directly
+  - All workflow scripts now produce ASCII-only output
+
+### Fixed
+- **Cross-platform compatibility** - Scripts now work reliably on all systems
+  - No more UnicodeEncodeError on Windows terminals with cp1252
+  - No more encoding issues in CI/CD environments
+  - No more problems with SSH sessions using misconfigured locales
+
+### Updated Files
+- `.claude/skills/workflow-utilities/scripts/safe_output.py` - ASCII-only SYMBOLS dict
+- `.claude/skills/initialize-repository/scripts/initialize_repository.py` - ASCII output
+- `.claude/skills/bmad-planner/scripts/create_planning.py` - ASCII output
+- `.claude/skills/speckit-author/scripts/create_specifications.py` - ASCII output
+- `.claude/skills/workflow-utilities/scripts/create_skill.py` - ASCII output
+- `.claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py` - ASCII output
+- `.claude/skills/quality-enforcer/scripts/check_coverage.py` - ASCII output
+- `.claude/skills/quality-enforcer/scripts/run_quality_gates.py` - ASCII output
+
 ## [5.15.0] - 2025-11-24
 
 ### Added

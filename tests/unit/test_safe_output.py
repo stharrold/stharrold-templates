@@ -1,17 +1,17 @@
-"""Tests for safe_output.py - Cross-platform Unicode output utilities."""
+"""Tests for safe_output.py - ASCII-only cross-platform output utilities.
+
+Issue: #102 - Verify all output is ASCII-only for maximum compatibility.
+"""
 
 import sys
-from io import StringIO
-from unittest.mock import MagicMock, patch
 
 import pytest
 
 # Add workflow-utilities/scripts to path
-sys.path.insert(0, '.claude/skills/workflow-utilities/scripts')
+sys.path.insert(0, ".claude/skills/workflow-utilities/scripts")
 
 from safe_output import (
     SYMBOLS,
-    _init_utf8,
     format_arrow,
     format_check,
     format_cross,
@@ -23,37 +23,12 @@ from safe_output import (
 )
 
 
-class TestInitUtf8:
-    """Test UTF-8 initialization."""
-
-    def test_init_utf8_success(self):
-        """Test _init_utf8 when reconfigure succeeds."""
-        with patch('sys.stdout') as mock_stdout:
-            mock_stdout.reconfigure = MagicMock()
-            result = _init_utf8()
-            assert result is True
-            mock_stdout.reconfigure.assert_called_once_with(encoding='utf-8')
-
-    def test_init_utf8_no_reconfigure_method(self):
-        """Test _init_utf8 when reconfigure doesn't exist."""
-        with patch('sys.stdout', spec=[]):  # No reconfigure method
-            result = _init_utf8()
-            assert result is False
-
-    def test_init_utf8_reconfigure_fails(self):
-        """Test _init_utf8 when reconfigure raises exception."""
-        with patch('sys.stdout') as mock_stdout:
-            mock_stdout.reconfigure = MagicMock(side_effect=Exception("Reconfigure failed"))
-            result = _init_utf8()
-            assert result is False
-
-
 class TestSymbols:
     """Test SYMBOLS dictionary."""
 
     def test_symbols_keys(self):
         """Test SYMBOLS has expected keys."""
-        expected_keys = {'checkmark', 'cross', 'arrow', 'bullet', 'warning'}
+        expected_keys = {"checkmark", "cross", "arrow", "bullet", "warning"}
         assert set(SYMBOLS.keys()) == expected_keys
 
     def test_symbols_values_are_strings(self):
@@ -61,6 +36,19 @@ class TestSymbols:
         for symbol in SYMBOLS.values():
             assert isinstance(symbol, str)
             assert len(symbol) > 0
+
+    def test_symbols_are_ascii_only(self):
+        """Test all SYMBOLS values are ASCII-only (Issue #102)."""
+        for name, symbol in SYMBOLS.items():
+            assert symbol.isascii(), f"Symbol '{name}' contains non-ASCII: {symbol!r}"
+
+    def test_symbols_expected_values(self):
+        """Test SYMBOLS have expected ASCII values."""
+        assert SYMBOLS["checkmark"] == "[OK]"
+        assert SYMBOLS["cross"] == "[FAIL]"
+        assert SYMBOLS["arrow"] == "->"
+        assert SYMBOLS["bullet"] == "*"
+        assert SYMBOLS["warning"] == "[WARN]"
 
 
 class TestSafePrint:
@@ -72,31 +60,6 @@ class TestSafePrint:
         captured = capsys.readouterr()
         assert "Hello World" in captured.out
 
-    def test_safe_print_with_unicode(self, capsys):
-        """Test safe_print with Unicode characters."""
-        safe_print("✓ Success")
-        captured = capsys.readouterr()
-        # Should print either Unicode or ASCII depending on platform
-        assert "[OK] Success" in captured.out or "✓ Success" in captured.out
-
-    def test_safe_print_fallback_on_unicode_error(self):
-        """Test safe_print falls back to ASCII on UnicodeEncodeError."""
-        with patch('builtins.print') as mock_print:
-            # First call raises UnicodeEncodeError, second succeeds
-            mock_print.side_effect = [UnicodeEncodeError('charmap', '', 0, 1, 'character maps to undefined'), None]
-
-            safe_print("✓ Test ✗ →  ⚠")
-
-            # Should have been called twice: first attempt + fallback
-            assert mock_print.call_count == 2
-
-            # Second call should have ASCII replacements
-            args, kwargs = mock_print.call_args
-            assert "[OK]" in args[0]
-            assert "[X]" in args[0]
-            assert "->" in args[0]
-            assert "!" in args[0]
-
     def test_safe_print_with_kwargs(self, capsys):
         """Test safe_print preserves print kwargs."""
         safe_print("Test", end="", sep="|")
@@ -104,78 +67,68 @@ class TestSafePrint:
         assert "Test" in captured.out
         assert not captured.out.endswith("\n")  # end=""
 
+    def test_safe_print_output_is_ascii(self, capsys):
+        """Test safe_print output is ASCII-only (Issue #102)."""
+        safe_print("Test message")
+        captured = capsys.readouterr()
+        assert captured.out.isascii(), f"Output contains non-ASCII: {captured.out!r}"
+
 
 class TestFormatFunctions:
     """Test format_* helper functions."""
 
     def test_format_check(self):
-        """Test format_check adds checkmark."""
+        """Test format_check adds [OK] prefix."""
         result = format_check("Success")
-        assert "Success" in result
-        # Should contain either Unicode checkmark or [OK]
-        assert "✓" in result or "[OK]" in result
+        assert result == "[OK] Success"
+        assert result.isascii()
 
     def test_format_cross(self):
-        """Test format_cross adds cross."""
+        """Test format_cross adds [FAIL] prefix."""
         result = format_cross("Error")
-        assert "Error" in result
-        # Should contain either Unicode cross or [X]
-        assert "✗" in result or "[X]" in result
+        assert result == "[FAIL] Error"
+        assert result.isascii()
 
     def test_format_arrow(self):
         """Test format_arrow creates arrow between items."""
         result = format_arrow("A", "B")
-        assert "A" in result
-        assert "B" in result
-        # Should contain either Unicode arrow or ->
-        assert "→" in result or "->" in result
+        assert result == "A -> B"
+        assert result.isascii()
 
     def test_format_warning(self):
-        """Test format_warning adds warning symbol."""
+        """Test format_warning adds [WARN] prefix."""
         result = format_warning("Warning")
-        assert "Warning" in result
-        # Should contain either Unicode warning or !
-        assert "⚠" in result or "!" in result
+        assert result == "[WARN] Warning"
+        assert result.isascii()
 
 
 class TestPrintConvenience:
     """Test print_* convenience functions."""
 
     def test_print_success(self, capsys):
-        """Test print_success outputs formatted success message."""
+        """Test print_success outputs [OK] formatted message."""
         print_success("Operation completed")
         captured = capsys.readouterr()
-        assert "Operation completed" in captured.out
-        # Should have checkmark or [OK]
-        assert "✓" in captured.out or "[OK]" in captured.out
+        assert "[OK] Operation completed" in captured.out
+        assert captured.out.isascii()
 
     def test_print_error(self, capsys):
-        """Test print_error outputs formatted error message."""
+        """Test print_error outputs [FAIL] formatted message."""
         print_error("Operation failed")
         captured = capsys.readouterr()
-        assert "Operation failed" in captured.out
-        # Should have cross or [X]
-        assert "✗" in captured.out or "[X]" in captured.out
+        assert "[FAIL] Operation failed" in captured.out
+        assert captured.out.isascii()
 
     def test_print_warning(self, capsys):
-        """Test print_warning outputs formatted warning message."""
+        """Test print_warning outputs [WARN] formatted message."""
         print_warning("Deprecated feature")
         captured = capsys.readouterr()
-        assert "Deprecated feature" in captured.out
-        # Should have warning or !
-        assert "⚠" in captured.out or "!" in captured.out
+        assert "[WARN] Deprecated feature" in captured.out
+        assert captured.out.isascii()
 
 
 class TestIntegration:
     """Integration tests for safe_output module."""
-
-    def test_multiple_symbols_in_one_message(self, capsys):
-        """Test message with multiple Unicode symbols."""
-        safe_print("✓ Success ✗ Failed → Next ⚠ Warning")
-        captured = capsys.readouterr()
-        # Should handle all symbols gracefully
-        assert len(captured.out) > 0
-        # At minimum, should not raise exception
 
     def test_format_functions_composition(self):
         """Test composing multiple format functions."""
@@ -185,6 +138,7 @@ class TestIntegration:
 
         assert "Step 1" in warning_msg
         assert "Step 2" in warning_msg
+        assert warning_msg.isascii()
 
     def test_safe_print_preserves_type_coercion(self, capsys):
         """Test safe_print handles non-string arguments."""
@@ -194,3 +148,18 @@ class TestIntegration:
         assert "42" in captured.out
         assert "True" in captured.out
         assert "None" in captured.out
+        assert captured.out.isascii()
+
+    def test_all_output_ascii_with_encoding_restriction(self, capsys):
+        """Test output works with ASCII-only encoding (Issue #102 main test)."""
+        # This test verifies the core requirement: no UnicodeEncodeError
+        print_success("test")
+        print_error("test")
+        print_warning("test")
+
+        captured = capsys.readouterr()
+        # All output must be ASCII-encodable
+        try:
+            captured.out.encode("ascii")
+        except UnicodeEncodeError:
+            pytest.fail(f"Output contains non-ASCII characters: {captured.out!r}")
