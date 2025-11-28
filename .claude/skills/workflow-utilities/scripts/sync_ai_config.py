@@ -38,9 +38,9 @@ from pathlib import Path
 
 # Safe cross-platform output
 try:
-    from .safe_output import safe_print, format_check, format_cross, format_warning, format_arrow
+    from .safe_output import format_arrow, format_check, format_cross, format_warning, safe_print
 except ImportError:
-    from safe_output import safe_print, format_check, format_cross, format_warning, format_arrow
+    from safe_output import format_arrow, format_check, format_cross, format_warning, safe_print
 
 
 def sync_claude_md_to_agents() -> tuple[bool, bool]:
@@ -66,7 +66,7 @@ def sync_claude_md_to_agents() -> tuple[bool, bool]:
         safe_print("  " + format_arrow("CLAUDE.md", "AGENTS.md"))
         return True, True
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync AGENTS.md: {e}"))
+        safe_print("  " + format_cross(f"Failed to sync AGENTS.md: {e}"))
         return False, False
 
 
@@ -96,7 +96,7 @@ def sync_claude_md_to_copilot() -> tuple[bool, bool]:
         safe_print("  " + format_arrow("CLAUDE.md", ".github/copilot-instructions.md"))
         return True, True
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync copilot-instructions.md: {e}"))
+        safe_print("  " + format_cross(f"Failed to sync copilot-instructions.md: {e}"))
         return False, False
 
 
@@ -139,7 +139,7 @@ def sync_skills_to_agents_dir() -> tuple[bool, bool]:
             safe_print("  " + format_arrow(".claude/skills/", ".agents/"))
         return True, modified
     except Exception as e:
-        safe_print(f"  " + format_cross(f"Failed to sync .agents/: {e}"))
+        safe_print("  " + format_cross(f"Failed to sync .agents/: {e}"))
         return False, False
 
 
@@ -243,12 +243,12 @@ def verify_sync() -> bool:
                 if skill_dir.is_dir():
                     dest = dest_dir / skill_dir.name
                     if not dest.exists():
-                        safe_print(f"  " + format_cross(f".agents/{skill_dir.name}/ missing"))
+                        safe_print("  " + format_cross(f".agents/{skill_dir.name}/ missing"))
                         skills_synced = False
                     else:
                         comparison = filecmp.dircmp(skill_dir, dest)
                         if _dirs_differ(comparison):
-                            safe_print(f"  " + format_cross(f".agents/{skill_dir.name}/ differs from .claude/skills/{skill_dir.name}/"))
+                            safe_print("  " + format_cross(f".agents/{skill_dir.name}/ differs from .claude/skills/{skill_dir.name}/"))
                             skills_synced = False
             if skills_synced:
                 safe_print("  " + format_check(".agents/ in sync with .claude/skills/"))

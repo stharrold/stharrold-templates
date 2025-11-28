@@ -35,21 +35,20 @@ sys.path.insert(
 
 # Safe cross-platform output
 try:
-    from safe_output import safe_print, format_check, format_cross, format_warning, format_arrow
+    from safe_output import format_check, format_cross, format_warning, safe_print
 except ImportError:
-    # Fallback if module not found
+    # Fallback if module not found - ASCII-only output
     def safe_print(*args, **kwargs):
-        try:
-            print(*args, **kwargs)
-        except UnicodeEncodeError:
-            message = ' '.join(str(arg) for arg in args)
-            message = message.replace('[OK]', '[OK]').replace('[X]', '[X]').replace('->', '->').replace('⚠', '!')
-            print(message, **kwargs)
+        print(*args, **kwargs)
 
-    def format_check(msg): return f"[OK] {msg}"
-    def format_cross(msg): return f"[X] {msg}"
-    def format_warning(msg): return f"! {msg}"
-    def format_arrow(left, right): return f"{left} -> {right}"
+    def format_check(msg):
+        return f"[OK] {msg}"
+
+    def format_cross(msg):
+        return f"[FAIL] {msg}"
+
+    def format_warning(msg):
+        return f"[WARN] {msg}"
 
 
 def run_cmd(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
