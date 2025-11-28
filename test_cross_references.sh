@@ -26,7 +26,7 @@ while IFS= read -r link; do
             ((errors++))
         fi
     fi
-done < <(grep -o '\[.*\](#[^)]*)'  "$TARGET_FILE")
+done < <(grep -o '\[.*\](#[^)]*)' "$TARGET_FILE")
 
 # Check external file references
 while IFS= read -r ref; do

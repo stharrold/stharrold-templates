@@ -103,6 +103,36 @@ def run_command(cmd: list[str], capture=True, check=True) -> str | None:
         error_exit(f"Command not found: {cmd[0]}")
 
 
+def get_main_repo_path() -> Path | None:
+    """Get the main repository path when running from a worktree.
+
+    Uses git's --git-common-dir to find the shared .git directory,
+    then returns its parent (the main repo root).
+
+    This is useful when a worktree needs to access files in the main repo
+    that aren't included in the worktree itself (e.g., planning/ directory).
+
+    Returns:
+        Path to main repo root, or None if not in a worktree.
+    """
+    # Check if in a worktree by looking at git-dir path
+    git_dir = run_command(["git", "rev-parse", "--git-dir"])
+    if "/worktrees/" not in git_dir:
+        return None
+
+    # Get the common git directory (shared .git for worktrees)
+    git_common_dir = run_command(["git", "rev-parse", "--git-common-dir"])
+
+    # Make it absolute if relative
+    git_common_path = Path(git_common_dir)
+    if not git_common_path.is_absolute():
+        git_common_path = (Path.cwd() / git_common_path).resolve()
+
+    # The parent of .git is the main repo root
+    main_repo = git_common_path.parent
+    return main_repo if main_repo.exists() else None
+
+
 def detect_context() -> dict[str, any]:
     """Detect current worktree context and BMAD planning availability."""
 
@@ -117,6 +147,9 @@ def detect_context() -> dict[str, any]:
     git_dir = run_command(["git", "rev-parse", "--git-dir"])
     is_worktree = "/worktrees/" in git_dir
 
+    # Get main repo path if in worktree
+    main_repo_path = get_main_repo_path() if is_worktree else None
+
     if not is_worktree:
         error_exit(
             "Not in a worktree. This script must be run from a feature/release/hotfix worktree.\n"
@@ -130,6 +163,7 @@ def detect_context() -> dict[str, any]:
         "current_dir": current_dir,
         "current_branch": current_branch,
         "is_worktree": is_worktree,
+        "main_repo_path": main_repo_path,
     }
 
 
@@ -138,16 +172,35 @@ def find_bmad_planning(slug: str) -> dict[str, Path] | None:
 
     Searches in order:
     1. planning/<slug>/ (in worktree - planning docs included via rebase)
-    2. ../planning/<slug>/ (fallback for nested worktree layout)
+    2. <main_repo>/planning/<slug>/ (main repo when running from worktree)
+    3. ../planning/<slug>/ (legacy fallback for nested worktree layout)
+
+    The main repo path is resolved from the git worktree configuration,
+    not from filesystem parent directory (which doesn't work for worktrees
+    with naming conventions like repo_feature_timestamp_slug).
     """
-    # Try current directory first (worktree includes planning via rebase)
-    planning_dir = Path("planning") / slug
+    planning_dir = None
 
-    # Fallback to parent directory (nested worktree layout)
-    if not planning_dir.exists():
-        planning_dir = Path("..") / "planning" / slug
+    # Try 1: Current directory (worktree includes planning via rebase)
+    candidate = Path("planning") / slug
+    if candidate.exists():
+        planning_dir = candidate
 
-    if not planning_dir.exists():
+    # Try 2: Main repo path (proper worktree resolution)
+    if planning_dir is None:
+        main_repo = get_main_repo_path()
+        if main_repo:
+            candidate = main_repo / "planning" / slug
+            if candidate.exists():
+                planning_dir = candidate
+
+    # Try 3: Parent directory fallback (legacy nested worktree layout)
+    if planning_dir is None:
+        candidate = Path("..") / "planning" / slug
+        if candidate.exists():
+            planning_dir = candidate
+
+    if planning_dir is None:
         return None
 
     bmad_docs = {

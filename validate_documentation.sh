@@ -40,8 +40,9 @@ fi
 
 # Check 4: Code blocks are closed
 echo "4. Checking code block closure..."
+# Count all ``` markers (both opening like ```python and closing like ```)
+# A balanced document has an even number of markers
 all_start_blocks=$(grep -c '^```' "$TARGET_FILE")
-end_blocks=$(grep -c '^```$' "$TARGET_FILE")
 
 # Code blocks should be pairs (start + end)
 if [ $((all_start_blocks % 2)) -eq 0 ]; then

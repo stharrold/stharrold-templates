@@ -457,7 +457,9 @@ class Auth0MCPIntegration {
       return tokens;
 
     } catch (error) {
-      console.error('❌ Authentication failed:', error.message);
+      // Sanitize error to avoid exposing credential details
+      const safeMessage = error.message?.replace(/token[=:]\s*\S+/gi, 'token=[REDACTED]');
+      console.error('❌ Authentication failed:', safeMessage);
       throw error;
     }
   }
@@ -740,6 +742,8 @@ $ kwalletcli -f kdewallet -e github-token
 
 ### Cross-Platform Python Verification
 
+For programmatic verification across all platforms:
+
 ```python
 import keyring
 
@@ -752,7 +756,10 @@ try:
     else:
         print("✗ Credential not found")
 except Exception as e:
-    print(f"✗ Error accessing credential: {e}")
+    # Sanitize error to avoid exposing credential details
+    import re
+    safe_error = re.sub(r'token[=:]\s*\S+', 'token=[REDACTED]', str(e), flags=re.IGNORECASE)
+    print(f"✗ Error accessing credential: {safe_error}")
 
 # List available backends
 print("Available keyring backends:", keyring.backend.get_all_keyring())
@@ -986,12 +993,14 @@ python3 -c "import keyring; print('Backend:', keyring.get_keyring())"
 
 # Step 2: Test credential retrieval
 python3 -c "
-import keyring
+import keyring, re
 try:
     token = keyring.get_password('mcp-secrets', 'github_token')
     print(f'Token found: {len(token) if token else 0} chars')
 except Exception as e:
-    print(f'Error: {e}')
+    # Sanitize error to avoid exposing credential details
+    safe_err = re.sub(r'token[=:]\s*\S+', 'token=[REDACTED]', str(e), flags=re.I)
+    print(f'Error: {safe_err}')
 "
 
 # Step 3: Verify environment variable expansion
@@ -1051,12 +1060,22 @@ def emergency_credential_handler():
     """Emergency credential access with audit logging."""
     import logging
     import getpass
+    import os
+    from datetime import datetime
+    from pathlib import Path
 
     logging.warning("EMERGENCY CREDENTIAL ACCESS INITIATED")
 
-    # Log emergency access
-    with open("/var/log/mcp-emergency.log", "a") as f:
-        f.write(f"{datetime.now()}: Emergency credential access by {os.getlogin()}\n")
+    # Log emergency access to user-accessible location
+    log_dir = Path.home() / ".local" / "share" / "mcp"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / "emergency.log"
+
+    try:
+        with open(log_file, "a") as f:
+            f.write(f"{datetime.now()}: Emergency credential access by {os.getlogin()}\n")
+    except PermissionError:
+        logging.error(f"Cannot write to emergency log: {log_file}")
 
     # Secure temporary input
     emergency_token = getpass.getpass("Emergency token (hidden): ")
