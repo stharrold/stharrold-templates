@@ -5,6 +5,8 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add scripts to path
 sys.path.insert(
     0,
@@ -168,6 +170,7 @@ class TestSetupAgentdbSymlink:
         # Should be something like "../../main_repo/.claude-state/agentdb.duckdb"
         assert ".." in symlink_target
 
+    @pytest.mark.skipif(os.geteuid() == 0, reason="Root bypasses permission checks")
     def test_returns_false_on_permission_error(self, tmp_path):
         """Should return False and print warning on permission error."""
         # Setup - create read-only worktree state dir
