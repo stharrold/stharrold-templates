@@ -64,6 +64,13 @@ def git_repo_with_remote(tmp_path):
         check=True,
         capture_output=True,
     )
+    # Rename branch to 'main' (may be 'master' depending on git config)
+    subprocess.run(
+        ["git", "branch", "-M", "main"],
+        cwd=local_path,
+        check=True,
+        capture_output=True,
+    )
     subprocess.run(
         ["git", "push", "-u", "origin", "main"],
         cwd=local_path,
