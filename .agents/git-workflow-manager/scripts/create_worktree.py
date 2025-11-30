@@ -11,6 +11,7 @@ files are deprecated in favor of GitHub Issues and specs/*/tasks.md.
 """
 
 import argparse
+import os
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -24,6 +25,49 @@ from worktree_context import compute_worktree_id
 # Constants with documented rationale
 TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"  # Compact ISO8601 for filename/branch safety
 VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow types
+
+
+def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
+    """Create symlink from worktree's agentdb.duckdb to main repo's database.
+
+    This enables all worktrees to share a unified AgentDB, allowing cross-session
+    visibility of workflow state.
+
+    Args:
+        worktree_path: Path to the newly created worktree
+        main_repo_path: Path to the main repository (source of AgentDB)
+
+    Returns:
+        True if symlink created successfully, False otherwise
+    """
+    worktree_state_dir = worktree_path / ".claude-state"
+    main_state_dir = main_repo_path / ".claude-state"
+    main_db_path = main_state_dir / "agentdb.duckdb"
+    worktree_db_path = worktree_state_dir / "agentdb.duckdb"
+
+    try:
+        # Ensure main repo state directory exists
+        main_state_dir.mkdir(parents=True, exist_ok=True)
+
+        # Initialize main repo database if it doesn't exist
+        if not main_db_path.exists():
+            # Touch the file so symlink target exists
+            main_db_path.touch()
+
+        # Skip if symlink already exists (idempotent)
+        if worktree_db_path.exists() or worktree_db_path.is_symlink():
+            return True
+
+        # Create relative symlink for portability
+        # Calculate relative path from worktree_state_dir to main_db_path
+        relative_target = os.path.relpath(main_db_path, worktree_state_dir)
+        worktree_db_path.symlink_to(relative_target)
+
+        return True
+
+    except (OSError, PermissionError) as e:
+        print(f"⚠️  Could not create AgentDB symlink: {e}", file=sys.stderr)
+        return False
 
 
 def create_worktree(workflow_type, slug, base_branch, create_todo=False):
@@ -184,6 +228,12 @@ Created: {created_timestamp}
         worktree_id = compute_worktree_id(worktree_path)
         (state_dir / ".worktree-id").write_text(worktree_id)
         print(f"✓ State directory: {state_dir}")
+
+        # Create symlink for shared AgentDB (repo_root is main repo)
+        if setup_agentdb_symlink(worktree_path, repo_root):
+            print(f"✓ AgentDB symlink: {state_dir / 'agentdb.duckdb'} → main repo")
+        else:
+            print("ℹ️  AgentDB: isolated (symlink creation failed)")
     except (OSError, PermissionError) as e:
         print(f"⚠️  Could not create state directory: {e}", file=sys.stderr)
 
