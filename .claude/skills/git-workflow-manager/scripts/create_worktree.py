@@ -70,6 +70,90 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
         return False
 
 
+def verify_planning_committed(slug: str, repo_root: Path) -> None:
+    """
+    Verify planning documents are committed and pushed before worktree creation.
+
+    This function ensures that BMAD planning documents exist and are properly
+    committed/pushed before a feature worktree can be created. This prevents
+    worktrees that don't contain the planning context.
+
+    Args:
+        slug: Feature slug (e.g., 'auth-system')
+        repo_root: Path to repository root
+
+    Raises:
+        ValueError: If planning directory doesn't exist
+        ValueError: If uncommitted changes detected in planning directory
+        ValueError: If local branch is ahead of remote
+
+    Note:
+        Only called for feature worktrees, not release/hotfix.
+    """
+    planning_dir = repo_root / "planning" / slug
+
+    # Check 1: Planning directory exists
+    if not planning_dir.exists():
+        raise ValueError(
+            f"Planning directory not found: planning/{slug}/\n\n"
+            f"Resolution: Run /1_specify to create planning documents first.\n\n"
+            f"Expected files:\n"
+            f"  - planning/{slug}/requirements.md\n"
+            f"  - planning/{slug}/architecture.md\n"
+            f"  - planning/{slug}/epics.md"
+        )
+
+    # Check 2: No uncommitted changes in planning directory
+    result = subprocess.run(
+        ["git", "status", "--porcelain", f"planning/{slug}/"],
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+    )
+    if result.stdout.strip():
+        raise ValueError(
+            f"Uncommitted changes detected in planning/{slug}/\n\n"
+            f"Changed files:\n{result.stdout}\n"
+            f"Resolution: Commit and push planning documents first:\n"
+            f"  git add planning/{slug}/\n"
+            f"  git commit -m 'docs(planning): add planning for {slug}'\n"
+            f"  git push"
+        )
+
+    # Check 3: Local branch is pushed to remote
+    # First fetch to ensure we have latest remote state
+    subprocess.run(
+        ["git", "fetch", "origin"],
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+    )
+
+    # Get current branch
+    result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+    )
+    current_branch = result.stdout.strip()
+
+    # Check if local is ahead of remote (only if remote branch exists)
+    result = subprocess.run(
+        ["git", "rev-list", "--count", f"origin/{current_branch}..HEAD"],
+        capture_output=True,
+        text=True,
+        cwd=repo_root,
+    )
+    # Only check if remote branch exists (returncode 0)
+    if result.returncode == 0:
+        ahead_count = result.stdout.strip()
+        if ahead_count and int(ahead_count) > 0:
+            raise ValueError(
+                f"Local branch is {ahead_count} commit(s) ahead of remote.\n\n" f"Resolution: Push your changes first:\n" f"  git push origin {current_branch}"
+            )
+
+
 def create_worktree(workflow_type, slug, base_branch, create_todo=False):
     """
     Create a worktree for feature/release/hotfix development.
@@ -115,6 +199,10 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
         print("Available branches:", file=sys.stderr)
         subprocess.run(["git", "branch", "-a"], stderr=subprocess.DEVNULL)
         raise
+
+    # Verify planning documents are committed and pushed (feature worktrees only)
+    if workflow_type == "feature":
+        verify_planning_committed(slug, repo_root)
 
     worktree_path = repo_root.parent / f"{repo_root.name}_{workflow_type}_{timestamp}_{slug}"
 
