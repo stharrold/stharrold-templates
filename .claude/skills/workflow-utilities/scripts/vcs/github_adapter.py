@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """GitHub VCS adapter using gh CLI.
 
 This adapter implements VCS operations for GitHub using the gh command-line tool.
@@ -56,7 +58,7 @@ class GitHubAdapter(BaseVCSAdapter):
             raise RuntimeError(f"'{GITHUB_CLI}' CLI not found. Install from https://cli.github.com/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to get GitHub username. " f"Make sure you're authenticated: gh auth login\n" f"Error: {error_msg}")
+            raise RuntimeError(f"Failed to get GitHub username. Make sure you're authenticated: gh auth login\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while getting GitHub username")
 
@@ -90,7 +92,7 @@ class GitHubAdapter(BaseVCSAdapter):
             raise RuntimeError(f"'{GITHUB_CLI}' CLI not found. Install from https://cli.github.com/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to create GitHub pull request.\n" f"Error: {error_msg}")
+            raise RuntimeError(f"Failed to create GitHub pull request.\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while creating GitHub pull request")
 
@@ -145,7 +147,7 @@ class GitHubAdapter(BaseVCSAdapter):
             raise RuntimeError(f"'{GITHUB_CLI}' CLI not found. Install from https://cli.github.com/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to fetch PR comments.\n" f"Error: {error_msg}")
+            raise RuntimeError(f"Failed to fetch PR comments.\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while fetching PR comments")
         except (json.JSONDecodeError, KeyError) as e:
@@ -179,7 +181,7 @@ class GitHubAdapter(BaseVCSAdapter):
             raise RuntimeError(f"'{GITHUB_CLI}' CLI not found. Install from https://cli.github.com/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to update PR.\n" f"Error: {error_msg}")
+            raise RuntimeError(f"Failed to update PR.\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while updating PR")
 
@@ -212,7 +214,7 @@ class GitHubAdapter(BaseVCSAdapter):
             raise RuntimeError(f"'{GITHUB_CLI}' CLI not found. Install from https://cli.github.com/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to fetch PR status.\n" f"Error: {error_msg}")
+            raise RuntimeError(f"Failed to fetch PR status.\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while fetching PR status")
         except (json.JSONDecodeError, KeyError) as e:

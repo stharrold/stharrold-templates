@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Manage context checkpoints in AgentDB.
 
 Usage:
@@ -34,8 +36,8 @@ def store_checkpoint(todo_file: str) -> None:
 
     sql = f"""
     INSERT INTO workflow_records (object_id, object_type, object_state, object_metadata)
-    VALUES ('{checkpoint_record['object_id']}', '{checkpoint_record['object_type']}',
-            '{checkpoint_record['object_state']}', '{checkpoint_record['object_metadata']}'::JSON);
+    VALUES ('{checkpoint_record["object_id"]}', '{checkpoint_record["object_type"]}',
+            '{checkpoint_record["object_state"]}', '{checkpoint_record["object_metadata"]}'::JSON);
     """
 
     print("SQL (to be executed via AgentDB):")

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """MIT Agent Synchronization Pattern - Integration Layer (Phase 3)
 
 Provides non-invasive hooks for existing agents to trigger sync engine with
@@ -334,7 +336,7 @@ class ComplianceWrapper:
         phi_justification = None
         if phi_detected:
             phi_justification = PHIDetector.extract_justification(context)
-            logger.warning(f"PHI detected in sync: agent={agent_id}, action={action}, " f"flow_token={flow_token}")
+            logger.warning(f"PHI detected in sync: agent={agent_id}, action={action}, flow_token={flow_token}")
             logger.info(f"PHI justification: {phi_justification}")
 
         # Add PHI metadata to context for audit trail
@@ -351,7 +353,7 @@ class ComplianceWrapper:
 
             # Additional compliance check: PHI without explicit justification
             if phi_detected and not has_explicit_justification:
-                logger.error(f"COMPLIANCE VIOLATION: PHI detected but no explicit justification provided! " f"agent={agent_id}, action={action}, flow_token={flow_token}")
+                logger.error(f"COMPLIANCE VIOLATION: PHI detected but no explicit justification provided! agent={agent_id}, action={action}, flow_token={flow_token}")
 
             return execution_ids
 
@@ -530,7 +532,7 @@ async def trigger_sync_completion(
             agent_id=agent_id, action=action, flow_token=flow_token, state_snapshot=state_snapshot, context=context
         )
 
-        logger.info(f"Sync triggered: agent={agent_id}, action={action}, " f"flow_token={flow_token}, executions={len(execution_ids)}")
+        logger.info(f"Sync triggered: agent={agent_id}, action={action}, flow_token={flow_token}, executions={len(execution_ids)}")
 
         # TODO (Phase 4): Execute target actions
         # For now, just log them

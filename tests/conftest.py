@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 # conftest.py - Shared pytest fixtures for stharrold-templates
 """Shared pytest fixtures and configuration."""
 

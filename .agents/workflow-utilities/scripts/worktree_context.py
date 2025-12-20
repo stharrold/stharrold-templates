@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Worktree-aware context detection and state management.
 
 This module provides utilities for detecting whether code is running in a git

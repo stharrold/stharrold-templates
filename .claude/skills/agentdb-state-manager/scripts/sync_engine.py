@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """MIT Agent Synchronization Pattern - Core Engine
 
 Implements declarative synchronization coordination with pattern matching,
@@ -462,9 +464,7 @@ class SynchronizationEngine:
         # For now, just record the execution
 
         logger.info(
-            f"Sync recorded: {sync['trigger_agent_id']}.{sync['trigger_action']} "
-            f"→ {sync['target_agent_id']}.{sync['target_action']} "
-            f"(execution_id={execution_id})"
+            f"Sync recorded: {sync['trigger_agent_id']}.{sync['trigger_action']} → {sync['target_agent_id']}.{sync['target_action']} (execution_id={execution_id})"
         )
 
         return execution_id
@@ -502,7 +502,7 @@ class SynchronizationEngine:
         # Find matching synchronization rules
         matching_syncs = self._find_matching_syncs(agent_id, action, state_snapshot)
 
-        logger.info(f"Agent action: {agent_id}.{action} (flow_token={flow_token}) " f"matched {len(matching_syncs)} sync rules")
+        logger.info(f"Agent action: {agent_id}.{action} (flow_token={flow_token}) matched {len(matching_syncs)} sync rules")
 
         for sync in matching_syncs:
             # Compute provenance hash for idempotency
@@ -512,7 +512,7 @@ class SynchronizationEngine:
             existing = self.conn.execute("SELECT execution_id FROM sync_executions WHERE provenance_hash = ?", [prov_hash]).fetchone()
 
             if existing:
-                logger.info(f"Idempotency: Sync {sync['sync_id']} already executed " f"(hash={prov_hash[:8]}...)")
+                logger.info(f"Idempotency: Sync {sync['sync_id']} already executed (hash={prov_hash[:8]}...)")
                 continue
 
             # Execute sync (trigger target agent)
