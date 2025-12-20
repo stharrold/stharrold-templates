@@ -30,7 +30,10 @@ VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow ty
 
 
 def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
-    """Create symlink from worktree's agentdb.duckdb to main repo's database.
+    """Create link from worktree's agentdb.duckdb to main repo's database.
+
+    Uses symlinks on Unix/macOS. On Windows, attempts symlink first (requires
+    Developer Mode or admin), then falls back to hard link (works on same volume).
 
     This enables all worktrees to share a unified AgentDB, allowing cross-session
     visibility of workflow state.
@@ -40,7 +43,7 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
         main_repo_path: Path to the main repository (source of AgentDB)
 
     Returns:
-        True if symlink created successfully, False otherwise
+        True if link created successfully, False otherwise
     """
     worktree_state_dir = worktree_path / ".claude-state"
     main_state_dir = main_repo_path / ".claude-state"
@@ -53,22 +56,43 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
 
         # Initialize main repo database if it doesn't exist
         if not main_db_path.exists():
-            # Touch the file so symlink target exists
+            # Touch the file so link target exists
             main_db_path.touch()
 
-        # Skip if symlink already exists (idempotent)
+        # Skip if link already exists (idempotent)
         if worktree_db_path.exists() or worktree_db_path.is_symlink():
             return True
 
-        # Create relative symlink for portability
-        # Calculate relative path from worktree_state_dir to main_db_path
-        relative_target = os.path.relpath(main_db_path, worktree_state_dir)
-        worktree_db_path.symlink_to(relative_target)
-
-        return True
+        # Try symlink first (works on all platforms if permissions allow)
+        try:
+            relative_target = os.path.relpath(main_db_path, worktree_state_dir)
+            worktree_db_path.symlink_to(relative_target)
+            return True
+        except (OSError, PermissionError) as symlink_error:
+            # On Windows, symlink may fail without Developer Mode or admin
+            if sys.platform == "win32":
+                # Fall back to hard link (works on same volume without special perms)
+                try:
+                    os.link(main_db_path, worktree_db_path)
+                    print(
+                        "ℹ️  Using hard link for AgentDB (symlink requires Developer Mode)",
+                        file=sys.stderr,
+                    )
+                    return True
+                except OSError as hardlink_error:
+                    # Hard link also failed (likely cross-volume)
+                    print(
+                        f"⚠️  Could not create AgentDB link: symlink failed ({symlink_error}), hard link failed ({hardlink_error})",
+                        file=sys.stderr,
+                    )
+                    return False
+            else:
+                # On Unix, symlink should work - if it fails, report and return False
+                print(f"⚠️  Could not create AgentDB symlink: {symlink_error}", file=sys.stderr)
+                return False
 
     except (OSError, PermissionError) as e:
-        print(f"⚠️  Could not create AgentDB symlink: {e}", file=sys.stderr)
+        print(f"⚠️  Could not create AgentDB link: {e}", file=sys.stderr)
         return False
 
 

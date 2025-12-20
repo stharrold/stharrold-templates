@@ -63,10 +63,10 @@ def get_worktree_path() -> str | None:
 
 
 def get_database_path() -> Path:
-    """Get path to AgentDB database.
+    """Get path to AgentDB database, resolving symlinks/hard links.
 
     Returns:
-        Path to agentdb.duckdb in .claude-state/
+        Resolved path to agentdb.duckdb in .claude-state/
     """
     # Try to find .claude-state in current dir or parent
     cwd = Path.cwd()
@@ -74,12 +74,15 @@ def get_database_path() -> Path:
     # Check current directory
     state_dir = cwd / ".claude-state"
     if state_dir.exists():
-        return state_dir / "agentdb.duckdb"
+        db_path = state_dir / "agentdb.duckdb"
+        # Resolve to follow symlinks/hard links when file exists
+        return db_path.resolve() if db_path.exists() else db_path
 
     # Check parent (if in worktree)
     parent_state = cwd.parent / ".claude-state"
     if parent_state.exists():
-        return parent_state / "agentdb.duckdb"
+        db_path = parent_state / "agentdb.duckdb"
+        return db_path.resolve() if db_path.exists() else db_path
 
     # Default to current directory's .claude-state
     state_dir.mkdir(parents=True, exist_ok=True)
