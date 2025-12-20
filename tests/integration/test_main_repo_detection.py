@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Integration test for main repository detection.
 
 Tests worktree detection when running in main repository (not a worktree).

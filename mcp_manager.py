@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """
 Multi-platform MCP server management tool.
 Manages MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.

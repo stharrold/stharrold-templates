@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Delete release branch after successful release and back-merge.
 
 This script implements Step 5.7 of Phase 5 (Release Workflow) as documented
@@ -46,7 +48,7 @@ def validate_version_format(version):
         ValueError: If version doesn't match vX.Y.Z pattern
     """
     if not re.match(VERSION_PATTERN, version):
-        raise ValueError(f"Invalid version format '{version}'. " f"Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)")
+        raise ValueError(f"Invalid version format '{version}'. Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)")
 
 
 def verify_branch_exists(branch_name):
@@ -62,7 +64,7 @@ def verify_branch_exists(branch_name):
     try:
         subprocess.run(["git", "rev-parse", "--verify", branch_name], capture_output=True, check=True)
     except subprocess.CalledProcessError:
-        raise ValueError(f"Branch '{branch_name}' does not exist. " f"Use 'git branch -a' to list available branches.")
+        raise ValueError(f"Branch '{branch_name}' does not exist. Use 'git branch -a' to list available branches.")
 
 
 def verify_tag_exists(version):
@@ -110,7 +112,7 @@ def verify_tag_on_branch(version, branch_name):
         branches = result.stdout.strip()
 
         if branch_name not in branches:
-            raise ValueError(f"Tag '{version}' not on {branch_name}. Release merge incomplete. " f"Ensure release PR was merged to {branch_name}.")
+            raise ValueError(f"Tag '{version}' not on {branch_name}. Release merge incomplete. Ensure release PR was merged to {branch_name}.")
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to verify tag on branch: {e.stderr.strip()}") from e
@@ -163,9 +165,7 @@ def delete_local_branch(branch_name):
         error_msg = e.stderr.decode() if e.stderr else "Unknown error"
 
         if "not fully merged" in error_msg:
-            raise RuntimeError(
-                f"Branch '{branch_name}' is not fully merged. " f"This indicates release workflow is incomplete. " f"Safety check failed - branch not deleted."
-            )
+            raise RuntimeError(f"Branch '{branch_name}' is not fully merged. This indicates release workflow is incomplete. Safety check failed - branch not deleted.")
         else:
             raise RuntimeError(f"Failed to delete local branch: {error_msg}") from e
 

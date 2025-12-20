@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Update existing CLAUDE.md files to include new children references.
 
 This script updates skill CLAUDE.md files to include references to newly
@@ -98,7 +100,7 @@ def main():
             if update_skill_claude_md(skill, dry_run=args.dry_run):
                 updated += 1
 
-    print(f'\n{"[DRY-RUN] " if args.dry_run else ""}Updated {updated} CLAUDE.md files')
+    print(f"\n{'[DRY-RUN] ' if args.dry_run else ''}Updated {updated} CLAUDE.md files")
 
 
 if __name__ == "__main__":

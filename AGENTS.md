@@ -63,9 +63,10 @@ uv run pre-commit run --all-files
 Hooks run automatically on commit:
 - **sync-ai-config** - Syncs CLAUDE.md → AGENTS.md, .github/copilot-instructions.md, .agents/ (runs first)
 - trailing whitespace, YAML/JSON validation
-- ruff linting/formatting
+- ruff linting/formatting (v0.14.8)
 - CLAUDE.md frontmatter check
 - skill structure validation
+- **SPDX license headers** - Validates Apache 2.0 headers on all Python files
 
 ## Quality Gates (5 gates, all must pass before PR)
 
@@ -95,6 +96,7 @@ Run specific test categories:
 ```bash
 uv run pytest tests/skills/ -v          # Skill tests only
 uv run pytest tests/contract/ -v        # Contract tests only
+uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (default in quality gates)
 ```
 
 ## PR Workflow (Enforced Sequence)
@@ -409,6 +411,21 @@ azure_devops:
 - **NEVER proactively create documentation files** unless explicitly requested
 - **Follow PR workflow sequence**: finish-feature → sync-agents → start-develop
 - **Quality gates must pass** before creating any PR
+- **SPDX headers required**: All Python files must have Apache 2.0 license headers
+
+## SPDX License Headers
+
+All Python files require SPDX headers for Apache 2.0 compliance:
+
+```python
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
+```
+
+**Validation**: `uv run python .claude/skills/workflow-utilities/scripts/check_spdx_headers.py`
+
+**Note**: `.agents/` is excluded from SPDX checking (read-only mirror synced from `.claude/skills/`).
 
 ## Worktree State Isolation
 
@@ -446,6 +463,7 @@ repo_feature_abc/            # Feature worktree
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
 | Branch divergence | See [Preventing Branch Divergence](#preventing-branch-divergence) section |
+| DuckDB not found | Run `uv sync` to install duckdb Python package (CLI not required) |
 
 ## Quick Debugging
 

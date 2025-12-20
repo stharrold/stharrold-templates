@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Contract tests for cleanup_orphaned_state() function.
 
 Tests the contract specified in specs/006-make-the-entire/contracts/worktree_context.md

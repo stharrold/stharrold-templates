@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Interactive SpecKit tool - creates spec.md and plan.md in worktree.
 
 This script runs interactively in a feature/release/hotfix worktree and:
@@ -314,7 +316,6 @@ def interactive_qa_with_bmad(bmad_docs: dict[str, Path], slug: str) -> dict[str,
     print("SpecKit Interactive Specification Tool")
     print("=" * 70)
     print(f"\n[OK] Detected BMAD planning context: {bmad_docs['planning_dir']}/")
-
 
     # Display BMAD summary
     print("\nBMAD Summary:")
@@ -713,7 +714,7 @@ When implementing this feature:
     (specs_dir / "CLAUDE.md").write_text(claude_md)
 
     # Create README.md
-    readme = f"""# Specifications: {slug.replace('-', ' ').title()}
+    readme = f"""# Specifications: {slug.replace("-", " ").title()}
 
 ## Overview
 
@@ -741,9 +742,9 @@ SpecKit Interactive Tool - `.claude/skills/speckit-author/scripts/create_specifi
     archived_dir = specs_dir / "ARCHIVED"
     archived_dir.mkdir(exist_ok=True)
 
-    (archived_dir / "CLAUDE.md").write_text(f"# Claude Code Context: specs/{slug}/ARCHIVED\n\n" "Archived specifications and deprecated files.\n")
+    (archived_dir / "CLAUDE.md").write_text(f"# Claude Code Context: specs/{slug}/ARCHIVED\n\nArchived specifications and deprecated files.\n")
 
-    (archived_dir / "README.md").write_text(f"# Archived: specs/{slug}\n\n" "Deprecated specification files are stored here.\n")
+    (archived_dir / "README.md").write_text(f"# Archived: specs/{slug}\n\nDeprecated specification files are stored here.\n")
 
     return specs_dir
 
@@ -789,7 +790,7 @@ def main():
     parser.add_argument(
         "--config",
         type=Path,
-        help="Path to YAML/JSON config file for non-interactive mode. " "Config should have section: with_bmad (if BMAD planning exists) or without_bmad (if not).",
+        help="Path to YAML/JSON config file for non-interactive mode. Config should have section: with_bmad (if BMAD planning exists) or without_bmad (if not).",
     )
 
     args = parser.parse_args()

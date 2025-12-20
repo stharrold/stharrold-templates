@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Record workflow transitions in AgentDB.
 
 This script records synchronization events in the AgentDB database for
@@ -61,10 +63,10 @@ def get_worktree_path() -> str | None:
 
 
 def get_database_path() -> Path:
-    """Get path to AgentDB database.
+    """Get path to AgentDB database, resolving symlinks/hard links.
 
     Returns:
-        Path to agentdb.duckdb in .claude-state/
+        Resolved path to agentdb.duckdb in .claude-state/
     """
     # Try to find .claude-state in current dir or parent
     cwd = Path.cwd()
@@ -72,12 +74,15 @@ def get_database_path() -> Path:
     # Check current directory
     state_dir = cwd / ".claude-state"
     if state_dir.exists():
-        return state_dir / "agentdb.duckdb"
+        db_path = state_dir / "agentdb.duckdb"
+        # Resolve to follow symlinks/hard links when file exists
+        return db_path.resolve() if db_path.exists() else db_path
 
     # Check parent (if in worktree)
     parent_state = cwd.parent / ".claude-state"
     if parent_state.exists():
-        return parent_state / "agentdb.duckdb"
+        db_path = parent_state / "agentdb.duckdb"
+        return db_path.resolve() if db_path.exists() else db_path
 
     # Default to current directory's .claude-state
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -147,40 +152,45 @@ def record_sync(sync_type: str, pattern: str, source: str = "", target: str = ""
     # Prepare metadata JSON
     metadata_json = json.dumps(metadata) if metadata else "{}"
 
-    # Build SQL
-    sql = f"""
+    # Build parameterized SQL to prevent SQL injection
+    sql = """
     INSERT INTO agent_synchronizations (
         sync_id, agent_id, worktree_path, sync_type,
         source_location, target_location, pattern, status,
         created_at, completed_at, created_by, metadata
-    ) VALUES (
-        '{sync_id}',
-        'claude-code',
-        {f"'{worktree}'" if worktree else 'NULL'},
-        '{sync_type}',
-        '{source}',
-        '{target}',
-        '{pattern}',
-        'completed',
-        '{timestamp}',
-        '{timestamp}',
-        'claude-code',
-        '{metadata_json}'
-    );
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
 
-    # Execute using DuckDB CLI or Python
+    # Parameters tuple - use None for NULL values
+    params = (
+        sync_id,
+        "claude-code",
+        worktree,  # Will be NULL if None
+        sync_type,
+        source,
+        target,
+        pattern,
+        "completed",
+        timestamp,
+        timestamp,
+        "claude-code",
+        metadata_json,
+    )
+
+    # Execute using DuckDB Python module
     try:
         import duckdb
 
         conn = duckdb.connect(str(db_path))
-        conn.execute(sql)
+        conn.execute(sql, params)
         conn.close()
     except ImportError:
-        # Fallback to CLI if duckdb not available
-        result = subprocess.run(["duckdb", str(db_path), "-c", sql], capture_output=True, text=True)
-        if result.returncode != 0:
-            raise RuntimeError(f"Database error: {result.stderr}")
+        # DuckDB not installed - provide clear error message
+        print(
+            "Error: DuckDB Python module not installed.\nInstall with: uv add duckdb  OR  uv sync\n\nAgentDB state tracking requires the duckdb package.",
+            file=sys.stderr,
+        )
+        raise RuntimeError("DuckDB not available. Run 'uv sync' to install dependencies.")
 
     return sync_id
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Query current workflow phase from AgentDB.
 
 This script queries the AgentDB database to determine the current workflow
@@ -53,22 +55,25 @@ def get_worktree_path() -> str | None:
 
 
 def get_database_path() -> Path | None:
-    """Get path to AgentDB database.
+    """Get path to AgentDB database, resolving symlinks/hard links.
 
     Returns:
-        Path to agentdb.duckdb or None if not found
+        Resolved path to agentdb.duckdb or None if not found
     """
     cwd = Path.cwd()
 
     # Check current directory
     state_dir = cwd / ".claude-state"
-    if (state_dir / "agentdb.duckdb").exists():
-        return state_dir / "agentdb.duckdb"
+    db_path = state_dir / "agentdb.duckdb"
+    if db_path.exists():
+        # Resolve to follow symlinks and get canonical path
+        return db_path.resolve()
 
     # Check parent (if in worktree)
     parent_state = cwd.parent / ".claude-state"
-    if (parent_state / "agentdb.duckdb").exists():
-        return parent_state / "agentdb.duckdb"
+    parent_db_path = parent_state / "agentdb.duckdb"
+    if parent_db_path.exists():
+        return parent_db_path.resolve()
 
     return None
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """
 Release Workflow Script
 
@@ -46,9 +48,18 @@ def get_current_branch() -> str:
 
 
 def get_contrib_branch() -> str:
-    """Get the contrib branch name (contrib/<username>)."""
+    """Get the contrib branch name (contrib/<username>).
+
+    Returns:
+        The contrib branch name (e.g., 'contrib/username')
+
+    Raises:
+        RuntimeError: If GitHub CLI fails to return a username
+    """
     result = run_cmd(["gh", "api", "user", "-q", ".login"], check=False)
-    username = result.stdout.strip() or "stharrold"
+    username = result.stdout.strip()
+    if not username:
+        raise RuntimeError("Failed to get GitHub username. Ensure you are authenticated:\n  gh auth login\n\nOr specify the contrib branch explicitly.")
     return f"contrib/{username}"
 
 
