@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Generate work-items from unresolved PR conversations.
 
 This script fetches unresolved PR review conversations and automatically creates
@@ -215,7 +217,7 @@ class PRFeedbackWorkItemGenerator:
             threads = json.loads(result)
 
         except FileNotFoundError:
-            raise RuntimeError("'az' CLI not found. " "Install from https://learn.microsoft.com/cli/azure/")
+            raise RuntimeError("'az' CLI not found. Install from https://learn.microsoft.com/cli/azure/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(f"Failed to fetch Azure DevOps PR threads.\nError: {error_msg}")
@@ -436,7 +438,7 @@ class PRFeedbackWorkItemGenerator:
             return (work_item_url, slug)
 
         except FileNotFoundError:
-            raise RuntimeError("'az' CLI not found. " "Install from https://learn.microsoft.com/cli/azure/")
+            raise RuntimeError("'az' CLI not found. Install from https://learn.microsoft.com/cli/azure/")
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else str(e)
             raise RuntimeError(f"Failed to create Azure DevOps work-item.\nError: {error_msg}")

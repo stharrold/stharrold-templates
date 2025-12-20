@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Create feature/release/hotfix worktree with optional TODO file.
 
 Constants:
@@ -28,7 +30,10 @@ VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow ty
 
 
 def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
-    """Create symlink from worktree's agentdb.duckdb to main repo's database.
+    """Create link from worktree's agentdb.duckdb to main repo's database.
+
+    Uses symlinks on Unix/macOS. On Windows, attempts symlink first (requires
+    Developer Mode or admin), then falls back to hard link (works on same volume).
 
     This enables all worktrees to share a unified AgentDB, allowing cross-session
     visibility of workflow state.
@@ -38,7 +43,7 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
         main_repo_path: Path to the main repository (source of AgentDB)
 
     Returns:
-        True if symlink created successfully, False otherwise
+        True if link created successfully, False otherwise
     """
     worktree_state_dir = worktree_path / ".claude-state"
     main_state_dir = main_repo_path / ".claude-state"
@@ -51,22 +56,43 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
 
         # Initialize main repo database if it doesn't exist
         if not main_db_path.exists():
-            # Touch the file so symlink target exists
+            # Touch the file so link target exists
             main_db_path.touch()
 
-        # Skip if symlink already exists (idempotent)
+        # Skip if link already exists (idempotent)
         if worktree_db_path.exists() or worktree_db_path.is_symlink():
             return True
 
-        # Create relative symlink for portability
-        # Calculate relative path from worktree_state_dir to main_db_path
-        relative_target = os.path.relpath(main_db_path, worktree_state_dir)
-        worktree_db_path.symlink_to(relative_target)
-
-        return True
+        # Try symlink first (works on all platforms if permissions allow)
+        try:
+            relative_target = os.path.relpath(main_db_path, worktree_state_dir)
+            worktree_db_path.symlink_to(relative_target)
+            return True
+        except (OSError, PermissionError) as symlink_error:
+            # On Windows, symlink may fail without Developer Mode or admin
+            if sys.platform == "win32":
+                # Fall back to hard link (works on same volume without special perms)
+                try:
+                    os.link(main_db_path, worktree_db_path)
+                    print(
+                        "ℹ️  Using hard link for AgentDB (symlink requires Developer Mode)",
+                        file=sys.stderr,
+                    )
+                    return True
+                except OSError as hardlink_error:
+                    # Hard link also failed (likely cross-volume)
+                    print(
+                        f"⚠️  Could not create AgentDB link: symlink failed ({symlink_error}), hard link failed ({hardlink_error})",
+                        file=sys.stderr,
+                    )
+                    return False
+            else:
+                # On Unix, symlink should work - if it fails, report and return False
+                print(f"⚠️  Could not create AgentDB symlink: {symlink_error}", file=sys.stderr)
+                return False
 
     except (OSError, PermissionError) as e:
-        print(f"⚠️  Could not create AgentDB symlink: {e}", file=sys.stderr)
+        print(f"⚠️  Could not create AgentDB link: {e}", file=sys.stderr)
         return False
 
 
@@ -149,9 +175,7 @@ def verify_planning_committed(slug: str, repo_root: Path) -> None:
     if result.returncode == 0:
         ahead_count = result.stdout.strip()
         if ahead_count and int(ahead_count) > 0:
-            raise ValueError(
-                f"Local branch is {ahead_count} commit(s) ahead of remote.\n\n" f"Resolution: Push your changes first:\n" f"  git push origin {current_branch}"
-            )
+            raise ValueError(f"Local branch is {ahead_count} commit(s) ahead of remote.\n\nResolution: Push your changes first:\n  git push origin {current_branch}")
 
 
 def create_worktree(workflow_type, slug, base_branch, create_todo=False):
@@ -174,7 +198,7 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
     """
     # Input validation
     if workflow_type not in VALID_WORKFLOW_TYPES:
-        raise ValueError(f"Invalid workflow_type '{workflow_type}'. " f"Must be one of: {', '.join(VALID_WORKFLOW_TYPES)}")
+        raise ValueError(f"Invalid workflow_type '{workflow_type}'. Must be one of: {', '.join(VALID_WORKFLOW_TYPES)}")
 
     if not slug or not slug.replace("-", "").replace("_", "").isalnum():
         raise ValueError(f"Invalid slug '{slug}'. Must contain only letters, numbers, hyphens, and underscores.")
@@ -208,7 +232,7 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
 
     # Check if worktree path already exists
     if worktree_path.exists():
-        raise FileExistsError(f"Worktree path already exists: {worktree_path}\n" f"Remove it first with: git worktree remove {worktree_path}")
+        raise FileExistsError(f"Worktree path already exists: {worktree_path}\nRemove it first with: git worktree remove {worktree_path}")
 
     # Create worktree
     try:
@@ -236,7 +260,7 @@ def create_worktree(workflow_type, slug, base_branch, create_todo=False):
 
         # Check if TODO file already exists
         if todo_path.exists():
-            print(f"WARNING: TODO file already exists: {todo_filename}\n" f"This worktree may have been created before.", file=sys.stderr)
+            print(f"WARNING: TODO file already exists: {todo_filename}\nThis worktree may have been created before.", file=sys.stderr)
 
         # Copy template and customize
         template_path = repo_root / ".claude" / "skills" / "workflow-orchestrator" / "templates" / "TODO_template.md"

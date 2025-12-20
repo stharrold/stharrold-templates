@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Integration tests for git-workflow-manager create_worktree.py.
 
 These tests verify the full workflow of worktree creation with

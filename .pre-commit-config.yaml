@@ -18,7 +18,7 @@ repos:
 
   # Ruff for Python linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.14.8
     hooks:
       - id: ruff
         args: [--fix]
@@ -51,4 +51,12 @@ repos:
         entry: python .claude/skills/workflow-utilities/scripts/check_skill_structure.py
         language: python
         files: ^\.claude/skills/
+        pass_filenames: false
+
+      # Check SPDX license headers
+      - id: spdx-headers
+        name: Check SPDX license headers
+        entry: python .claude/skills/workflow-utilities/scripts/check_spdx_headers.py
+        language: python
+        types: [python]
         pass_filenames: false

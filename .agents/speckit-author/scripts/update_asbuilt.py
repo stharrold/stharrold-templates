@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Update BMAD planning with as-built implementation details.
 
 This script runs after a feature PR is merged to contrib branch. It:
@@ -219,7 +221,7 @@ def gather_as_built_info(planning_dir: Path, specs_dir: Path, todo_file: Path | 
     print("Lessons Learned")
     print("=" * 70)
 
-    info["lessons_learned"] = ask_multiline("Key lessons learned from this implementation?\n" "(What went well? What would you do differently?)")
+    info["lessons_learned"] = ask_multiline("Key lessons learned from this implementation?\n(What went well? What would you do differently?)")
 
     return info
 

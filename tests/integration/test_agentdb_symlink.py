@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Integration test for shared AgentDB via symlink.
 
 Tests that worktree AgentDB symlinks work correctly with the actual

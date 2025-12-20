@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Sync TODO_*.md files to AgentDB.
 
 Parses YAML frontmatter from TODO files and converts to immutable append-only
@@ -175,10 +177,10 @@ def sync_to_agentdb(records: list[dict[str, Any]], session_id: str) -> bool:
         sql = f"""
         INSERT INTO workflow_records (object_id, object_type, object_state, object_metadata)
         VALUES (
-            '{record['object_id']}',
-            '{record['object_type']}',
-            '{record['object_state']}',
-            '{record['object_metadata']}'::JSON
+            '{record["object_id"]}',
+            '{record["object_type"]}',
+            '{record["object_state"]}',
+            '{record["object_metadata"]}'::JSON
         );
         """
         print(sql.strip())

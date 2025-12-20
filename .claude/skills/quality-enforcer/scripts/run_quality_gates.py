@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Run all quality gates and report results."""
 
 import shutil
@@ -34,10 +36,18 @@ def get_worktree_info() -> dict:
 
 
 def run_tests():
-    """Run all tests and verify they pass."""
+    """Run all tests and verify they pass.
+
+    Excludes integration and benchmark tests which require external services
+    or are designed for performance measurement rather than correctness.
+    """
     print("Running tests...")
     prefix = get_command_prefix()
-    result = subprocess.run(prefix + ["pytest", "-v"], capture_output=True, text=True)
+    result = subprocess.run(
+        prefix + ["pytest", "-v", "-m", "not integration and not benchmark"],
+        capture_output=True,
+        text=True,
+    )
 
     passed = result.returncode == 0
 
@@ -269,9 +279,9 @@ def run_all_quality_gates(coverage_threshold=80):
                 context={},
             )
         )
-    except Exception:
-        # Graceful degradation: don't fail if sync unavailable
-        pass
+    except Exception as e:
+        # Graceful degradation: don't fail if sync unavailable, but log for debugging
+        print(f"[DEBUG] AgentDB sync skipped: {e}", file=sys.stderr)
 
     return all_passed, results
 

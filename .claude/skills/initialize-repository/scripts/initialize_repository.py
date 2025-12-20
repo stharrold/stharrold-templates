@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Initialize a new repository with the workflow system from a source repository.
 
 This meta-skill (Phase 0) bootstraps new repositories by copying the workflow
@@ -717,7 +719,7 @@ pythonpath = ["src"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py{config.python_version.replace('.', '')}"
+target-version = "py{config.python_version.replace(".", "")}"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W"]

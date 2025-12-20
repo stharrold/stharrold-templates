@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Cleanup feature worktree and optionally archive TODO.
 
 This script ensures proper cleanup: (optional) Archive TODO → Delete worktree → Delete branches.
@@ -54,7 +56,7 @@ def find_todo_file(slug: str) -> Path:
     matches = glob.glob(pattern)
 
     if not matches:
-        raise FileNotFoundError(f"No TODO file found for slug '{slug}'\n" f"Expected pattern: TODO_feature_*_{slug}.md\n" f"Searched in: {repo_root}")
+        raise FileNotFoundError(f"No TODO file found for slug '{slug}'\nExpected pattern: TODO_feature_*_{slug}.md\nSearched in: {repo_root}")
 
     if len(matches) > 1:
         raise ValueError(f"Multiple TODO files found for slug '{slug}':\n" + "\n".join(f"  - {m}" for m in matches))
@@ -106,7 +108,7 @@ def find_branch(slug: str) -> str:
     branches = [b.strip().lstrip("* ") for b in result.stdout.strip().split("\n") if b.strip()]
 
     if not branches:
-        raise ValueError(f"No branch found for slug '{slug}'\n" f"Expected pattern: feature/*_{slug}")
+        raise ValueError(f"No branch found for slug '{slug}'\nExpected pattern: feature/*_{slug}")
 
     if len(branches) > 1:
         raise ValueError(f"Multiple branches found for slug '{slug}':\n" + "\n".join(f"  - {b}" for b in branches))

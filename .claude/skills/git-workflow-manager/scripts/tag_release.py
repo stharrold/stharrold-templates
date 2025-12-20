@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Create annotated tag on main branch after release merge.
 
 This script implements Step 5.5 of Phase 5 (Release Workflow) as documented
@@ -42,7 +44,7 @@ def validate_version_format(version):
         ValueError: If version doesn't match vX.Y.Z pattern
     """
     if not re.match(VERSION_PATTERN, version):
-        raise ValueError(f"Invalid version format '{version}'. " f"Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)")
+        raise ValueError(f"Invalid version format '{version}'. Must match pattern vX.Y.Z (e.g., v1.1.0, v2.0.0)")
 
 
 def verify_branch_exists(branch_name):
@@ -58,7 +60,7 @@ def verify_branch_exists(branch_name):
     try:
         subprocess.run(["git", "rev-parse", "--verify", branch_name], capture_output=True, check=True)
     except subprocess.CalledProcessError:
-        raise ValueError(f"Branch '{branch_name}' does not exist. " f"Use 'git branch -a' to list available branches.")
+        raise ValueError(f"Branch '{branch_name}' does not exist. Use 'git branch -a' to list available branches.")
 
 
 def verify_tag_not_exists(version):
@@ -76,7 +78,7 @@ def verify_tag_not_exists(version):
         result = subprocess.run(["git", "tag", "-l", version], capture_output=True, text=True, check=True)
 
         if result.stdout.strip():
-            raise ValueError(f"Tag '{version}' already exists locally. " f"Use 'git tag -l' to list existing tags.")
+            raise ValueError(f"Tag '{version}' already exists locally. Use 'git tag -l' to list existing tags.")
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to check local git tags: {e.stderr.strip()}") from e
@@ -86,7 +88,7 @@ def verify_tag_not_exists(version):
         result = subprocess.run(["git", "ls-remote", "--tags", "origin", version], capture_output=True, text=True, check=True)
 
         if result.stdout.strip():
-            raise ValueError(f"Tag '{version}' already exists on remote. " f"Use 'git ls-remote --tags origin' to list remote tags.")
+            raise ValueError(f"Tag '{version}' already exists on remote. Use 'git ls-remote --tags origin' to list remote tags.")
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to check remote git tags: {e.stderr.strip()}") from e
@@ -142,7 +144,7 @@ def verify_branch_up_to_date(branch_name):
         behind_count = int(result.stdout.strip())
 
         if behind_count > 0:
-            raise RuntimeError(f"Branch '{branch_name}' is {behind_count} commit(s) behind origin/{branch_name}. " f"Please pull latest changes first.")
+            raise RuntimeError(f"Branch '{branch_name}' is {behind_count} commit(s) behind origin/{branch_name}. Please pull latest changes first.")
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to verify branch status: {e.stderr.strip()}") from e
@@ -253,7 +255,7 @@ def verify_tag_pushed(version):
         result = subprocess.run(["git", "ls-remote", "--tags", "origin", version], capture_output=True, text=True, check=True)
 
         if not result.stdout.strip():
-            raise RuntimeError(f"Tag '{version}' not found on remote after push. " f"Push may have failed silently.")
+            raise RuntimeError(f"Tag '{version}' not found on remote after push. Push may have failed silently.")
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to verify tag on remote: {e.stderr.strip()}") from e

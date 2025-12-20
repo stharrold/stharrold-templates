@@ -45,11 +45,21 @@ This command supports two modes based on user input:
 
 **Run this first. If it fails, STOP and tell the user to fix the context.**
 
+### Full Mode Context
+For full integration (coming from a feature worktree):
+- **Starting location**: Feature worktree
+- **Starting branch**: `feature/*`
+- **After Step 1**: Switch to main repo on `contrib/*` branch
+
+### Contrib-Only Mode Context
+For contrib-only integration (no feature worktree):
+- **Location**: Main repo
+- **Branch**: `contrib/*`
+
 ```bash
+# For Contrib-Only mode, verify context:
 python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 5
 ```
-
-Expected: Main repo, `contrib/*` branch
 
 ---
 
@@ -57,12 +67,21 @@ Expected: Main repo, `contrib/*` branch
 
 **Skip this step in Contrib-Only mode.**
 
+**IMPORTANT**: This step runs from the **feature worktree** on the `feature/*` branch.
+
 Create a pull request from the feature branch to contrib:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
 ```
 
 **MANUAL GATE**: Wait for PR approval and merge in GitHub UI.
+
+**After merge**: Switch to main repo and checkout contrib branch:
+```bash
+cd /path/to/main/repo
+git checkout contrib/stharrold
+git pull origin contrib/stharrold
+```
 
 ## Step 2: Cleanup Feature Worktree [FULL MODE ONLY]
 

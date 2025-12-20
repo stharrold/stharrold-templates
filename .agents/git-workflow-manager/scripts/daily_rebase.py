@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Perform daily rebase workflow.
 
 Constants:
@@ -39,7 +41,7 @@ def daily_rebase(contrib_branch):
     """
     # Input validation
     if not contrib_branch or not contrib_branch.startswith("contrib/"):
-        raise ValueError(f"Invalid contrib branch '{contrib_branch}'. " f"Must start with 'contrib/' (e.g., 'contrib/username')")
+        raise ValueError(f"Invalid contrib branch '{contrib_branch}'. Must start with 'contrib/' (e.g., 'contrib/username')")
 
     print(f"Rebasing {contrib_branch} onto develop...", file=sys.stderr)
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """VCS configuration loading and validation.
 
 This module handles loading and validating .vcs_config.yaml files.
@@ -45,7 +47,7 @@ def load_vcs_config(config_path: Path | None = None) -> dict[str, Any] | None:
           repository: "MyRepo"  # Optional: defaults to project name if not specified
     """
     if yaml is None:
-        raise ImportError("PyYAML is required to load VCS configuration. " "Install it with: pip install pyyaml")
+        raise ImportError("PyYAML is required to load VCS configuration. Install it with: pip install pyyaml")
 
     if config_path is None:
         config_path = Path.cwd() / CONFIG_FILE_NAME
