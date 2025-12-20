@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.18.0] - 2025-12-20
+
+### Added
+- **SPDX license headers** - All Python files now have Apache 2.0 SPDX headers
+  - Added `check_spdx_headers.py` pre-commit hook for validation
+  - Headers include shebang, copyright, and license identifier
+- **Windows hard link fallback** - AgentDB worktree symlinks now work on Windows
+  - Uses `os.link()` (hard link) when symlink requires Developer Mode
+  - Added platform detection in `create_worktree.py`
+  - New tests for Windows fallback behavior
+- **Path resolution for symlinks** - Better handling of symlinks/hard links
+  - Added `Path.resolve()` to `query_workflow_state.py`
+  - Added `Path.resolve()` to `record_sync.py`
+- **Pytest markers** - Added `integration` and `benchmark` markers
+  - Quality gates exclude slow tests by default
+
+### Changed
+- **Pre-commit hooks** - Updated ruff to v0.14.8
+- **SQL injection prevention** - `record_sync.py` uses parameterized queries
+- **Quality gates** - Exclude integration/benchmark tests for faster CI
+
+### Fixed
+- **DuckDB error messages** - Clear instructions when duckdb package missing
+- **Cross-platform compatibility** - Windows users no longer need admin for worktrees
+
 ## [5.16.0] - 2025-11-26
 
 ### Changed
