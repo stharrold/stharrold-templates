@@ -253,13 +253,17 @@ RUN apk add --no-cache \
     readline-dev \
     zlib-dev
 
-# Install Apache AGE
-RUN git clone https://github.com/apache/age.git /tmp/age && \
+# SECURITY WARNING: For production, pin dependencies to specific commit SHAs
+# or verified release tags with integrity verification (checksums/signatures).
+# Unpinned git clones create supply-chain risk if repos are compromised.
+
+# Install Apache AGE (pin to release tag in production)
+RUN git clone --branch release/PG17/1.5.0 --depth 1 https://github.com/apache/age.git /tmp/age && \
     cd /tmp/age && \
     make install
 
-# Install pgvector
-RUN git clone https://github.com/pgvector/pgvector.git /tmp/pgvector && \
+# Install pgvector (pin to release tag in production)
+RUN git clone --branch v0.8.0 --depth 1 https://github.com/pgvector/pgvector.git /tmp/pgvector && \
     cd /tmp/pgvector && \
     make && make install
 
@@ -1142,8 +1146,14 @@ class GraphCQLProvider:
         return self._execute_cypher(cypher)
 
     def get_conditions(self, patient_id: str) -> list[dict]:
-        """Retrieve conditions for a patient."""
+        """Retrieve conditions for a patient.
 
+        SECURITY WARNING: This example uses f-string interpolation for clarity.
+        In production, validate/sanitize patient_id or use parameterized queries
+        to prevent Cypher injection attacks that could expose/corrupt PHI.
+        """
+        # Production: validate patient_id format (e.g., UUID pattern)
+        # or use AGE's parameter binding if available
         cypher = f"""
             MATCH (p:Patient {{id: '{patient_id}'}})-[:HAS_CONDITION]->(c:Condition)
             RETURN c
