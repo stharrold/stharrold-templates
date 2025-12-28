@@ -140,6 +140,9 @@ def check_file(file_path: Path, show_fix: bool = False) -> list[str]:
     except UnicodeDecodeError:
         errors.append(f"{file_path}: Unable to decode as UTF-8")
         return errors
+    except OSError as e:
+        errors.append(f"{file_path}: Unable to read file: {e}")
+        return errors
 
     if is_ascii(content):
         return []

@@ -197,6 +197,7 @@ def _process_worktree_entry(
                 data = json.load(f)
                 workflow_step = data.get("current_step")
         except (json.JSONDecodeError, OSError):
+            # Ignore errors reading workflow.json - step info is optional metadata
             pass
 
     return PendingWorktree(
