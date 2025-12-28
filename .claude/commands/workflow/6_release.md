@@ -46,7 +46,7 @@ Create a release and deploy to production.
 
 Run workflow step:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
 ```
 
 ## Available Steps
@@ -62,16 +62,16 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/r
 
 ```bash
 # 1. Create release branch (auto-calculates version)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py create-release
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py create-release
 
 # 2. Run quality gates on release branch
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py run-gates
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py run-gates
 
 # 3. Create PR to main
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py pr-main
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py pr-main
 
 # 4. After PR merged, tag the release
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py tag-release
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py tag-release
 ```
 
 ## Semantic Versioning
@@ -93,7 +93,7 @@ The `run-gates` step runs quality gates:
 
 After tagging, record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_6_release
 ```

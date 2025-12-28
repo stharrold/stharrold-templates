@@ -59,7 +59,7 @@ If still missing, STOP and prompt user to run `/1_specify` first.
 
 Run the SpecKit author to create specifications:
 ```bash
-podman-compose run --rm dev python .claude/skills/speckit-author/scripts/create_specifications.py \
+uv run python .claude/skills/speckit-author/scripts/create_specifications.py \
   feature {slug} stharrold \
   --issue {issue-number}
 ```
@@ -74,7 +74,7 @@ This creates `specs/{slug}/` with:
 
 Record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_2_plan \
   --source "planning/{slug}" \

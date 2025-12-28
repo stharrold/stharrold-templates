@@ -47,7 +47,7 @@ Note the issue number for later use.
 
 Run the BMAD planner to create planning documents:
 ```bash
-podman-compose run --rm dev python .claude/skills/bmad-planner/scripts/create_planning.py \
+uv run python .claude/skills/bmad-planner/scripts/create_planning.py \
   --slug {slug} \
   --issue {issue-number}
 ```
@@ -61,7 +61,7 @@ This creates `planning/{slug}/` with:
 
 Create an isolated worktree for development (no TODO file):
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
   feature {slug} contrib/stharrold \
   --no-todo
 ```
@@ -75,7 +75,7 @@ This creates:
 
 Record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_1_specify \
   --source "planning/{slug}" \

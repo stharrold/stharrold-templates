@@ -69,7 +69,7 @@ Execute tasks in dependency order:
 
 After all tasks complete, run quality gates:
 ```bash
-podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+uv run python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 Quality gates must pass (5/5):
@@ -83,7 +83,7 @@ Quality gates must pass (5/5):
 
 Calculate the next version based on changes:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
+uv run python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
   develop v{current-version}
 ```
 
@@ -91,7 +91,7 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/s
 
 Record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type quality_gate \
   --pattern phase_4_implement
 ```

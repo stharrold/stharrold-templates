@@ -23,31 +23,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Workflow automation tools (git helpers, archive management, semantic versioning)
 - **Containerized development** - Podman + uv + Python 3.11 for consistent dev/CI environments
 
-**Key Principle**: All development uses `podman-compose run --rm dev <command>`. One way to run everything.
+**Key Principle**: Workflow commands use `uv run <command>` directly. Package testing uses containers (CI/CD).
 
 ## Essential Commands
 
 ```bash
-# Build container (once)
-podman-compose build
-
-# Run any command (containerized - preferred)
-podman-compose run --rm dev <command>
-
-# Alternative: Run directly with uv (when podman unavailable)
+# Workflow commands (run directly with uv)
 uv run <command>
 
 # Common operations
-podman-compose run --rm dev pytest                    # Run tests
-podman-compose run --rm dev pytest -v -k test_name    # Single test
-podman-compose run --rm dev ruff check .              # Lint
-podman-compose run --rm dev ruff check --fix .        # Auto-fix
-podman-compose run --rm dev python mcp_manager.py --status
+uv run pytest                              # Run tests
+uv run pytest -v -k test_name              # Single test
+uv run ruff check .                        # Lint
+uv run ruff check --fix .                  # Auto-fix
+uv run python mcp_manager.py --status      # MCP status
 
-# Or without container:
-uv run pytest
-uv run pytest -v -k test_name
-uv run ruff check .
+# Package testing (containerized - for CI/CD)
+podman-compose build                       # Build container
+podman-compose run --rm dev uv run pytest  # Run tests in container
 ```
 
 ## Pre-commit Hooks
@@ -61,17 +54,16 @@ uv run pre-commit run --all-files
 ```
 
 Hooks run automatically on commit:
-- **sync-ai-config** - Syncs CLAUDE.md → AGENTS.md, .github/copilot-instructions.md, .agents/ (runs first)
 - trailing whitespace, YAML/JSON validation
 - ruff linting/formatting (v0.14.8)
 - CLAUDE.md frontmatter check
 - skill structure validation
 - **SPDX license headers** - Validates Apache 2.0 headers on all Python files
 
-## Quality Gates (5 gates, all must pass before PR)
+## Quality Gates (4 gates, all must pass before PR)
 
 ```bash
-podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+uv run python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 | Gate | Description |
@@ -80,7 +72,6 @@ podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_q
 | 2. Tests | All pytest tests pass |
 | 3. Build | `uv build` succeeds |
 | 4. Linting | `ruff check .` clean |
-| 5. AI Config Sync | CLAUDE.md → AGENTS.md synced |
 
 ## Test Organization
 
@@ -103,16 +94,13 @@ uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (defa
 
 ```bash
 # Step 1: PR feature → contrib (runs quality gates)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
 
-# Step 2: Sync CLAUDE.md → AGENTS.md
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py sync-agents
-
-# Step 3: PR contrib → develop
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
+# Step 2: PR contrib → develop
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
 
 # Or run all steps
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py full
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py full
 ```
 
 ## Slash Commands
@@ -200,7 +188,7 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 |-------|---------|
 | workflow-orchestrator | Main coordinator, templates |
 | git-workflow-manager | Worktrees, PRs, semantic versioning |
-| quality-enforcer | Quality gates (5 gates) |
+| quality-enforcer | Quality gates (4 gates) |
 | bmad-planner | Requirements + architecture |
 | speckit-author | Specifications |
 | tech-stack-adapter | Python/uv/Podman detection |
@@ -215,103 +203,35 @@ docs/research/ → docs/guides/ → docs/archived/
 (research)       (production)   (compressed)
 ```
 
-### AI Config Sync (Model-Agnostic)
-
-CLAUDE.md automatically syncs to:
-- `AGENTS.md` (cross-tool)
-- `.github/copilot-instructions.md` (GitHub Copilot)
-- `.agents/` (mirrored skills)
-
-**Sync utility** (`sync_ai_config.py`):
-```bash
-# Manual sync
-uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py sync
-
-# Verify files are in sync
-uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py verify
-
-# Check if sync needed
-uv run python .claude/skills/workflow-utilities/scripts/sync_ai_config.py check
-```
-
-**Automation**: Pre-commit hook syncs automatically when CLAUDE.md or .claude/ is modified.
-
-### AI Configuration Architecture
-
-This repository follows a **Claude-first development model** with cross-tool compatibility.
-
-**Directory Roles:**
-
-| Directory | Role | Editable |
-|-----------|------|----------|
-| `.claude/` | **PRIMARY** source for AI configuration | Yes |
-| `.agents/` | Read-only mirror ([OpenAI agents.md spec](https://github.com/openai/agents.md)) | No |
-
-**Sync Flow:**
-
-```
-.claude/                          .agents/
-├── commands/    (Claude-specific) │
-├── skills/      ─────sync─────>  ├── (mirrored skills)
-├── settings.local.json           │
-└── CLAUDE.md                     └── CLAUDE.md
-
-CLAUDE.md ─────sync─────> AGENTS.md
-          └────sync─────> .github/copilot-instructions.md
-```
-
-**What Gets Synced vs Claude-Specific:**
-
-| Source | Target | Synced |
-|--------|--------|--------|
-| `.claude/skills/` | `.agents/` | Yes |
-| `CLAUDE.md` | `AGENTS.md` | Yes |
-| `CLAUDE.md` | `.github/copilot-instructions.md` | Yes |
-| `.claude/commands/` | - | No (Claude-specific) |
-| `.claude/settings.local.json` | - | No (Claude-specific) |
-| `.claude-state/` | - | No (runtime state) |
-
-**Cross-Tool Compatibility:**
-
-The `.agents/` directory follows the emerging [OpenAI agents.md spec](https://github.com/openai/agents.md) ([directory support proposal](https://github.com/openai/agents.md/issues/9)).
-
-Compatible tools:
-- **Claude Code** - Primary (reads `.claude/` directly)
-- **GitHub Copilot** - Via `.github/copilot-instructions.md`
-- **Cursor** - Reads `.agents/` or `AGENTS.md`
-- **Windsurf** - Reads `AGENTS.md`
-- **Other AI assistants** - Via standard `AGENTS.md`
-
 ## Git Workflow Commands
 
 ```bash
 # Create feature worktree (no TODO file by default)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
   feature my-feature contrib/stharrold --no-todo
 
 # Semantic version calculation
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
+uv run python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
 
 # Archive management
-podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/archive_manager.py list
+uv run python .claude/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Release workflow (develop → release → main)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
 # Pattern: release/vX.Y.Z ──PR──> develop (direct, no intermediate branch)
 # Requires: release/* branch must exist when starting step 7
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
-# ⚠️ CRITICAL: Backmerge direction
-# CORRECT: release/vX.Y.Z → develop (direct PR from release branch)
-# WRONG:   main → develop (NEVER merge main to develop!)
+# CRITICAL: Backmerge direction
+# CORRECT: release/vX.Y.Z -> develop (direct PR from release branch)
+# WRONG:   main -> develop (NEVER merge main to develop!)
 
-# Cleanup feature worktree (no TODO archival by default)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py \
-  my-feature --no-archive
+# Cleanup feature worktree and branches
+uv run python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py my-feature
 ```
 
 ## Workflow State Tracking (AgentDB)
@@ -320,10 +240,10 @@ Workflow state is tracked in AgentDB (DuckDB) instead of TODO*.md files:
 
 ```bash
 # Query current workflow phase
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
 
 # Record workflow transition (called by slash commands)
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_1_specify \
   --source "planning/{slug}" \
@@ -351,8 +271,6 @@ planning/{slug}/           specs/{slug}/              specs/{slug}/
 ```
 
 **Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
-
-**See also**: [AI Configuration Architecture](#ai-configuration-architecture) section for `.claude/` vs `.agents/` directory structure and sync patterns.
 
 ## MCP Configuration Paths
 
@@ -405,15 +323,16 @@ azure_devops:
 
 ## Critical Guidelines
 
-- **One way to run**: Always use `podman-compose run --rm dev <command>`
+- **One way to run**: Workflow commands use `uv run <command>` directly
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow PR workflow sequence**: finish-feature -> sync-agents -> start-develop
+- **Follow PR workflow sequence**: finish-feature -> start-develop
 - **Quality gates must pass** before creating any PR
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
 - **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
 - **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)
+- **Use GitHub Issues**: Task tracking uses GitHub Issues/Azure DevOps work items (not TODO*.md files)
 
 ## ASCII-Only Characters (Issue #121)
 
@@ -479,8 +398,6 @@ All Python files require SPDX headers for Apache 2.0 compliance:
 
 **Validation**: `uv run python .claude/skills/workflow-utilities/scripts/check_spdx_headers.py`
 
-**Note**: `.agents/` is excluded from SPDX checking (read-only mirror synced from `.claude/skills/`).
-
 ## Worktree State Isolation
 
 Multiple Claude Code instances can work on different features concurrently using git worktrees. Each worktree has isolated state in `.claude-state/`:
@@ -509,10 +426,10 @@ repo_feature_abc/            # Feature worktree
 
 | Issue | Solution |
 |-------|----------|
-| Container not building | `podman info` to verify Podman running |
-| pytest not found in container | Use `podman-compose run --rm dev uv run pytest` (inside container) or `uv run pytest` (outside container) |
-| Import errors | Use `podman-compose run --rm dev python` |
-| Platform not found | `mcp_manager.py --status` to check |
+| Container not building | `podman info` to verify Podman running (CI/CD only) |
+| pytest not found | Use `uv run pytest` |
+| Import errors | Use `uv run python` |
+| Platform not found | `uv run python mcp_manager.py --status` to check |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
@@ -643,8 +560,8 @@ Every directory has a CLAUDE.md with YAML frontmatter for AI navigation:
 
 ```bash
 # Generate missing CLAUDE.md files
-podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/generate_claude_md.py
+uv run python .claude/skills/workflow-utilities/scripts/generate_claude_md.py
 
 # Update children references in existing CLAUDE.md files
-podman-compose run --rm dev python .claude/skills/workflow-utilities/scripts/update_claude_md_refs.py
+uv run python .claude/skills/workflow-utilities/scripts/update_claude_md_refs.py
 ```
