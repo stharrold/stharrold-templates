@@ -141,3 +141,130 @@ class TestPendingWorktreeType:
         assert wt["workflow_step"] == 4
         assert wt["prunable"] is False
         assert wt["error"] is None
+
+    def test_pending_worktree_with_error(self) -> None:
+        """PendingWorktree can have error message."""
+        wt: PendingWorktree = {
+            "worktree_path": "/path/to/worktree",
+            "branch": "feature/test",
+            "commits_ahead": -1,
+            "workflow_step": None,
+            "prunable": True,
+            "error": "worktree is prunable",
+        }
+
+        assert wt["error"] == "worktree is prunable"
+        assert wt["commits_ahead"] == -1
+        assert wt["workflow_step"] is None
+
+
+class TestProcessWorktreeEntryEdgeCases:
+    """Additional edge case tests for _process_worktree_entry."""
+
+    def test_handles_release_branch(self, tmp_path: Path) -> None:
+        """Release branches should be skipped."""
+        worktree_path = tmp_path / "release-worktree"
+        entry = {"path": str(worktree_path), "branch": "release/v1.0.0"}
+        result = _process_worktree_entry(entry, tmp_path, "contrib/stharrold")
+        assert result is None
+
+    def test_handles_hotfix_branch(self, tmp_path: Path) -> None:
+        """Hotfix branches (feature/) should be detected."""
+        worktree_path = tmp_path / "hotfix-worktree"
+        entry = {"path": str(worktree_path), "branch": "hotfix/urgent-fix"}
+        # Hotfix is not a feature branch, so should be skipped
+        result = _process_worktree_entry(entry, tmp_path, "contrib/stharrold")
+        assert result is None
+
+    @patch("verify_workflow_context.subprocess.run")
+    def test_handles_subprocess_error(self, mock_run: MagicMock, tmp_path: Path) -> None:
+        """Should handle git command failures gracefully."""
+        worktree_path = tmp_path / "feature-worktree"
+        entry = {"path": str(worktree_path), "branch": "feature/test-branch"}
+
+        # Mock git rev-list failing
+        mock_run.return_value = MagicMock(stdout="", returncode=1)
+
+        result = _process_worktree_entry(entry, tmp_path, "contrib/stharrold")
+
+        # Should return with error message and -1 commits
+        assert result is not None
+        assert result["commits_ahead"] == -1
+        assert result["error"] is not None
+        assert "Could not count commits" in result["error"]
+
+    def test_handles_missing_branch_key(self, tmp_path: Path) -> None:
+        """Should handle entry without branch key."""
+        worktree_path = tmp_path / "no-branch-worktree"
+        entry = {"path": str(worktree_path)}  # No branch key
+        result = _process_worktree_entry(entry, tmp_path, "contrib/stharrold")
+        # Should be skipped since no branch
+        assert result is None
+
+
+class TestDetectPendingWorktreesEdgeCases:
+    """Additional edge case tests for detect_pending_worktrees."""
+
+    @patch("verify_workflow_context.run_command")
+    def test_handles_multiple_worktrees(self, mock_run: MagicMock, tmp_path: Path) -> None:
+        """Should detect multiple pending worktrees."""
+        feature1 = tmp_path / "repo_feature_one"
+        feature2 = tmp_path / "repo_feature_two"
+
+        porcelain_output = f"""worktree {tmp_path}
+branch refs/heads/contrib/stharrold
+
+worktree {feature1}
+branch refs/heads/feature/one
+
+worktree {feature2}
+branch refs/heads/feature/two"""
+
+        mock_run.side_effect = [
+            "contrib/stharrold",  # git branch --show-current
+            porcelain_output,  # git worktree list --porcelain
+        ]
+
+        # Since subprocess.run for rev-list isn't mocked, this would fail
+        # So we test the parsing logic separately
+        with patch("verify_workflow_context.subprocess.run") as mock_subprocess:
+            mock_subprocess.return_value = MagicMock(stdout="2\n", returncode=0)
+            result = detect_pending_worktrees(tmp_path)
+
+        # Both features should be detected
+        assert len(result) == 2
+
+    @patch("verify_workflow_context.run_command")
+    def test_handles_empty_porcelain_output(self, mock_run: MagicMock, tmp_path: Path) -> None:
+        """Should handle empty worktree list."""
+        mock_run.side_effect = [
+            "contrib/stharrold",  # git branch --show-current
+            "",  # Empty git worktree list --porcelain
+        ]
+
+        result = detect_pending_worktrees(tmp_path)
+        assert result == []
+
+    @patch("verify_workflow_context.run_command")
+    def test_handles_prunable_in_porcelain(self, mock_run: MagicMock, tmp_path: Path) -> None:
+        """Should detect prunable worktrees from porcelain output."""
+        feature_path = tmp_path / "repo_feature_prunable"
+
+        # Note: git porcelain format uses just "prunable" on its own line
+        porcelain_output = f"""worktree {tmp_path}
+branch refs/heads/contrib/stharrold
+
+worktree {feature_path}
+branch refs/heads/feature/test
+prunable"""
+
+        mock_run.side_effect = [
+            "contrib/stharrold",  # git branch --show-current
+            porcelain_output,  # git worktree list --porcelain
+        ]
+
+        result = detect_pending_worktrees(tmp_path)
+
+        assert len(result) == 1
+        assert result[0]["prunable"] is True
+        assert "prunable" in result[0]["error"].lower()
