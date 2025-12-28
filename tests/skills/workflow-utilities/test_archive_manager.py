@@ -4,6 +4,7 @@
 """Tests for archive_manager.py create_archive() function."""
 
 import os
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -349,3 +350,76 @@ class TestCreateArchive:
             assert "[WARN]" in captured.err
         finally:
             unreadable_file.chmod(0o644)  # Restore permissions for cleanup
+
+
+class TestArchiveManagerCLI:
+    """Tests for archive_manager.py CLI behavior."""
+
+    def test_cli_returns_exit_code_2_on_partial_failure(self, tmp_path: Path):
+        """CLI exits with code 2 when some files fail to archive."""
+        # Create one valid file
+        valid_file = tmp_path / "valid.txt"
+        valid_file.write_text("valid content")
+
+        archived_dir = tmp_path / "ARCHIVED"
+
+        # Get the script path
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
+
+        # Run CLI with one valid file and one nonexistent file
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script_path),
+                "create",
+                "--output-dir",
+                str(archived_dir),
+                "partial-test",
+                str(valid_file),
+                str(tmp_path / "nonexistent.txt"),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        # Should exit with code 2 for partial failure
+        assert result.returncode == 2
+        # Archive should still be created with valid file
+        assert archived_dir.exists()
+        archives = list(archived_dir.glob("*.zip"))
+        assert len(archives) == 1
+
+    def test_cli_returns_exit_code_0_on_success(self, tmp_path: Path):
+        """CLI exits with code 0 when all files are archived successfully."""
+        # Create valid files
+        file1 = tmp_path / "file1.txt"
+        file2 = tmp_path / "file2.txt"
+        file1.write_text("content 1")
+        file2.write_text("content 2")
+
+        archived_dir = tmp_path / "ARCHIVED"
+
+        # Get the script path
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
+
+        # Run CLI with valid files only
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script_path),
+                "create",
+                "--output-dir",
+                str(archived_dir),
+                "success-test",
+                str(file1),
+                str(file2),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        # Should exit with code 0 for success
+        assert result.returncode == 0
+        # Archive should be created
+        archives = list(archived_dir.glob("*.zip"))
+        assert len(archives) == 1
