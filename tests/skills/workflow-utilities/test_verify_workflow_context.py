@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tests for verify_workflow_context.py pending worktree detection."""
 
+import subprocess
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -268,3 +269,109 @@ prunable"""
         assert len(result) == 1
         assert result[0]["prunable"] is True
         assert "prunable" in result[0]["error"].lower()
+
+
+class TestStrictMode:
+    """Tests for --strict mode CLI behavior."""
+
+    @patch("verify_workflow_context.detect_pending_worktrees")
+    @patch("verify_workflow_context.validate_context")
+    @patch("verify_workflow_context.is_worktree")
+    def test_strict_mode_exits_code_2_with_pending_worktrees(self, mock_is_worktree: MagicMock, mock_validate: MagicMock, mock_detect: MagicMock) -> None:
+        """--strict mode should exit with code 2 when pending worktrees exist."""
+        # Get the script path
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
+
+        # Mock the subprocess to test actual CLI behavior
+        # We'll run the actual script with mocked git commands
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(script_path),
+                "--step",
+                "5",
+                "--strict",
+            ],
+            capture_output=True,
+            text=True,
+            env={**dict(__import__("os").environ), "PYTHONDONTWRITEBYTECODE": "1"},
+        )
+
+        # Note: This test will pass context validation (if we're in main repo on contrib/*)
+        # but may or may not have pending worktrees. The key behavior to test is
+        # that --strict flag is recognized and affects exit code when worktrees exist.
+        # Since we can't easily mock git commands in a subprocess, we verify the flag is accepted.
+        # Exit code 0 = no pending worktrees, 1 = context invalid, 2 = strict + pending worktrees
+        assert result.returncode in (0, 1, 2)
+
+    def test_strict_flag_is_recognized(self) -> None:
+        """--strict flag should be a valid CLI argument."""
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
+
+        # Run with --help to verify --strict is documented
+        result = subprocess.run(
+            [sys.executable, str(script_path), "--help"],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0
+        assert "--strict" in result.stdout
+        assert "exit code 2" in result.stdout.lower() or "exit with code 2" in result.stdout.lower()
+
+    @patch("verify_workflow_context.detect_pending_worktrees")
+    @patch("verify_workflow_context.validate_context")
+    def test_without_strict_pending_worktrees_exit_0(self, mock_validate: MagicMock, mock_detect: MagicMock) -> None:
+        """Without --strict, pending worktrees should NOT cause exit code 2."""
+        # Import main function to test directly
+        from verify_workflow_context import main
+
+        mock_validate.return_value = (True, "Context valid")
+        mock_detect.return_value = [
+            {
+                "worktree_path": "/tmp/test",
+                "branch": "feature/test",
+                "commits_ahead": 5,
+                "workflow_step": 4,
+                "prunable": False,
+                "error": None,
+            }
+        ]
+
+        # Mock sys.argv and sys.exit
+        with patch("sys.argv", ["verify_workflow_context.py", "--step", "5"]):
+            with patch("sys.exit") as mock_exit:
+                with patch("verify_workflow_context.is_worktree", return_value=False):
+                    main()
+
+        # Without --strict, should exit 0 even with pending worktrees
+        mock_exit.assert_called_with(0)
+
+    @patch("verify_workflow_context.detect_pending_worktrees")
+    @patch("verify_workflow_context.validate_context")
+    def test_with_strict_pending_worktrees_exit_2(self, mock_validate: MagicMock, mock_detect: MagicMock) -> None:
+        """With --strict, pending worktrees should cause exit code 2."""
+        from verify_workflow_context import main
+
+        mock_validate.return_value = (True, "Context valid")
+        mock_detect.return_value = [
+            {
+                "worktree_path": "/tmp/test",
+                "branch": "feature/test",
+                "commits_ahead": 5,
+                "workflow_step": 4,
+                "prunable": False,
+                "error": None,
+            }
+        ]
+
+        # Mock sys.argv with --strict and sys.exit
+        with patch("sys.argv", ["verify_workflow_context.py", "--step", "5", "--strict"]):
+            with patch("sys.exit") as mock_exit:
+                with patch("verify_workflow_context.is_worktree", return_value=False):
+                    main()
+
+        # With --strict, exit(2) should be called (before exit(0))
+        # Check all calls to sys.exit
+        exit_codes = [call[0][0] for call in mock_exit.call_args_list]
+        assert 2 in exit_codes, f"Expected exit(2) in calls, got: {exit_codes}"

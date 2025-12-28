@@ -9,6 +9,8 @@ the dependency is properly installed and functional.
 Issue: #125
 """
 
+from packaging import version
+
 
 class TestDuckDBRequired:
     """Verify DuckDB is installed and functional."""
@@ -18,18 +20,17 @@ class TestDuckDBRequired:
         import duckdb  # noqa: F401 - Import is the test
 
     def test_duckdb_version(self):
-        """Test: DuckDB version meets minimum requirement (>=1.4.2)."""
+        """Test: DuckDB version meets minimum requirement (>=1.4.2).
+
+        Uses packaging.version for robust version comparison that handles
+        pre-release versions (e.g., "1.5.0-rc1") correctly.
+        """
         import duckdb
 
-        version = duckdb.__version__
-        major, minor, patch = map(int, version.split(".")[:3])
+        min_version = version.parse("1.4.2")
+        current_version = version.parse(duckdb.__version__)
 
-        # Minimum version: 1.4.2
-        assert major >= 1, f"DuckDB major version {major} < 1"
-        if major == 1:
-            assert minor >= 4, f"DuckDB minor version {minor} < 4"
-            if minor == 4:
-                assert patch >= 2, f"DuckDB patch version {patch} < 2"
+        assert current_version >= min_version, f"DuckDB version {duckdb.__version__} < minimum required 1.4.2"
 
     def test_duckdb_in_memory_connection(self):
         """Test: DuckDB can create in-memory database."""

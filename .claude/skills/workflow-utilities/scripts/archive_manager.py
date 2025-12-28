@@ -81,7 +81,7 @@ def create_archive(
     delete_originals: bool = False,
     ensure_archived_structure: bool = True,
     timestamp: str | None = None,
-) -> str:
+) -> tuple[str, list[tuple[str, str]]]:
     """Create a timestamped archive of files.
 
     Args:
@@ -94,7 +94,7 @@ def create_archive(
         timestamp: Optional timestamp (default: current UTC time)
 
     Returns:
-        Path to created archive
+        Tuple of (path to created archive, list of (file_path, error) for failed files)
 
     Raises:
         ValueError: If no valid files were archived
@@ -124,6 +124,7 @@ def create_archive(
     zip_path = archived_path / zip_name
 
     archived_count = 0
+    failed_files: list[tuple[str, str]] = []
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for file in files:
@@ -148,6 +149,8 @@ def create_archive(
                     print(f"  Archived: {file_path}")
                     archived_count += 1
                 except (PermissionError, OSError) as e:
+                    error_msg = str(e)
+                    failed_files.append((str(file_path), error_msg))
                     print(f"  {format_warning(f'Could not archive {file_path}: {e}')}", file=sys.stderr)
                     continue
 
@@ -155,6 +158,8 @@ def create_archive(
                     file_path.unlink()
                     print(f"  Deleted: {file_path}")
             else:
+                error_msg = "File not found"
+                failed_files.append((str(file_path), error_msg))
                 print(f"  {format_warning(f'{file_path} not found')}", file=sys.stderr)
 
     if archived_count == 0:
@@ -162,8 +167,13 @@ def create_archive(
         zip_path.unlink()
         raise ValueError("No valid files were archived")
 
-    print(f"[OK] Created archive: {zip_path}")
-    return str(zip_path)
+    # Report summary including any failures
+    if failed_files:
+        print(f"[WARN] {len(failed_files)} file(s) failed to archive:")
+        for path, error in failed_files:
+            print(f"  - {path}: {error}")
+    print(f"[OK] Created archive: {zip_path} ({archived_count} file(s))")
+    return str(zip_path), failed_files
 
 
 def list_archives(archived_dir: str = "ARCHIVED") -> list[Path]:
@@ -322,13 +332,16 @@ if __name__ == "__main__":
         files = remaining_args[1:]
 
         try:
-            create_archive(
+            archive_path, failed_files = create_archive(
                 description=description,
                 files=files,
                 archived_dir=output_dir,
                 preserve_paths=preserve_paths,
                 delete_originals=delete_originals,
             )
+            # Exit with code 2 if there were partial failures
+            if failed_files:
+                sys.exit(2)
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)

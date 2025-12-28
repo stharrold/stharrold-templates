@@ -25,6 +25,7 @@ Usage:
 Exit codes:
     0 - Context validation passed (pending worktree warnings are non-blocking)
     1 - Context validation failed
+    2 - Pending worktrees detected in --strict mode (for CI enforcement)
 """
 
 import argparse
@@ -379,6 +380,11 @@ Step shortcuts:
         action="store_true",
         help="Only output on failure",
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Exit with code 2 if pending worktrees are detected (for CI enforcement)",
+    )
 
     args = parser.parse_args()
 
@@ -418,6 +424,12 @@ Step shortcuts:
             pending_with_commits = [w for w in pending if w["commits_ahead"] > 0]
             if pending_with_commits:
                 print_pending_worktree_warnings(pending_with_commits)
+                # In strict mode, exit with code 2 for CI enforcement
+                if args.strict:
+                    safe_print("")
+                    safe_print(format_cross("STRICT MODE: Pending worktrees block release"))
+                    safe_print("Use --no-strict or resolve pending worktrees before proceeding.")
+                    sys.exit(2)
 
         sys.exit(0)
     else:
