@@ -116,9 +116,9 @@ def sync_ai_config():
     Sync and verify AI configuration files.
 
     Uses consolidated sync_ai_config utility for:
-    - CLAUDE.md → AGENTS.md
-    - CLAUDE.md → .github/copilot-instructions.md
-    - .claude/skills/ → .agents/
+    - CLAUDE.md -> AGENTS.md
+    - CLAUDE.md -> .github/copilot-instructions.md
+    - .claude/skills/ -> .agents/
 
     Returns:
         True if sync successful and files are in sync

@@ -76,9 +76,9 @@ def extract_azure_repo_from_remote() -> str | None:
         Repository name if detected, None otherwise
 
     Example URLs and extracted repo names:
-        - https://dev.azure.com/org/project/_git/repo → repo
-        - git@ssh.dev.azure.com:v3/org/project/repo → repo
-        - https://org.visualstudio.com/project/_git/repo → repo
+        - https://dev.azure.com/org/project/_git/repo -> repo
+        - git@ssh.dev.azure.com:v3/org/project/repo -> repo
+        - https://org.visualstudio.com/project/_git/repo -> repo
     """
     try:
         result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True, check=True, timeout=5)

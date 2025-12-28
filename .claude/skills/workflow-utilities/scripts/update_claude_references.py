@@ -125,7 +125,7 @@ def update_claude_file(claude_file: Path, root_dir: Path, dry_run: bool = False)
         print(cross_refs)
     else:
         claude_file.write_text(final_content, encoding="utf-8")
-        print(f"✓ Updated {claude_file.relative_to(root_dir)}")
+        print(f"[OK] Updated {claude_file.relative_to(root_dir)}")
 
 
 def main():
@@ -150,7 +150,7 @@ def main():
         update_claude_file(claude_file, root_dir, dry_run)
 
     print()
-    print(f"✅ {'Would update' if dry_run else 'Updated'} {len(claude_files)} CLAUDE.md files")
+    print(f"[OK] {'Would update' if dry_run else 'Updated'} {len(claude_files)} CLAUDE.md files")
 
     if dry_run:
         print()

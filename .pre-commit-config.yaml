@@ -60,3 +60,11 @@ repos:
         language: python
         types: [python]
         pass_filenames: false
+
+      # Check ASCII-only in Python files (Issue #121)
+      - id: ascii-only
+        name: Check ASCII-only characters
+        entry: python .claude/skills/workflow-utilities/scripts/check_ascii_only.py
+        language: python
+        types: [python]
+        pass_filenames: false

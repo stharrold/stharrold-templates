@@ -75,24 +75,24 @@ def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
                 try:
                     os.link(main_db_path, worktree_db_path)
                     print(
-                        "ℹ️  Using hard link for AgentDB (symlink requires Developer Mode)",
+                        "[INFO]  Using hard link for AgentDB (symlink requires Developer Mode)",
                         file=sys.stderr,
                     )
                     return True
                 except OSError as hardlink_error:
                     # Hard link also failed (likely cross-volume)
                     print(
-                        f"⚠️  Could not create AgentDB link: symlink failed ({symlink_error}), hard link failed ({hardlink_error})",
+                        f"[WARN]  Could not create AgentDB link: symlink failed ({symlink_error}), hard link failed ({hardlink_error})",
                         file=sys.stderr,
                     )
                     return False
             else:
                 # On Unix, symlink should work - if it fails, report and return False
-                print(f"⚠️  Could not create AgentDB symlink: {symlink_error}", file=sys.stderr)
+                print(f"[WARN]  Could not create AgentDB symlink: {symlink_error}", file=sys.stderr)
                 return False
 
     except (OSError, PermissionError) as e:
-        print(f"⚠️  Could not create AgentDB link: {e}", file=sys.stderr)
+        print(f"[WARN]  Could not create AgentDB link: {e}", file=sys.stderr)
         return False
 
 
@@ -339,22 +339,22 @@ Created: {created_timestamp}
         # Create .worktree-id with hash of worktree path (using shared implementation)
         worktree_id = compute_worktree_id(worktree_path)
         (state_dir / ".worktree-id").write_text(worktree_id)
-        print(f"✓ State directory: {state_dir}")
+        print(f"[OK] State directory: {state_dir}")
 
         # Create symlink for shared AgentDB (repo_root is main repo)
         if setup_agentdb_symlink(worktree_path, repo_root):
-            print(f"✓ AgentDB symlink: {state_dir / 'agentdb.duckdb'} → main repo")
+            print(f"[OK] AgentDB symlink: {state_dir / 'agentdb.duckdb'} -> main repo")
         else:
-            print("ℹ️  AgentDB: isolated (symlink creation failed)")
+            print("[INFO]  AgentDB: isolated (symlink creation failed)")
     except (OSError, PermissionError) as e:
-        print(f"⚠️  Could not create state directory: {e}", file=sys.stderr)
+        print(f"[WARN]  Could not create state directory: {e}", file=sys.stderr)
 
-    print(f"✓ Worktree created: {worktree_path}")
-    print(f"✓ Branch: {branch_name}")
+    print(f"[OK] Worktree created: {worktree_path}")
+    print(f"[OK] Branch: {branch_name}")
     if todo_filename:
-        print(f"✓ TODO file: {todo_filename}")
+        print(f"[OK] TODO file: {todo_filename}")
     else:
-        print("ℹ️  TODO file: skipped (deprecated)")
+        print("[INFO]  TODO file: skipped (deprecated)")
 
     return {"worktree_path": str(worktree_path), "branch_name": branch_name, "todo_file": todo_filename, "state_dir": str(state_dir) if state_dir.exists() else None}
 

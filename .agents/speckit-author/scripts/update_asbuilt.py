@@ -150,7 +150,7 @@ def gather_as_built_info(planning_dir: Path, specs_dir: Path, todo_file: Path | 
     deviations = analyze_deviations(planning_dir, specs_dir)
 
     if deviations:
-        print(f"\n✓ Found {len(deviations)} potential deviations")
+        print(f"\n[OK] Found {len(deviations)} potential deviations")
 
     # Ask about additional deviations
     print("\n" + "=" * 70)
@@ -230,14 +230,14 @@ def update_requirements_md(req_path: Path, info: dict[str, any]) -> None:
     """Append As-Built Notes section to requirements.md."""
 
     if not req_path.exists():
-        print(f"⚠ Requirements file not found: {req_path}")
+        print(f"[WARN] Requirements file not found: {req_path}")
         return
 
     content = req_path.read_text()
 
     # Check if as-built section already exists
     if "## As-Built Notes" in content:
-        print(f"⚠ As-Built Notes already exist in {req_path}")
+        print(f"[WARN] As-Built Notes already exist in {req_path}")
         overwrite = input("  Overwrite? (y/N) > ").strip().lower()
         if overwrite not in ["y", "yes"]:
             return
@@ -267,21 +267,21 @@ def update_requirements_md(req_path: Path, info: dict[str, any]) -> None:
     content += as_built
     req_path.write_text(content)
 
-    print(f"✓ Updated {req_path}")
+    print(f"[OK] Updated {req_path}")
 
 
 def update_architecture_md(arch_path: Path, info: dict[str, any]) -> None:
     """Append As-Built Architecture section to architecture.md."""
 
     if not arch_path.exists():
-        print(f"⚠ Architecture file not found: {arch_path}")
+        print(f"[WARN] Architecture file not found: {arch_path}")
         return
 
     content = arch_path.read_text()
 
     # Check if as-built section already exists
     if "## As-Built Architecture" in content:
-        print(f"⚠ As-Built Architecture already exists in {arch_path}")
+        print(f"[WARN] As-Built Architecture already exists in {arch_path}")
         overwrite = input("  Overwrite? (y/N) > ").strip().lower()
         if overwrite not in ["y", "yes"]:
             return
@@ -301,7 +301,7 @@ def update_architecture_md(arch_path: Path, info: dict[str, any]) -> None:
         as_built += "Matches planned architecture with these changes:\n\n"
 
         for dev in tech_deviations:
-            as_built += f"- ~~{dev['planned']}~~ → {dev['actual']}\n"
+            as_built += f"- ~~{dev['planned']}~~ -> {dev['actual']}\n"
             as_built += f"  - Reason: {dev['reason']}\n"
 
         as_built += "\n"
@@ -323,21 +323,21 @@ def update_architecture_md(arch_path: Path, info: dict[str, any]) -> None:
     content += as_built
     arch_path.write_text(content)
 
-    print(f"✓ Updated {arch_path}")
+    print(f"[OK] Updated {arch_path}")
 
 
 def update_epics_md(epics_path: Path, info: dict[str, any]) -> None:
     """Append Epic Completion Status to epics.md."""
 
     if not epics_path.exists():
-        print(f"⚠ Epics file not found: {epics_path}")
+        print(f"[WARN] Epics file not found: {epics_path}")
         return
 
     content = epics_path.read_text()
 
     # Check if completion section already exists
     if "## Epic Completion Status" in content:
-        print(f"⚠ Epic Completion Status already exists in {epics_path}")
+        print(f"[WARN] Epic Completion Status already exists in {epics_path}")
         overwrite = input("  Overwrite? (y/N) > ").strip().lower()
         if overwrite not in ["y", "yes"]:
             return
@@ -351,7 +351,7 @@ def update_epics_md(epics_path: Path, info: dict[str, any]) -> None:
     if info.get("epics"):
         for epic in info["epics"]:
             completion += f"### {epic['id']} (COMPLETED)\n"
-            completion += f"- **Status:** ✓ Completed {info['date']}\n"
+            completion += f"- **Status:** [OK] Completed {info['date']}\n"
             completion += f"- **Estimated effort:** {epic['estimated']}\n"
             completion += f"- **Actual effort:** {epic['actual']}\n"
 
@@ -369,7 +369,7 @@ def update_epics_md(epics_path: Path, info: dict[str, any]) -> None:
     content += completion
     epics_path.write_text(content)
 
-    print(f"✓ Updated {epics_path}")
+    print(f"[OK] Updated {epics_path}")
 
 
 def commit_changes(planning_dir: Path, specs_dir: Path) -> None:
@@ -391,7 +391,7 @@ Refs: {specs_dir}/spec.md
 
     run_command(["git", "commit", "-m", commit_msg])
 
-    print("\n✓ Committed as-built updates")
+    print("\n[OK] Committed as-built updates")
 
 
 def main():
@@ -428,7 +428,7 @@ def main():
     if not args.no_commit:
         commit_changes(args.planning_dir, args.specs_dir)
     else:
-        print("\n⚠ Skipping commit (--no-commit flag)")
+        print("\n[WARN] Skipping commit (--no-commit flag)")
 
     # Summary
     print("\n" + "=" * 70)

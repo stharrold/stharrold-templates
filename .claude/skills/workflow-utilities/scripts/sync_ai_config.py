@@ -11,9 +11,9 @@ Used by:
 - Quality gates (gate 5: AI config sync)
 
 Syncs:
-- CLAUDE.md → AGENTS.md
-- CLAUDE.md → .github/copilot-instructions.md
-- .claude/skills/ → .agents/
+- CLAUDE.md -> AGENTS.md
+- CLAUDE.md -> .github/copilot-instructions.md
+- .claude/skills/ -> .agents/
 
 Usage:
     # Sync all files (for pre-commit or manual)
@@ -172,17 +172,17 @@ def sync_all() -> tuple[bool, bool]:
     all_success = True
     any_modified = False
 
-    # Sync CLAUDE.md → AGENTS.md
+    # Sync CLAUDE.md -> AGENTS.md
     success, modified = sync_claude_md_to_agents()
     all_success &= success
     any_modified |= modified
 
-    # Sync CLAUDE.md → .github/copilot-instructions.md
+    # Sync CLAUDE.md -> .github/copilot-instructions.md
     success, modified = sync_claude_md_to_copilot()
     all_success &= success
     any_modified |= modified
 
-    # Sync .claude/skills/ → .agents/
+    # Sync .claude/skills/ -> .agents/
     success, modified = sync_skills_to_agents_dir()
     all_success &= success
     any_modified |= modified
@@ -207,7 +207,7 @@ def verify_sync() -> bool:
     safe_print("Verifying AI configuration sync...")
     all_synced = True
 
-    # Verify CLAUDE.md → AGENTS.md
+    # Verify CLAUDE.md -> AGENTS.md
     source = Path("CLAUDE.md")
     dest = Path("AGENTS.md")
     if source.exists():
@@ -220,7 +220,7 @@ def verify_sync() -> bool:
         else:
             safe_print("  " + format_check("AGENTS.md in sync"))
 
-    # Verify CLAUDE.md → .github/copilot-instructions.md
+    # Verify CLAUDE.md -> .github/copilot-instructions.md
     dest = Path(".github/copilot-instructions.md")
     if source.exists():
         if not dest.exists():
@@ -232,7 +232,7 @@ def verify_sync() -> bool:
         else:
             safe_print("  " + format_check(".github/copilot-instructions.md in sync"))
 
-    # Verify .claude/skills/ → .agents/
+    # Verify .claude/skills/ -> .agents/
     source_dir = Path(".claude/skills")
     dest_dir = Path(".agents")
     if source_dir.exists():
@@ -272,7 +272,7 @@ def check_needs_sync() -> bool:
     Returns:
         True if files need syncing
     """
-    # Check CLAUDE.md → AGENTS.md
+    # Check CLAUDE.md -> AGENTS.md
     source = Path("CLAUDE.md")
     if source.exists():
         dest = Path("AGENTS.md")
@@ -283,7 +283,7 @@ def check_needs_sync() -> bool:
         if not dest.exists() or not filecmp.cmp(source, dest, shallow=False):
             return True
 
-    # Check .claude/skills/ → .agents/
+    # Check .claude/skills/ -> .agents/
     source_dir = Path(".claude/skills")
     dest_dir = Path(".agents")
     if source_dir.exists():

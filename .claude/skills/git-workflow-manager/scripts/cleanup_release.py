@@ -293,16 +293,16 @@ def main():
             print(f"  Note: No TODO file found for {version}", file=sys.stderr)
 
         # Success output
-        print(f"\n✓ Verified tag {version} exists")
-        print("✓ Verified tag on main branch")
-        print("✓ Verified back-merge to develop complete")
-        print(f"✓ Deleted local branch: {release_branch}")
-        print(f"✓ Deleted remote branch: origin/{release_branch}")
+        print(f"\n[OK] Verified tag {version} exists")
+        print("[OK] Verified tag on main branch")
+        print("[OK] Verified back-merge to develop complete")
+        print(f"[OK] Deleted local branch: {release_branch}")
+        print(f"[OK] Deleted remote branch: origin/{release_branch}")
 
         if todo_path:
-            print(f"✓ Archived: {todo_path.name}")
+            print(f"[OK] Archived: {todo_path.name}")
 
-        print(f"✓ Release workflow complete for {version}")
+        print(f"[OK] Release workflow complete for {version}")
 
         print("\nNext steps:")
         print("  1. Update contrib branch: python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/<gh-user>")

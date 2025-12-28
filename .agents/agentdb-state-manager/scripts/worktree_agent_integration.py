@@ -88,7 +88,7 @@ class FlowTokenManager:
         if cwd.name.startswith("german_feature_"):
             # Extract branch name from worktree directory
             # Example: german_feature_20251117T024349Z_phase-3-integration
-            #   → feature/20251117T024349Z_phase-3-integration
+            #   -> feature/20251117T024349Z_phase-3-integration
             parts = cwd.name.split("_", 2)  # ["german", "feature", "20251117T024349Z_phase-3-integration"]
             if len(parts) >= 3:
                 return f"feature/{parts[2]}"
@@ -119,9 +119,9 @@ class FlowTokenManager:
         """Extract issue number from flow token if present.
 
         Patterns:
-        - issue-123 → 123
-        - feature/20251117_issue-123-description → 123
-        - contrib/stharrold → None
+        - issue-123 -> 123
+        - feature/20251117_issue-123-description -> 123
+        - contrib/stharrold -> None
 
         Args:
             flow_token: Flow token string
@@ -383,8 +383,8 @@ class SyncEngineFactory:
         """Create sync engine instance if enabled.
 
         Feature Flag:
-        - SYNC_ENGINE_ENABLED=true → Create and return engine
-        - SYNC_ENGINE_ENABLED=false (default) → Return None
+        - SYNC_ENGINE_ENABLED=true -> Create and return engine
+        - SYNC_ENGINE_ENABLED=false (default) -> Return None
 
         Singleton Pattern:
         - Cache instance per db_path

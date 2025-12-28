@@ -60,9 +60,9 @@ if __name__ == "__main__":
     try:
         test_remove_duplicate_servers()
         print("\n" + "=" * 60)
-        print("✅ TEST PASSED: Deduplication works correctly")
+        print("[OK] TEST PASSED: Deduplication works correctly")
         sys.exit(0)
     except AssertionError as e:
         print("\n" + "=" * 60)
-        print(f"❌ TEST FAILED: {e}")
+        print(f"[FAIL] TEST FAILED: {e}")
         sys.exit(1)

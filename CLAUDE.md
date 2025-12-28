@@ -409,9 +409,63 @@ azure_devops:
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow PR workflow sequence**: finish-feature → sync-agents → start-develop
+- **Follow PR workflow sequence**: finish-feature -> sync-agents -> start-develop
 - **Quality gates must pass** before creating any PR
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
+- **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
+- **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)
+
+## ASCII-Only Characters (Issue #121)
+
+All Python files must use only ASCII characters (0x00-0x7F). No Unicode symbols.
+
+**Why**: Ensures compatibility across all platforms, terminals, and encoding configurations.
+
+**Encoding**: Files are UTF-8 encoded (UTF-8 is ASCII-compatible for ASCII characters).
+
+**Common replacements** (use `safe_output.py` functions):
+
+| Unicode | ASCII | Function |
+|---------|-------|----------|
+| `[checkmark]` | `[OK]` | `format_check()` |
+| `[cross]` | `[FAIL]` | `format_cross()` |
+| `[warning]` | `[WARN]` | `format_warning()` |
+| `[arrow]` | `->` | `format_arrow()` |
+
+**Validation**: `uv run python .claude/skills/workflow-utilities/scripts/check_ascii_only.py`
+
+**Pre-commit**: Enforced automatically via `ascii-only` hook.
+
+## Absolute Paths (Issue #122)
+
+Scripts must use dynamically populated absolute paths, not relative paths.
+
+**Why**: Relative paths break when scripts are called from different working directories.
+
+**Pattern**:
+```python
+import subprocess
+from pathlib import Path
+
+def get_repo_root() -> Path:
+    """Get the repository root directory as an absolute path."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, check=True,
+    )
+    return Path(result.stdout.strip()).resolve()
+
+# Use absolute paths
+repo_root = get_repo_root()
+archived_dir = repo_root / "ARCHIVED"
+file_path = (repo_root / relative_path).resolve()
+```
+
+**Key rules**:
+- Always resolve paths with `.resolve()` for absolute canonical form
+- Derive paths from `git rev-parse --show-toplevel` for repo-relative paths
+- Convert relative input paths to absolute before processing
+- Store relative paths in archives for portability (use `relative_to(repo_root)`)
 
 ## SPDX License Headers
 

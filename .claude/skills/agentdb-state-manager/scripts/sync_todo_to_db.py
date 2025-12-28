@@ -32,16 +32,16 @@ class Colors:
 
 
 def error_exit(msg: str) -> None:
-    print(f"{Colors.RED}✗ {msg}{Colors.END}", file=sys.stderr)
+    print(f"{Colors.RED}[FAIL] {msg}{Colors.END}", file=sys.stderr)
     sys.exit(1)
 
 
 def success(msg: str) -> None:
-    print(f"{Colors.GREEN}✓ {msg}{Colors.END}")
+    print(f"{Colors.GREEN}[OK] {msg}{Colors.END}")
 
 
 def info(msg: str) -> None:
-    print(f"{Colors.BLUE}ℹ {msg}{Colors.END}")
+    print(f"{Colors.BLUE}[INFO] {msg}{Colors.END}")
 
 
 def parse_todo_file(file_path: Path) -> dict[str, Any] | None:
@@ -225,7 +225,7 @@ def main() -> None:
 
         success(f"Synced {todo_file.name}")
 
-    print(f"\n{Colors.GREEN}✓ Sync complete{Colors.END}\n")
+    print(f"\n{Colors.GREEN}[OK] Sync complete{Colors.END}\n")
 
 
 if __name__ == "__main__":
