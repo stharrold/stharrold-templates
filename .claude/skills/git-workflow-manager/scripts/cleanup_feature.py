@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Cleanup feature worktree and optionally archive TODO.
 
-This script ensures proper cleanup: (optional) Archive TODO → Delete worktree → Delete branches.
+This script ensures proper cleanup: (optional) Archive TODO -> Delete worktree -> Delete branches.
 
 Constants:
 - WORKTREE_PREFIX: '../{project}_feature_' or '../feature_'
@@ -129,9 +129,9 @@ def archive_todo(todo_file: Path, summary: str, version: str):
     """
     archiver_script = Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts" / "workflow_archiver.py"
 
-    print(f"📦 Archiving TODO: {todo_file.name}")
+    print(f"[PKG] Archiving TODO: {todo_file.name}")
     subprocess.run([sys.executable, str(archiver_script), str(todo_file), "--summary", summary, "--version", version], check=True)
-    print(f"✓ TODO archived to ARCHIVED/{todo_file.name}")
+    print(f"[OK] TODO archived to ARCHIVED/{todo_file.name}")
 
 
 def delete_worktree(worktree_path: Path):
@@ -143,9 +143,9 @@ def delete_worktree(worktree_path: Path):
     Raises:
         subprocess.CalledProcessError: If git worktree remove fails
     """
-    print(f"🗑️  Removing worktree: {worktree_path}")
+    print(f"[DEL]  Removing worktree: {worktree_path}")
     subprocess.run(["git", "worktree", "remove", str(worktree_path)], check=True)
-    print(f"✓ Worktree removed: {worktree_path}")
+    print(f"[OK] Worktree removed: {worktree_path}")
 
 
 def delete_branch(branch_name: str):
@@ -158,19 +158,19 @@ def delete_branch(branch_name: str):
         subprocess.CalledProcessError: If git branch deletion fails
     """
     # Delete local branch
-    print(f"🗑️  Deleting local branch: {branch_name}")
+    print(f"[DEL]  Deleting local branch: {branch_name}")
     subprocess.run(["git", "branch", "-D", branch_name], check=True)
-    print(f"✓ Local branch deleted: {branch_name}")
+    print(f"[OK] Local branch deleted: {branch_name}")
 
     # Delete remote branch (if exists)
-    print(f"🗑️  Deleting remote branch: origin/{branch_name}")
+    print(f"[DEL]  Deleting remote branch: origin/{branch_name}")
     result = subprocess.run(["git", "push", "origin", "--delete", branch_name], capture_output=True, text=True)
 
     if result.returncode == 0:
-        print(f"✓ Remote branch deleted: origin/{branch_name}")
+        print(f"[OK] Remote branch deleted: origin/{branch_name}")
     else:
         # Remote branch might not exist - not an error
-        print(f"ℹ️  Remote branch not found (may have been deleted): origin/{branch_name}")
+        print(f"[INFO]  Remote branch not found (may have been deleted): origin/{branch_name}")
 
 
 def cleanup_feature(slug: str, summary: str = None, version: str = None, project_name: str = None, archive_todo_file: bool = False):
@@ -190,7 +190,7 @@ def cleanup_feature(slug: str, summary: str = None, version: str = None, project
         ValueError: If branch not found or multiple matches
         subprocess.CalledProcessError: If any git operation fails
     """
-    print(f"\n🚀 Cleaning up feature: {slug}")
+    print(f"\n[GO] Cleaning up feature: {slug}")
     print("=" * 70)
 
     todo_file = None
@@ -199,29 +199,29 @@ def cleanup_feature(slug: str, summary: str = None, version: str = None, project
     if archive_todo_file:
         try:
             todo_file = find_todo_file(slug)
-            print(f"✓ Found TODO: {todo_file.name}")
+            print(f"[OK] Found TODO: {todo_file.name}")
         except FileNotFoundError as e:
-            print(f"\n❌ ERROR: {e}", file=sys.stderr)
-            print("\nℹ️  TODO file must exist before cleanup with --archive.", file=sys.stderr)
+            print(f"\n[FAIL] ERROR: {e}", file=sys.stderr)
+            print("\n[INFO]  TODO file must exist before cleanup with --archive.", file=sys.stderr)
             print("   If TODO was already archived, this feature is already cleaned up.", file=sys.stderr)
             print("   Use --no-archive to skip TODO archival.", file=sys.stderr)
             sys.exit(1)
     else:
-        print("ℹ️  Skipping TODO archival (deprecated)")
+        print("[INFO]  Skipping TODO archival (deprecated)")
 
     # Step 2: Find worktree (optional - may not exist)
     worktree_path = find_worktree(slug, project_name)
     if worktree_path:
-        print(f"✓ Found worktree: {worktree_path}")
+        print(f"[OK] Found worktree: {worktree_path}")
     else:
-        print("ℹ️  No worktree found (may have been deleted or work done on contrib directly)")
+        print("[INFO]  No worktree found (may have been deleted or work done on contrib directly)")
 
     # Step 3: Find branch (fail if missing)
     try:
         branch_name = find_branch(slug)
-        print(f"✓ Found branch: {branch_name}")
+        print(f"[OK] Found branch: {branch_name}")
     except ValueError as e:
-        print(f"\n❌ ERROR: {e}", file=sys.stderr)
+        print(f"\n[FAIL] ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
     print("\n" + "=" * 70)
@@ -233,10 +233,10 @@ def cleanup_feature(slug: str, summary: str = None, version: str = None, project
         try:
             archive_todo(todo_file, summary, version)
         except subprocess.CalledProcessError as e:
-            print("\n❌ ERROR: Failed to archive TODO file", file=sys.stderr)
+            print("\n[FAIL] ERROR: Failed to archive TODO file", file=sys.stderr)
             print(f"   Command failed: {e.cmd}", file=sys.stderr)
             print(f"   Return code: {e.returncode}", file=sys.stderr)
-            print("\n⚠️  Cleanup aborted - TODO not archived", file=sys.stderr)
+            print("\n[WARN]  Cleanup aborted - TODO not archived", file=sys.stderr)
             print("   Worktree and branches NOT deleted (safe to retry)", file=sys.stderr)
             sys.exit(1)
 
@@ -245,13 +245,13 @@ def cleanup_feature(slug: str, summary: str = None, version: str = None, project
         try:
             delete_worktree(worktree_path)
         except subprocess.CalledProcessError as e:
-            print("\n❌ ERROR: Failed to delete worktree", file=sys.stderr)
+            print("\n[FAIL] ERROR: Failed to delete worktree", file=sys.stderr)
             print(f"   Path: {worktree_path}", file=sys.stderr)
             print(f"   Command failed: {e.cmd}", file=sys.stderr)
             if archive_todo_file:
-                print("\n⚠️  TODO archived but worktree NOT deleted", file=sys.stderr)
+                print("\n[WARN]  TODO archived but worktree NOT deleted", file=sys.stderr)
             else:
-                print("\n⚠️  Worktree NOT deleted", file=sys.stderr)
+                print("\n[WARN]  Worktree NOT deleted", file=sys.stderr)
             print("   You can manually delete: git worktree remove", file=sys.stderr)
             sys.exit(1)
 
@@ -259,28 +259,28 @@ def cleanup_feature(slug: str, summary: str = None, version: str = None, project
     try:
         delete_branch(branch_name)
     except subprocess.CalledProcessError as e:
-        print("\n❌ ERROR: Failed to delete branch", file=sys.stderr)
+        print("\n[FAIL] ERROR: Failed to delete branch", file=sys.stderr)
         print(f"   Branch: {branch_name}", file=sys.stderr)
         print(f"   Command failed: {e.cmd}", file=sys.stderr)
         if archive_todo_file:
-            print("\n⚠️  TODO archived, worktree deleted, but branch NOT deleted", file=sys.stderr)
+            print("\n[WARN]  TODO archived, worktree deleted, but branch NOT deleted", file=sys.stderr)
         else:
-            print("\n⚠️  Worktree deleted, but branch NOT deleted", file=sys.stderr)
+            print("\n[WARN]  Worktree deleted, but branch NOT deleted", file=sys.stderr)
         print("   You can manually delete: git branch -D", file=sys.stderr)
         sys.exit(1)
 
     print("\n" + "=" * 70)
-    print(f"✅ Feature cleanup complete: {slug}")
+    print(f"[OK] Feature cleanup complete: {slug}")
     print("=" * 70)
     print("\nCleaned up:")
     if archive_todo_file and todo_file:
-        print(f"  ✓ TODO archived: ARCHIVED/{todo_file.name}")
+        print(f"  [OK] TODO archived: ARCHIVED/{todo_file.name}")
     else:
         print("  - TODO archival: skipped (deprecated)")
     if worktree_path:
-        print(f"  ✓ Worktree deleted: {worktree_path}")
-    print(f"  ✓ Local branch deleted: {branch_name}")
-    print(f"  ✓ Remote branch deleted: origin/{branch_name}")
+        print(f"  [OK] Worktree deleted: {worktree_path}")
+    print(f"  [OK] Local branch deleted: {branch_name}")
+    print(f"  [OK] Remote branch deleted: origin/{branch_name}")
     print()
 
 
@@ -337,7 +337,7 @@ Notes:
     try:
         cleanup_feature(slug=args.slug, summary=args.summary, version=args.version, project_name=args.project_name, archive_todo_file=archive_todo)
     except Exception as e:
-        print(f"\n❌ Unexpected error: {e}", file=sys.stderr)
+        print(f"\n[FAIL] Unexpected error: {e}", file=sys.stderr)
         import traceback
 
         traceback.print_exc()

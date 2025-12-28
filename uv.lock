@@ -478,7 +478,7 @@ wheels = [
 
 [[package]]
 name = "stharrold-templates"
-version = "5.15.0"
+version = "5.18.0"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

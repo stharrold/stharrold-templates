@@ -630,7 +630,7 @@ class MCPManager:
         env_creds = validate_credentials()
         print("\nEnvironment Variables:")
         for var, status in env_creds.items():
-            status_str = "✓ Found" if status else "✗ Missing"
+            status_str = "[OK] Found" if status else "[FAIL] Missing"
             print(f"  {var}: {status_str}")
 
         # Check platform-specific storage
@@ -641,7 +641,7 @@ class MCPManager:
                 if "error" in key:
                     print(f"  Error checking {key}")
                 else:
-                    status_str = "✓ Found" if status else "✗ Missing"
+                    status_str = "[OK] Found" if status else "[FAIL] Missing"
                     print(f"  {key}: {status_str}")
 
         # Recommendations
