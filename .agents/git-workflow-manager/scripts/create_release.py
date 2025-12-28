@@ -158,11 +158,11 @@ def confirm_version_mismatch(provided_version, recommended_version, auto_confirm
         return True
 
     if auto_confirm:
-        print(f"⚠️  Version mismatch: provided {provided_version}, recommended {recommended_version}", file=sys.stderr)
+        print(f"[WARN]  Version mismatch: provided {provided_version}, recommended {recommended_version}", file=sys.stderr)
         print(f"Continuing with {provided_version} (--yes flag enabled)", file=sys.stderr)
         return True
 
-    print("\n⚠️  Version Mismatch Warning", file=sys.stderr)
+    print("\n[WARN]  Version Mismatch Warning", file=sys.stderr)
     print(f"Provided version:    {provided_version}", file=sys.stderr)
     print(f"Recommended version: {recommended_version}", file=sys.stderr)
     print(f"\nSemantic versioning suggests {recommended_version} based on changes.", file=sys.stderr)
@@ -309,7 +309,7 @@ tasks:
 
   integration:
     - id: int_001
-      description: "Create PR: release/{version} → main"
+      description: "Create PR: release/{version} -> main"
       status: pending
       files: []
       dependencies: [qa_001, qa_002, qa_003, qa_004]
@@ -362,7 +362,7 @@ Release workflow for version {version} created from {base_branch} branch.
   - Command: `uv run pytest --cov=src --cov-report=term --cov-fail-under=80`
 
 - [ ] **qa_002**: Verify all quality gates pass
-  - Test coverage ≥ 80%
+  - Test coverage >= 80%
   - All tests passing
   - Build successful
   - Linting clean (ruff)
@@ -377,7 +377,7 @@ Release workflow for version {version} created from {base_branch} branch.
 
 ### Phase 5.3-5.7: Integration and Cleanup
 
-- [ ] **int_001**: Create PR: release/{version} → main
+- [ ] **int_001**: Create PR: release/{version} -> main
   - Command: `gh pr create --base main --title "Release {version}"`
 
 - [ ] **int_002**: User merges PR in GitHub UI
@@ -394,7 +394,7 @@ Release workflow for version {version} created from {base_branch} branch.
 
 ## Quality Gates
 
-- [ ] Test coverage ≥ 80%
+- [ ] Test coverage >= 80%
 - [ ] All tests passing
 - [ ] Build successful
 - [ ] Linting clean (ruff)
@@ -484,10 +484,10 @@ For more information, see WORKFLOW.md Phase 5 (Release Workflow).
         todo_path = create_todo_file(version, base_branch, base_commit)
 
         # Success output
-        print(f"\n✓ Created release branch: {branch_name}")
-        print(f"✓ Base: {base_branch} (commit {base_commit})")
-        print(f"✓ TODO file: {todo_path.name}")
-        print("✓ Ready for final QA and documentation updates")
+        print(f"\n[OK] Created release branch: {branch_name}")
+        print(f"[OK] Base: {base_branch} (commit {base_commit})")
+        print(f"[OK] TODO file: {todo_path.name}")
+        print("[OK] Ready for final QA and documentation updates")
         print("\nNext steps:")
         print("  1. Run quality gates: python .claude/skills/quality-enforcer/scripts/run_quality_gates.py")
         print("  2. Update documentation and version in pyproject.toml")

@@ -578,7 +578,7 @@ def generate_epic_breakdown(requirements_data: dict[str, any], architecture_data
             "priority_reasoning": "Critical for production readiness but can overlap with implementation",
             "dependencies": dependencies,
             "estimated_effort": "1-2 days",
-            "deliverables": ["Test coverage ≥80%", "All tests passing", "Linting clean (ruff)", "Type checking clean (mypy)", "Documentation complete"],
+            "deliverables": ["Test coverage >=80%", "All tests passing", "Linting clean (ruff)", "Type checking clean (mypy)", "Documentation complete"],
         }
     )
 
@@ -763,12 +763,12 @@ BMAD planning documents for the {slug} feature. Created during Phase 1 (Planning
 
 ```
 planning/{slug}/
-├── requirements.md    # Business requirements (Analyst)
-├── architecture.md    # Technical architecture (Architect)
-├── epics.md          # Epic breakdown (PM)
-├── CLAUDE.md         # This file
-├── README.md         # Human-readable overview
-└── ARCHIVED/         # Deprecated planning documents
+|---- requirements.md    # Business requirements (Analyst)
+|---- architecture.md    # Technical architecture (Architect)
+|---- epics.md          # Epic breakdown (PM)
+|---- CLAUDE.md         # This file
+|---- README.md         # Human-readable overview
+`---- ARCHIVED/         # Deprecated planning documents
 ```
 
 ## Files in This Directory

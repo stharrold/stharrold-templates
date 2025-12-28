@@ -115,17 +115,17 @@ def update_skill_md_version(skill_md: Path, old_version: str, new_version: str, 
     new_content = re.sub(r"(version:\s*)" + re.escape(old_version), r"\g<1>" + new_version, content, count=1)
 
     if new_content == content:
-        print(f"  ⚠ No version found to update in {skill_md}")
+        print(f"  [WARN] No version found to update in {skill_md}")
         return False
 
     if dry_run:
         print(f"  [DRY RUN] Would update {skill_md}")
-        print(f"    version: {old_version} → {new_version}")
+        print(f"    version: {old_version} -> {new_version}")
         return True
 
     skill_md.write_text(new_content)
-    print(f"  ✓ Updated {skill_md}")
-    print(f"    version: {old_version} → {new_version}")
+    print(f"  [OK] Updated {skill_md}")
+    print(f"    version: {old_version} -> {new_version}")
     return True
 
 
@@ -143,7 +143,7 @@ def prompt_changelog_entry(skill_name: str, old_version: str, new_version: str) 
     print("\n" + "=" * 70)
     print(f"CHANGELOG Entry for {skill_name}")
     print("=" * 70)
-    print(f"Version: {old_version} → {new_version}")
+    print(f"Version: {old_version} -> {new_version}")
     print()
     print("Enter changelog entry (type 'END' on a blank line when done):")
     print()
@@ -181,7 +181,7 @@ def update_changelog(changelog_md: Path, entry: str, dry_run: bool = False) -> b
         True if update successful, False otherwise
     """
     if not changelog_md.exists():
-        print(f"  ⚠ CHANGELOG.md not found: {changelog_md}")
+        print(f"  [WARN] CHANGELOG.md not found: {changelog_md}")
         print("  Creating new CHANGELOG.md...")
 
         header = """# Changelog
@@ -220,7 +220,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         return True
 
     changelog_md.write_text(content)
-    print(f"  ✓ Updated {changelog_md}")
+    print(f"  [OK] Updated {changelog_md}")
     return True
 
 
@@ -305,7 +305,7 @@ Updated documentation:
 
 Refs: .claude/skills/{skill_name}/CHANGELOG.md
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+[BOT] Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 """
@@ -338,7 +338,7 @@ def archive_previous_version(skill_md: Path, old_version: str, dry_run: bool = F
 
     shutil.copy2(skill_md, archive_file)
 
-    print(f"  ✓ Archived previous version to {archive_file}")
+    print(f"  [OK] Archived previous version to {archive_file}")
     return True
 
 
@@ -389,7 +389,7 @@ def main():
     print("Skill Documentation Sync Tool")
     print("=" * 70)
     print(f"Skill: {args.skill_name}")
-    print(f"Version: {old_version} → {args.new_version}")
+    print(f"Version: {old_version} -> {args.new_version}")
     print(f"Dry run: {args.dry_run}")
     print()
 
@@ -423,7 +423,7 @@ def main():
         print(f"  Found {len(workflow_sections)} section(s) in WORKFLOW.md:")
         for section in workflow_sections:
             print(f"    - {section}")
-        print("\n  ⚠ Please manually review and update these sections in WORKFLOW.md")
+        print("\n  [WARN] Please manually review and update these sections in WORKFLOW.md")
     else:
         print(f"  No sections found referencing {args.skill_name} (this might be OK)")
 
@@ -452,7 +452,7 @@ def main():
         # Commit
         run_command(["git", "commit", "-m", commit_msg], capture=False)
 
-        print("\n✓ Commit created successfully!")
+        print("\n[OK] Commit created successfully!")
 
     # Summary
     print("\n" + "=" * 70)
@@ -462,7 +462,7 @@ def main():
     if args.dry_run:
         print("DRY RUN - No changes were made")
     else:
-        print(f"✓ Updated {args.skill_name} from v{old_version} to v{args.new_version}")
+        print(f"[OK] Updated {args.skill_name} from v{old_version} to v{args.new_version}")
 
     print("\nNext steps:")
     print("  1. Review SKILL.md for any additional documentation updates")

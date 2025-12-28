@@ -235,7 +235,7 @@ Examples:
     try:
         sync_id = record_sync(sync_type=args.sync_type, pattern=args.pattern, source=args.source, target=args.target, worktree=args.worktree, metadata=metadata)
 
-        print(f"✓ Recorded sync: {sync_id}")
+        print(f"[OK] Recorded sync: {sync_id}")
         print(f"  Type: {args.sync_type}")
         print(f"  Pattern: {args.pattern}")
         if args.source:

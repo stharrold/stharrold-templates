@@ -90,7 +90,7 @@ def daily_rebase(contrib_branch):
             if len(counts) == 2:
                 local_ahead, remote_ahead = int(counts[0]), int(counts[1])
                 if local_ahead > 0 and remote_ahead > 0:
-                    print(f"✗ DIVERGENCE DETECTED: {contrib_branch} has diverged from origin", file=sys.stderr)
+                    print(f"[FAIL] DIVERGENCE DETECTED: {contrib_branch} has diverged from origin", file=sys.stderr)
                     print(f"  Local has {local_ahead} commits not on remote", file=sys.stderr)
                     print(f"  Remote has {remote_ahead} commits not on local", file=sys.stderr)
                     print("\n  To resolve, choose one of:", file=sys.stderr)
@@ -108,10 +108,10 @@ def daily_rebase(contrib_branch):
                         check=False,
                     )
                     if pull_result.returncode != 0:
-                        print(f"✗ Pull failed: {pull_result.stderr}", file=sys.stderr)
+                        print(f"[FAIL] Pull failed: {pull_result.stderr}", file=sys.stderr)
                         print("  Resolve manually, then retry.", file=sys.stderr)
                         return False
-                    print("  ✓ Synced with remote", file=sys.stderr)
+                    print("  [OK] Synced with remote", file=sys.stderr)
 
         # Rebase onto origin/develop
         print(f"Rebasing onto {TARGET_BRANCH}...", file=sys.stderr)
@@ -121,11 +121,11 @@ def daily_rebase(contrib_branch):
         print("Pushing to origin...", file=sys.stderr)
         subprocess.run(["git", "push", "origin", contrib_branch, "--force-with-lease"], check=True, capture_output=True)
 
-        print(f"✓ {contrib_branch} successfully rebased onto develop", file=sys.stderr)
+        print(f"[OK] {contrib_branch} successfully rebased onto develop", file=sys.stderr)
         return True
 
     except subprocess.CalledProcessError as e:
-        print("✗ Rebase failed", file=sys.stderr)
+        print("[FAIL] Rebase failed", file=sys.stderr)
         if e.stderr:
             print(f"\nGit error: {e.stderr.strip()}", file=sys.stderr)
 

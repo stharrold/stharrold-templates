@@ -73,7 +73,7 @@ def error_exit(message: str, code: int = 1) -> None:
         message: Error message to display
         code: Exit code (default 1)
     """
-    print(f"{Colors.RED}✗ Error:{Colors.END} {message}", file=sys.stderr)
+    print(f"{Colors.RED}[FAIL] Error:{Colors.END} {message}", file=sys.stderr)
     sys.exit(code)
 
 
@@ -83,7 +83,7 @@ def success(message: str) -> None:
     Args:
         message: Success message to display
     """
-    print(f"{Colors.GREEN}✓{Colors.END} {message}")
+    print(f"{Colors.GREEN}[OK]{Colors.END} {message}")
 
 
 def info(message: str) -> None:
@@ -92,7 +92,7 @@ def info(message: str) -> None:
     Args:
         message: Info message to display
     """
-    print(f"{Colors.BLUE}ℹ{Colors.END} {message}")
+    print(f"{Colors.BLUE}[INFO]{Colors.END} {message}")
 
 
 def warning(message: str) -> None:
@@ -101,7 +101,7 @@ def warning(message: str) -> None:
     Args:
         message: Warning message to display
     """
-    print(f"{Colors.YELLOW}⚠{Colors.END} {message}")
+    print(f"{Colors.YELLOW}[WARN]{Colors.END} {message}")
 
 
 def generate_session_id() -> str:
@@ -369,28 +369,28 @@ def print_summary(session_id: str, workflow_states: dict[str, Any], db_path: Pat
     print(f"\n{Colors.BOLD}Loaded State Definitions:{Colors.END}")
     for obj_type, description in workflow_states.get("object_types", {}).items():
         state_count = len(workflow_states.get("states", {}).get(obj_type, {}))
-        print(f"  • {obj_type}: {state_count} states - {description}")
+        print(f"  * {obj_type}: {state_count} states - {description}")
 
     print(f"\n{Colors.BOLD}Created Tables:{Colors.END}")
-    print("  ✓ schema_metadata (schema version tracking)")
-    print("  ✓ agent_synchronizations (workflow transitions - used by record_sync.py)")
-    print("  ✓ session_metadata (session configuration)")
-    print("  ✓ workflow_records (immutable append-only state)")
+    print("  [OK] schema_metadata (schema version tracking)")
+    print("  [OK] agent_synchronizations (workflow transitions - used by record_sync.py)")
+    print("  [OK] session_metadata (session configuration)")
+    print("  [OK] workflow_records (immutable append-only state)")
 
     print(f"\n{Colors.BOLD}Created Indexes:{Colors.END}")
-    print("  ✓ idx_sync_* (agent_synchronizations indexes)")
-    print("  ✓ idx_records_* (workflow_records indexes)")
+    print("  [OK] idx_sync_* (agent_synchronizations indexes)")
+    print("  [OK] idx_records_* (workflow_records indexes)")
 
     print(f"\n{Colors.BOLD}Created Views:{Colors.END}")
-    print("  ✓ state_transitions (temporal state change analysis)")
-    print("  ✓ v_current_sync_status (current sync status)")
+    print("  [OK] state_transitions (temporal state change analysis)")
+    print("  [OK] v_current_sync_status (current sync status)")
 
     print(f"\n{Colors.BOLD}Next Steps:{Colors.END}")
     print("  1. Record sync: python record_sync.py --sync-type workflow_transition --pattern phase_1_specify")
     print("  2. Query state: python query_workflow_state.py")
     print("  3. Analyze metrics: python analyze_metrics.py")
 
-    print(f"\n{Colors.GREEN}🎉 AgentDB ready for workflow state tracking!{Colors.END}\n")
+    print(f"\n{Colors.GREEN}[DONE] AgentDB ready for workflow state tracking!{Colors.END}\n")
 
 
 def main() -> None:

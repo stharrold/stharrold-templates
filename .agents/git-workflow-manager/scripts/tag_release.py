@@ -332,14 +332,14 @@ def main():
         release_url = create_github_release(version)
 
         # Success output
-        print(f"\n✓ Checked out {branch} branch")
-        print(f"✓ Pulled latest changes (commit {commit_sha})")
-        print(f"✓ Created annotated tag: {version}")
+        print(f"\n[OK] Checked out {branch} branch")
+        print(f"[OK] Pulled latest changes (commit {commit_sha})")
+        print(f"[OK] Created annotated tag: {version}")
         print(f'  Message: "{tag_message}"')
-        print("✓ Pushed tag to origin")
+        print("[OK] Pushed tag to origin")
 
         if release_url:
-            print(f"✓ GitHub release created: {release_url}")
+            print(f"[OK] GitHub release created: {release_url}")
         else:
             print("  GitHub release: skipped (gh CLI not available or failed)")
 

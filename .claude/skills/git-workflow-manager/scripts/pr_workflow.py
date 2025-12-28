@@ -155,7 +155,7 @@ def step_finish_feature() -> bool:
             contrib,
             "--fill",
             "--body",
-            "Feature PR created via workflow automation.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)",
+            "Feature PR created via workflow automation.\n\n[BOT] Generated with [Claude Code](https://claude.com/claude-code)",
         ],
         check=False,
     )
@@ -212,7 +212,7 @@ def step_archive_todo() -> bool:
             "git",
             "commit",
             "-m",
-            "chore: archive TODO files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+            "chore: archive TODO files\n\n[BOT] Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
         ],
         check=False,
     )
@@ -278,7 +278,7 @@ def step_sync_agents() -> bool:
                 "commit",
                 "-m",
                 "chore: sync CLAUDE.md to cross-tool formats\n\n"
-                "🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\n"
+                "[BOT] Generated with [Claude Code](https://claude.com/claude-code)\n\n"
                 "Co-Authored-By: Claude <noreply@anthropic.com>",
             ],
             check=False,
@@ -333,7 +333,7 @@ def step_start_develop() -> bool:
                 "Workflow steps completed:\n"
                 "- [x] Quality gates passed\n"
                 "- [x] AI config synced\n\n"
-                "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+                "[BOT] Generated with [Claude Code](https://claude.com/claude-code)"
             ),
         ],
         check=False,
@@ -351,7 +351,7 @@ def step_start_develop() -> bool:
     # Return to editable branch
     return_to_editable_branch()
 
-    print("\n✓ WORKFLOW COMPLETE")
+    print("\n[OK] WORKFLOW COMPLETE")
     return True
 
 
@@ -411,7 +411,7 @@ def run_full_workflow():
     for name, func in steps:
         print(f"\n>>> Running step: {name}")
         if not func():
-            print(f"\n✗ Workflow stopped at step: {name}")
+            print(f"\n[FAIL] Workflow stopped at step: {name}")
             # Always return to editable branch, even on failure
             return_to_editable_branch()
             return False

@@ -594,23 +594,23 @@ def generate_claude_md(skill_path: Path, config: SkillConfig) -> None:
 """
 
     if config.has_scripts:
-        content += """├── scripts/
-│   ├── __init__.py
-│   └── [script-name].py
+        content += """|---- scripts/
+|   |---- __init__.py
+|   `---- [script-name].py
 """
 
     if config.has_templates:
-        content += """├── templates/
-│   └── [template-name].md.template
+        content += """|---- templates/
+|   `---- [template-name].md.template
 """
 
-    content += """├── SKILL.md                      # Complete skill documentation
-├── CLAUDE.md                     # This file
-├── README.md                     # Human-readable overview
-├── CHANGELOG.md                  # Version history
-└── ARCHIVED/                     # Deprecated files
-    ├── CLAUDE.md
-    └── README.md
+    content += """|---- SKILL.md                      # Complete skill documentation
+|---- CLAUDE.md                     # This file
+|---- README.md                     # Human-readable overview
+|---- CHANGELOG.md                  # Version history
+`---- ARCHIVED/                     # Deprecated files
+    |---- CLAUDE.md
+    `---- README.md
 ```
 
 ## Usage by Claude Code
@@ -967,7 +967,7 @@ def print_summary(skill_path: Path, config: SkillConfig) -> None:
     print("  - Discrepancies documented with rationale")
     print("  - See SKILL.md for alignment details")
 
-    print(f"\n{Colors.GREEN}🎉 Happy coding!{Colors.END}\n")
+    print(f"\n{Colors.GREEN}[DONE] Happy coding!{Colors.END}\n")
 
 
 def main() -> None:

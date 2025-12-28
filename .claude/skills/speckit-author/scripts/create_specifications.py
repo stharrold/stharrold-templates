@@ -685,11 +685,11 @@ SpecKit specifications for {workflow_type} '{slug}'
 
 ```
 specs/{slug}/
-├── spec.md        # Detailed technical specification
-├── plan.md        # Implementation task breakdown
-├── CLAUDE.md      # This file
-├── README.md      # Human-readable overview
-└── ARCHIVED/      # Deprecated specs
+|---- spec.md        # Detailed technical specification
+|---- plan.md        # Implementation task breakdown
+|---- CLAUDE.md      # This file
+|---- README.md      # Human-readable overview
+`---- ARCHIVED/      # Deprecated specs
 ```
 
 ## Files in This Directory
