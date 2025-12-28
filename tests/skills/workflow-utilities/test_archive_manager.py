@@ -94,7 +94,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            result = create_archive(
+            result, failed_files = create_archive(
                 description="test-archive",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -106,6 +106,7 @@ class TestCreateArchive:
         assert result.endswith(".zip")
         assert "test-archive" in result
         assert "20251228T120000Z" in result
+        assert failed_files == []
 
         # Verify contents
         with zipfile.ZipFile(result, "r") as zipf:
@@ -123,7 +124,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            result = create_archive(
+            result, failed_files = create_archive(
                 description="multi-file",
                 files=[str(file1), str(file2)],
                 archived_dir=archived_dir,
@@ -131,6 +132,7 @@ class TestCreateArchive:
             )
 
         # Verify contents
+        assert failed_files == []
         with zipfile.ZipFile(result, "r") as zipf:
             names = zipf.namelist()
             assert "file1.txt" in names
@@ -147,7 +149,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            result = create_archive(
+            result, failed_files = create_archive(
                 description="preserve-test",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -156,6 +158,7 @@ class TestCreateArchive:
             )
 
         # Verify path is preserved in archive
+        assert failed_files == []
         with zipfile.ZipFile(result, "r") as zipf:
             names = zipf.namelist()
             assert "subdir/nested.txt" in names
@@ -170,7 +173,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            create_archive(
+            result, failed_files = create_archive(
                 description="delete-test",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -180,6 +183,7 @@ class TestCreateArchive:
 
         # Verify file was deleted
         assert not test_file.exists()
+        assert failed_files == []
 
     def test_keeps_originals_by_default(self, tmp_path: Path):
         """Keeps source files by default (delete_originals=False)."""
@@ -190,7 +194,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            create_archive(
+            result, failed_files = create_archive(
                 description="keep-test",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -199,6 +203,7 @@ class TestCreateArchive:
 
         # Verify file still exists
         assert test_file.exists()
+        assert failed_files == []
 
     def test_raises_error_for_no_valid_files(self, tmp_path: Path):
         """Raises ValueError when no valid files are provided."""
@@ -222,7 +227,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            result = create_archive(
+            result, failed_files = create_archive(
                 description="partial-test",
                 files=[str(valid_file), "nonexistent.txt"],
                 archived_dir=archived_dir,
@@ -235,6 +240,11 @@ class TestCreateArchive:
             names = zipf.namelist()
             assert "valid.txt" in names
             assert "nonexistent.txt" not in names
+
+        # Verify failed files list contains the missing file
+        assert len(failed_files) == 1
+        assert "nonexistent.txt" in failed_files[0][0]
+        assert failed_files[0][1] == "File not found"
 
         # Verify warning was printed (uses format_warning from safe_output)
         captured = capsys.readouterr()
@@ -249,7 +259,7 @@ class TestCreateArchive:
         custom_dir = tmp_path / "custom_archive"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            result = create_archive(
+            result, failed_files = create_archive(
                 description="custom-dir",
                 files=[str(test_file)],
                 archived_dir=custom_dir,
@@ -258,6 +268,7 @@ class TestCreateArchive:
 
         assert str(custom_dir) in result
         assert Path(result).exists()
+        assert failed_files == []
 
     def test_creates_archived_structure_by_default(self, tmp_path: Path):
         """Creates CLAUDE.md and README.md in archive directory by default."""
@@ -268,7 +279,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "ARCHIVED"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            create_archive(
+            result, failed_files = create_archive(
                 description="structure-test",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -277,6 +288,7 @@ class TestCreateArchive:
 
         assert (archived_dir / "CLAUDE.md").exists()
         assert (archived_dir / "README.md").exists()
+        assert failed_files == []
 
     def test_skips_archived_structure_when_disabled(self, tmp_path: Path):
         """Skips CLAUDE.md and README.md when ensure_archived_structure=False."""
@@ -287,7 +299,7 @@ class TestCreateArchive:
         archived_dir = tmp_path / "plain_archive"
 
         with patch("archive_manager.get_repo_root", return_value=tmp_path):
-            create_archive(
+            result, failed_files = create_archive(
                 description="no-structure",
                 files=[str(test_file)],
                 archived_dir=archived_dir,
@@ -297,6 +309,7 @@ class TestCreateArchive:
 
         assert not (archived_dir / "CLAUDE.md").exists()
         assert not (archived_dir / "README.md").exists()
+        assert failed_files == []
 
     @pytest.mark.skipif(os.geteuid() == 0, reason="Root can read files regardless of permissions")
     def test_handles_permission_error_on_archive(self, tmp_path: Path, capsys):
@@ -313,7 +326,7 @@ class TestCreateArchive:
 
         try:
             with patch("archive_manager.get_repo_root", return_value=tmp_path):
-                result = create_archive(
+                result, failed_files = create_archive(
                     description="perm-test",
                     files=[str(readable_file), str(unreadable_file)],
                     archived_dir=archived_dir,
@@ -326,6 +339,10 @@ class TestCreateArchive:
                 names = zipf.namelist()
                 assert "readable.txt" in names
                 assert "unreadable.txt" not in names
+
+            # Verify failed files list contains the permission error
+            assert len(failed_files) == 1
+            assert "unreadable.txt" in failed_files[0][0]
 
             # Verify warning was printed
             captured = capsys.readouterr()

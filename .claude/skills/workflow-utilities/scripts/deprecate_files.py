@@ -42,6 +42,10 @@ def deprecate_files(todo_file, description, *files):
         description: Short description (e.g., 'old-auth-flow')
         *files: File paths to deprecate
 
+    Returns:
+        Tuple of (archive_path, failed_files) where failed_files is a list of
+        (file_path, error_message) tuples for files that could not be archived.
+
     Creates:
         ARCHIVED/YYYYMMDDTHHMMSSZ_<description>.zip
     """
@@ -72,4 +76,7 @@ if __name__ == "__main__":
         print("  archive_manager.py create --delete <description> <files...>")
         sys.exit(1)
 
-    deprecate_files(sys.argv[1], sys.argv[2], *sys.argv[3:])
+    archive_path, failed_files = deprecate_files(sys.argv[1], sys.argv[2], *sys.argv[3:])
+    # Exit with code 2 if there were partial failures
+    if failed_files:
+        sys.exit(2)

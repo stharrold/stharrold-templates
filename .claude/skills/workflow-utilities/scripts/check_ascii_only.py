@@ -8,6 +8,14 @@ compatibility across all platforms and terminals.
 
 Issue: #121
 
+Unicode normalization note:
+    This script assumes files are UTF-8 encoded in NFC (Canonical Composition)
+    form, which is Python's default. Characters like "e" can be represented as:
+      - U+00E9 (precomposed, NFC) - single code point
+      - U+0065 U+0301 (decomposed, NFD) - e + combining acute accent
+    The script detects both forms as non-ASCII since both contain code points
+    > 127. For consistent detection, ensure source files use NFC normalization.
+
 Usage:
     python check_ascii_only.py [--fix] [paths...]
 
@@ -26,16 +34,24 @@ import sys
 from pathlib import Path
 
 # ASCII replacements for common Unicode symbols
+#
+# Note on variant selectors (U+FE0F):
+# Some Unicode symbols have two representations - base form and emoji form.
+# The variant selector U+FE0F requests emoji presentation. For example:
+#   - U+26A0 (warning sign) = base form
+#   - U+26A0 U+FE0F (warning sign + VS16) = emoji presentation
+# Both variants are mapped to the same ASCII replacement to handle either form.
+# This applies to symbols like warning, info, trash can, etc.
 ASCII_REPLACEMENTS = {
     # Checkmarks and status
-    "\u2713": "[OK]",  # ✓
-    "\u2714": "[OK]",  # ✔
-    "\u2717": "[FAIL]",  # ✗
-    "\u2718": "[FAIL]",  # ✘
-    "\u26a0": "[WARN]",  # ⚠
-    "\u26a0\ufe0f": "[WARN]",  # ⚠️
-    "\u2139": "[INFO]",  # ℹ
-    "\u2139\ufe0f": "[INFO]",  # ℹ️
+    "\u2713": "[OK]",  # checkmark
+    "\u2714": "[OK]",  # heavy checkmark
+    "\u2717": "[FAIL]",  # ballot X
+    "\u2718": "[FAIL]",  # heavy ballot X
+    "\u26a0": "[WARN]",  # warning (base form)
+    "\u26a0\ufe0f": "[WARN]",  # warning (with variant selector)
+    "\u2139": "[INFO]",  # info (base form)
+    "\u2139\ufe0f": "[INFO]",  # info (with variant selector)
     # Arrows
     "\u2192": "->",  # →
     "\u2190": "<-",  # ←
