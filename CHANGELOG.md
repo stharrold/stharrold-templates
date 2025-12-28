@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **ASCII-only enforcement** (Issue #121) - Pre-commit hook validates Python files
+  - Added `check_ascii_only.py` script with 77 Unicode to ASCII mappings
+  - Replaced 363 Unicode violations across 28 files
+  - Pre-commit hook prevents regressions
+- **Shared archive creation** (Issue #123) - `archive_manager.py create` command
+  - Added `create_archive()` function with `--delete`, `--preserve-paths`, `--output-dir` options
+  - Shared by `deprecate_files.py` for code reuse
+  - Error handling for permission/symlink issues
+- **Pending worktree detection** (Issue #124) - Detects incomplete feature branches
+  - Added `PendingWorktree` TypedDict for structured data
+  - Non-blocking warnings in steps 5-7 for worktrees with unmerged commits
+  - Parses `git worktree list --porcelain` for accurate detection
+- **DuckDB required dependency** (Issue #125) - Moved from optional to required
+  - Added comprehensive tests for import, version, connection, query, table creation
+  - Version constraint: `duckdb>=1.4.2`
+
+### Changed
+- **Absolute path resolution** (Issue #122) - Consistent `get_repo_root()` pattern
+  - All scripts use `git rev-parse --show-toplevel` for repo root
+  - Proper use of `.resolve()` for canonical paths
+  - Archive paths handle relative input to absolute storage
+
+### Fixed
+- **Error handling** - Improved error handling across scripts
+  - `archive_manager.py`: Catch permission/symlink errors during zipfile.write()
+  - `check_ascii_only.py`: Handle OSError for file reading
+  - `verify_workflow_context.py`: Empty except clause documented
+
 ## [5.18.0] - 2025-12-20
 
 ### Added

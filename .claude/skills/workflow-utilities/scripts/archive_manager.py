@@ -143,9 +143,13 @@ def create_archive(
                 else:
                     archive_name = file_path.name
 
-                zipf.write(file_path, archive_name)
-                print(f"  Archived: {file_path}")
-                archived_count += 1
+                try:
+                    zipf.write(file_path, archive_name)
+                    print(f"  Archived: {file_path}")
+                    archived_count += 1
+                except (PermissionError, OSError) as e:
+                    print(f"  {format_warning(f'Could not archive {file_path}: {e}')}", file=sys.stderr)
+                    continue
 
                 if delete_originals:
                     file_path.unlink()

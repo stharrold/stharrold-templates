@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tests for archive_manager.py create_archive() function."""
 
+import os
 import sys
 import zipfile
 from pathlib import Path
@@ -296,3 +297,38 @@ class TestCreateArchive:
 
         assert not (archived_dir / "CLAUDE.md").exists()
         assert not (archived_dir / "README.md").exists()
+
+    @pytest.mark.skipif(os.geteuid() == 0, reason="Root can read files regardless of permissions")
+    def test_handles_permission_error_on_archive(self, tmp_path: Path, capsys):
+        """Handles files that can't be read due to permissions."""
+        # Create test files - one readable, one not
+        readable_file = tmp_path / "readable.txt"
+        readable_file.write_text("readable content")
+
+        unreadable_file = tmp_path / "unreadable.txt"
+        unreadable_file.write_text("secret content")
+        unreadable_file.chmod(0o000)
+
+        archived_dir = tmp_path / "ARCHIVED"
+
+        try:
+            with patch("archive_manager.get_repo_root", return_value=tmp_path):
+                result = create_archive(
+                    description="perm-test",
+                    files=[str(readable_file), str(unreadable_file)],
+                    archived_dir=archived_dir,
+                    timestamp="20251228T120000Z",
+                )
+
+            # Verify archive was created with readable file only
+            assert Path(result).exists()
+            with zipfile.ZipFile(result, "r") as zipf:
+                names = zipf.namelist()
+                assert "readable.txt" in names
+                assert "unreadable.txt" not in names
+
+            # Verify warning was printed
+            captured = capsys.readouterr()
+            assert "[WARN]" in captured.err
+        finally:
+            unreadable_file.chmod(0o644)  # Restore permissions for cleanup
