@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tests for check_ascii_only.py edge cases."""
 
+import os
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add the scripts directory to the path for imports
 sys.path.insert(
@@ -168,6 +171,7 @@ class TestCheckFile:
         assert len(errors) == 1
         assert "Unable to decode" in errors[0]
 
+    @pytest.mark.skipif(os.geteuid() == 0, reason="Root can read files regardless of permissions")
     def test_handles_permission_error(self, tmp_path: Path):
         """Handles files that can't be read."""
         test_file = tmp_path / "noperm.py"
