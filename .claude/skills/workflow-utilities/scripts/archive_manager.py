@@ -9,6 +9,8 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+from safe_output import format_warning
+
 
 def get_repo_root() -> Path:
     """Get the repository root directory as an absolute path."""
@@ -149,7 +151,7 @@ def create_archive(
                     file_path.unlink()
                     print(f"  Deleted: {file_path}")
             else:
-                print(f"  Warning: {file_path} not found", file=sys.stderr)
+                print(f"  {format_warning(f'{file_path} not found')}", file=sys.stderr)
 
     if archived_count == 0:
         # Remove empty archive
@@ -160,7 +162,7 @@ def create_archive(
     return str(zip_path)
 
 
-def list_archives(archived_dir="ARCHIVED"):
+def list_archives(archived_dir: str = "ARCHIVED") -> list[Path]:
     """List all archives with timestamps."""
     repo_root = get_repo_root()
 

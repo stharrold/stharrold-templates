@@ -235,9 +235,9 @@ class TestCreateArchive:
             assert "valid.txt" in names
             assert "nonexistent.txt" not in names
 
-        # Verify warning was printed
+        # Verify warning was printed (uses format_warning from safe_output)
         captured = capsys.readouterr()
-        assert "Warning" in captured.err
+        assert "[WARN]" in captured.err
 
     def test_uses_custom_output_directory(self, tmp_path: Path):
         """Uses custom output directory."""
