@@ -44,6 +44,7 @@ Exit codes:
 import argparse
 import shutil
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -56,6 +57,21 @@ from safe_output import (
     print_success,
     print_warning,
 )
+
+# Module-level constants to avoid duplication and make updates easier
+# These are the minimum versions required for the workflow system
+DEFAULT_DEV_DEPENDENCIES = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.6.0",
+]
+
+# Minimum number of skills expected in a complete workflow system.
+# The full system has 6+ skills (workflow-orchestrator, git-workflow-manager,
+# tech-stack-adapter, workflow-utilities, agentdb-state-manager, initialize-repository).
+# We require at least 3 to catch incomplete or corrupted installations.
+MIN_EXPECTED_SKILLS = 3
 
 
 def validate_source(source_path: Path) -> tuple[bool, str]:
@@ -83,8 +99,8 @@ def validate_source(source_path: Path) -> tuple[bool, str]:
 
     # Count skills
     skills = [d.name for d in skills_dir.iterdir() if d.is_dir()]
-    if len(skills) < 3:
-        return False, f"Source has incomplete workflow system ({len(skills)} skills)"
+    if len(skills) < MIN_EXPECTED_SKILLS:
+        return False, f"Source has incomplete workflow system ({len(skills)} skills, need {MIN_EXPECTED_SKILLS}+)"
 
     return True, f"Source validated ({len(skills)} skills found)"
 
@@ -133,7 +149,11 @@ def prompt_overwrite(target_path: Path) -> bool:
 
 
 def copy_skills(source_path: Path, target_path: Path, force: bool) -> int:
-    """Copy .claude/skills/ directory.
+    """Copy .claude/skills/ directory using atomic replacement.
+
+    Uses a two-phase approach for safety: copies to a temporary location first,
+    then replaces the target only if the copy succeeds. This prevents data loss
+    if the copy operation fails partway through.
 
     Args:
         source_path: Path to source repository
@@ -147,12 +167,19 @@ def copy_skills(source_path: Path, target_path: Path, force: bool) -> int:
 
     source_skills = source_path / ".claude" / "skills"
     target_skills = target_path / ".claude" / "skills"
+    target_skills.parent.mkdir(parents=True, exist_ok=True)
 
     if force and target_skills.exists():
-        shutil.rmtree(target_skills)
-
-    target_skills.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_skills, target_skills, dirs_exist_ok=True)
+        # Use atomic replacement: copy to temp, then swap
+        with tempfile.TemporaryDirectory(dir=target_skills.parent) as tmp_dir:
+            tmp_skills = Path(tmp_dir) / "skills"
+            shutil.copytree(source_skills, tmp_skills)
+            # Copy succeeded, now do the atomic swap
+            shutil.rmtree(target_skills)
+            shutil.move(str(tmp_skills), str(target_skills))
+    else:
+        # No existing directory or not force, just copy
+        shutil.copytree(source_skills, target_skills, dirs_exist_ok=True)
 
     # Count and report skills
     skills = [d.name for d in target_skills.iterdir() if d.is_dir()]
@@ -164,7 +191,11 @@ def copy_skills(source_path: Path, target_path: Path, force: bool) -> int:
 
 
 def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
-    """Copy .claude/commands/ directory.
+    """Copy .claude/commands/ directory using atomic replacement.
+
+    Uses a two-phase approach for safety: copies to a temporary location first,
+    then replaces the target only if the copy succeeds. This prevents data loss
+    if the copy operation fails partway through.
 
     Args:
         source_path: Path to source repository
@@ -183,11 +214,19 @@ def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
         print_warning("Source has no .claude/commands/ directory")
         return 0
 
-    if force and target_commands.exists():
-        shutil.rmtree(target_commands)
-
     target_commands.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source_commands, target_commands, dirs_exist_ok=True)
+
+    if force and target_commands.exists():
+        # Use atomic replacement: copy to temp, then swap
+        with tempfile.TemporaryDirectory(dir=target_commands.parent) as tmp_dir:
+            tmp_commands = Path(tmp_dir) / "commands"
+            shutil.copytree(source_commands, tmp_commands)
+            # Copy succeeded, now do the atomic swap
+            shutil.rmtree(target_commands)
+            shutil.move(str(tmp_commands), str(target_commands))
+    else:
+        # No existing directory or not force, just copy
+        shutil.copytree(source_commands, target_commands, dirs_exist_ok=True)
 
     # Count command files (*.md in workflow/)
     workflow_dir = target_commands / "workflow"
@@ -302,13 +341,8 @@ def merge_pyproject_toml(source_path: Path, target_path: Path) -> bool:
     dev_deps = extract_dev_deps_from_toml(source_data)
 
     if not dev_deps:
-        # Fallback: use standard dev deps
-        dev_deps = [
-            "pytest>=8.0.0",
-            "pytest-cov>=4.1.0",
-            "ruff>=0.1.0",
-            "pre-commit>=3.6.0",
-        ]
+        # Fallback: use module-level default dev deps
+        dev_deps = DEFAULT_DEV_DEPENDENCIES.copy()
 
     # Format dev deps for TOML output
     formatted_deps = ",\n    ".join(f'"{dep}"' for dep in dev_deps)
@@ -366,13 +400,28 @@ dev = [
     {formatted_deps},
 ]
 """
-    target_file.write_text(target_content + dev_section)
-    print_success("Added dev dependencies to pyproject.toml")
+    new_content = target_content + dev_section
+    target_file.write_text(new_content)
+
+    # Validate the resulting TOML is syntactically valid
+    try:
+        with target_file.open("rb") as f:
+            tomllib.load(f)
+        print_success("Added dev dependencies to pyproject.toml")
+    except tomllib.TOMLDecodeError as e:
+        print_warning(f"pyproject.toml may have syntax issues after merge: {e}")
+        print_warning("Please review the file manually")
+
     return True
 
 
 def merge_gitignore(source_path: Path, target_path: Path) -> bool:
     """Append workflow patterns to .gitignore, deduplicate.
+
+    Adds workflow-specific patterns (.claude-state/, .tmp/, *.duckdb) to the
+    target .gitignore file. Non-blank lines are deduplicated while preserving
+    order. Consecutive blank lines are collapsed to a single blank line to
+    maintain clean formatting.
 
     Args:
         source_path: Path to source repository
