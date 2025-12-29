@@ -64,7 +64,7 @@ Parse the tasks from plan.md and display:
 
 Record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_3_tasks \
   --source "specs/{slug}/plan.md"

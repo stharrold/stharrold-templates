@@ -66,7 +66,7 @@ git describe --tags --abbrev=0 origin/main
 
 Run workflow step:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 ```
 
 ## Available Steps
@@ -82,16 +82,16 @@ podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/b
 
 ```bash
 # 1. Create PR from release branch to develop (version auto-detected)
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop
 
 # Or specify version explicitly
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop --version v5.10.0
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop --version v5.10.0
 
 # 2. After PR approved and merged
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py rebase-contrib
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py rebase-contrib
 
 # 3. Cleanup release branch
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release
+uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release
 ```
 
 ## Key Features
@@ -125,7 +125,7 @@ If rebase conflicts occur:
 
 After cleanup, record the workflow transition:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_7_backmerge
 ```

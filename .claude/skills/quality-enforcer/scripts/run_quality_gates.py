@@ -3,18 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 """Run all quality gates and report results."""
 
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-# Add workflow-utilities to path for worktree_context and container_utils
+# Add workflow-utilities to path for worktree_context
 sys.path.insert(
     0,
     str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
 )
-
-from container_utils import get_command_prefix, get_uv_command_prefix
 
 
 def get_worktree_info() -> dict:
@@ -42,9 +39,8 @@ def run_tests():
     or are designed for performance measurement rather than correctness.
     """
     print("Running tests...")
-    prefix = get_command_prefix()
     result = subprocess.run(
-        prefix + ["pytest", "-v", "-m", "not integration and not benchmark"],
+        ["uv", "run", "pytest", "-v", "-m", "not integration and not benchmark"],
         capture_output=True,
         text=True,
     )
@@ -65,10 +61,9 @@ def check_coverage(threshold=80):
     """Check test coverage meets threshold."""
     print(f"Checking coverage (>={threshold}%)...")
 
-    # Call check_coverage.py script using repo-relative path for container compatibility
+    # Call check_coverage.py script using repo-relative path
     script_path = ".claude/skills/quality-enforcer/scripts/check_coverage.py"
-    prefix = get_command_prefix()
-    result = subprocess.run(prefix + ["python", script_path, str(threshold)], capture_output=True, text=True)
+    result = subprocess.run(["uv", "run", "python", script_path, str(threshold)], capture_output=True, text=True)
 
     passed = result.returncode == 0
     print(result.stdout)
@@ -79,8 +74,7 @@ def check_coverage(threshold=80):
 def check_build():
     """Verify package builds successfully."""
     print("Checking build...")
-    prefix = get_uv_command_prefix()
-    result = subprocess.run(prefix + ["build"], capture_output=True, text=True)
+    result = subprocess.run(["uv", "build"], capture_output=True, text=True)
 
     passed = result.returncode == 0
 
@@ -97,8 +91,7 @@ def check_linting():
     """Run ruff linting."""
     print("Checking linting...")
 
-    prefix = get_command_prefix()
-    result = subprocess.run(prefix + ["ruff", "check", "."], capture_output=True, text=True)
+    result = subprocess.run(["uv", "run", "ruff", "check", "."], capture_output=True, text=True)
 
     passed = result.returncode == 0
 
@@ -109,84 +102,6 @@ def check_linting():
         print(result.stdout)
 
     return passed
-
-
-def sync_ai_config():
-    """
-    Sync and verify AI configuration files.
-
-    Uses consolidated sync_ai_config utility for:
-    - CLAUDE.md -> AGENTS.md
-    - CLAUDE.md -> .github/copilot-instructions.md
-    - .claude/skills/ -> .agents/
-
-    Returns:
-        True if sync successful and files are in sync
-    """
-    print("Checking AI assistant configuration...")
-
-    try:
-        # Import consolidated sync utility
-        sync_utils_path = Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"
-        if str(sync_utils_path) not in sys.path:
-            sys.path.insert(0, str(sync_utils_path))
-
-        from sync_ai_config import sync_all, verify_sync
-
-        # First, sync any out-of-date files
-        success, modified = sync_all()
-
-        if not success:
-            print("[X] AI config sync failed")
-            return False
-
-        # Then verify everything is in sync
-        if not verify_sync():
-            print("[X] AI config verification failed - files still out of sync")
-            return False
-
-        print("[OK] AI assistant configuration synced and verified")
-        return True
-
-    except ImportError:
-        # Fallback to inline implementation if import fails
-        print("  [WARN] Using fallback sync (sync_ai_config.py not found)")
-
-        # Check if CLAUDE.md or .claude/ was modified
-        git_diff = subprocess.run(["git", "diff", "--name-only"], capture_output=True, text=True, check=False)
-        git_diff_staged = subprocess.run(["git", "diff", "--name-only", "--cached"], capture_output=True, text=True, check=False)
-        modified_files = git_diff.stdout + git_diff_staged.stdout
-        needs_sync = "CLAUDE.md" in modified_files or ".claude/" in modified_files
-
-        if not needs_sync:
-            print("[WARN] CLAUDE.md not modified, skipping sync")
-            return True
-
-        print("[INFO] CLAUDE.md modified - syncing to cross-tool formats...")
-
-        if Path("CLAUDE.md").exists():
-            shutil.copy("CLAUDE.md", "AGENTS.md")
-            print("  [OK] Synced CLAUDE.md -> AGENTS.md")
-            Path(".github").mkdir(exist_ok=True)
-            shutil.copy("CLAUDE.md", ".github/copilot-instructions.md")
-            print("  [OK] Synced CLAUDE.md -> .github/copilot-instructions.md")
-
-        if Path(".claude/skills").exists():
-            Path(".agents").mkdir(exist_ok=True)
-            for skill_dir in Path(".claude/skills").iterdir():
-                if skill_dir.is_dir():
-                    dest = Path(".agents") / skill_dir.name
-                    if dest.exists():
-                        shutil.rmtree(dest)
-                    shutil.copytree(skill_dir, dest)
-            print("  [OK] Synced .claude/skills/ -> .agents/")
-
-        print("[OK] AI assistant configuration synced")
-        return True
-
-    except Exception as e:
-        print(f"[WARN] Sync failed (non-critical): {e}")
-        return True  # Don't fail quality gates if sync fails
 
 
 def run_all_quality_gates(coverage_threshold=80):
@@ -211,33 +126,27 @@ def run_all_quality_gates(coverage_threshold=80):
     print("=" * 60)
 
     # Gate 1: Test Coverage
-    print("\n[1/5] Test Coverage...")
+    print("\n[1/4] Test Coverage...")
     passed = check_coverage(coverage_threshold)
     results["coverage"] = {"passed": passed}
     all_passed &= passed
 
     # Gate 2: Tests Passing
-    print("\n[2/5] Running Tests...")
+    print("\n[2/4] Running Tests...")
     passed = run_tests()
     results["tests"] = {"passed": passed}
     all_passed &= passed
 
     # Gate 3: Build
-    print("\n[3/5] Build Check...")
+    print("\n[3/4] Build Check...")
     passed = check_build()
     results["build"] = {"passed": passed}
     all_passed &= passed
 
     # Gate 4: Linting
-    print("\n[4/5] Linting...")
+    print("\n[4/4] Linting...")
     passed = check_linting()
     results["linting"] = {"passed": passed}
-    all_passed &= passed
-
-    # Gate 5: AI Assistant Configuration Sync
-    print("\n[5/5] AI Assistant Configuration...")
-    passed = sync_ai_config()
-    results["ai_config_sync"] = {"passed": passed}
     all_passed &= passed
 
     # Summary
@@ -274,7 +183,6 @@ def run_all_quality_gates(coverage_threshold=80):
                     "tests_passed": results.get("tests", {}).get("passed", False),
                     "build_passed": results.get("build", {}).get("passed", False),
                     "linting_passed": results.get("linting", {}).get("passed", False),
-                    "ai_config_sync_passed": results.get("ai_config_sync", {}).get("passed", False),
                 },
                 context={},
             )

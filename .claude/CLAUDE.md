@@ -19,13 +19,9 @@ Claude Code configuration root containing commands, skills, and settings.
 
 **This directory (`.claude/`) is the PRIMARY source for AI configuration.**
 
-Changes made here sync to:
-- `.agents/` (skills only)
-- `AGENTS.md` (from root CLAUDE.md)
-- `.github/copilot-instructions.md` (from root CLAUDE.md)
-
-Claude-specific content (NOT synced):
+Contents:
 - `commands/` - Claude Code slash commands
+- `skills/` - Modular skill implementations
 - `settings.local.json` - Local settings
 
 ## Contents

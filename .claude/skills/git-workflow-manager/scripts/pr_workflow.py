@@ -6,30 +6,24 @@ PR Workflow Enforcement Script
 
 Enforces the required workflow sequence:
 1. pr-finish-feature-to-contrib - Create PR from feature to contrib branch
-2. archive-todo - Archive the TODO file after PR merge
-3. copy-claude-to-agents - Sync CLAUDE.md to AGENTS.md and .agents/
-4. pr-start-contrib-to-develop - Create PR from contrib to develop
+2. pr-start-contrib-to-develop - Create PR from contrib to develop
 
 Usage:
-    podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py <step>
+    uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py <step>
 
 Steps:
     finish-feature    - Step 1: PR feature -> contrib (runs quality gates first)
-    archive-todo      - Step 2: Archive TODO file after merge
-    sync-agents       - Step 3: Sync CLAUDE.md -> AGENTS.md
-    start-develop     - Step 4: PR contrib -> develop
+    start-develop     - Step 2: PR contrib -> develop
     full              - Run all steps in sequence
     status            - Show current workflow status
 """
 
 import argparse
-import shutil
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
 
-# Add workflow-utilities to path for sync_ai_config
+# Add workflow-utilities to path for safe_output utilities
 sys.path.insert(
     0,
     str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
@@ -168,140 +162,20 @@ def step_finish_feature() -> bool:
             return False
 
     safe_print(format_check(f" Step 1 complete: PR created {current} -> {contrib}"))
-    print("\nNext: After PR is merged, run: pr_workflow.py archive-todo")
-    return True
-
-
-def step_archive_todo() -> bool:
-    """
-    Step 2: Archive the TODO file after PR merge.
-
-    Archives TODO*.md files to ARCHIVED/ with timestamp.
-    """
-    print("\n" + "=" * 60)
-    print("STEP 2: Archive TODO")
-    print("=" * 60)
-
-    # Find TODO files
-    todo_files = list(Path(".").glob("TODO*.md"))
-
-    if not todo_files:
-        safe_print(format_warning("  No TODO*.md files found to archive"))
-        return True
-
-    # Create ARCHIVED directory
-    archived_dir = Path("ARCHIVED")
-    archived_dir.mkdir(exist_ok=True)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    for todo_file in todo_files:
-        # Create archive name
-        archive_name = f"{timestamp}_{todo_file.name}"
-        archive_path = archived_dir / archive_name
-
-        print(f"  Archiving {todo_file} -> {archive_path}")
-        shutil.move(str(todo_file), str(archive_path))
-
-    # Commit the archive
-    run_cmd(["git", "add", "ARCHIVED/"], check=False)
-    run_cmd(["git", "add", "-u"], check=False)  # Stage deletions
-
-    result = run_cmd(
-        [
-            "git",
-            "commit",
-            "-m",
-            "chore: archive TODO files\n\n[BOT] Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
-        ],
-        check=False,
-    )
-
-    if result.returncode != 0 and "nothing to commit" not in result.stdout:
-        safe_print(format_warning(f"  Commit warning: {result.stderr}"))
-
-    safe_print(format_check(" Step 2 complete: TODO files archived"))
-    print("\nNext: Run: pr_workflow.py sync-agents")
-    return True
-
-
-def step_sync_agents() -> bool:
-    """
-    Step 3: Sync CLAUDE.md to AGENTS.md and .agents/.
-
-    Uses consolidated sync_ai_config utility for:
-    - CLAUDE.md -> AGENTS.md
-    - CLAUDE.md -> .github/copilot-instructions.md
-    - .claude/skills/ -> .agents/
-    """
-    print("\n" + "=" * 60)
-    print("STEP 3: Sync CLAUDE.md -> AGENTS.md")
-    print("=" * 60)
-
-    # Use consolidated sync utility
-    try:
-        from sync_ai_config import sync_all
-
-        success, modified = sync_all()
-
-        if not success:
-            safe_print(format_cross(" Sync failed"))
-            return False
-
-    except ImportError:
-        # Fallback to inline implementation if import fails
-        safe_print("  " + format_warning("  Using fallback sync (sync_ai_config.py not found)"))
-        if Path("CLAUDE.md").exists():
-            shutil.copy("CLAUDE.md", "AGENTS.md")
-            safe_print("  " + format_check(" CLAUDE.md -> AGENTS.md"))
-            Path(".github").mkdir(exist_ok=True)
-            shutil.copy("CLAUDE.md", ".github/copilot-instructions.md")
-            safe_print("  " + format_check(" CLAUDE.md -> .github/copilot-instructions.md"))
-        if Path(".claude/skills").exists():
-            Path(".agents").mkdir(exist_ok=True)
-            for skill_dir in Path(".claude/skills").iterdir():
-                if skill_dir.is_dir():
-                    dest = Path(".agents") / skill_dir.name
-                    if dest.exists():
-                        shutil.rmtree(dest)
-                    shutil.copytree(skill_dir, dest)
-            safe_print("  " + format_check(" .claude/skills/ -> .agents/"))
-        modified = True
-
-    # Commit the sync if files were modified
-    if modified:
-        run_cmd(["git", "add", "AGENTS.md", ".github/", ".agents/"], check=False)
-
-        result = run_cmd(
-            [
-                "git",
-                "commit",
-                "-m",
-                "chore: sync CLAUDE.md to cross-tool formats\n\n"
-                "[BOT] Generated with [Claude Code](https://claude.com/claude-code)\n\n"
-                "Co-Authored-By: Claude <noreply@anthropic.com>",
-            ],
-            check=False,
-        )
-
-        if result.returncode != 0 and "nothing to commit" not in result.stdout:
-            safe_print(format_warning(f"  Commit warning: {result.stderr}"))
-
-    safe_print(format_check(" Step 3 complete: AI config synced"))
-    print("\nNext: Run: pr_workflow.py start-develop")
+    print("\nNext: After PR is merged, run: pr_workflow.py start-develop")
     return True
 
 
 def step_start_develop() -> bool:
     """
-    Step 4: Create PR from contrib branch to develop.
+    Step 2: Create PR from contrib branch to develop.
 
     Prerequisites:
     - Must be on contrib/* branch
     - All previous steps complete
     """
     print("\n" + "=" * 60)
-    print("STEP 4: PR Contrib -> Develop")
+    print("STEP 2: PR Contrib -> Develop")
     print("=" * 60)
 
     current = get_current_branch()
@@ -367,28 +241,10 @@ def show_status():
     print(f"\nCurrent branch: {current}")
     print(f"Contrib branch: {contrib}")
 
-    # Check TODO files
-    todo_files = list(Path(".").glob("TODO*.md"))
-    print(f"\nTODO*.md files: {len(todo_files)}")
-    for f in todo_files:
-        print(f"  - {f}")
-
-    # Check AGENTS.md sync
-    agents_synced = Path("AGENTS.md").exists()
-    print(f"\nAGENTS.md exists: {'[OK]' if agents_synced else '[X]'}")
-
-    # Check .agents/ sync
-    agents_dir = Path(".agents").exists()
-    print(f".agents/ exists: {'[OK]' if agents_dir else '[X]'}")
-
     # Determine next step
     print("\n" + "-" * 40)
     if current.startswith("feature/"):
         print("Next step: pr_workflow.py finish-feature")
-    elif todo_files:
-        print("Next step: pr_workflow.py archive-todo")
-    elif not agents_synced:
-        print("Next step: pr_workflow.py sync-agents")
     elif current.startswith("contrib/"):
         print("Next step: pr_workflow.py start-develop")
     else:
@@ -403,8 +259,6 @@ def run_full_workflow():
 
     steps = [
         ("finish-feature", step_finish_feature),
-        ("archive-todo", step_archive_todo),
-        ("sync-agents", step_sync_agents),
         ("start-develop", step_start_develop),
     ]
 
@@ -427,14 +281,12 @@ def run_full_workflow():
 
 def main():
     parser = argparse.ArgumentParser(description="PR Workflow Enforcement", formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__)
-    parser.add_argument("step", choices=["finish-feature", "archive-todo", "sync-agents", "start-develop", "full", "status"], help="Workflow step to execute")
+    parser.add_argument("step", choices=["finish-feature", "start-develop", "full", "status"], help="Workflow step to execute")
 
     args = parser.parse_args()
 
     step_map = {
         "finish-feature": step_finish_feature,
-        "archive-todo": step_archive_todo,
-        "sync-agents": step_sync_agents,
         "start-develop": step_start_develop,
         "full": run_full_workflow,
         "status": show_status,

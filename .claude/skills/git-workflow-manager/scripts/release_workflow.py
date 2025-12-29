@@ -7,7 +7,7 @@ Release Workflow Script
 Creates a release from develop branch and deploys to production.
 
 Usage:
-    podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
+    uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
 
 Steps:
     create-release  - Create release branch from develop
@@ -23,13 +23,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Add workflow-utilities to path for container_utils
+# Add workflow-utilities to path for safe_output
 sys.path.insert(
     0,
     str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),
 )
-
-from container_utils import get_command_prefix
 
 # Safe cross-platform output
 from safe_output import safe_print
@@ -111,8 +109,7 @@ def run_quality_gates() -> bool:
         safe_print("[WARN]  Quality gates script not found, skipping")
         return True
 
-    prefix = get_command_prefix()
-    result = subprocess.run(prefix + ["python", str(script_path)], check=False)
+    result = subprocess.run(["uv", "run", "python", str(script_path)], check=False)
 
     return result.returncode == 0
 

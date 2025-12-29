@@ -357,10 +357,10 @@ python .claude/skills/bmad-planner/scripts/create_planning.py my-feature <userna
 python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature my-feature contrib/<username>
 
 # Phase 3: Quality
-podman-compose run --rm dev python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+uv run python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 
 # Phase 4-5: Integration & Release
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py full
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py full
 ```
 
 ### Slash Commands

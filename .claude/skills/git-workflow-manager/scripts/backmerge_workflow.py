@@ -14,7 +14,7 @@ Pattern:
                     `----> (delete release/* after merge)
 
 Usage:
-    podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
+    uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 
 Steps:
     pr-develop      - Create PR from release branch to develop

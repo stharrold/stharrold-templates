@@ -40,7 +40,7 @@ Parse `$ARGUMENTS` to determine mode:
 
 Run state query to get last known phase:
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py \
   --format json
 ```
 

@@ -89,7 +89,7 @@ git pull origin contrib/stharrold
 
 After PR is merged, cleanup the worktree (no TODO archival):
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py \
+uv run python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py \
   {slug} --no-archive
 ```
 
@@ -111,14 +111,14 @@ gh issue close {issue-number} --comment "Implemented in PR #{pr-number}"
 
 Sync CLAUDE.md to cross-tool formats:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py sync-agents
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py sync-agents
 ```
 
 ## Step 5: Create PR contrib → develop
 
 Create a pull request from contrib to develop:
 ```bash
-podman-compose run --rm dev python .claude/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
+uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
 ```
 
 **MANUAL GATE**: Wait for PR approval and merge in GitHub UI.
@@ -129,14 +129,14 @@ Record the workflow transition (use appropriate pattern based on mode):
 
 **Full mode:**
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_5_integrate
 ```
 
 **Contrib-Only mode:**
 ```bash
-podman-compose run --rm dev python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_5_integrate_contrib_only
 ```
