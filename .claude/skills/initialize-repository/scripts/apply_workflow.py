@@ -43,8 +43,8 @@ Exit codes:
 
 import argparse
 import shutil
-import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 # Add workflow-utilities to path for safe_output
@@ -56,27 +56,6 @@ from safe_output import (
     print_success,
     print_warning,
 )
-
-
-def get_repo_root(path: Path) -> Path:
-    """Get the repository root directory as an absolute path.
-
-    Args:
-        path: Any path within the repository
-
-    Returns:
-        Absolute path to repository root
-
-    Raises:
-        subprocess.CalledProcessError: If not a git repository
-    """
-    result = subprocess.run(
-        ["git", "-C", str(path), "rev-parse", "--show-toplevel"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return Path(result.stdout.strip()).resolve()
 
 
 def validate_source(source_path: Path) -> tuple[bool, str]:
@@ -253,8 +232,47 @@ def copy_documentation(source_path: Path, target_path: Path) -> list[str]:
     return copied
 
 
+def extract_dev_deps_from_toml(toml_data: dict) -> list[str]:
+    """Extract dev dependencies from parsed TOML data.
+
+    Checks multiple locations in order of preference:
+    1. [dependency-groups].dev (PEP 735, uv)
+    2. [tool.uv].dev-dependencies (older uv format)
+    3. [project.optional-dependencies].dev (setuptools/pip)
+
+    Args:
+        toml_data: Parsed TOML dictionary
+
+    Returns:
+        List of dependency strings, or empty list if not found
+    """
+    # Check [dependency-groups].dev (PEP 735)
+    if "dependency-groups" in toml_data:
+        dev = toml_data["dependency-groups"].get("dev", [])
+        if dev:
+            return list(dev)
+
+    # Check [tool.uv].dev-dependencies (older uv format)
+    if "tool" in toml_data and "uv" in toml_data["tool"]:
+        dev = toml_data["tool"]["uv"].get("dev-dependencies", [])
+        if dev:
+            return list(dev)
+
+    # Check [project.optional-dependencies].dev (setuptools/pip)
+    if "project" in toml_data:
+        optional = toml_data["project"].get("optional-dependencies", {})
+        dev = optional.get("dev", [])
+        if dev:
+            return list(dev)
+
+    return []
+
+
 def merge_pyproject_toml(source_path: Path, target_path: Path) -> bool:
     """Merge dev dependencies into target pyproject.toml.
+
+    Uses tomllib to properly parse TOML and extract dev dependencies
+    from multiple possible locations.
 
     Args:
         source_path: Path to source repository
@@ -272,22 +290,16 @@ def merge_pyproject_toml(source_path: Path, target_path: Path) -> bool:
         print_warning("Source has no pyproject.toml")
         return False
 
-    # Read source to extract dev dependencies
-    source_content = source_file.read_text()
+    # Parse source TOML properly using tomllib
+    try:
+        with source_file.open("rb") as f:
+            source_data = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        print_warning(f"Source pyproject.toml is invalid: {e}")
+        return False
 
-    # Extract dev dependencies from source (simple parsing)
-    dev_deps = []
-    in_dev_section = False
-    for line in source_content.split("\n"):
-        if "[dependency-groups]" in line or "[project.optional-dependencies]" in line:
-            in_dev_section = True
-            continue
-        if in_dev_section and line.startswith("["):
-            in_dev_section = False
-        if in_dev_section and line.strip().startswith('"'):
-            dep = line.strip().strip('",')
-            if dep:
-                dev_deps.append(dep)
+    # Extract dev dependencies from source
+    dev_deps = extract_dev_deps_from_toml(source_data)
 
     if not dev_deps:
         # Fallback: use standard dev deps
@@ -297,6 +309,9 @@ def merge_pyproject_toml(source_path: Path, target_path: Path) -> bool:
             "ruff>=0.1.0",
             "pre-commit>=3.6.0",
         ]
+
+    # Format dev deps for TOML output
+    formatted_deps = ",\n    ".join(f'"{dep}"' for dep in dev_deps)
 
     if not target_file.exists():
         # Create minimal pyproject.toml
@@ -310,10 +325,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "pytest>=8.0.0",
-    "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "pre-commit>=3.6.0",
+    {formatted_deps},
 ]
 
 [tool.pytest.ini_options]
@@ -331,26 +343,31 @@ select = ["E", "F", "I", "N", "W", "B", "UP"]
         print_success("Created pyproject.toml with dev dependencies")
         return True
 
-    # Read existing target
-    target_content = target_file.read_text()
-
-    # Check if dev section exists
-    if "[dependency-groups]" not in target_content and "[project.optional-dependencies]" not in target_content:
-        # Append dev section
-        dev_section = """
-[dependency-groups]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "pre-commit>=3.6.0",
-]
-"""
-        target_file.write_text(target_content + dev_section)
-        print_success("Added dev dependencies to pyproject.toml")
+    # Parse target TOML to check for existing dev section
+    try:
+        with target_file.open("rb") as f:
+            target_data = tomllib.load(f)
+    except tomllib.TOMLDecodeError:
+        # If target is invalid, preserve it as-is and warn
+        print_warning("Target pyproject.toml is invalid, preserving as-is")
         return True
 
-    print_success("pyproject.toml already has dev dependencies (preserved)")
+    # Check if dev section already exists
+    existing_deps = extract_dev_deps_from_toml(target_data)
+    if existing_deps:
+        print_success("pyproject.toml already has dev dependencies (preserved)")
+        return True
+
+    # Append dev section to target
+    target_content = target_file.read_text()
+    dev_section = f"""
+[dependency-groups]
+dev = [
+    {formatted_deps},
+]
+"""
+    target_file.write_text(target_content + dev_section)
+    print_success("Added dev dependencies to pyproject.toml")
     return True
 
 
@@ -400,13 +417,24 @@ def merge_gitignore(source_path: Path, target_path: Path) -> bool:
             if pattern and not pattern.startswith("#"):
                 added.append(pattern)
 
-    # Deduplicate while preserving order
+    # Deduplicate non-blank lines while preserving order
+    # Blank lines are preserved but consecutive blanks are collapsed to one
     seen = set()
     unique_lines = []
+    prev_was_blank = False
     for line in existing_lines:
-        if line not in seen:
-            seen.add(line)
-            unique_lines.append(line)
+        is_blank = line == ""
+        if is_blank:
+            # Collapse consecutive blank lines to one
+            if not prev_was_blank:
+                unique_lines.append(line)
+            prev_was_blank = True
+        else:
+            # Deduplicate non-blank lines
+            if line not in seen:
+                seen.add(line)
+                unique_lines.append(line)
+            prev_was_blank = False
 
     # Write back
     target_file.write_text("\n".join(unique_lines))
