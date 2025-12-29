@@ -139,9 +139,9 @@ See `secrets.toml` for secret definitions.
 │   ├── guides/             # Production guides
 │   ├── research/           # Exploratory documents
 │   └── reference/          # Reference materials
-├── .claude/skills/         # AI workflow skills
-├── specs/                  # Feature specifications
-└── tools/                  # Utility scripts
+├── .claude/skills/         # AI workflow skills (6 active)
+├── scripts/                # Utility scripts (secrets, run helpers)
+└── ARCHIVED/               # Archived specs, planning docs, deprecated code
 ```
 
 ## License
