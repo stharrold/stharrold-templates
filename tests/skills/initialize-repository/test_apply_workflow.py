@@ -169,6 +169,15 @@ class TestValidateTarget:
         assert valid
         assert "git repository" in message
 
+    def test_succeeds_when_git_worktree(self, tmp_path: Path):
+        """Succeeds when target is a git worktree (.git is a file, not directory)."""
+        # Worktrees have a .git file pointing to the main repo's .git/worktrees/
+        git_file = tmp_path / ".git"
+        git_file.write_text("gitdir: /some/path/.git/worktrees/my-worktree")
+        valid, message = validate_target(tmp_path)
+        assert valid
+        assert "git repository" in message
+
 
 class TestMergeGitignore:
     """Tests for merge_gitignore()."""

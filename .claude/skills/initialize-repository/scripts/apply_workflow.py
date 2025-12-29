@@ -42,6 +42,7 @@ Exit codes:
 """
 
 import argparse
+import os
 import shutil
 import sys
 import tempfile
@@ -49,7 +50,14 @@ import tomllib
 from pathlib import Path
 
 # Add workflow-utilities to path for safe_output
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
+# Use resolve() to get canonical path and validate it's within expected structure
+_script_dir = Path(__file__).resolve().parent
+_skills_dir = _script_dir.parent.parent
+_utils_path = (_skills_dir / "workflow-utilities" / "scripts").resolve()
+# Validate path is within skills directory (prevents path traversal attacks)
+if not str(_utils_path).startswith(str(_skills_dir.resolve())):
+    raise RuntimeError("Invalid path: workflow-utilities not in expected location")
+sys.path.insert(0, str(_utils_path))
 from safe_output import (
     SYMBOLS,
     print_error,
@@ -121,9 +129,10 @@ def validate_target(target_path: Path) -> tuple[bool, str]:
         return False, f"Target path is not a directory: {target_path}"
 
     # Check if it's a git repository
-    git_dir = target_path / ".git"
-    if not git_dir.exists():
-        return False, "Target is not a git repository (no .git directory)"
+    # Note: .git can be a directory (normal repo) or a file (worktree)
+    git_path = target_path / ".git"
+    if not git_path.exists():
+        return False, "Target is not a git repository (no .git)"
 
     return True, "Target validated (git repository)"
 
@@ -170,16 +179,32 @@ def copy_skills(source_path: Path, target_path: Path, force: bool) -> int:
     target_skills.parent.mkdir(parents=True, exist_ok=True)
 
     if force and target_skills.exists():
-        # Use atomic replacement: copy to temp, then swap
+        # Use atomic replacement with backup: copy to temp, rename old to backup,
+        # rename temp to target, delete backup. This prevents race conditions.
         with tempfile.TemporaryDirectory(dir=target_skills.parent) as tmp_dir:
             tmp_skills = Path(tmp_dir) / "skills"
-            shutil.copytree(source_skills, tmp_skills)
-            # Copy succeeded, now do the atomic swap
-            shutil.rmtree(target_skills)
-            shutil.move(str(tmp_skills), str(target_skills))
+            backup_skills = target_skills.parent / f"skills.backup.{os.getpid()}"
+            try:
+                shutil.copytree(source_skills, tmp_skills)
+                # Atomic rename: old -> backup
+                target_skills.rename(backup_skills)
+                try:
+                    # Atomic rename: temp -> target
+                    shutil.move(str(tmp_skills), str(target_skills))
+                    # Success - remove backup
+                    shutil.rmtree(backup_skills)
+                except Exception:
+                    # Restore from backup if move failed
+                    backup_skills.rename(target_skills)
+                    raise
+            except PermissionError as e:
+                raise PermissionError(f"Permission denied copying skills: {e}") from e
     else:
         # No existing directory or not force, just copy
-        shutil.copytree(source_skills, target_skills, dirs_exist_ok=True)
+        try:
+            shutil.copytree(source_skills, target_skills, dirs_exist_ok=True)
+        except PermissionError as e:
+            raise PermissionError(f"Permission denied copying skills: {e}") from e
 
     # Count and report skills
     skills = [d.name for d in target_skills.iterdir() if d.is_dir()]
@@ -217,16 +242,32 @@ def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
     target_commands.parent.mkdir(parents=True, exist_ok=True)
 
     if force and target_commands.exists():
-        # Use atomic replacement: copy to temp, then swap
+        # Use atomic replacement with backup: copy to temp, rename old to backup,
+        # rename temp to target, delete backup. This prevents race conditions.
         with tempfile.TemporaryDirectory(dir=target_commands.parent) as tmp_dir:
             tmp_commands = Path(tmp_dir) / "commands"
-            shutil.copytree(source_commands, tmp_commands)
-            # Copy succeeded, now do the atomic swap
-            shutil.rmtree(target_commands)
-            shutil.move(str(tmp_commands), str(target_commands))
+            backup_commands = target_commands.parent / f"commands.backup.{os.getpid()}"
+            try:
+                shutil.copytree(source_commands, tmp_commands)
+                # Atomic rename: old -> backup
+                target_commands.rename(backup_commands)
+                try:
+                    # Atomic rename: temp -> target
+                    shutil.move(str(tmp_commands), str(target_commands))
+                    # Success - remove backup
+                    shutil.rmtree(backup_commands)
+                except Exception:
+                    # Restore from backup if move failed
+                    backup_commands.rename(target_commands)
+                    raise
+            except PermissionError as e:
+                raise PermissionError(f"Permission denied copying commands: {e}") from e
     else:
         # No existing directory or not force, just copy
-        shutil.copytree(source_commands, target_commands, dirs_exist_ok=True)
+        try:
+            shutil.copytree(source_commands, target_commands, dirs_exist_ok=True)
+        except PermissionError as e:
+            raise PermissionError(f"Permission denied copying commands: {e}") from e
 
     # Count command files (*.md in workflow/)
     workflow_dir = target_commands / "workflow"
