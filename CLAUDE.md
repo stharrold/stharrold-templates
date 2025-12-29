@@ -60,19 +60,6 @@ Hooks run automatically on commit:
 - skill structure validation
 - **SPDX license headers** - Validates Apache 2.0 headers on all Python files
 
-## Quality Gates (4 gates, all must pass before PR)
-
-```bash
-uv run python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
-```
-
-| Gate | Description |
-|------|-------------|
-| 1. Coverage | ≥80% test coverage |
-| 2. Tests | All pytest tests pass |
-| 3. Build | `uv build` succeeds |
-| 4. Linting | `ruff check .` clean |
-
 ## Test Organization
 
 ```
@@ -80,7 +67,7 @@ tests/
 ├── unit/           # Single component tests
 ├── contract/       # Interface compliance tests
 ├── integration/    # End-to-end scenarios
-└── skills/         # Skill-specific tests (quality-enforcer, git-workflow-manager)
+└── skills/         # Skill-specific tests (git-workflow-manager, workflow-utilities)
 ```
 
 Run specific test categories:
@@ -90,65 +77,35 @@ uv run pytest tests/contract/ -v        # Contract tests only
 uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (default in quality gates)
 ```
 
-## PR Workflow (Enforced Sequence)
+## v6 Workflow (feature-dev)
 
-```bash
-# Step 1: PR feature → contrib (runs quality gates)
-uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
+Streamlined 4-phase workflow using Claude's feature-dev plugin:
 
-# Step 2: PR contrib → develop
-uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
-
-# Or run all steps
-uv run python .claude/skills/git-workflow-manager/scripts/pr_workflow.py full
+```
+/workflow:v6_1_worktree "feature description"
+    | creates worktree, user runs /feature-dev in worktree
+    v
+/workflow:v6_2_integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+    | PR feature->contrib->develop
+    v
+/workflow:v6_3_release
+    | create release, PR to main, tag
+    v
+/workflow:v6_4_backmerge
+    | PR release->develop, rebase contrib, cleanup
 ```
 
-## Slash Commands
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/workflow:v6_1_worktree "desc"` | Create worktree, prompt for /feature-dev |
+| 2 | `/workflow:v6_2_integrate ["branch"]` | PR feature->contrib->develop |
+| 3 | `/workflow:v6_3_release` | Create release (develop->release->main) |
+| 4 | `/workflow:v6_4_backmerge` | Sync release (PR to develop, rebase contrib) |
 
-**Orchestrator**: `/workflow/all` - Run complete workflow with auto-detection and manual gate pauses
-
-**Feature Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate`
-
-**Release Workflow**: `/6_release` → `/7_backmerge`
-
-| Command | Purpose |
-|---------|---------|
-| `/workflow/all` | Orchestrate full workflow (auto-detect state, pause at PR gates) |
-| `/workflow/all new "desc"` | Start new feature from scratch |
-| `/workflow/all release` | Run release workflow (steps 6-7) |
-| `/workflow/all continue` | Resume after PR merge |
-
-| Step | Command | Navigation | Purpose |
-|------|---------|------------|---------|
-| 1 | `/1_specify` | (start) → 1 → 2 | Create feature branch and specification |
-| 2 | `/2_plan` | 1 → 2 → 3 | Generate specs via speckit-author |
-| 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
-| 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
-| 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs, cleanup worktree |
-| 5b | `/5_integrate from contrib to develop` | contrib → 6 | PR contrib→develop only (no worktree) |
-| 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
-| 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
-
-## Workflow Context Validation
-
-Each workflow step validates that it is running in the correct location/branch:
-
-```bash
-# Validate context before running a step
-python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
-```
-
-| Step | Location | Branch | Validation |
-|------|----------|--------|------------|
-| `/1_specify` | Main repo | `contrib/*` | `--step 1` |
-| `/2_plan` | **Worktree** | `feature/*` | `--step 2` |
-| `/3_tasks` | **Worktree** | `feature/*` | `--step 3` |
-| `/4_implement` | **Worktree** | `feature/*` | `--step 4` |
-| `/5_integrate` | Main repo | `contrib/*` | `--step 5` |
-| `/6_release` | Main repo | `contrib/*` | `--step 6` |
-| `/7_backmerge` | Main repo | `contrib/*` | `--step 7` |
-
-**Key rule**: Steps 2-4 must run in the feature worktree, not the main repo.
+**Key differences from old v1-v7 workflow:**
+- No BMAD planning or SpecKit specifications (feature-dev handles planning)
+- No quality gates (feature-dev's code review phase ensures quality)
+- Simplified 4-step flow instead of 7 steps
 
 ## Core Architecture
 
@@ -180,21 +137,23 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | Step 6 creates → Step 7 deletes after backmerge |
+| `release/*` | Ephemeral | v6_3_release creates, v6_4_backmerge deletes |
 
-### Skills System (9 skills in `.claude/skills/`)
+### Skills System (6 skills in `.claude/skills/`)
 
 | Skill | Purpose |
 |-------|---------|
 | workflow-orchestrator | Main coordinator, templates |
 | git-workflow-manager | Worktrees, PRs, semantic versioning |
-| quality-enforcer | Quality gates (4 gates) |
-| bmad-planner | Requirements + architecture |
-| speckit-author | Specifications |
 | tech-stack-adapter | Python/uv/Podman detection |
 | workflow-utilities | Archive, directory structure |
 | agentdb-state-manager | Workflow state tracking (AgentDB) |
 | initialize-repository | Bootstrap new repos |
+
+**Archived skills** (see `ARCHIVED/`):
+- bmad-planner - Replaced by feature-dev plugin
+- speckit-author - Replaced by feature-dev plugin
+- quality-enforcer - Replaced by feature-dev code review
 
 ### Document Lifecycle
 
@@ -250,27 +209,18 @@ uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --target "worktree"
 ```
 
-## Workflow Artifact Directories
+## Feature Development (v6 Workflow)
 
-**IMPORTANT**: Different workflow phases create artifacts in different locations:
+**v6 uses Claude's feature-dev plugin** instead of BMAD planning documents.
 
-| Directory | Created By | Purpose | Location |
-|-----------|------------|---------|----------|
-| `planning/{slug}/` | `/1_specify` | Initial requirements (BMAD docs) | Main repo |
-| `specs/{slug}/` | `/2_plan` | Detailed specs and task lists | Feature worktree |
+**Workflow:**
+1. `/workflow:v6_1_worktree "desc"` - Creates feature worktree
+2. User runs `/feature-dev "desc"` in worktree - Claude handles planning, architecture, implementation, code review
+3. `/workflow:v6_2_integrate "branch"` - PRs feature->contrib->develop
+4. `/workflow:v6_3_release` - Creates release->main with tag
+5. `/workflow:v6_4_backmerge` - Syncs release to develop, rebases contrib
 
-**Workflow artifact flow:**
-```
-/1_specify (main repo)     /2_plan (worktree)        /3_tasks (worktree)
-        │                         │                         │
-        ▼                         ▼                         ▼
-planning/{slug}/           specs/{slug}/              specs/{slug}/
-├── requirements.md        ├── spec.md                ├── plan.md (validated)
-├── architecture.md        ├── plan.md                └── tasks.md
-└── epics.md               └── CLAUDE.md
-```
-
-**Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
+**Key difference from v1-v7**: No separate planning artifacts. feature-dev handles everything in a single guided session.
 
 ## MCP Configuration Paths
 
@@ -327,8 +277,7 @@ azure_devops:
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow PR workflow sequence**: finish-feature -> start-develop
-- **Quality gates must pass** before creating any PR
+- **Follow v6 workflow sequence**: v6_1_worktree -> feature-dev -> v6_2_integrate -> v6_3_release -> v6_4_backmerge
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
 - **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
 - **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)

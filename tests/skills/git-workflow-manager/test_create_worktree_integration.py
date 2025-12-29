@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Integration tests for git-workflow-manager create_worktree.py.
 
-These tests verify the full workflow of worktree creation with
-planning document verification using real git repositories.
+These tests verify the full workflow of worktree creation using real git repositories.
+Note: v6 workflow removed planning verification (feature-dev handles planning).
 """
 
 import os
@@ -98,41 +98,20 @@ def git_repo_with_remote(tmp_path):
 
 
 class TestCreateWorktreeIntegration:
-    """Integration tests for worktree creation with planning verification."""
+    """Integration tests for worktree creation (v6 workflow)."""
 
-    def test_full_workflow_with_committed_planning(self, git_repo_with_remote):
-        """Should create worktree when planning docs committed and pushed."""
+    def test_feature_worktree_creation(self, git_repo_with_remote):
+        """Should create feature worktree without planning verification (v6 workflow)."""
         from create_worktree import create_worktree
 
         local_path = git_repo_with_remote
-
-        # Create and commit planning directory
-        planning_dir = local_path / "planning" / "test-feature"
-        planning_dir.mkdir(parents=True)
-        (planning_dir / "requirements.md").write_text("# Requirements\n\nTest feature requirements.")
-        (planning_dir / "architecture.md").write_text("# Architecture\n\nTest feature architecture.")
-        (planning_dir / "epics.md").write_text("# Epics\n\nE-001: Core implementation")
-
-        subprocess.run(["git", "add", "."], cwd=local_path, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", "docs(planning): add planning for test-feature"],
-            cwd=local_path,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "push"],
-            cwd=local_path,
-            check=True,
-            capture_output=True,
-        )
 
         # Change to repo directory for create_worktree
         original_cwd = os.getcwd()
         try:
             os.chdir(local_path)
 
-            # This should succeed
+            # v6: This should succeed without planning docs
             result = create_worktree("feature", "test-feature", "contrib/testuser")
 
             assert "worktree_path" in result
@@ -150,49 +129,77 @@ class TestCreateWorktreeIntegration:
         finally:
             os.chdir(original_cwd)
 
-    def test_full_workflow_fails_uncommitted_planning(self, git_repo_with_remote):
-        """Should fail worktree creation when planning docs not committed."""
+    def test_feature_worktree_no_planning_required(self, git_repo_with_remote):
+        """v6 workflow: feature worktree creation does NOT require planning docs."""
         from create_worktree import create_worktree
 
         local_path = git_repo_with_remote
 
-        # Create planning directory but DON'T commit
-        planning_dir = local_path / "planning" / "uncommitted-feature"
-        planning_dir.mkdir(parents=True)
-        (planning_dir / "requirements.md").write_text("# Requirements\n\nUncommitted.")
-
-        # Change to repo directory for create_worktree
+        # No planning directory - should still work (v6 uses feature-dev plugin)
         original_cwd = os.getcwd()
         try:
             os.chdir(local_path)
 
-            # This should fail with clear error message
-            with pytest.raises(ValueError) as exc_info:
-                create_worktree("feature", "uncommitted-feature", "contrib/testuser")
+            # This should succeed (v6 workflow removed planning verification)
+            result = create_worktree("feature", "no-planning-feature", "contrib/testuser")
 
-            error_msg = str(exc_info.value)
-            assert "Uncommitted changes detected" in error_msg
-            assert "planning/uncommitted-feature/" in error_msg
+            assert "worktree_path" in result
+            assert "no-planning-feature" in result["branch_name"]
+            assert Path(result["worktree_path"]).exists()
+
+            # Cleanup: remove worktree
+            subprocess.run(
+                ["git", "worktree", "remove", result["worktree_path"], "--force"],
+                cwd=local_path,
+                check=False,
+                capture_output=True,
+            )
         finally:
             os.chdir(original_cwd)
 
-    def test_release_worktree_skips_planning_check(self, git_repo_with_remote):
-        """Should allow release worktree creation without planning docs."""
+    def test_release_worktree_creation(self, git_repo_with_remote):
+        """Should allow release worktree creation."""
         from create_worktree import create_worktree
 
         local_path = git_repo_with_remote
 
-        # No planning directory - release should still work
         original_cwd = os.getcwd()
         try:
             os.chdir(local_path)
 
-            # This should succeed (release doesn't need planning)
-            # Note: slug validation doesn't allow dots, so use valid version slug
+            # Release worktrees should work
             result = create_worktree("release", "v1-0-0", "contrib/testuser")
 
             assert "worktree_path" in result
             assert "release" in result["branch_name"]
+
+            # Cleanup: remove worktree
+            subprocess.run(
+                ["git", "worktree", "remove", result["worktree_path"], "--force"],
+                cwd=local_path,
+                check=False,
+                capture_output=True,
+            )
+        finally:
+            os.chdir(original_cwd)
+
+    def test_worktree_creates_state_directory(self, git_repo_with_remote):
+        """Should create .claude-state directory in worktree."""
+        from create_worktree import create_worktree
+
+        local_path = git_repo_with_remote
+
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(local_path)
+
+            result = create_worktree("feature", "state-test", "contrib/testuser")
+
+            worktree_path = Path(result["worktree_path"])
+            state_dir = worktree_path / ".claude-state"
+            assert state_dir.exists()
+            assert (state_dir / ".gitignore").exists()
+            assert (state_dir / ".worktree-id").exists()
 
             # Cleanup: remove worktree
             subprocess.run(
