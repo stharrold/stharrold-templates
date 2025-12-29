@@ -8,7 +8,6 @@ children:
   - .claude/CLAUDE.md
   - docs/CLAUDE.md
   - tests/CLAUDE.md
-  - specs/CLAUDE.md
 ---
 
 # CLAUDE.md
@@ -204,9 +203,9 @@ uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.
 # Record workflow transition (called by slash commands)
 uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_1_specify \
-  --source "planning/{slug}" \
-  --target "worktree"
+  --pattern v6_1_worktree \
+  --source "contrib/stharrold" \
+  --target "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
 
 ## Feature Development (v6 Workflow)
@@ -492,13 +491,7 @@ python stharrold-templates/.claude/skills/initialize-repository/scripts/initiali
 - `docs/reference/workflow-*.md` - Phase-specific workflow docs (≤20KB each)
 - `ARCHITECTURE.md` - System architecture analysis
 - `CHANGELOG.md` - Version history
-- `specs/` - Feature specifications with design artifacts
-- `specs/STATUS.md` - Specification status tracking (completed/active/paused/abandoned)
-
-Archive completed specs:
-```bash
-uv run python .claude/skills/git-workflow-manager/scripts/archive_spec.py <spec-id>
-```
+- `ARCHIVED/` - Archived specs, planning docs, and deprecated skills (zipped)
 
 ## CLAUDE.md Hierarchy
 
