@@ -4,6 +4,21 @@
 # Build:  podman build -t stharrold-templates .
 # Run:    podman run --rm -v .:/app stharrold-templates <command>
 # Shell:  podman run --rm -it -v .:/app stharrold-templates bash
+#
+# Secrets Management:
+#   Secrets are detected via environment variables at runtime.
+#   The container auto-detects it's running in a container environment.
+#
+#   Podman (recommended - uses secrets store):
+#     podman run --secret db_pass,type=env,target=DB_PASSWORD \
+#                --secret api_key,type=env,target=API_KEY \
+#                -v .:/app stharrold-templates uv run scripts/run.py pytest
+#
+#   Docker/Podman (direct env vars):
+#     docker run -e DB_PASSWORD="$DB_PASSWORD" -e API_KEY="$API_KEY" \
+#                -v .:/app stharrold-templates uv run scripts/run.py pytest
+#
+#   See secrets.toml for required/optional secret definitions.
 
 FROM python:3.11-slim
 

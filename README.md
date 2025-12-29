@@ -56,6 +56,70 @@ Common operations:
 | `ruff check .` | Lint code |
 | `python mcp_manager.py --status` | Check MCP configuration |
 
+## Secrets Management
+
+Cross-platform secrets management using environment variables with keyring fallback.
+
+### Setup (Local Development)
+
+```bash
+# Configure secrets in OS keyring (one-time)
+uv run scripts/secrets_setup.py
+
+# Verify secrets are configured
+uv run scripts/secrets_setup.py --check
+```
+
+### Usage
+
+```bash
+# Run any command with secrets injected
+uv run scripts/run.py <command> [args...]
+
+# Examples
+uv run scripts/run.py uv run pytest
+uv run scripts/run.py python main.py
+```
+
+### How It Works
+
+1. **Environment variable set** -> uses it (allows external injection)
+2. **CI detected** -> requires env vars (GitHub Actions, Azure DevOps, etc.)
+3. **Container detected** -> requires env vars (Docker, Podman)
+4. **Local development** -> fetches from OS keyring
+
+### Platform Notes
+
+| Platform | Keyring Backend |
+|----------|-----------------|
+| macOS | Keychain (automatic) |
+| Windows | Credential Manager (automatic) |
+| Linux | libsecret/KWallet (may require: `apt install libsecret-1-0`) |
+
+### CI/CD Configuration
+
+**GitHub Actions** - Set secrets in repository settings, map to env vars:
+```yaml
+env:
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  API_KEY: ${{ secrets.API_KEY }}
+```
+
+**Azure DevOps** - Use variable groups or pipeline variables:
+```yaml
+env:
+  DB_PASSWORD: $(DB_PASSWORD)
+  API_KEY: $(API_KEY)
+```
+
+**Containers** - Inject at runtime:
+```bash
+podman run --secret db_pass,type=env,target=DB_PASSWORD ...
+docker run -e DB_PASSWORD="$DB_PASSWORD" ...
+```
+
+See `secrets.toml` for secret definitions.
+
 ## Documentation
 
 | Document | Purpose |
