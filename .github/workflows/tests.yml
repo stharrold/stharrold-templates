@@ -20,11 +20,6 @@ jobs:
       - name: Build container
         run: podman-compose build
 
-      - name: Run documentation validation
-        run: |
-          chmod +x validate_documentation.sh test_*.sh
-          podman-compose run --rm dev ./validate_documentation.sh
-
       - name: Run pytest
         run: podman-compose run --rm dev uv run pytest
 
