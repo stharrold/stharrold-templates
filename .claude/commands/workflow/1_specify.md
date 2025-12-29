@@ -59,11 +59,10 @@ This creates `planning/{slug}/` with:
 
 ## Step 4: Create Feature Worktree
 
-Create an isolated worktree for development (no TODO file):
+Create an isolated worktree for development:
 ```bash
 uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
-  feature {slug} contrib/stharrold \
-  --no-todo
+  feature {slug} contrib/stharrold
 ```
 
 This creates:

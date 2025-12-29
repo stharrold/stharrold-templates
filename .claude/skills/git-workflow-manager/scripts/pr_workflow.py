@@ -23,7 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Add workflow-utilities to path for sync_ai_config
+# Add workflow-utilities to path for safe_output utilities
 sys.path.insert(
     0,
     str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"),

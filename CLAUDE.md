@@ -206,9 +206,9 @@ docs/research/ → docs/guides/ → docs/archived/
 ## Git Workflow Commands
 
 ```bash
-# Create feature worktree (no TODO file by default)
+# Create feature worktree
 uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
-  feature my-feature contrib/stharrold --no-todo
+  feature my-feature contrib/stharrold
 
 # Semantic version calculation
 uv run python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
