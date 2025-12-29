@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # dependencies = ["keyring>=24.0.0"]
 # ///
 # SPDX-FileCopyrightText: 2025 stharrold
@@ -29,20 +29,27 @@ from __future__ import annotations
 
 import getpass
 import os
+import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import keyring
 
 
-def get_script_dir() -> Path:
-    """Get the directory containing this script."""
-    return Path(__file__).parent.resolve()
-
-
 def get_repo_root() -> Path:
-    """Get the repository root directory."""
-    return get_script_dir().parent
+    """Get the repository root directory as an absolute path."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return Path(result.stdout.strip()).resolve()
+    except subprocess.CalledProcessError:
+        # Fallback to script parent if not in git repo
+        return Path(__file__).parent.parent.resolve()
 
 
 def load_secrets_config() -> dict:
@@ -53,72 +60,76 @@ def load_secrets_config() -> dict:
     """
     config_path = get_repo_root() / "secrets.toml"
     if not config_path.exists():
-        print("[FAIL] secrets.toml not found at:", config_path)
+        print(f"[FAIL] secrets.toml not found at: {config_path}")
+        print()
+        print("This file is required to configure which secrets should be stored in the keyring.")
+        print("Create a secrets.toml file at the path above with content similar to:")
+        print()
+        print("[secrets]")
+        print('required = ["EXAMPLE_REQUIRED_SECRET"]')
+        print('optional = ["EXAMPLE_OPTIONAL_SECRET"]')
+        print()
+        print("[keyring]")
+        print('service = "your-service-name"')
+        print()
+        print("Update the example names to match the secrets your project needs.")
         sys.exit(1)
 
-    # Parse TOML manually (no external dependency)
-    config: dict = {"required": [], "optional": [], "service": "default"}
-    current_section = None
+    # Use Python 3.11+ stdlib tomllib for robust TOML parsing
+    with open(config_path, "rb") as f:
+        data = tomllib.load(f)
 
-    with open(config_path) as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if line.startswith("[") and line.endswith("]"):
-                current_section = line[1:-1]
-                continue
-            if "=" in line:
-                key, value = line.split("=", 1)
-                key = key.strip()
-                value = value.strip()
-                # Handle list values
-                if value.startswith("[") and value.endswith("]"):
-                    items = value[1:-1].split(",")
-                    value = [item.strip().strip('"').strip("'") for item in items if item.strip()]
-                else:
-                    value = value.strip('"').strip("'")
-
-                if current_section == "secrets":
-                    if key == "required":
-                        config["required"] = value if isinstance(value, list) else [value]
-                    elif key == "optional":
-                        config["optional"] = value if isinstance(value, list) else [value]
-                elif current_section == "keyring":
-                    if key == "service":
-                        config["service"] = value
-
-    return config
+    return {
+        "required": data.get("secrets", {}).get("required", []),
+        "optional": data.get("secrets", {}).get("optional", []),
+        "service": data.get("keyring", {}).get("service", "default"),
+    }
 
 
 def is_ci() -> bool:
-    """Detect if running in a CI environment."""
+    """Detect if running in a CI environment.
+
+    Checks for common CI environment variables.
+    """
     ci_vars = [
         "CI",
         "GITHUB_ACTIONS",
         "GITLAB_CI",
-        "TF_BUILD",
+        "TF_BUILD",  # Azure DevOps
         "JENKINS_URL",
         "CIRCLECI",
         "TRAVIS",
+        "BUILDKITE",
+        "DRONE",
+        "CODEBUILD_BUILD_ID",  # AWS CodeBuild
     ]
     return any(os.environ.get(var) for var in ci_vars)
 
 
 def is_container() -> bool:
-    """Detect if running inside a container."""
+    """Detect if running inside a container.
+
+    Checks for Docker, Podman, and Kubernetes indicators.
+    """
+    # Docker
     if Path("/.dockerenv").exists():
         return True
+
+    # Podman
     if Path("/run/.containerenv").exists():
         return True
+
+    # Check cgroup for container indicators
     cgroup_path = Path("/proc/1/cgroup")
     if cgroup_path.exists():
         try:
             content = cgroup_path.read_text()
-            if "docker" in content or "kubepods" in content:
+            if "docker" in content or "kubepods" in content or "containerd" in content:
                 return True
         except (OSError, PermissionError):
+            # Cannot read cgroup info (e.g., due to permissions), assume not in container
             pass
+
     return False
 
 
@@ -134,7 +145,10 @@ def get_secret(service: str, name: str) -> str | None:
     """
     try:
         return keyring.get_password(service, name)
-    except Exception:
+    except Exception as e:
+        # Re-raise system exceptions that shouldn't be caught
+        if isinstance(e, (KeyboardInterrupt, SystemExit)):
+            raise
         return None
 
 
@@ -215,7 +229,8 @@ def setup_secret(service: str, name: str, is_optional: bool = False) -> bool:
         print(f"{name}{optional_tag}: ", end="")
 
     if is_optional:
-        response = input("Enter value (or press Enter to skip): ")
+        # Use getpass for consistency and security (hides input)
+        response = getpass.getpass("Enter value (or press Enter to skip): ")
         if not response:
             print("  -> Skipped")
             return True  # Optional secrets can be skipped
