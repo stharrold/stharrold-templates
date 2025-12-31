@@ -208,19 +208,6 @@ uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --target "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
 
-## Feature Development (v6 Workflow)
-
-**v6 uses Claude's feature-dev plugin** instead of BMAD planning documents.
-
-**Workflow:**
-1. `/workflow:v6_1_worktree "desc"` - Creates feature worktree
-2. User runs `/feature-dev "desc"` in worktree - Claude handles planning, architecture, implementation, code review
-3. `/workflow:v6_2_integrate "branch"` - PRs feature->contrib->develop
-4. `/workflow:v6_3_release` - Creates release->main with tag
-5. `/workflow:v6_4_backmerge` - Syncs release to develop, rebases contrib
-
-**Key difference from v1-v7**: No separate planning artifacts. feature-dev handles everything in a single guided session.
-
 ## MCP Configuration Paths
 
 | Platform | macOS | Windows | Linux |
@@ -243,6 +230,12 @@ gh --version              # GitHub CLI (for GitHub repos)
 az --version              # Azure CLI (for Azure DevOps repos)
 az extension add --name azure-devops  # Required extension
 ```
+
+## Cross-Platform Compatibility
+
+- Pre-commit hooks use `language: python` (no shebang scripts) - works on Git Bash for Windows
+- All scripts invoked via `uv run python <script>` - no shell script dependencies
+- ASCII-only characters in Python files ensures terminal compatibility across platforms
 
 ## VCS Provider Configuration
 
@@ -388,10 +381,10 @@ repo_feature_abc/            # Feature worktree
 
 ```bash
 # Where am I in the workflow?
-python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
 
 # Am I in the right context for this step?
-python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+uv run python .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
 
 # What branches exist?
 git branch -a | grep -E "(feature|release|contrib)"
