@@ -22,7 +22,7 @@ Complete 6-phase workflow guide (2,000+ lines):
 
 ### WORKFLOW-INIT-PROMPT.md
 Navigation guide for workflow system (~500 tokens):
-- Quick start for new Claude instances
+- Quick start for new Gemini instances
 - Progressive skill loading patterns
 - Context management strategies
 - Critical pitfalls to avoid
@@ -82,14 +82,14 @@ From the complete german workflow system, we integrated:
 ## Related Documentation
 
 **In stharrold-templates:**
-- `CLAUDE.md` - Main repository guide with workflow integration section
+- `GEMINI.md` - Main repository guide with workflow integration section
 - `CONTRIBUTING.md` - Contributor guidelines adapted for templates
 - `tools/README.md` - Integrated workflow tools documentation
 - `pyproject.toml` - Development dependencies configuration
 
 **External:**
 - German workflow repository: (reference implementation)
-- Claude Code official docs: https://docs.claude.com/en/docs/claude-code/
+- Gemini Code official docs: https://docs.gemini.com/en/docs/gemini-code/
 
 ## Version Information
 
@@ -102,5 +102,5 @@ From the complete german workflow system, we integrated:
 
 For questions about:
 - **Integrated tools**: See `tools/README.md` or `CONTRIBUTING.md`
-- **MCP management**: See main `CLAUDE.md`
+- **MCP management**: See main `GEMINI.md`
 - **German workflow concepts**: Read `german-workflow-v5.3.0.md` in this directory

@@ -72,7 +72,7 @@ Not git repositories or special-purpose directories.
 | Directory | Type | Workflow Status | Reason |
 |-----------|------|-----------------|--------|
 | **Azure/** | Infrastructure | N/A | Not a git repository (ARM, Bicep, Functions) |
-| **Claude_Sessions/** | Workspace | N/A | Container for temporary Claude Code workspaces |
+| **Gemini_Sessions/** | Workspace | N/A | Container for temporary Gemini Code workspaces |
 | **Databases/** | Tools | N/A | DBeaver workspaces, exports |
 | **Notebooks/** | Analysis | N/A | marimo notebooks (not git) |
 | **onboarding-guide/** | Documentation | N/A | Not a git repository |
@@ -188,7 +188,7 @@ Projects that should be added to batch script:
   - 4-file output (SQL, JSONL, log, config)
   - YAML frontmatter
 - **Workflow Applied:** 2025-11-19
-- **Source Used:** sql/.claude (self)
+- **Source Used:** sql/.gemini (self)
 
 #### catalog/ (EDW Data Catalog)
 - **Status:** ✅ Complete (9 skills)
@@ -229,7 +229,7 @@ Projects that should be added to batch script:
 All development projects (app_geocode, CBIA, Demand, GeocodedAddresses, Huddles, NRC, PerformanceGoals, Rooms, SysIntg) have:
 - ✅ Workflow installed (9 skills)
 - Applied: 2025-11-19
-- Source: sql/.claude
+- Source: sql/.gemini
 
 ### Reference Projects
 
@@ -268,14 +268,14 @@ bash verify-workflow.sh
 
 # Check specific project
 cd D:\Projects\<project>
-ls .claude/skills/ | wc -l  # Should be 9
+ls .gemini/skills/ | wc -l  # Should be 9
 ```
 
 To verify quality gates:
 
 ```bash
 cd D:\Projects\<project>
-python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 ---
@@ -285,4 +285,4 @@ python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 - [Application Guide](application-guide.md) - How to apply workflow
 - [Decision Matrix](decision-matrix.md) - Method selection
 - [Version Mapping](version-mapping.md) - Version numbering
-- [D:\Projects\CLAUDE.md](../../../CLAUDE.md) - Meta-repository overview
+- [D:\Projects\GEMINI.md](../../../GEMINI.md) - Meta-repository overview

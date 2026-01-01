@@ -4,7 +4,7 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 
 ## Features
 
-- **Multi-platform MCP manager** (`mcp_manager.py`) - Configure Claude Code CLI, VS Code, and Claude Desktop
+- **Multi-platform MCP manager** (`mcp_manager.py`) - Configure Gemini Code CLI, VS Code, and Gemini Desktop
 - **Containerized development** - Podman + uv + Python 3.11 for consistent environments
 - **Workflow automation** - Git helpers, archive management, semantic versioning
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
@@ -124,7 +124,7 @@ See `secrets.toml` for secret definitions.
 
 | Document | Purpose |
 |----------|---------|
-| [CLAUDE.md](CLAUDE.md) | AI agent instructions |
+| [GEMINI.md](GEMINI.md) | AI agent instructions |
 | [WORKFLOW.md](WORKFLOW.md) | Complete workflow guide |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
@@ -139,7 +139,7 @@ See `secrets.toml` for secret definitions.
 │   ├── guides/             # Production guides
 │   ├── research/           # Exploratory documents
 │   └── reference/          # Reference materials
-├── .claude/skills/         # AI workflow skills (6 active)
+├── .gemini/skills/         # AI workflow skills (6 active)
 ├── scripts/                # Utility scripts (secrets, run helpers)
 └── ARCHIVED/               # Archived specs, planning docs, deprecated code
 ```

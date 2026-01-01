@@ -12,6 +12,6 @@ feat: integrate workflow secrets patterns into security tools
 
 Closes #12
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Gemini Code](https://gemini.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Gemini <noreply@anthropic.com>

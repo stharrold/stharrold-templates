@@ -82,14 +82,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No more problems with SSH sessions using misconfigured locales
 
 ### Updated Files
-- `.claude/skills/workflow-utilities/scripts/safe_output.py` - ASCII-only SYMBOLS dict
-- `.claude/skills/initialize-repository/scripts/initialize_repository.py` - ASCII output
-- `.claude/skills/bmad-planner/scripts/create_planning.py` - ASCII output
-- `.claude/skills/speckit-author/scripts/create_specifications.py` - ASCII output
-- `.claude/skills/workflow-utilities/scripts/create_skill.py` - ASCII output
-- `.claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py` - ASCII output
-- `.claude/skills/quality-enforcer/scripts/check_coverage.py` - ASCII output
-- `.claude/skills/quality-enforcer/scripts/run_quality_gates.py` - ASCII output
+- `.gemini/skills/workflow-utilities/scripts/safe_output.py` - ASCII-only SYMBOLS dict
+- `.gemini/skills/initialize-repository/scripts/initialize_repository.py` - ASCII output
+- `.gemini/skills/bmad-planner/scripts/create_planning.py` - ASCII output
+- `.gemini/skills/speckit-author/scripts/create_specifications.py` - ASCII output
+- `.gemini/skills/workflow-utilities/scripts/create_skill.py` - ASCII output
+- `.gemini/skills/agentdb-state-manager/scripts/checkpoint_manager.py` - ASCII output
+- `.gemini/skills/quality-enforcer/scripts/check_coverage.py` - ASCII output
+- `.gemini/skills/quality-enforcer/scripts/run_quality_gates.py` - ASCII output
 
 ## [5.15.0] - 2025-11-24
 
@@ -126,7 +126,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Slash command workflow clarity** - Added explicit ordering to all slash commands
   - All 4 commands now show workflow position: `/specify` (Step 1) → `/plan` (Step 2) → `/tasks` (Step 3) → `/workflow` (Step 4)
   - Each command shows prerequisites, outputs, and next step
-  - CLAUDE.md updated with numbered workflow table
+  - GEMINI.md updated with numbered workflow table
 
 - **CI/CD improvements** - Fixed GitHub Actions for containerized environment
   - Updated tests.yml to use `uv run pytest` for proper dependency resolution
@@ -147,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.15.1] - 2025-11-18
 
 ### Changed
-- **CLAUDE.md improvements** - Enhanced onboarding and reduced duplication
+- **GEMINI.md improvements** - Enhanced onboarding and reduced duplication
   - Added Quick Reference Card with 7 common workflows + 3 core commands
   - Added Current Repository State section with pre-work checklist
   - Added "What NOT to Do" section (9 prohibitions + 5 best practices)
@@ -156,7 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **WORKFLOW-INIT-PROMPT.md** - Clarified workflow application for existing repositories
   - Separated "From This Repo" vs "From Downloaded Release" approaches
-  - Simplified prompt for Claude Code: "Read `/path/to/standard`. Apply the workflow..."
+  - Simplified prompt for Gemini Code: "Read `/path/to/standard`. Apply the workflow..."
 
 ### Added
 - **.github/WORKTREE_CLEANUP_GUIDE.md** - Prevention strategies for worktree cleanup issues
@@ -200,7 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Documentation updates** - Phase 5 & 6 completion reflected across workflow
-  - CLAUDE.md updated with Phase 5 & 6 completion status
+  - GEMINI.md updated with Phase 5 & 6 completion status
   - Performance targets documented with actual results
   - Scalability bottleneck analyzed (DuckDB single-writer limitation)
   - Production deployment recommendation (keep DuckDB, migrate to PostgreSQL only if load exceeds 2,000 ops/sec)
@@ -271,7 +271,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Documentation updates** - Phase 4 completion reflected across workflow
-  - CLAUDE.md updated with Phase 4 completion status
+  - GEMINI.md updated with Phase 4 completion status
   - WORKFLOW.md updated with atomic cleanup workflow
   - All 7 PR review issue TODOs properly archived
   - Phase 4 TODO properly archived with completion metadata
@@ -324,7 +324,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Issue #218-222: Removed unused imports, variables, and FlowTokenType enum
   - Issue #223: Optimized PHIDetector to single loop iteration (50% performance improvement)
   - Issue #224: Added release worktree pattern support
-  - Issue #225: Fixed Phase 3 version inconsistency in CLAUDE.md
+  - Issue #225: Fixed Phase 3 version inconsistency in GEMINI.md
   - Issue #227: Removed async/sync mismatch in on_agent_action_complete
   - Issue #228: Improved SSN regex to reduce false positives (require hyphens)
   - Issue #229: Refactored dynamic path manipulation pattern across agent hooks
@@ -345,7 +345,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - **Updated for Phase 3 completion**
-  - CLAUDE.md reflects Phase 3 completion status
+  - GEMINI.md reflects Phase 3 completion status
   - agentdb-state-manager/CHANGELOG.md includes v1.12.0 details
   - Clear distinction between v1.11.0 (Phase 2) and v1.12.0 (Phase 3)
 
@@ -363,12 +363,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Phase 2 integration guide (phase2_integration_guide.md, 394 lines)
   - Database migration for Phase 2 tables (phase2_migration.sql, 215 lines)
   - Workflow tracking documentation (TODO_feature_20251117T024349Z_phase-2-engine.md, 1,720 lines)
-  - Python package structure for .claude/ directory (__init__.py files)
+  - Python package structure for .gemini/ directory (__init__.py files)
 
 ### Changed
-- **Linting configuration** - N999 exception for .claude directory
-  - Added per-file-ignores in pyproject.toml to allow __init__.py files in .claude/
-  - Acknowledges .claude/ as special configuration directory (similar to .github/, .vscode/)
+- **Linting configuration** - N999 exception for .gemini directory
+  - Added per-file-ignores in pyproject.toml to allow __init__.py files in .gemini/
+  - Acknowledges .gemini/ as special configuration directory (similar to .github/, .vscode/)
   - Preserves Python package structure while maintaining PEP 8 compliance
 
 ### Fixed
@@ -376,7 +376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Issue #199: Removed unsupported array access claim from _resolve_params docstring
   - Issue #200: Removed unused Path import from sync_engine.py
   - Issue #201: Removed unused uuid4 import from test_sync_engine.py
-  - Issue #203: Fixed N999 linting errors for .claude directory
+  - Issue #203: Fixed N999 linting errors for .gemini directory
   - Auto-fixed import sorting per ruff recommendations
 
 ### Dependencies
@@ -395,12 +395,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Schema integration guide (schema_integration_guide.md, 1068 lines)
 
 - **Directory structure improvements** - Enhanced documentation organization
-  - Created docs/ and benchmarks/ directories with CLAUDE.md and README.md
+  - Created docs/ and benchmarks/ directories with GEMINI.md and README.md
   - Added ARCHIVED/ subdirectories for deprecated content
   - YAML frontmatter with parent/child/sibling navigation
 
 ### Changed
-- **CLAUDE.md documentation enhancements** - Domain-specific guidance
+- **GEMINI.md documentation enhancements** - Domain-specific guidance
   - Added "Current Active Work" section documenting MIT Agent Sync Pattern status
   - Added "Parallel Agent Execution Patterns" with time calculations and decision tree
   - Added "Healthcare Compliance" section with HIPAA/FDA/IRB requirements
@@ -451,10 +451,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Work-item generation and nested workflow patterns
   - Updated Phase 4 steps to include optional feedback handling
 
-- **CLAUDE.md improvements** - Added architectural cross-references
+- **GEMINI.md improvements** - Added architectural cross-references
   - Cross-reference to ARCHITECTURE.md for deep-dive analysis
-  - Separation of concerns: operational guidance (CLAUDE.md) vs. architecture (ARCHITECTURE.md)
-  - Improved navigation for future Claude Code instances
+  - Separation of concerns: operational guidance (GEMINI.md) vs. architecture (ARCHITECTURE.md)
+  - Improved navigation for future Gemini Code instances
 
 ### Fixed
 - **Azure DevOps repository parameter handling** - Fixed 4 related issues (#105-106, #110, #112, #115)
@@ -502,7 +502,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Issue #84: Fixed version reference (v1.8.1 → v1.8.0) in backmerge_release.py
   - Issue #83: Removed extra bracket in markdown link (migrate_directory_frontmatter.py:222)
   - Issue #82: Removed extra bracket in markdown link (migrate_directory_frontmatter.py:213)
-  - Issue #81: Removed extra bracket in markdown link (specs/CLAUDE.md:68)
+  - Issue #81: Removed extra bracket in markdown link (specs/GEMINI.md:68)
   - Issue #79: Fixed git merge abort logic (use --no-commit + git merge --abort)
   - Issue #78: Clarified conflicts parameter docstring in create_pr function
   - Issue #77: Fixed YAML formatting inconsistency (directory_structure.py)
@@ -538,7 +538,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Migration guide from GitHub branch protection
 
 ### Documentation
-- Updated CLAUDE.md with v1.8.1 release information
+- Updated GEMINI.md with v1.8.1 release information
 - Updated WORKFLOW.md to remove branch protection exception
 - Added Azure DevOps policy references throughout workflow docs
 
@@ -553,7 +553,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Workflow documentation** - Improved navigation and reduced duplication
-  - Restructured CLAUDE.md to use reference pattern
+  - Restructured GEMINI.md to use reference pattern
   - Added quick-start workflow initialization
   - Improved token efficiency for skill loading
 
@@ -575,7 +575,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.0] - 2025-11-04
 
 ### Added
-- **GitHub Issue Management documentation** - Comprehensive issue tracking workflow added to CLAUDE.md
+- **GitHub Issue Management documentation** - Comprehensive issue tracking workflow added to GEMINI.md
   - Documents issue sources (Copilot reviews, manual creation, security alerts)
   - 5-step issue workflow (fix on contrib, reference in commits, PR to develop, auto-close)
   - Common issue types with solutions (unused variables, bare except, line length, syntax, security)
@@ -588,7 +588,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Tag-based deployment principles (immutable, reproducible, instant rollback)
 - **Comprehensive branch protection documentation** - Explicit rules for `main` and `develop` protected branches
   - Added "Branch Protection Policy" section to WORKFLOW.md (~95 lines)
-  - Added "Protected Branches" section to CLAUDE.md with rules and exceptions
+  - Added "Protected Branches" section to GEMINI.md with rules and exceptions
   - Added "Protected Branches" section to CONTRIBUTING.md with enforcement details
   - Added protected branches warning to README.md
   - Added protected branch policy to git-workflow-manager/SKILL.md
@@ -662,9 +662,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Comprehensive skill documentation** - Completed documentation for all workflow skills
   - Added 5 missing `scripts/__init__.py` files (proper Python package structure)
-  - Completed 6 CLAUDE.md files (352-1,019 lines each) for Claude Code integration
+  - Completed 6 GEMINI.md files (352-1,019 lines each) for Gemini Code integration
   - Completed 5 README.md files (232-435 lines each) for human developers
-  - All skills now have comprehensive documentation for both Claude Code and humans
+  - All skills now have comprehensive documentation for both Gemini Code and humans
 
 ### Changed
 - **Workflow documentation** - Enhanced Phase 4.5 instructions
@@ -674,7 +674,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 - Skills with complete documentation: 9/9 (100%)
-- CLAUDE.md coverage: All skills (bmad-planner, speckit-author, quality-enforcer, git-workflow-manager, tech-stack-adapter, workflow-orchestrator, workflow-utilities, initialize-repository, agentdb-state-manager)
+- GEMINI.md coverage: All skills (bmad-planner, speckit-author, quality-enforcer, git-workflow-manager, tech-stack-adapter, workflow-orchestrator, workflow-utilities, initialize-repository, agentdb-state-manager)
 - README.md coverage: All skills
 - Version validation: All checks passed
 
@@ -685,7 +685,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Interactive Q&A system (4 phases, 13-14 questions)
   - Copies all 8 workflow skills from source to target repository
   - Adapts documentation for new repository context
-  - Generates README.md, CLAUDE.md, pyproject.toml
+  - Generates README.md, GEMINI.md, pyproject.toml
   - Optional git initialization with 3-branch structure
   - Token savings: ~3,350 tokens per repository (96% reduction)
 - Version consistency validator (`validate_versions.py`)
@@ -697,7 +697,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Workflow system now has 8 skills (added initialize-repository meta-skill)
 - WORKFLOW.md updated with Phase 0 (Repository Initialization)
-- CLAUDE.md updated with 8th skill reference
+- GEMINI.md updated with 8th skill reference
 
 ### Token Efficiency
 - Repository initialization: ~3,350 tokens saved (96% reduction)
@@ -778,22 +778,22 @@ When making changes to the workflow:
    - Update Version History Summary table
 
 4. **Link to skill CHANGELOGs:**
-   - For skill-specific changes, reference `.claude/skills/<skill-name>/CHANGELOG.md`
+   - For skill-specific changes, reference `.gemini/skills/<skill-name>/CHANGELOG.md`
 
 ---
 
 ## Related Documentation
 
 - **[WORKFLOW.md](WORKFLOW.md)** - Complete workflow guide
-- **[CLAUDE.md](CLAUDE.md)** - Claude Code interaction guide
+- **[GEMINI.md](GEMINI.md)** - Gemini Code interaction guide
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guidelines
-- **[.claude/skills/UPDATE_CHECKLIST.md](.claude/skills/UPDATE_CHECKLIST.md)** - Update process checklist
+- **[.gemini/skills/UPDATE_CHECKLIST.md](.gemini/skills/UPDATE_CHECKLIST.md)** - Update process checklist
 
 **Skill-Specific CHANGELOGs:**
-- [bmad-planner](.claude/skills/bmad-planner/CHANGELOG.md)
-- [speckit-author](.claude/skills/speckit-author/CHANGELOG.md)
-- [workflow-orchestrator](.claude/skills/workflow-orchestrator/CHANGELOG.md)
-- [git-workflow-manager](.claude/skills/git-workflow-manager/CHANGELOG.md)
-- [quality-enforcer](.claude/skills/quality-enforcer/CHANGELOG.md)
-- [tech-stack-adapter](.claude/skills/tech-stack-adapter/CHANGELOG.md)
-- [workflow-utilities](.claude/skills/workflow-utilities/CHANGELOG.md)
+- [bmad-planner](.gemini/skills/bmad-planner/CHANGELOG.md)
+- [speckit-author](.gemini/skills/speckit-author/CHANGELOG.md)
+- [workflow-orchestrator](.gemini/skills/workflow-orchestrator/CHANGELOG.md)
+- [git-workflow-manager](.gemini/skills/git-workflow-manager/CHANGELOG.md)
+- [quality-enforcer](.gemini/skills/quality-enforcer/CHANGELOG.md)
+- [tech-stack-adapter](.gemini/skills/tech-stack-adapter/CHANGELOG.md)
+- [workflow-utilities](.gemini/skills/workflow-utilities/CHANGELOG.md)

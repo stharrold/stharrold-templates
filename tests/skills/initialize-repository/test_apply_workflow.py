@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # Add the scripts directory to the path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "initialize-repository" / "scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "initialize-repository" / "scripts"))
 
 from apply_workflow import (
     extract_dev_deps_from_toml,
@@ -102,37 +102,37 @@ class TestValidateSource:
         assert "not a directory" in message
 
     def test_fails_when_missing_skills_dir(self, tmp_path: Path):
-        """Fails when .claude/skills/ directory is missing."""
-        (tmp_path / ".claude" / "commands").mkdir(parents=True)
+        """Fails when .gemini/skills/ directory is missing."""
+        (tmp_path / ".gemini" / "commands").mkdir(parents=True)
         valid, message = validate_source(tmp_path)
         assert not valid
-        assert "missing .claude/skills/" in message
+        assert "missing .gemini/skills/" in message
 
     def test_fails_when_missing_commands_dir(self, tmp_path: Path):
-        """Fails when .claude/commands/ directory is missing."""
-        (tmp_path / ".claude" / "skills" / "skill1").mkdir(parents=True)
+        """Fails when .gemini/commands/ directory is missing."""
+        (tmp_path / ".gemini" / "skills" / "skill1").mkdir(parents=True)
         valid, message = validate_source(tmp_path)
         assert not valid
-        assert "missing .claude/commands/" in message
+        assert "missing .gemini/commands/" in message
 
     def test_fails_when_incomplete_skills(self, tmp_path: Path):
         """Fails when fewer than 3 skills exist."""
-        skills_dir = tmp_path / ".claude" / "skills"
+        skills_dir = tmp_path / ".gemini" / "skills"
         skills_dir.mkdir(parents=True)
         (skills_dir / "skill1").mkdir()
         (skills_dir / "skill2").mkdir()
-        (tmp_path / ".claude" / "commands").mkdir()
+        (tmp_path / ".gemini" / "commands").mkdir()
         valid, message = validate_source(tmp_path)
         assert not valid
         assert "incomplete" in message
 
     def test_succeeds_with_complete_source(self, tmp_path: Path):
         """Succeeds when source has complete workflow system."""
-        skills_dir = tmp_path / ".claude" / "skills"
+        skills_dir = tmp_path / ".gemini" / "skills"
         skills_dir.mkdir(parents=True)
         for i in range(4):
             (skills_dir / f"skill{i}").mkdir()
-        (tmp_path / ".claude" / "commands").mkdir()
+        (tmp_path / ".gemini" / "commands").mkdir()
         valid, message = validate_source(tmp_path)
         assert valid
         assert "4 skills found" in message
@@ -195,7 +195,7 @@ class TestMergeGitignore:
         gitignore = target / ".gitignore"
         assert gitignore.exists()
         content = gitignore.read_text()
-        assert ".claude-state/" in content
+        assert ".gemini-state/" in content
         assert ".tmp/" in content
 
     def test_copies_source_gitignore(self, tmp_path: Path):
@@ -229,7 +229,7 @@ class TestMergeGitignore:
         assert result is True
         content = (target / ".gitignore").read_text()
         assert "*.pyc" in content
-        assert ".claude-state/" in content
+        assert ".gemini-state/" in content
         assert ".tmp/" in content
 
     def test_deduplicates_non_blank_lines(self, tmp_path: Path):
@@ -239,13 +239,13 @@ class TestMergeGitignore:
         source.mkdir()
         target.mkdir()
 
-        (target / ".gitignore").write_text(".claude-state/\n.tmp/\n*.pyc\n")
+        (target / ".gitignore").write_text(".gemini-state/\n.tmp/\n*.pyc\n")
 
         merge_gitignore(source, target)
 
         content = (target / ".gitignore").read_text()
         # Count occurrences
-        assert content.count(".claude-state/") == 1
+        assert content.count(".gemini-state/") == 1
         assert content.count(".tmp/") == 1
 
     def test_preserves_single_blank_lines(self, tmp_path: Path):

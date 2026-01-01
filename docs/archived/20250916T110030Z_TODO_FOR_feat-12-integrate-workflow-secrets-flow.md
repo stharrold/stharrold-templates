@@ -19,10 +19,10 @@ target:
   file: "10_draft-merged/20_credentials/25_mcp-security-tools.md"
   action: "enhance_existing"
   size_limit_kb: 30
-  parent_orchestrator: "10_draft-merged/20_credentials/CLAUDE.md"
+  parent_orchestrator: "10_draft-merged/20_credentials/GEMINI.md"
 
 dependencies:
-  - Enhanced CLAUDE.md with unified git conventions
+  - Enhanced GEMINI.md with unified git conventions
   - GitHub issue #12 created
   - Worktree structure established
 
@@ -42,13 +42,13 @@ success_criteria:
 ## Overview
 Integrate practical security workflow examples from `09_workflow-secrets-mcp.md` into the existing `25_mcp-security-tools.md` file to enhance security patterns documentation.
 
-**Implementation Approach**: This is the Claude Flow implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit), TODO_FOR_feat-12-integrate-workflow-secrets-claude.md (Claude), and TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md (BMAD).
+**Implementation Approach**: This is the Gemini Flow implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit), TODO_FOR_feat-12-integrate-workflow-secrets-gemini.md (Gemini), and TODO_FOR_feat-12-integrate-workflow-secrets-bmad.md (BMAD).
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
 **Worktree Location**: Work will be completed in `../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow/`
 
-**Implementation Notes**: This task uses the Claude Flow approach. See [TODO.md line 28](TODO.md#L28) for tracking.
+**Implementation Notes**: This task uses the Gemini Flow approach. See [TODO.md line 28](TODO.md#L28) for tracking.
 
 ## Pre-Integration Analysis
 
@@ -73,14 +73,14 @@ Integrate practical security workflow examples from `09_workflow-secrets-mcp.md`
 ## Content Integration
 
 ### [ ] 4. Create worktree and branch
-**Note**: Work will be completed using Claude Flow approach in dedicated worktree.
+**Note**: Work will be completed using Gemini Flow approach in dedicated worktree.
 
 ```bash
 git worktree add ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow -b feat/12-integrate-workflow-secrets-flow
 cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow
 ```
 
-**Status**: Pending - Ready for Claude Flow implementation
+**Status**: Pending - Ready for Gemini Flow implementation
 
 ### [ ] 5. Enhance target file
 - [ ] Add step-by-step installation workflows
@@ -99,7 +99,7 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow
 ## Quality Assurance
 
 ### [ ] 7. Update cross-references
-- [ ] Update `20_credentials/CLAUDE.md` if needed
+- [ ] Update `20_credentials/GEMINI.md` if needed
 - [ ] Verify navigation reflects enhanced content
 - [ ] Check internal links work correctly
 
@@ -137,13 +137,13 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-flow
   - Included mcpauth OAuth 2.1 server deployment workflow
   - Added platform-specific credential verification steps
   - Archived source document with UTC timestamp
-  - Claude Flow implementation approach
+  - Gemini Flow implementation approach
 
   Closes #12
 
-  🤖 Generated with Claude Flow
+  🤖 Generated with Gemini Flow
 
-  Co-Authored-By: Claude Flow <noreply@anthropic.com>"
+  Co-Authored-By: Gemini Flow <noreply@anthropic.com>"
   ```
 
 ### [ ] 12. Update tracking

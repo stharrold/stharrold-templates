@@ -13,7 +13,7 @@ from pathlib import Path
 # Add scripts to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent.parent / ".claude/skills/git-workflow-manager/scripts"),
+    str(Path(__file__).parent.parent.parent.parent / ".gemini/skills/git-workflow-manager/scripts"),
 )
 
 import create_worktree
@@ -32,7 +32,7 @@ class TestCreateWorktree:
         assert "verify_planning_committed" not in source
 
     def test_worktree_creates_state_directory(self, tmp_path):
-        """Should create .claude-state directory in worktree."""
+        """Should create .gemini-state directory in worktree."""
         # This is a unit test for the state isolation feature
         # Full integration tests are in test_create_worktree_integration.py
         pass  # Placeholder for integration test

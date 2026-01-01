@@ -13,7 +13,7 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
+    str(Path(__file__).parent.parent.parent / ".gemini/skills/workflow-utilities/scripts"),
 )
 
 
@@ -53,15 +53,15 @@ class TestGetAgentdbPath:
 
         assert db_path.name == "agentdb.duckdb"
 
-    def test_path_parent_is_claude_state(self):
+    def test_path_parent_is_gemini_state(self):
         """Given: get_agentdb_path() called.
-        Then: Parent directory is .claude-state.
+        Then: Parent directory is .gemini-state.
         """
         from worktree_context import get_agentdb_path
 
         db_path = get_agentdb_path()
 
-        assert db_path.parent.name == ".claude-state"
+        assert db_path.parent.name == ".gemini-state"
 
 
 class TestGetMainRepoPath:

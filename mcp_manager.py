@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """
 Multi-platform MCP server management tool.
-Manages MCP servers across Claude Code CLI, VS Code MCP Extension, and Claude Desktop.
+Manages MCP servers across Gemini Code CLI, VS Code MCP Extension, and Gemini Desktop.
 """
 
 import argparse
@@ -25,21 +25,21 @@ def get_platform_config_paths() -> dict[str, Path]:
 
     if system == "darwin":  # macOS
         return {
-            "claude_code": home / ".claude.json",
+            "gemini_code": home / ".gemini.json",
             "vscode": home / "Library" / "Application Support" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / "Library" / "Application Support" / "Claude" / "config.json",
+            "gemini_desktop": home / "Library" / "Application Support" / "Gemini" / "config.json",
         }
     elif system == "windows":
         return {
-            "claude_code": home / ".claude.json",
+            "gemini_code": home / ".gemini.json",
             "vscode": home / "AppData" / "Roaming" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / "AppData" / "Roaming" / "Claude" / "config.json",
+            "gemini_desktop": home / "AppData" / "Roaming" / "Gemini" / "config.json",
         }
     else:  # Linux and others
         return {
-            "claude_code": home / ".claude.json",
+            "gemini_code": home / ".gemini.json",
             "vscode": home / ".config" / "Code" / "User" / "mcp.json",
-            "claude_desktop": home / ".config" / "claude" / "config.json",
+            "gemini_desktop": home / ".config" / "gemini" / "config.json",
         }
 
 
@@ -368,13 +368,13 @@ class MCPManager:
     def __init__(self):
         paths = get_platform_config_paths()
         self.configs = [
-            MCPConfig("Claude Code CLI", paths["claude_code"], "Claude Code command-line interface"),
+            MCPConfig("Gemini Code CLI", paths["gemini_code"], "Gemini Code command-line interface"),
             MCPConfig("VS Code MCP Extension", paths["vscode"], "Visual Studio Code MCP extension"),
-            MCPConfig("Claude Desktop", paths["claude_desktop"], "Claude Desktop application"),
+            MCPConfig("Gemini Desktop", paths["gemini_desktop"], "Gemini Desktop application"),
         ]
 
         # Platform name mapping for command-line arguments
-        self.platform_map = {"claude-code": "Claude Code CLI", "vscode": "VS Code MCP Extension", "claude-desktop": "Claude Desktop"}
+        self.platform_map = {"gemini-code": "Gemini Code CLI", "vscode": "VS Code MCP Extension", "gemini-desktop": "Gemini Desktop"}
 
     def select_target_platform(self, platform_name: str | None = None) -> MCPConfig | None:
         """Select target platform configuration."""
@@ -875,13 +875,13 @@ def main():
         epilog="""
 Examples:
   mcp_manager.py                           # List servers from first available platform
-  mcp_manager.py --platform claude-code   # Work with Claude Code CLI only
+  mcp_manager.py --platform gemini-code   # Work with Gemini Code CLI only
   mcp_manager.py --platform vscode --add  # Add server to VS Code MCP Extension
-  mcp_manager.py --platform claude-desktop --remove  # Remove servers from Claude Desktop
+  mcp_manager.py --platform gemini-desktop --remove  # Remove servers from Gemini Desktop
   mcp_manager.py --status                  # Show all platform statuses
   mcp_manager.py --disable                 # Interactive server disabling (auto-detect platform)
   mcp_manager.py --enable                  # Interactive server enabling (auto-detect platform)
-  mcp_manager.py --file ~/.claude.json    # Work with specific file only
+  mcp_manager.py --file ~/.gemini.json    # Work with specific file only
   mcp_manager.py --check-credentials       # Validate credential setup
   mcp_manager.py --backup-only             # Create backups only
         """,
@@ -898,8 +898,8 @@ Examples:
     parser.add_argument("--deduplicate", action="store_true", help="Remove duplicate servers (keeps DISABLED_ versions when both exist)")
     parser.add_argument(
         "--platform",
-        choices=["claude-code", "vscode", "claude-desktop"],
-        help="Target platform (claude-code, vscode, claude-desktop). If not specified, auto-detects first available platform.",
+        choices=["gemini-code", "vscode", "gemini-desktop"],
+        help="Target platform (gemini-code, vscode, gemini-desktop). If not specified, auto-detects first available platform.",
     )
     parser.add_argument("--status", action="store_true", help="Show status of all MCP platforms")
 

@@ -39,13 +39,13 @@ The hotfix workflow creates urgent fixes for production issues. Hotfixes branch 
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   hotfix v1.3.0-hotfix.1 main
 ```
 
 **Example:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   hotfix critical-auth-bypass main
 ```
 
@@ -86,7 +86,7 @@ cd /Users/user/Documents/GitHub/standard_hotfix_critical-auth-bypass
 
 **Command (if using SpecKit):**
 ```bash
-python .claude/skills/speckit-author/scripts/create_specifications.py \
+python .gemini/skills/speckit-author/scripts/create_specifications.py \
   hotfix critical-auth-bypass stharrold \
   --todo-file ../TODO_hotfix_20251024T093000Z_critical-auth-bypass.md
 ```
@@ -146,16 +146,16 @@ Regression test: <test file added/updated>
 
 Refs: TODO_hotfix_20251024T093000Z_critical-auth-bypass.md
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Gemini <noreply@anthropic.com>
 ```
 
 #### Step 6.5: Quality Assurance
 
 **Run all quality gates:**
 ```bash
-python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 **Quality gates (all must pass):**
@@ -203,7 +203,7 @@ Next: Calculate hotfix version
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
+python .gemini/skills/git-workflow-manager/scripts/semantic_version.py \
   main v1.3.0
 ```
 
@@ -274,7 +274,7 @@ This hotfix addresses CVE-XXXX-XXXXX (if applicable)
 - TODO: TODO_hotfix_20251024T093000Z_critical-auth-bypass.md
 - Spec: specs/critical-auth-bypass/spec.md (if applicable)
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
 EOF
 )"
 ```
@@ -294,7 +294,7 @@ EOF
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
+python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
   v1.3.0-hotfix.1 main
 ```
 
@@ -321,7 +321,7 @@ python .claude/skills/git-workflow-manager/scripts/tag_release.py \
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
   v1.3.0-hotfix.1 develop
 ```
 
@@ -365,7 +365,7 @@ git branch -D hotfix/20251024T093000Z_critical-auth-bypass
 
 **Archive TODO file:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/archive_manager.py \
+python .gemini/skills/workflow-utilities/scripts/archive_manager.py \
   archive TODO_hotfix_20251024T093000Z_critical-auth-bypass.md
 ```
 
@@ -381,7 +381,7 @@ python .claude/skills/workflow-utilities/scripts/archive_manager.py \
 
 **Rebase contrib to include hotfix:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
+python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py \
   contrib/stharrold
 ```
 
@@ -555,7 +555,7 @@ git checkout v1.5.0-hotfix.1
 # Deploy...
 
 # 6. Back-merge to develop
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
   v1.5.0-hotfix.1 develop
 
 # Result:

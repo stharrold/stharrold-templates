@@ -12,7 +12,7 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
+    str(Path(__file__).parent.parent.parent / ".gemini/skills/workflow-utilities/scripts"),
 )
 
 
