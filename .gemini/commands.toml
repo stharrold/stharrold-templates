@@ -3,7 +3,7 @@ description = "Create worktree for development (Step 1 of 4)"
 prompt = """
 # /workflow:v7x0_1-worktree - Step 1 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create git worktree for isolated development.
 
@@ -105,7 +105,7 @@ description = "Integrate feature to develop (Step 2 of 4)"
 prompt = """
 # /workflow:v7x0_2-integrate - Step 2 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create PRs from feature → contrib → develop.
 
@@ -265,7 +265,7 @@ description = "Release to production (Step 3 of 4)"
 prompt = """
 # /workflow:v7x0_3-release - Step 3 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create release from develop, create PR to main, tag release.
 
@@ -379,7 +379,7 @@ description = "Sync release to develop and contrib (Step 4 of 4)"
 prompt = """
 # /workflow:v7x0_4-backmerge - Step 4 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Sync release changes back to develop and rebase contrib.
 

@@ -58,9 +58,9 @@ az --version              # Azure CLI (for Azure DevOps repos)
    uv sync
    ```
 
-## Development Workflow (v6)
+## Development Workflow (v7x0)
 
-This repository uses a streamlined **v6** workflow.
+This repository uses a streamlined **v7x0** workflow.
 
 ### Branch Structure
 

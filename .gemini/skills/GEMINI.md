@@ -17,7 +17,7 @@ children:
 
 ## Purpose
 
-Modular skill implementations (6 skills) for v6 workflow automation.
+Modular skill implementations (6 skills) for v7x0 workflow automation.
 
 **Archived skills** (see `ARCHIVED/`):
 - bmad-planner - Replaced by feature-dev plugin

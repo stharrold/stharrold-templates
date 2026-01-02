@@ -162,13 +162,13 @@ uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py de
 uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Release workflow (develop → release → main)
-uv run python .gemini/skills/git-workflow-manager/scripts/workflow:v7x0_3-release_workflow.py <step>
+uv run python .gemini/skills/git-workflow-manager/scripts/release_workflow.py <step>
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
 # Pattern: release/vX.Y.Z ──PR──> develop (direct, no intermediate branch)
 # Requires: release/* branch must exist when starting step 7
-uv run python .gemini/skills/git-workflow-manager/scripts/workflow:v7x0_4-backmerge_workflow.py <step>
+uv run python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
 # CRITICAL: Backmerge direction
@@ -374,7 +374,7 @@ git worktree list
 git branch --show-current
 
 # Is this a worktree or main repo?
-git rev-parse --git-dir  # .git = main repo, .git/workflow:v7x0_1-worktrees/* = worktree
+git rev-parse --git-dir  # .git = main repo, .git/worktrees/* = worktree
 ```
 
 ## Preventing Branch Divergence
