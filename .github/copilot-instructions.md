@@ -8,7 +8,6 @@ children:
   - .gemini/GEMINI.md
   - docs/GEMINI.md
   - tests/GEMINI.md
-  - specs/GEMINI.md
 ---
 
 # GEMINI.md
@@ -18,36 +17,27 @@ This file provides guidance to Gemini Code (gemini.ai/code) when working with co
 ## What This Repository Is
 
 **Templates and utilities for MCP (Model Context Protocol) server configuration:**
-- Multi-platform MCP manager (`mcp_manager.py`) for Gemini Code CLI, VS Code, and Gemini Desktop
 - Modular documentation guides (≤30KB per file for AI context optimization)
 - Workflow automation tools (git helpers, archive management, semantic versioning)
 - **Containerized development** - Podman + uv + Python 3.11 for consistent dev/CI environments
 
-**Key Principle**: All development uses `podman-compose run --rm dev <command>`. One way to run everything.
+**Key Principle**: Workflow commands use `uv run <command>` directly. Package testing uses containers (CI/CD).
 
 ## Essential Commands
 
 ```bash
-# Build container (once)
-podman-compose build
-
-# Run any command (containerized - preferred)
-podman-compose run --rm dev <command>
-
-# Alternative: Run directly with uv (when podman unavailable)
+# Workflow commands (run directly with uv)
 uv run <command>
 
 # Common operations
-podman-compose run --rm dev pytest                    # Run tests
-podman-compose run --rm dev pytest -v -k test_name    # Single test
-podman-compose run --rm dev ruff check .              # Lint
-podman-compose run --rm dev ruff check --fix .        # Auto-fix
-podman-compose run --rm dev python mcp_manager.py --status
+uv run pytest                              # Run tests
+uv run pytest -v -k test_name              # Single test
+uv run ruff check .                        # Lint
+uv run ruff check --fix .                  # Auto-fix
 
-# Or without container:
-uv run pytest
-uv run pytest -v -k test_name
-uv run ruff check .
+# Package testing (containerized - for CI/CD)
+podman-compose build                       # Build container
+podman-compose run --rm dev uv run pytest  # Run tests in container
 ```
 
 ## Pre-commit Hooks
@@ -61,26 +51,11 @@ uv run pre-commit run --all-files
 ```
 
 Hooks run automatically on commit:
-- **sync-ai-config** - Syncs GEMINI.md → AGENTS.md, .github/copilot-instructions.md, .agents/ (runs first)
 - trailing whitespace, YAML/JSON validation
 - ruff linting/formatting (v0.14.8)
 - GEMINI.md frontmatter check
 - skill structure validation
 - **SPDX license headers** - Validates Apache 2.0 headers on all Python files
-
-## Quality Gates (5 gates, all must pass before PR)
-
-```bash
-podman-compose run --rm dev python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
-```
-
-| Gate | Description |
-|------|-------------|
-| 1. Coverage | ≥80% test coverage |
-| 2. Tests | All pytest tests pass |
-| 3. Build | `uv build` succeeds |
-| 4. Linting | `ruff check .` clean |
-| 5. AI Config Sync | GEMINI.md → AGENTS.md synced |
 
 ## Test Organization
 
@@ -89,7 +64,7 @@ tests/
 ├── unit/           # Single component tests
 ├── contract/       # Interface compliance tests
 ├── integration/    # End-to-end scenarios
-└── skills/         # Skill-specific tests (quality-enforcer, git-workflow-manager)
+└── skills/         # Skill-specific tests (git-workflow-manager, workflow-utilities)
 ```
 
 Run specific test categories:
@@ -99,83 +74,37 @@ uv run pytest tests/contract/ -v        # Contract tests only
 uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (default in quality gates)
 ```
 
-## PR Workflow (Enforced Sequence)
+## v6 Workflow (feature-dev)
 
-```bash
-# Step 1: PR feature → contrib (runs quality gates)
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/pr_workflow.py finish-feature
+Streamlined 4-phase workflow using Gemini's feature-dev plugin:
 
-# Step 2: Sync GEMINI.md → AGENTS.md
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/pr_workflow.py sync-agents
-
-# Step 3: PR contrib → develop
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/pr_workflow.py start-develop
-
-# Or run all steps
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/pr_workflow.py full
+```
+/worktree "feature description"
+    | creates worktree, user runs /feature-dev in worktree
+    v
+/integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+    | PR feature->contrib->develop
+    v
+/release
+    | create release, PR to main, tag
+    v
+/backmerge
+    | PR release->develop, rebase contrib, cleanup
 ```
 
-## Slash Commands
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1 | `/worktree "desc"` | Create worktree, prompt for /feature-dev |
+| 2 | `/integrate ["branch"]` | PR feature->contrib->develop |
+| 3 | `/release` | Create release (develop->release->main) |
+| 4 | `/backmerge` | Sync release (PR to develop, rebase contrib) |
 
-**Orchestrator**: `/workflow/all` - Run complete workflow with auto-detection and manual gate pauses
-
-**Feature Workflow**: `/1_specify` → `/2_plan` → `/3_tasks` → `/4_implement` → `/5_integrate`
-
-**Release Workflow**: `/6_release` → `/7_backmerge`
-
-| Command | Purpose |
-|---------|---------|
-| `/workflow/all` | Orchestrate full workflow (auto-detect state, pause at PR gates) |
-| `/workflow/all new "desc"` | Start new feature from scratch |
-| `/workflow/all release` | Run release workflow (steps 6-7) |
-| `/workflow/all continue` | Resume after PR merge |
-
-| Step | Command | Navigation | Purpose |
-|------|---------|------------|---------|
-| 1 | `/1_specify` | (start) → 1 → 2 | Create feature branch and specification |
-| 2 | `/2_plan` | 1 → 2 → 3 | Generate specs via speckit-author |
-| 3 | `/3_tasks` | 2 → 3 → 4 | Validate task list from plan.md |
-| 4 | `/4_implement` | 3 → 4 → 5 | Execute tasks + run quality gates |
-| 5 | `/5_integrate` | 4 → 5 → 6 | Create PRs, cleanup worktree |
-| 5b | `/5_integrate from contrib to develop` | contrib → 6 | PR contrib→develop only (no worktree) |
-| 6 | `/6_release` | 5 → 6 → 7 | Create release (develop→release→main) |
-| 7 | `/7_backmerge` | 6 → 7 → (end) | Sync release (PR to develop, rebase contrib) |
-
-## Workflow Context Validation
-
-Each workflow step validates that it is running in the correct location/branch:
-
-```bash
-# Validate context before running a step
-python .gemini/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
-```
-
-| Step | Location | Branch | Validation |
-|------|----------|--------|------------|
-| `/1_specify` | Main repo | `contrib/*` | `--step 1` |
-| `/2_plan` | **Worktree** | `feature/*` | `--step 2` |
-| `/3_tasks` | **Worktree** | `feature/*` | `--step 3` |
-| `/4_implement` | **Worktree** | `feature/*` | `--step 4` |
-| `/5_integrate` | Main repo | `contrib/*` | `--step 5` |
-| `/6_release` | Main repo | `contrib/*` | `--step 6` |
-| `/7_backmerge` | Main repo | `contrib/*` | `--step 7` |
-
-**Key rule**: Steps 2-4 must run in the feature worktree, not the main repo.
+**Key differences from old v1-v7 workflow:**
+- No BMAD planning or SpecKit specifications (feature-dev handles planning)
+- No quality gates (feature-dev's code review phase ensures quality)
+- Simplified 4-step flow instead of 7 steps
 
 ## Core Architecture
-
-### MCP Manager (`mcp_manager.py`)
-
-**Platform Detection**: Auto-detects gemini-code → vscode → gemini-desktop
-
-**Key Functions**:
-- `MCPConfig(platform, config_path)` - Platform-specific handler
-- `select_target_platform()` - Returns first available platform
-- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions
-
-**Schema Differences**:
-- Gemini Code & Desktop: `"mcpServers": {}`
-- VS Code: `"servers": {}`
 
 ### Branch Structure
 
@@ -192,21 +121,25 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | Step 6 creates → Step 7 deletes after backmerge |
+| `release/*` | Ephemeral | `/release` creates, `/backmerge` deletes |
+...
+- **Follow v6 workflow sequence**: `/worktree` -> `feature-dev` -> `/integrate` -> `/release` -> `/backmerge`
 
-### Skills System (9 skills in `.gemini/skills/`)
+### Skills System (6 skills in `.gemini/skills/`)
 
 | Skill | Purpose |
 |-------|---------|
 | workflow-orchestrator | Main coordinator, templates |
 | git-workflow-manager | Worktrees, PRs, semantic versioning |
-| quality-enforcer | Quality gates (5 gates) |
-| bmad-planner | Requirements + architecture |
-| speckit-author | Specifications |
 | tech-stack-adapter | Python/uv/Podman detection |
 | workflow-utilities | Archive, directory structure |
 | agentdb-state-manager | Workflow state tracking (AgentDB) |
 | initialize-repository | Bootstrap new repos |
+
+**Archived skills** (see `ARCHIVED/`):
+- bmad-planner - Replaced by feature-dev plugin
+- speckit-author - Replaced by feature-dev plugin
+- quality-enforcer - Replaced by feature-dev code review
 
 ### Document Lifecycle
 
@@ -215,103 +148,35 @@ docs/research/ → docs/guides/ → docs/archived/
 (research)       (production)   (compressed)
 ```
 
-### AI Config Sync (Model-Agnostic)
-
-GEMINI.md automatically syncs to:
-- `AGENTS.md` (cross-tool)
-- `.github/copilot-instructions.md` (GitHub Copilot)
-- `.agents/` (mirrored skills)
-
-**Sync utility** (`sync_ai_config.py`):
-```bash
-# Manual sync
-uv run python .gemini/skills/workflow-utilities/scripts/sync_ai_config.py sync
-
-# Verify files are in sync
-uv run python .gemini/skills/workflow-utilities/scripts/sync_ai_config.py verify
-
-# Check if sync needed
-uv run python .gemini/skills/workflow-utilities/scripts/sync_ai_config.py check
-```
-
-**Automation**: Pre-commit hook syncs automatically when GEMINI.md or .gemini/ is modified.
-
-### AI Configuration Architecture
-
-This repository follows a **Gemini-first development model** with cross-tool compatibility.
-
-**Directory Roles:**
-
-| Directory | Role | Editable |
-|-----------|------|----------|
-| `.gemini/` | **PRIMARY** source for AI configuration | Yes |
-| `.agents/` | Read-only mirror ([OpenAI agents.md spec](https://github.com/openai/agents.md)) | No |
-
-**Sync Flow:**
-
-```
-.gemini/                          .agents/
-├── commands/    (Gemini-specific) │
-├── skills/      ─────sync─────>  ├── (mirrored skills)
-├── settings.local.json           │
-└── GEMINI.md                     └── GEMINI.md
-
-GEMINI.md ─────sync─────> AGENTS.md
-          └────sync─────> .github/copilot-instructions.md
-```
-
-**What Gets Synced vs Gemini-Specific:**
-
-| Source | Target | Synced |
-|--------|--------|--------|
-| `.gemini/skills/` | `.agents/` | Yes |
-| `GEMINI.md` | `AGENTS.md` | Yes |
-| `GEMINI.md` | `.github/copilot-instructions.md` | Yes |
-| `.gemini/commands/` | - | No (Gemini-specific) |
-| `.gemini/settings.local.json` | - | No (Gemini-specific) |
-| `.gemini-state/` | - | No (runtime state) |
-
-**Cross-Tool Compatibility:**
-
-The `.agents/` directory follows the emerging [OpenAI agents.md spec](https://github.com/openai/agents.md) ([directory support proposal](https://github.com/openai/agents.md/issues/9)).
-
-Compatible tools:
-- **Gemini Code** - Primary (reads `.gemini/` directly)
-- **GitHub Copilot** - Via `.github/copilot-instructions.md`
-- **Cursor** - Reads `.agents/` or `AGENTS.md`
-- **Windsurf** - Reads `AGENTS.md`
-- **Other AI assistants** - Via standard `AGENTS.md`
-
 ## Git Workflow Commands
 
 ```bash
-# Create feature worktree (no TODO file by default)
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
-  feature my-feature contrib/stharrold --no-todo
+# Create feature worktree
+uv run python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
+  feature my-feature contrib/stharrold
 
 # Semantic version calculation
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
+uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
 
 # Archive management
-podman-compose run --rm dev python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
+uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Release workflow (develop → release → main)
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/release_workflow.py <step>
+uv run python .gemini/skills/git-workflow-manager/scripts/release_workflow.py <step>
 # Steps: create-release, run-gates, pr-main, tag-release, full, status
 
 # Backmerge workflow (release → develop, rebase contrib)
 # Pattern: release/vX.Y.Z ──PR──> develop (direct, no intermediate branch)
 # Requires: release/* branch must exist when starting step 7
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
+uv run python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py <step>
 # Steps: pr-develop, rebase-contrib, cleanup-release, full, status
 
-# ⚠️ CRITICAL: Backmerge direction
-# CORRECT: release/vX.Y.Z → develop (direct PR from release branch)
-# WRONG:   main → develop (NEVER merge main to develop!)
+# CRITICAL: Backmerge direction
+# CORRECT: release/vX.Y.Z -> develop (direct PR from release branch)
+# WRONG:   main -> develop (NEVER merge main to develop!)
 
-# Cleanup feature worktree (no TODO archival by default)
-podman-compose run --rm dev python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
-  my-feature --no-archive
+# Cleanup feature worktree and branches
+uv run python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py my-feature
 ```
 
 ## Workflow State Tracking (AgentDB)
@@ -320,47 +185,15 @@ Workflow state is tracked in AgentDB (DuckDB) instead of TODO*.md files:
 
 ```bash
 # Query current workflow phase
-podman-compose run --rm dev python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py
+uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py
 
 # Record workflow transition (called by slash commands)
-podman-compose run --rm dev python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_1_specify \
-  --source "planning/{slug}" \
-  --target "worktree"
+  --pattern v6_1_worktree \
+  --source "contrib/stharrold" \
+  --target "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
-
-## Workflow Artifact Directories
-
-**IMPORTANT**: Different workflow phases create artifacts in different locations:
-
-| Directory | Created By | Purpose | Location |
-|-----------|------------|---------|----------|
-| `planning/{slug}/` | `/1_specify` | Initial requirements (BMAD docs) | Main repo |
-| `specs/{slug}/` | `/2_plan` | Detailed specs and task lists | Feature worktree |
-
-**Workflow artifact flow:**
-```
-/1_specify (main repo)     /2_plan (worktree)        /3_tasks (worktree)
-        │                         │                         │
-        ▼                         ▼                         ▼
-planning/{slug}/           specs/{slug}/              specs/{slug}/
-├── requirements.md        ├── spec.md                ├── plan.md (validated)
-├── architecture.md        ├── plan.md                └── tasks.md
-└── epics.md               └── GEMINI.md
-```
-
-**Key rule**: `/4_implement` reads from `specs/{slug}/`, NOT `planning/{slug}/`.
-
-**See also**: [AI Configuration Architecture](#ai-configuration-architecture) section for `.gemini/` vs `.agents/` directory structure and sync patterns.
-
-## MCP Configuration Paths
-
-| Platform | macOS | Windows | Linux |
-|----------|-------|---------|-------|
-| Gemini Code | `~/.gemini.json` | `~/.gemini.json` | `~/.gemini.json` |
-| VS Code | `~/Library/.../mcp.json` | `~/AppData/.../mcp.json` | `~/.config/.../mcp.json` |
-| Gemini Desktop | `~/Library/.../config.json` | `~/AppData/.../config.json` | `~/.config/.../config.json` |
 
 ## Prerequisites
 
@@ -376,6 +209,12 @@ gh --version              # GitHub CLI (for GitHub repos)
 az --version              # Azure CLI (for Azure DevOps repos)
 az extension add --name azure-devops  # Required extension
 ```
+
+## Cross-Platform Compatibility
+
+- Pre-commit hooks use `language: python` (no shebang scripts) - works on Git Bash for Windows
+- All scripts invoked via `uv run python <script>` - no shell script dependencies
+- ASCII-only characters in Python files ensures terminal compatibility across platforms
 
 ## VCS Provider Configuration
 
@@ -405,13 +244,67 @@ azure_devops:
 
 ## Critical Guidelines
 
-- **One way to run**: Always use `podman-compose run --rm dev <command>`
+- **One way to run**: Workflow commands use `uv run <command>` directly
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow PR workflow sequence**: finish-feature → sync-agents → start-develop
-- **Quality gates must pass** before creating any PR
+- **Follow v6 workflow sequence**: `/worktree` -> `feature-dev` -> `/integrate` -> `/release` -> `/backmerge`
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
+- **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
+- **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)
+- **Use GitHub Issues**: Task tracking uses GitHub Issues/Azure DevOps work items (not TODO*.md files)
+
+## ASCII-Only Characters (Issue #121)
+
+All Python files must use only ASCII characters (0x00-0x7F). No Unicode symbols.
+
+**Why**: Ensures compatibility across all platforms, terminals, and encoding configurations.
+
+**Encoding**: Files are UTF-8 encoded (UTF-8 is ASCII-compatible for ASCII characters).
+
+**Common replacements** (use `safe_output.py` functions):
+
+| Unicode | ASCII | Function |
+|---------|-------|----------|
+| `[checkmark]` | `[OK]` | `format_check()` |
+| `[cross]` | `[FAIL]` | `format_cross()` |
+| `[warning]` | `[WARN]` | `format_warning()` |
+| `[arrow]` | `->` | `format_arrow()` |
+
+**Validation**: `uv run python .gemini/skills/workflow-utilities/scripts/check_ascii_only.py`
+
+**Pre-commit**: Enforced automatically via `ascii-only` hook.
+
+## Absolute Paths (Issue #122)
+
+Scripts must use dynamically populated absolute paths, not relative paths.
+
+**Why**: Relative paths break when scripts are called from different working directories.
+
+**Pattern**:
+```python
+import subprocess
+from pathlib import Path
+
+def get_repo_root() -> Path:
+    """Get the repository root directory as an absolute path."""
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, check=True,
+    )
+    return Path(result.stdout.strip()).resolve()
+
+# Use absolute paths
+repo_root = get_repo_root()
+archived_dir = repo_root / "ARCHIVED"
+file_path = (repo_root / relative_path).resolve()
+```
+
+**Key rules**:
+- Always resolve paths with `.resolve()` for absolute canonical form
+- Derive paths from `git rev-parse --show-toplevel` for repo-relative paths
+- Convert relative input paths to absolute before processing
+- Store relative paths in archives for portability (use `relative_to(repo_root)`)
 
 ## SPDX License Headers
 
@@ -424,8 +317,6 @@ All Python files require SPDX headers for Apache 2.0 compliance:
 ```
 
 **Validation**: `uv run python .gemini/skills/workflow-utilities/scripts/check_spdx_headers.py`
-
-**Note**: `.agents/` is excluded from SPDX checking (read-only mirror synced from `.gemini/skills/`).
 
 ## Worktree State Isolation
 
@@ -455,10 +346,9 @@ repo_feature_abc/            # Feature worktree
 
 | Issue | Solution |
 |-------|----------|
-| Container not building | `podman info` to verify Podman running |
-| pytest not found in container | Use `podman-compose run --rm dev uv run pytest` (inside container) or `uv run pytest` (outside container) |
-| Import errors | Use `podman-compose run --rm dev python` |
-| Platform not found | `mcp_manager.py --status` to check |
+| Container not building | `podman info` to verify Podman running (CI/CD only) |
+| pytest not found | Use `uv run pytest` |
+| Import errors | Use `uv run python` |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
@@ -469,10 +359,10 @@ repo_feature_abc/            # Feature worktree
 
 ```bash
 # Where am I in the workflow?
-python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py
+uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py
 
 # Am I in the right context for this step?
-python .gemini/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
+uv run python .gemini/skills/workflow-utilities/scripts/verify_workflow_context.py --step <N>
 
 # What branches exist?
 git branch -a | grep -E "(feature|release|contrib)"
@@ -572,13 +462,7 @@ python stharrold-templates/.gemini/skills/initialize-repository/scripts/initiali
 - `docs/reference/workflow-*.md` - Phase-specific workflow docs (≤20KB each)
 - `ARCHITECTURE.md` - System architecture analysis
 - `CHANGELOG.md` - Version history
-- `specs/` - Feature specifications with design artifacts
-- `specs/STATUS.md` - Specification status tracking (completed/active/paused/abandoned)
-
-Archive completed specs:
-```bash
-uv run python .gemini/skills/git-workflow-manager/scripts/archive_spec.py <spec-id>
-```
+- `ARCHIVED/` - Archived specs, planning docs, and deprecated skills (zipped)
 
 ## GEMINI.md Hierarchy
 
@@ -589,8 +473,8 @@ Every directory has a GEMINI.md with YAML frontmatter for AI navigation:
 
 ```bash
 # Generate missing GEMINI.md files
-podman-compose run --rm dev python .gemini/skills/workflow-utilities/scripts/generate_gemini_md.py
+uv run python .gemini/skills/workflow-utilities/scripts/generate_gemini_md.py
 
 # Update children references in existing GEMINI.md files
-podman-compose run --rm dev python .gemini/skills/workflow-utilities/scripts/update_gemini_md_refs.py
+uv run python .gemini/skills/workflow-utilities/scripts/update_gemini_md_refs.py
 ```
