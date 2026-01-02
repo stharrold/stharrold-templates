@@ -20,10 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       id-token: write
-      actions: read # Required for Gemini to read CI results on PRs
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,19 +31,6 @@ jobs:
           fetch-depth: 1
 
       - name: Run Gemini Code
-        id: gemini
-        uses: anthropics/gemini-code-action@v1
+        uses: google-github-actions/run-gemini-cli@v0.1.18
         with:
-          gemini_code_oauth_token: ${{ secrets.GEMINI_CODE_OAUTH_TOKEN }}
-
-          # This is an optional setting that allows Gemini to read CI results on PRs
-          additional_permissions: |
-            actions: read
-
-          # Optional: Give a custom prompt to Gemini. If this is not specified, Gemini will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
-
-          # Optional: Add gemini_args to customize behavior and configuration
-          # See https://github.com/anthropics/gemini-code-action/blob/main/docs/usage.md
-          # or https://code.gemini.com/docs/en/cli-reference for available options
-          # gemini_args: '--allowed-tools Bash(gh pr:*)'
+          api_key: ${{ secrets.GEMINI_API_KEY }}
