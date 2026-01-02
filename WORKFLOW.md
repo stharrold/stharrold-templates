@@ -1,4 +1,4 @@
-# Workflow Guide - v7x0 (Implementation)
+# Workflow Guide - v7x1 (Implementation)
 
 **Version:** 7.0.0
 **Date:** 2026-01-01
@@ -46,28 +46,28 @@ If you have cloned `stharrold-templates` into a subdirectory (e.g., `.tmp/`):
 python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/apply_workflow.py .tmp/stharrold-templates .
 ```
 
-## v7x0 Workflow
+## v7x1 Workflow
 
 ```
-/workflow:v7x0_1-worktree "feature description"
+/workflow:v7x1_1-worktree "feature description"
     | creates worktree, user implements feature in worktree
     v
-/workflow:v7x0_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/workflow:v7x1_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
     | PR feature->contrib->develop
     v
-/workflow:v7x0_3-release
+/workflow:v7x1_3-release
     | create release, PR to main, tag
     v
-/workflow:v7x0_4-backmerge
+/workflow:v7x1_4-backmerge
     | PR release->develop, rebase contrib, cleanup
 ```
 
-### Step 1: Create Worktree (`/workflow:v7x0_1-worktree`)
+### Step 1: Create Worktree (`/workflow:v7x1_1-worktree`)
 
 Creates isolated git worktree for feature development.
 
 ```bash
-/workflow:v7x0_1-worktree "add user authentication"
+/workflow:v7x1_1-worktree "add user authentication"
 ```
 
 **Output:**
@@ -94,12 +94,12 @@ cd <worktree-path>
 
 No separate planning documents needed.
 
-### Step 3: Integrate (`/workflow:v7x0_2-integrate`)
+### Step 3: Integrate (`/workflow:v7x1_2-integrate`)
 
 From main repo, after implementation is complete:
 
 ```bash
-/workflow:v7x0_2-integrate "feature/20251229T120000Z_add-user-auth"
+/workflow:v7x1_2-integrate "feature/20251229T120000Z_add-user-auth"
 ```
 
 **Two modes:**
@@ -108,13 +108,13 @@ From main repo, after implementation is complete:
 
 **Manual gates:** PRs require approval in GitHub/Azure DevOps UI.
 
-### Step 4: Release (`/workflow:v7x0_3-release`)
+### Step 4: Release (`/workflow:v7x1_3-release`)
 
 Creates release from develop:
 
 ```bash
-/workflow:v7x0_3-release           # Auto-calculate version
-/workflow:v7x0_3-release v1.2.0    # Explicit version
+/workflow:v7x1_3-release           # Auto-calculate version
+/workflow:v7x1_3-release v1.2.0    # Explicit version
 ```
 
 **Creates:**
@@ -122,12 +122,12 @@ Creates release from develop:
 - PR to main (requires approval)
 - Tag on main after merge
 
-### Step 5: Backmerge (`/workflow:v7x0_4-backmerge`)
+### Step 5: Backmerge (`/workflow:v7x1_4-backmerge`)
 
 Syncs release changes back:
 
 ```bash
-/workflow:v7x0_4-backmerge
+/workflow:v7x1_4-backmerge
 ```
 
 **Actions:**
@@ -160,11 +160,11 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 - `feature/*` - Feature development
 
 **Ephemeral branches:**
-- `release/*` - Created in `/workflow:v7x0_3-release`, deleted in `/workflow:v7x0_4-backmerge`
+- `release/*` - Created in `/workflow:v7x1_3-release`, deleted in `/workflow:v7x1_4-backmerge`
 
 ## Key Differences from v1-v7
 
-| Aspect | v1-v7 | v7x0 |
+| Aspect | v1-v7 | v7x1 |
 |--------|-------|-----|
 | Planning | BMAD documents + SpecKit specs | Built-in Gemini tools |
 | Quality gates | 5 separate gates | Gemini Code Review |

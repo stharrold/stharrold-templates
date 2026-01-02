@@ -1,22 +1,22 @@
 # Workflow Phases Diagram
 
-Visual representation of the streamlined v7x0 workflow system.
+Visual representation of the streamlined v7x1 workflow system.
 
 ## Phase Flow
 
 ```mermaid
 flowchart TB
     subgraph Feature["Feature Workflow"]
-        Step1[/workflow:v7x0_1-worktree<br/>Create isolated<br/>environment]
+        Step1[/workflow:v7x1_1-worktree<br/>Create isolated<br/>environment]
         Step2[Implementation<br/>Autonomous development<br/>using Gemini tools]
-        Step3[/workflow:v7x0_2-integrate<br/>Create PRs from<br/>feature to develop]
+        Step3[/workflow:v7x1_2-integrate<br/>Create PRs from<br/>feature to develop]
 
         Step1 --> Step2 --> Step3
     end
 
     subgraph Release["Release Workflow"]
-        Step4[/workflow:v7x0_3-release<br/>develop → release → main]
-        Step5[/workflow:v7x0_4-backmerge<br/>Sync release to<br/>develop and contrib]
+        Step4[/workflow:v7x1_3-release<br/>develop → release → main]
+        Step5[/workflow:v7x1_4-backmerge<br/>Sync release to<br/>develop and contrib]
 
         Step4 --> Step5
     end
@@ -63,8 +63,8 @@ flowchart LR
         Review -->|Improve| Plan
     end
 
-    Step1[/workflow:v7x0_1-worktree] --> Loop
-    Loop -->|Done| Step3[/workflow:v7x0_2-integrate]
+    Step1[/workflow:v7x1_1-worktree] --> Loop
+    Loop -->|Done| Step3[/workflow:v7x1_2-integrate]
 ```
 
 ## Skill Dependencies

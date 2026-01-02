@@ -20,7 +20,7 @@ related_skills:
 
 Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, GEMINI.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 
-> **Note**: As of v7x0.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
+> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
 
 ## Directory Structure
 
@@ -441,7 +441,7 @@ result = subprocess.run([
 **Context:** User updated a skill, need to sync documentation
 
 **User says:**
-- "Updated bmad-planner to v7x0.0"
+- "Updated bmad-planner to v7x1.0"
 - "Sync documentation"
 - "Validate versions"
 

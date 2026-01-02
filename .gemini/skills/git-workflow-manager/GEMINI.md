@@ -19,7 +19,7 @@ related_skills:
 
 Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub/Azure DevOps).
 
-> **Note**: As of v7x0.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
+> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
 
 ## Directory Structure
 

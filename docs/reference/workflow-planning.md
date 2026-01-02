@@ -3,18 +3,18 @@
 **Parent:** [WORKFLOW.md](../../WORKFLOW.md)
 **Version:** 6.0.0
 
-This document covers the initial steps of the streamlined v7x0 workflow.
+This document covers the initial steps of the streamlined v7x1 workflow.
 
 ---
 
-## v7x0 Workflow Overview
+## v7x1 Workflow Overview
 
-The v7x0 workflow simplifies development by leveraging built-in Gemini CLI tools for autonomous planning, architecture, and implementation.
+The v7x1 workflow simplifies development by leveraging built-in Gemini CLI tools for autonomous planning, architecture, and implementation.
 
-1. **[/workflow:v7x0_1-worktree](command:workflow:v7x0_1-worktree)**: Create isolated development environment.
+1. **[/workflow:v7x1_1-worktree](command:workflow:v7x1_1-worktree)**: Create isolated development environment.
 2. **Implementation**: Autonomous development using built-in tools.
-3. **[/workflow:v7x0_2-integrate](command:workflow:v7x0_2-integrate)**: Sync with main repo and develop branch.
-4. **[/workflow:v7x0_3-release](command:workflow:v7x0_3-release)** & **[/workflow:v7x0_4-backmerge](command:workflow:v7x0_4-backmerge)**: Production deployment.
+3. **[/workflow:v7x1_2-integrate](command:workflow:v7x1_2-integrate)**: Sync with main repo and develop branch.
+4. **[/workflow:v7x1_3-release](command:workflow:v7x1_3-release)** & **[/workflow:v7x1_4-backmerge](command:workflow:v7x1_4-backmerge)**: Production deployment.
 
 ---
 
@@ -22,7 +22,7 @@ The v7x0 workflow simplifies development by leveraging built-in Gemini CLI tools
 
 **Location:** Main repository
 **Branch:** `contrib/<gh-user>`
-**Command:** `/workflow:v7x0_1-worktree "feature description"`
+**Command:** `/workflow:v7x1_1-worktree "feature description"`
 
 This command automates the creation of an isolated git worktree for your feature.
 
@@ -78,7 +78,7 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v7x0_1_worktree
+  --pattern phase_v7x1_1_worktree
 ```
 
 ---

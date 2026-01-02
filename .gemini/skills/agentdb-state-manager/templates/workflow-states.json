@@ -1,6 +1,6 @@
 {
   "version": "5.2.0",
-  "description": "Canonical state definitions for workflow v7x0 AgentDB integration",
+  "description": "Canonical state definitions for workflow v7x1 AgentDB integration",
   "object_types": {
     "feature": "Feature-level workflow tracking (Phase 1-4)",
     "epic": "Epic from BMAD planning (Phase 1)",

@@ -1,7 +1,7 @@
 ---
 type: gemini-context
 directory: .gemini/skills
-purpose: Modular skill implementations (6 skills) for v7x0 workflow automation.
+purpose: Modular skill implementations (6 skills) for v7x1 workflow automation.
 parent: ../GEMINI.md
 sibling_readme: null
 children:
@@ -17,7 +17,7 @@ children:
 
 ## Purpose
 
-Modular skill implementations (6 skills) for v7x0 workflow automation.
+Modular skill implementations (6 skills) for v7x1 workflow automation.
 
 **Archived skills** (see `ARCHIVED/`):
 - bmad-planner - Replaced by autonomous implementation

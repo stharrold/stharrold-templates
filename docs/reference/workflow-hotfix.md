@@ -22,9 +22,9 @@ A hotfix is an urgent fix for a production issue. It follows a similar flow to f
 
 **Location:** Main repository
 **Branch:** `main`
-**Command:** `/workflow:v7x0_1-worktree "hotfix: brief description"`
+**Command:** `/workflow:v7x1_1-worktree "hotfix: brief description"`
 
-The `/workflow:v7x0_1-worktree` command handles hotfix creation when run from the `main` branch (or by specifying `main` as base).
+The `/workflow:v7x1_1-worktree` command handles hotfix creation when run from the `main` branch (or by specifying `main` as base).
 
 **Side effects:**
 - Creates a `hotfix/YYYYMMDDTHHMMSSZ_slug` branch from `main`.
@@ -50,13 +50,13 @@ Inside the worktree, chat with Gemini to implement the fix.
 ### Step 3: Integrate & Deploy
 
 **Location:** Main repository
-**Command:** `/workflow:v7x0_2-integrate "hotfix/branch-name"`
+**Command:** `/workflow:v7x1_2-integrate "hotfix/branch-name"`
 
 Integrating a hotfix involves merging into both production and development lines.
 
 1. **Merge to Main**: Create a PR from **hotfix** → **main**.
-2. **Tag Release**: After merging, use `/workflow:v7x0_3-release` to tag the new production version (e.g., `v7.0.1`).
-3. **Backmerge to Develop**: Use `/workflow:v7x0_4-backmerge` to sync the fix into the `develop` branch.
+2. **Tag Release**: After merging, use `/workflow:v7x1_3-release` to tag the new production version (e.g., `v7.0.1`).
+3. **Backmerge to Develop**: Use `/workflow:v7x1_4-backmerge` to sync the fix into the `develop` branch.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 type: gemini-context
 directory: .gemini/skills/workflow-orchestrator
-purpose: Workflow Orchestrator is **the main coordinator skill** for the 4-phase v7x0 workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
+purpose: Workflow Orchestrator is **the main coordinator skill** for the 4-phase v7x1 workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
 parent: ../GEMINI.md
 sibling_readme: README.md
 children:
@@ -21,7 +21,7 @@ related_skills:
 
 Workflow Orchestrator is **the main coordinator skill** for the 7-phase workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
 
-> **Note**: As of v7x0.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Use `query_workflow_state.py` from `agentdb-state-manager` to determine current phase instead of parsing TODO files.
+> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Use `query_workflow_state.py` from `agentdb-state-manager` to determine current phase instead of parsing TODO files.
 
 ## Directory Structure
 
@@ -382,33 +382,33 @@ if quality_gates_passed() and not pr_created():
 
 ---
 
-## Workflow Phase Map (v7x0)
+## Workflow Phase Map (v7x1)
 
 ```
 Phase 0: Session Start
 ├── Load: tech-stack-adapter
 └── Action: Detect project configuration
 
-Phase 1: Worktree (/workflow:v7x0_1-worktree)
+Phase 1: Worktree (/workflow:v7x1_1-worktree)
 ├── Load: git-workflow-manager
 ├── Action: Create feature worktree
 └── Action: Record state in AgentDB
 
-Phase 2: Integration (/workflow:v7x0_2-integrate)
+Phase 2: Integration (/workflow:v7x1_2-integrate)
 ├── Load: git-workflow-manager
 ├── Action: Push feature → Create PR (feature -> contrib)
 ├── Action: Cleanup worktree
 ├── Action: Push contrib → Create PR (contrib -> develop)
 └── Action: Record state in AgentDB
 
-Phase 3: Release (/workflow:v7x0_3-release)
+Phase 3: Release (/workflow:v7x1_3-release)
 ├── Load: git-workflow-manager
 ├── Action: Create release branch
 ├── Action: Create PR (release -> main)
 ├── Action: Tag release
 └── Action: Record state in AgentDB
 
-Phase 4: Backmerge (/workflow:v7x0_4-backmerge)
+Phase 4: Backmerge (/workflow:v7x1_4-backmerge)
 ├── Load: git-workflow-manager
 ├── Action: Create PR (release -> develop)
 ├── Action: Rebase contrib on develop

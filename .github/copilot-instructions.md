@@ -156,7 +156,7 @@ uv run python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   feature my-feature contrib/stharrold
 
 # Semantic version calculation
-uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v7x0.0
+uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v7x1.0
 
 # Archive management
 uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list

@@ -1,6 +1,6 @@
 description = "Sync release to develop and contrib (Step 4 of 4)"
 prompt = """
-# /workflow:v7x0_4-backmerge - Step 4 of 4
+# /workflow:v7x1_4-backmerge - Step 4 of 4
 
 **Context Check**: !{python3 .gemini/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7}
 
@@ -14,5 +14,5 @@ Run: `uv run python .gemini/skills/git-workflow-manager/scripts/backmerge_workfl
 Run: `uv run python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release`
 
 ## Step 4: Record State
-Run: `uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x0_4_backmerge`
+Run: `uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x1_4_backmerge`
 """

@@ -58,9 +58,9 @@ az --version              # Azure CLI (for Azure DevOps repos)
    uv sync
    ```
 
-## Development Workflow (v7x0)
+## Development Workflow (v7x1)
 
-This repository uses a streamlined **v7x0** workflow.
+This repository uses a streamlined **v7x1** workflow.
 
 ### Branch Structure
 
@@ -76,11 +76,11 @@ feature/* (isolated worktrees)
 
 ### Workflow Steps
 
-1. **Create Worktree**: `/workflow:v7x0_1-worktree "feature description"`
+1. **Create Worktree**: `/workflow:v7x1_1-worktree "feature description"`
 2. **Implement**: Perform implementation using built-in Gemini CLI tools (in worktree).
-3. **Integrate**: `/workflow:v7x0_2-integrate` (in main repo)
-4. **Release**: `/workflow:v7x0_3-release`
-5. **Backmerge**: `/workflow:v7x0_4-backmerge`
+3. **Integrate**: `/workflow:v7x1_2-integrate` (in main repo)
+4. **Release**: `/workflow:v7x1_3-release`
+5. **Backmerge**: `/workflow:v7x1_4-backmerge`
 
 ### Manual Maintenance
 
@@ -108,7 +108,7 @@ All directories must have:
 
 ### 1. Create Pull Request
 
-Use the `/workflow:v7x0_2-integrate` command to automate PR creation, or do it manually:
+Use the `/workflow:v7x1_2-integrate` command to automate PR creation, or do it manually:
 
 ```bash
 # Create PR to contrib/stharrold
