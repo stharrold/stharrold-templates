@@ -2,7 +2,7 @@
 title: MCP Security Tools & Ecosystem
 version: 1.2
 updated: 2025-09-16
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -162,8 +162,8 @@ $ mcp-secrets set github token
 Enter value for 'github_token': ************************************
 ✓ Credential stored in system keychain
 
-# Step 4: Configure Claude to use the stored secret
-# Add to claude.json:
+# Step 4: Configure Gemini to use the stored secret
+# Add to gemini.json:
 {
   "mcpServers": {
     "github": {
@@ -181,7 +181,7 @@ $ mcp-secrets get github token
 ghp_xxxxxxxxxxxxxxxxxxxx
 
 # Step 6: Test MCP server functionality
-$ claude-desktop --test-mcp github
+$ gemini-desktop --test-mcp github
 ✓ MCP server started successfully
 ✓ Authentication verified
 ✓ GitHub API accessible
@@ -189,7 +189,7 @@ $ claude-desktop --test-mcp github
 
 **Runtime Credential Injection:**
 
-When Claude starts the GitHub MCP server, mcp-secrets-plugin handles the credential retrieval automatically:
+When Gemini starts the GitHub MCP server, mcp-secrets-plugin handles the credential retrieval automatically:
 
 ```python
 # Behind the scenes credential resolution
@@ -530,11 +530,11 @@ auth0_tenants:
       - "mcp:read"
 ```
 
-## Claude Desktop Native Integration
+## Gemini Desktop Native Integration
 
-### Claude Desktop Extensions (DXT)
+### Gemini Desktop Extensions (DXT)
 
-**Overview:** Native integration within Claude Desktop that automatically encrypts credentials marked as sensitive in configuration schemas.
+**Overview:** Native integration within Gemini Desktop that automatically encrypts credentials marked as sensitive in configuration schemas.
 
 **Key Features:**
 - **Automatic encryption** using OS-native credential stores
@@ -593,7 +593,7 @@ auth0_tenants:
 **Installation Experience:**
 
 1. **Extension Installation**: User installs MCP server extension
-2. **Credential Prompting**: Claude Desktop automatically prompts for sensitive fields
+2. **Credential Prompting**: Gemini Desktop automatically prompts for sensitive fields
 3. **Secure Storage**: Credentials encrypted using OS keychain/credential manager
 4. **Template Replacement**: `${user_config.*}` syntax replaced with decrypted values
 5. **Zero Configuration**: Server works immediately without manual setup
@@ -775,7 +775,7 @@ print("Available keyring backends:", keyring.backend.get_all_keyring())
 | **Node.js keytar** | ✅ | ❌ | ❌ | Basic | ✅ |
 | **mcpauth** | ✅ | ✅ | ✅ | Comprehensive | ✅ |
 | **Auth0 MCP Server** | ✅ | ✅ | ✅ | Enterprise | ✅ |
-| **Claude Desktop DXT** | ✅ | ❌ | ❌ | Basic | ❌ |
+| **Gemini Desktop DXT** | ✅ | ❌ | ❌ | Basic | ❌ |
 
 ### Recommended Implementation Strategy
 
@@ -816,7 +816,7 @@ mcp_security_stack:
     device_flow: "auth0-mcp-server"
 
   desktop_integration:
-    claude_desktop: "native-dxt"
+    gemini_desktop: "native-dxt"
     vs_code: "mcp-secrets-plugin"
     cli: "mcp-secrets-plugin"
 
@@ -1008,7 +1008,7 @@ echo "Testing pattern: \${SECRET:github_token}"
 mcp-secrets test github_token
 
 # Step 4: Check MCP server logs
-tail -f ~/.local/share/claude/logs/mcp.log
+tail -f ~/.local/share/gemini/logs/mcp.log
 ```
 
 ### Platform-Specific Recovery Procedures

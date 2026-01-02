@@ -2,7 +2,7 @@
 title: Enterprise Deployment & CI/CD Integration
 version: 4.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -25,14 +25,14 @@ changelog:
 
 # Enterprise Deployment & CI/CD Integration
 
-Comprehensive enterprise deployment strategies, CI/CD pipeline integration, security workflows, and industry-specific MCP server configurations for production-scale Claude development.
+Comprehensive enterprise deployment strategies, CI/CD pipeline integration, security workflows, and industry-specific MCP server configurations for production-scale Gemini development.
 
 ## Enterprise Deployment Strategies
 
 ### Production-Grade Architecture Patterns
 
 **Enterprise Deployment Philosophy:**
-Enterprise Claude deployments require sophisticated orchestration, security integration, and continuous delivery pipelines that align with existing organizational infrastructure and compliance requirements.
+Enterprise Gemini deployments require sophisticated orchestration, security integration, and continuous delivery pipelines that align with existing organizational infrastructure and compliance requirements.
 
 **Core Deployment Principles:**
 - **Infrastructure-as-Code** with version-controlled configuration management
@@ -51,8 +51,8 @@ Enterprise search implementation represents the most sophisticated MCP capabilit
 **Data Discovery and Classification:**
 ```bash
 # Data source inventory and assessment
-claude enterprise-search init-data-census
-claude enterprise-search classify-sources --comprehensive
+gemini enterprise-search init-data-census
+gemini enterprise-search classify-sources --comprehensive
 
 # Expected data source categories:
 # - Structured databases (PostgreSQL, MongoDB, MySQL)
@@ -89,8 +89,8 @@ governance_framework:
 **Vector Database Implementation:**
 ```bash
 # Enterprise vector database deployment
-claude enterprise-search deploy-vector-db --provider=pinecone --enterprise-grade
-claude enterprise-search configure-embeddings --model=text-embedding-ada-002
+gemini enterprise-search deploy-vector-db --provider=pinecone --enterprise-grade
+gemini enterprise-search configure-embeddings --model=text-embedding-ada-002
 
 # Alternative enterprise options:
 # --provider=weaviate --self-hosted
@@ -128,8 +128,8 @@ architecture:
 
 **Multi-Stage Pipeline Architecture:**
 ```yaml
-# .github/workflows/claude-enterprise-deploy.yml
-name: Claude Enterprise Deployment
+# .github/workflows/gemini-enterprise-deploy.yml
+name: Gemini Enterprise Deployment
 on:
   push:
     branches: [main, staging, develop]
@@ -156,7 +156,7 @@ jobs:
     steps:
       - name: Deploy to Staging Environment
         run: |
-          claude enterprise-deploy staging \
+          gemini enterprise-deploy staging \
             --mcp-config=enterprise-staging.json \
             --security-level=high \
             --audit-logging=enabled
@@ -169,7 +169,7 @@ jobs:
     steps:
       - name: Production Deployment with Approval
         run: |
-          claude enterprise-deploy production \
+          gemini enterprise-deploy production \
             --mcp-config=enterprise-production.json \
             --security-level=maximum \
             --compliance-mode=sox,gdpr,hipaa \
@@ -186,9 +186,9 @@ jobs:
 
 **Terraform Enterprise Configuration:**
 ```hcl
-# terraform/enterprise-claude.tf
-module "claude_enterprise" {
-  source = "./modules/claude-deployment"
+# terraform/enterprise-gemini.tf
+module "gemini_enterprise" {
+  source = "./modules/gemini-deployment"
 
   # Enterprise Configuration
   deployment_environment = var.environment
@@ -258,25 +258,25 @@ module "claude_enterprise" {
 
 **Production-Grade Kubernetes Deployment:**
 ```yaml
-# claude-code-deployment.yml
+# gemini-code-deployment.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: claude-mcp-orchestrator
-  namespace: claude-production
+  name: gemini-mcp-orchestrator
+  namespace: gemini-production
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: claude-mcp
+      app: gemini-mcp
   template:
     metadata:
       labels:
-        app: claude-mcp
+        app: gemini-mcp
     spec:
       containers:
       - name: mcp-server
-        image: claude-mcp:v4.0
+        image: gemini-mcp:v4.0
         resources:
           limits:
             cpu: "2"
@@ -288,16 +288,16 @@ spec:
         - name: GITHUB_TOKEN
           valueFrom:
             secretKeyRef:
-              name: claude-secrets
+              name: gemini-secrets
               key: github-token
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: claude-mcp-service
+  name: gemini-mcp-service
 spec:
   selector:
-    app: claude-mcp
+    app: gemini-mcp
   ports:
   - port: 8080
     targetPort: 8080
@@ -314,8 +314,8 @@ spec:
 ```bash
 # Complete production deployment
 kubectl apply -f k8s/production/
-kubectl rollout status deployment/claude-mcp-orchestrator
-kubectl get pods -l app=claude-mcp
+kubectl rollout status deployment/gemini-mcp-orchestrator
+kubectl get pods -l app=gemini-mcp
 ```
 
 ## Security Workflows and Compliance
@@ -384,21 +384,21 @@ class EnterpriseSecurityManager:
 #!/bin/bash
 
 # Daily security health check
-claude security daily-audit \
+gemini security daily-audit \
   --compliance-frameworks=sox,gdpr,hipaa \
   --vulnerability-scan=comprehensive \
   --access-review=automated \
   --report-format=enterprise
 
 # Weekly security assessment
-claude security weekly-assessment \
+gemini security weekly-assessment \
   --penetration-testing=light \
   --configuration-drift=detect \
   --privilege-audit=comprehensive \
   --security-metrics=dashboard
 
 # Monthly compliance reporting
-claude security compliance-report \
+gemini security compliance-report \
   --frameworks=all \
   --executive-summary=included \
   --remediation-plans=automated \
@@ -413,12 +413,12 @@ claude security compliance-report \
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: claude-mcp-hpa
+  name: gemini-mcp-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: claude-mcp-orchestrator
+    name: gemini-mcp-orchestrator
   minReplicas: 2
   maxReplicas: 20
   metrics:
@@ -449,53 +449,53 @@ spec:
 **Healthcare and Life Sciences:**
 ```bash
 # HIPAA-compliant healthcare integrations
-claude mcp add healthcare-emr npx @modelcontextprotocol/server-healthcare-emr
-claude mcp add fhir-integration npx @modelcontextprotocol/server-fhir
-claude mcp add medical-coding npx @modelcontextprotocol/server-medical-coding
+gemini mcp add healthcare-emr npx @modelcontextprotocol/server-healthcare-emr
+gemini mcp add fhir-integration npx @modelcontextprotocol/server-fhir
+gemini mcp add medical-coding npx @modelcontextprotocol/server-medical-coding
 
 # Enhanced privacy and audit controls
-claude config set-privacy-mode healthcare
-claude config set-audit-retention 7-years
-claude config set-encryption-level maximum
+gemini config set-privacy-mode healthcare
+gemini config set-audit-retention 7-years
+gemini config set-encryption-level maximum
 ```
 
 **Financial Services and Banking:**
 ```bash
 # Financial compliance and trading integrations
-claude mcp add bloomberg-terminal npx @modelcontextprotocol/server-bloomberg
-claude mcp add risk-management npx @modelcontextprotocol/server-risk-analytics
-claude mcp add regulatory-reporting npx @modelcontextprotocol/server-fintech-compliance
+gemini mcp add bloomberg-terminal npx @modelcontextprotocol/server-bloomberg
+gemini mcp add risk-management npx @modelcontextprotocol/server-risk-analytics
+gemini mcp add regulatory-reporting npx @modelcontextprotocol/server-fintech-compliance
 
 # SOX compliance configuration
-claude config set-compliance-mode sox
-claude config set-transaction-logging comprehensive
-claude config set-change-management approval-required
+gemini config set-compliance-mode sox
+gemini config set-transaction-logging comprehensive
+gemini config set-change-management approval-required
 ```
 
 **Manufacturing and Supply Chain:**
 ```bash
 # Industrial IoT and supply chain integration
-claude mcp add erp-integration npx @modelcontextprotocol/server-sap-erp
-claude mcp add supply-chain npx @modelcontextprotocol/server-supply-analytics
-claude mcp add quality-management npx @modelcontextprotocol/server-quality-systems
+gemini mcp add erp-integration npx @modelcontextprotocol/server-sap-erp
+gemini mcp add supply-chain npx @modelcontextprotocol/server-supply-analytics
+gemini mcp add quality-management npx @modelcontextprotocol/server-quality-systems
 
 # Industry 4.0 configuration
-claude config set-iot-integration enabled
-claude config set-predictive-maintenance active
-claude config set-supply-chain-visibility enhanced
+gemini config set-iot-integration enabled
+gemini config set-predictive-maintenance active
+gemini config set-supply-chain-visibility enhanced
 ```
 
 **Government and Public Sector:**
 ```bash
 # Government security and compliance
-claude mcp add government-systems npx @modelcontextprotocol/server-gov-integration
-claude mcp add classified-handling npx @modelcontextprotocol/server-classified-docs
-claude mcp add public-records npx @modelcontextprotocol/server-public-records
+gemini mcp add government-systems npx @modelcontextprotocol/server-gov-integration
+gemini mcp add classified-handling npx @modelcontextprotocol/server-classified-docs
+gemini mcp add public-records npx @modelcontextprotocol/server-public-records
 
 # FedRAMP compliance configuration
-claude config set-security-clearance moderate
-claude config set-data-sovereignty us-only
-claude config set-audit-trail comprehensive
+gemini config set-security-clearance moderate
+gemini config set-data-sovereignty us-only
+gemini config set-audit-trail comprehensive
 ```
 
 ## Multi-Environment Management
@@ -542,7 +542,7 @@ backup_strategy:
 **Blue-Green Deployment Strategy:**
 ```bash
 # Blue-green deployment with zero downtime
-claude enterprise-deploy blue-green \
+gemini enterprise-deploy blue-green \
   --current-environment=blue \
   --target-environment=green \
   --health-check-timeout=300 \
@@ -550,7 +550,7 @@ claude enterprise-deploy blue-green \
   --traffic-shift-strategy=gradual
 
 # Canary deployment for gradual rollout
-claude enterprise-deploy canary \
+gemini enterprise-deploy canary \
   --canary-percentage=10 \
   --success-metrics=response-time,error-rate \
   --promotion-criteria=automated \
@@ -648,7 +648,7 @@ alerting:
 **Comprehensive Backup Strategy:**
 ```bash
 # Automated backup and recovery procedures
-claude enterprise-backup create-strategy \
+gemini enterprise-backup create-strategy \
   --backup-frequency=hourly \
   --retention-policy=5-years \
   --encryption-level=aes-256 \
@@ -656,7 +656,7 @@ claude enterprise-backup create-strategy \
   --point-in-time-recovery=enabled
 
 # Disaster recovery testing
-claude enterprise-dr test-recovery \
+gemini enterprise-dr test-recovery \
   --scenario=full-system-failure \
   --recovery-target=4-hours \
   --data-consistency-check=comprehensive \
@@ -700,4 +700,4 @@ claude enterprise-dr test-recovery \
 
 ---
 
-*This enterprise deployment guide provides comprehensive strategies for production-scale Claude development with security, compliance, and operational excellence.*
+*This enterprise deployment guide provides comprehensive strategies for production-scale Gemini development with security, compliance, and operational excellence.*

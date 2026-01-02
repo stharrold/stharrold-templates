@@ -2,7 +2,7 @@
 title: Multi-Agent Systems & Orchestration Patterns
 version: 4.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -21,22 +21,22 @@ related:
   - ./37_team-collaboration.md
   - ./38_enterprise-deployment.md
   - ../10_mcp/12_servers.md
-  - ../20_credentials/CLAUDE.md
+  - ../20_credentials/GEMINI.md
 changelog:
-  - 4.0: BREAKING CHANGE - Replaced Claude-Flow with LangGraph orchestration, split into modular subcategories
+  - 4.0: BREAKING CHANGE - Replaced Gemini-Flow with LangGraph orchestration, split into modular subcategories
   - 1.0: Initial multi-agent systems guide with advanced orchestration patterns
 ---
 
 # Multi-Agent Systems & Orchestration Patterns
 
-Advanced multi-agent coordination strategies, orchestration frameworks, and production deployment patterns for enterprise-scale Claude development workflows.
+Advanced multi-agent coordination strategies, orchestration frameworks, and production deployment patterns for enterprise-scale Gemini development workflows.
 
 ## Multi-Agent Architecture Overview
 
 ### Orchestration Framework Strategy
 
 **LangGraph-Based Implementation (v4.0+):**
-Enterprise-scale multi-agent coordination using production-ready LangGraph orchestration with TypeScript integration, replacing previous Claude-Flow implementations for enhanced scalability and maintainability.
+Enterprise-scale multi-agent coordination using production-ready LangGraph orchestration with TypeScript integration, replacing previous Gemini-Flow implementations for enhanced scalability and maintainability.
 
 **Core Architecture Benefits:**
 - **Graph-based workflow definition** with visual state management

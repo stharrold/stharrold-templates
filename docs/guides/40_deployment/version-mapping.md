@@ -9,10 +9,10 @@ This document explains the version numbering schemes used in stharrold-templates
 **Purpose:** IU Health CBIA adaptation version
 **Current:** v1.15.1
 **Found in:**
-- `D:\Projects\CLAUDE.md` (meta-repository)
+- `D:\Projects\GEMINI.md` (meta-repository)
 - `D:\Projects\apply-workflow-batch.sh`
-- `D:\Projects\templates\workflow-template\CLAUDE.md`
-- Individual project CLAUDE.md files (workflow section)
+- `D:\Projects\templates\workflow-template\GEMINI.md`
+- Individual project GEMINI.md files (workflow section)
 
 **Example:**
 ```markdown
@@ -81,8 +81,8 @@ Update when:
 
 Files to update:
 1. `apply-workflow-batch.sh` line 2
-2. `D:\Projects\CLAUDE.md` references
-3. Each project's CLAUDE.md workflow section
+2. `D:\Projects\GEMINI.md` references
+3. Each project's GEMINI.md workflow section
 
 ### German Workflow (v5.x.x)
 Update when:
@@ -110,7 +110,7 @@ Update when:
 2. **For upstream sync:** Reference German Workflow version (v5.x.x)
 3. **For package releases:** Use pyproject.toml version
 
-**Example CLAUDE.md section:**
+**Example GEMINI.md section:**
 ```markdown
 ## Standard Workflow System
 

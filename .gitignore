@@ -41,7 +41,13 @@ build/
 .tmp/
 
 # Worktree state (per-worktree mutable state)
-.claude-state/
+.gemini-state/
 
 # VSCode AI rules
 .github/instructions/codacy.instructions.md
+
+# Gemini
+.gemini/settings.local.json
+#.gemini/
+
+gha-creds-*.json

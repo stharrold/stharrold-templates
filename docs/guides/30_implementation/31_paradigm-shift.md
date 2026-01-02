@@ -2,7 +2,7 @@
 title: Agentic Development Paradigm
 version: 3.1
 updated: 2025-09-12
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -26,13 +26,13 @@ changelog:
 
 # Agentic Development Paradigm
 
-Strategic foundation for transforming software development from traditional IDE-based coding to agentic, conversation-driven programming with Claude Code as an autonomous development partner.
+Strategic foundation for transforming software development from traditional IDE-based coding to agentic, conversation-driven programming with Gemini Code as an autonomous development partner.
 
 ## Fundamental Paradigm Shift
 
 ### From Code Completion to Development Partnership
 
-Claude Code fundamentally transforms software development by moving beyond traditional autocomplete suggestions to become an **autonomous development partner** capable of executing complex, multi-step workflows with minimal supervision.
+Gemini Code fundamentally transforms software development by moving beyond traditional autocomplete suggestions to become an **autonomous development partner** capable of executing complex, multi-step workflows with minimal supervision.
 
 **Traditional IDE Limitations:**
 - **Code completion tools** (GitHub Copilot, Cursor) provide suggestions but require manual orchestration
@@ -46,37 +46,37 @@ Claude Code fundamentally transforms software development by moving beyond tradi
 - **Autonomous task execution** completes entire features from conception to deployment rather than simple code completion
 - **Multi-step reasoning** handles complex architectural decisions and cross-cutting concerns
 
-### Positioning Claude Code as Development Partner
+### Positioning Gemini Code as Development Partner
 
-Rather than treating Claude Code as a code completion tool, successful teams position it as an autonomous development partner through strategic delegation and orchestration.
+Rather than treating Gemini Code as a code completion tool, successful teams position it as an autonomous development partner through strategic delegation and orchestration.
 
 ## Model Selection Strategy
 
 <model_strategy>
 
-**Claude Sonnet 4**: Default for all development tasks
-**Claude Opus 4**: Reserve for complex architecture, multi-file refactoring
-**Claude Haiku**: Use for repetitive tasks, simple CRUD operations
+**Gemini Sonnet 4**: Default for all development tasks
+**Gemini Opus 4**: Reserve for complex architecture, multi-file refactoring
+**Gemini Haiku**: Use for repetitive tasks, simple CRUD operations
 Switch models based on task complexity, not preference
 </model_strategy>
 
 Choose the appropriate model based on the complexity and scope of your development task:
 
-**Claude Sonnet 4 - Standard Development (Default):**
+**Gemini Sonnet 4 - Standard Development (Default):**
 - Feature implementation and bug fixes
 - Code reviews and refactoring
 - API development and testing
 - Database queries and optimization
 - Documentation writing
 
-**Claude Opus 4 - Complex Architecture:**
+**Gemini Opus 4 - Complex Architecture:**
 - System design and architectural decisions
 - Multi-file refactoring across modules
 - Complex algorithm implementation
 - Security architecture planning
 - Performance optimization strategies
 
-**Claude Haiku - Repetitive Tasks:**
+**Gemini Haiku - Repetitive Tasks:**
 - CRUD operations and boilerplate code
 - Simple component creation
 - Configuration file updates
@@ -88,18 +88,18 @@ Choose the appropriate model based on the complexity and scope of your developme
 **Full Feature Development:**
 ```bash
 # Example: Complete authentication system implementation
-claude "Implement user authentication system with:
+gemini "Implement user authentication system with:
 - JWT token management
 - Password hashing with bcrypt
 - Email verification flow
 - Role-based permissions
 - Session management
 - Password reset functionality
-Following our Django patterns in CLAUDE.md"
+Following our Django patterns in GEMINI.md"
 ```
 
 **Autonomous Decision Making:**
-- Allow Claude to make architectural decisions within defined constraints
+- Allow Gemini to make architectural decisions within defined constraints
 - Provide strategic oversight through checkpoint reviews and approval gates
 - Enable complete ownership of implementation details while maintaining alignment
 
@@ -120,7 +120,7 @@ git worktree add ../project-ui feature/user-interface
 git worktree add ../project-tests feature/test-suite
 git worktree add ../project-api feature/api-endpoints
 
-# Run independent Claude Code sessions:
+# Run independent Gemini Code sessions:
 # Instance 1: Implements authentication system
 # Instance 2: Builds UI components
 # Instance 3: Generates comprehensive test suite
@@ -129,10 +129,10 @@ git worktree add ../project-api feature/api-endpoints
 
 **Coordinated Team Orchestration:**
 This approach mirrors how human development teams operate, with specialized roles contributing to the final product:
-- **Backend Claude instance**: Focuses on API development, database design, business logic
-- **Frontend Claude instance**: Concentrates on UI/UX, state management, component architecture
-- **Testing Claude instance**: Develops test strategies, automation, quality assurance
-- **DevOps Claude instance**: Handles deployment, infrastructure, monitoring
+- **Backend Gemini instance**: Focuses on API development, database design, business logic
+- **Frontend Gemini instance**: Concentrates on UI/UX, state management, component architecture
+- **Testing Gemini instance**: Develops test strategies, automation, quality assurance
+- **DevOps Gemini instance**: Handles deployment, infrastructure, monitoring
 
 **Synchronization and Integration:**
 ```bash
@@ -153,7 +153,7 @@ git merge feature/test-suite
 **Strategic Context Architecture:**
 Before requesting implementation, successful teams provide comprehensive background through structured information architecture:
 
-#### 1. Well-Structured CLAUDE.md Files
+#### 1. Well-Structured GEMINI.md Files
 
 **Project-Level Context:**
 ```yaml
@@ -178,7 +178,7 @@ standards:
 
 **Domain-Specific Patterns:**
 ```python
-# Example coding standards in CLAUDE.md
+# Example coding standards in GEMINI.md
 def process_payment(amount: Decimal, payment_method: str) -> PaymentResult:
     """
     All payment functions must:
@@ -224,9 +224,9 @@ constraints:
 **Computational Resource Allocation:**
 ```bash
 # Keywords that allocate additional processing power
-claude "Think harder about the optimal database schema for user relationships"
-claude "Ultrathink the security implications of this authentication flow"
-claude "Consider all edge cases for the payment processing pipeline"
+gemini "Think harder about the optimal database schema for user relationships"
+gemini "Ultrathink the security implications of this authentication flow"
+gemini "Consider all edge cases for the payment processing pipeline"
 ```
 
 **Results:** This comprehensive context strategy reduces iteration cycles and improves first-attempt success rates by 40-60%.
@@ -235,19 +235,19 @@ claude "Consider all edge cases for the payment processing pipeline"
 
 ### Dynamic Model Selection Based on Task Complexity
 
-**Claude Sonnet 4 ($3/million tokens):**
+**Gemini Sonnet 4 ($3/million tokens):**
 - **Optimal for 80% of development tasks** including routine CRUD operations, UI development, basic API endpoints
 - **Consistent performance under load** with reliable response times during peak usage
 - **Best balance of quality and cost** for sustained development work
 - **Excellent for:** Standard implementations, refactoring, documentation, testing
 
-**Claude Opus 4 ($15/million tokens):**
+**Gemini Opus 4 ($15/million tokens):**
 - **Complex architectural decisions** requiring deep reasoning and multi-step analysis
 - **Superior reasoning capability** justifies 5x cost premium for critical decisions
 - **More rate limiting** but significantly better results for complex refactoring and system design
 - **Excellent for:** System architecture, complex algorithms, security implementations, performance optimization
 
-**Claude Haiku ($0.80/million tokens):**
+**Gemini Haiku ($0.80/million tokens):**
 - **Simple, repetitive tasks** where speed matters more than sophisticated reasoning
 - **Bulk operations** and data transformation tasks
 - **High-volume, low-complexity** operations like code formatting, simple bug fixes
@@ -258,29 +258,29 @@ claude "Consider all edge cases for the payment processing pipeline"
 **Task-Based Model Selection:**
 ```bash
 # Default workflow - use Sonnet for most work
-claude /model sonnet-4
-claude "Implement user registration form with validation"
+gemini /model sonnet-4
+gemini "Implement user registration form with validation"
 
 # Switch to Opus for architectural decisions
-claude /model opus-4
-claude "Design database schema for multi-tenant e-commerce platform with complex inventory management"
+gemini /model opus-4
+gemini "Design database schema for multi-tenant e-commerce platform with complex inventory management"
 
 # Switch to Haiku for simple operations
-claude /model haiku
-claude "Format all Python files in src/ directory using black"
+gemini /model haiku
+gemini "Format all Python files in src/ directory using black"
 
 # Return to Sonnet for continued development
-claude /model sonnet-4
+gemini /model sonnet-4
 ```
 
 **Cost Optimization Patterns:**
 ```bash
 # Monitor usage and costs
-claude /cost --breakdown-by-model
+gemini /cost --breakdown-by-model
 
 # Automated model switching based on complexity
-claude config set-model-switching automatic
-claude config set-complexity-threshold medium
+gemini config set-model-switching automatic
+gemini config set-complexity-threshold medium
 ```
 
 ## Project Template Integration
@@ -365,9 +365,9 @@ domain_knowledge:
 
 ## Competitive Analysis & Strategic Positioning
 
-### When to Use Claude Code vs Alternatives
+### When to Use Gemini Code vs Alternatives
 
-**Claude Code Optimal Scenarios:**
+**Gemini Code Optimal Scenarios:**
 - **Complex, long-running projects** with stable architectures requiring deep context understanding
 - **Enterprise applications** with strict coding standards and compliance requirements
 - **Legacy system modernization** where comprehensive understanding of existing patterns is critical
@@ -385,7 +385,7 @@ domain_knowledge:
 - **File-by-file editing** with minimal cross-file dependencies
 - **Developers preferring IDE-centric** workflows with enhanced autocomplete
 
-**Claude Code Strategic Advantages:**
+**Gemini Code Strategic Advantages:**
 - **Autonomous project management** - handles entire features end-to-end
 - **Terminal-native operations** - sophisticated Git workflows and automation
 - **Persistent project knowledge** - maintains context across sessions
@@ -403,7 +403,7 @@ domain_knowledge:
 
 ## Future Developments and Strategic Implications
 
-### The Claude 4 Model Revolution
+### The Gemini 4 Model Revolution
 
 #### Performance Breakthrough
 
@@ -430,7 +430,7 @@ domain_knowledge:
 
 **Platform Maturation Indicators:**
 - **1,600+ MCP servers** signal evolution beyond individual tool status to comprehensive platform
-- **Enterprise integrations** with Jira, Slack, Google Drive, Salesforce transform Claude Code into unified development platform
+- **Enterprise integrations** with Jira, Slack, Google Drive, Salesforce transform Gemini Code into unified development platform
 - **Custom MCP development** enables domain-specific integrations (Unity game development, PayPal business operations, specialized industry tools)
 
 **Ecosystem Network Effects:**
@@ -533,13 +533,13 @@ When starting a new session:
 5. Note any usage limit considerations
 
 **Task Complexity Assessment:**
-- **Simple tasks** (bug fixes, minor features): Use Claude Sonnet 4
-- **Complex tasks** (architecture, multi-file changes): Consider Claude Opus 4
-- **Repetitive tasks** (CRUD, boilerplate): Use Claude Haiku
+- **Simple tasks** (bug fixes, minor features): Use Gemini Sonnet 4
+- **Complex tasks** (architecture, multi-file changes): Consider Gemini Opus 4
+- **Repetitive tasks** (CRUD, boilerplate): Use Gemini Haiku
 
 **Context Preparation:**
 - Clear irrelevant conversation history with `/clear`
-- Load project-specific CLAUDE.md context
+- Load project-specific GEMINI.md context
 - Identify critical files and dependencies for the task
 - Prepare relevant test files and documentation
 

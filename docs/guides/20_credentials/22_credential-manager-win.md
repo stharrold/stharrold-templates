@@ -2,7 +2,7 @@
 title: Windows Credential Manager Setup
 version: 3.2
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -233,9 +233,9 @@ $newToken = ConvertTo-SecureString "new-token-value" -AsPlainText -Force
 New-StoredCredential -Target "AZURE_DEVOPS_PAT" -UserName "token" -SecurePassword $newToken -Persist LocalMachine
 ```
 
-## Configure %USERPROFILE%\.claude.json (Claude Code CLI)
+## Configure %USERPROFILE%\.gemini.json (Gemini Code CLI)
 
-Create or update your Claude Code configuration file at `%USERPROFILE%\.claude.json`:
+Create or update your Gemini Code configuration file at `%USERPROFILE%\.gemini.json`:
 
 ```json
 {
@@ -425,7 +425,7 @@ Write-Host ""
 Write-Host "🎉 Setup complete!" -ForegroundColor Green
 Write-Host "📋 Next steps:" -ForegroundColor Yellow
 Write-Host "   1. Restart PowerShell or run: . `$PROFILE" -ForegroundColor White
-Write-Host "   2. Configure MCP servers: ../10_mcp/CLAUDE.md" -ForegroundColor White
+Write-Host "   2. Configure MCP servers: ../10_mcp/GEMINI.md" -ForegroundColor White
 Write-Host "   3. Test with: `$env:GITHUB_TOKEN.Substring(0,10)" -ForegroundColor White
 ```
 

@@ -20,10 +20,10 @@ target:
   file: "10_draft-merged/20_credentials/25_mcp-security-tools.md"
   action: "enhance_existing"
   size_limit_kb: 30
-  parent_orchestrator: "10_draft-merged/20_credentials/CLAUDE.md"
+  parent_orchestrator: "10_draft-merged/20_credentials/GEMINI.md"
 
 dependencies:
-  - Enhanced CLAUDE.md with unified git conventions
+  - Enhanced GEMINI.md with unified git conventions
   - GitHub issue #12 created
   - Worktree structure established
 
@@ -43,7 +43,7 @@ success_criteria:
 ## Overview
 Integrate practical security workflow examples from `09_workflow-secrets-mcp.md` into the existing `25_mcp-security-tools.md` file to enhance security patterns documentation.
 
-**Implementation Approach**: This is the GitHub Speckit implementation (PR #25). For Claude approach, see TODO_FOR_feat-12-integrate-workflow-secrets-claude.md
+**Implementation Approach**: This is the GitHub Speckit implementation (PR #25). For Gemini approach, see TODO_FOR_feat-12-integrate-workflow-secrets-gemini.md
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
@@ -99,7 +99,7 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
 ## Quality Assurance
 
 ### [x] 7. Update cross-references
-- [x] Update `20_credentials/CLAUDE.md` if needed
+- [x] Update `20_credentials/GEMINI.md` if needed
 - [x] Verify navigation reflects enhanced content
 - [x] Check internal links work correctly
 

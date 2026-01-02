@@ -2,7 +2,7 @@
 title: Implementation Workflow Patterns
 version: 4.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -17,10 +17,10 @@ related:
   - ./33_testing-standards.md
   - ./37_team-collaboration.md
   - ../10_mcp/12_servers.md
-  - ../20_credentials/CLAUDE.md
+  - ../20_credentials/GEMINI.md
 changelog:
   - 4.0: BREAKING CHANGE - Replaced Docker with Podman for container management, added automated tool discovery pipeline, LangGraph orchestration
-  - 3.2: Added Claude framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
+  - 3.2: Added Gemini framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
   - 3.1: Enhanced with development standards and workflow patterns
   - Added template common commands and git workflow integration
   - Integrated project-specific implementation strategies
@@ -77,7 +77,7 @@ Integrate this tactical execution pattern within the strategic implementation ph
 **GitHub MCP Server** - Repository management and PR automation
 ```bash
 # Installation and configuration
-claude mcp add github npx @modelcontextprotocol/server-github
+gemini mcp add github npx @modelcontextprotocol/server-github
 ```
 **Capabilities:**
 - Natural language commit messages and PR creation
@@ -87,7 +87,7 @@ claude mcp add github npx @modelcontextprotocol/server-github
 
 **Git MCP Server** - Core version control operations
 ```bash
-claude mcp add git npx @modelcontextprotocol/server-git
+gemini mcp add git npx @modelcontextprotocol/server-git
 ```
 **Capabilities:**
 - Advanced Git operations and history analysis
@@ -103,7 +103,7 @@ claude mcp add git npx @modelcontextprotocol/server-git
 - Always create feature branches from main
 - Squash commits before merging
 
-**Recommended Git Commands for Claude Code:**
+**Recommended Git Commands for Gemini Code:**
 ```bash
 # Create feature branch
 git checkout -b feature/task-description
@@ -114,13 +114,13 @@ git add . && git commit -m "feat(auth): implement JWT token validation"
 # Push with upstream tracking
 git push -u origin feature/task-description
 
-# Create PR via Claude Code GitHub integration
-claude "Create PR for this feature with comprehensive description"
+# Create PR via Gemini Code GitHub integration
+gemini "Create PR for this feature with comprehensive description"
 ```
 
 **Filesystem MCP Server** - Secure file operations
 ```bash
-claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /project/path
+gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /project/path
 ```
 **Capabilities:**
 - File and directory operations with security controls
@@ -131,7 +131,7 @@ claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /project/p
 #### Development Infrastructure
 **Sequential Thinking MCP Server** - Structured problem-solving
 ```bash
-claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
 ```
 **Capabilities:**
 - Multi-step problem decomposition and analysis
@@ -141,7 +141,7 @@ claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequen
 
 **Context7 MCP Server** - Real-time documentation access
 ```bash
-claude mcp add context7 npx @context7/mcp-server
+gemini mcp add context7 npx @context7/mcp-server
 ```
 **Capabilities:**
 - Real-time access to technical documentation
@@ -153,10 +153,10 @@ claude mcp add context7 npx @context7/mcp-server
 **PostgreSQL/SQLite MCP Server** - Database operations
 ```bash
 # PostgreSQL for production environments
-claude mcp add postgres npx @modelcontextprotocol/server-postgres
+gemini mcp add postgres npx @modelcontextprotocol/server-postgres
 
 # SQLite for development and testing
-claude mcp add sqlite npx @modelcontextprotocol/server-sqlite
+gemini mcp add sqlite npx @modelcontextprotocol/server-sqlite
 ```
 **Capabilities:**
 - Natural language to SQL query generation
@@ -175,7 +175,7 @@ claude mcp add sqlite npx @modelcontextprotocol/server-sqlite
 - Code quality analysis and recommendations
 - Compliance checking for industry standards
 - Integration with CI/CD pipelines
-- **Note:** Required per repository CLAUDE.md guidelines for all file edits
+- **Note:** Required per repository GEMINI.md guidelines for all file edits
 
 ### Setup Steps
 
@@ -200,19 +200,19 @@ $githubToken = ConvertTo-SecureString "your-github-token" -AsPlainText -Force
 New-StoredCredential -Target "GITHUB_TOKEN" -UserName "token" -SecurePassword $githubToken -Persist LocalMachine
 ```
 
-**Reference:** For complete credential setup, see [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
+**Reference:** For complete credential setup, see [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
 
 #### 2. Server Installation and Configuration
 ```bash
 # Install core MCP servers in sequence
-claude mcp add github npx @modelcontextprotocol/server-github
-claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path/to/project
-claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
-claude mcp add postgres npx @modelcontextprotocol/server-postgres
-claude mcp add codacy npx @codacy/codacy-mcp
+gemini mcp add github npx @modelcontextprotocol/server-github
+gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path/to/project
+gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+gemini mcp add postgres npx @modelcontextprotocol/server-postgres
+gemini mcp add codacy npx @codacy/codacy-mcp
 
 # Verify installation
-claude mcp list
+gemini mcp list
 ```
 
 #### 3. Validation and Testing
@@ -223,7 +223,7 @@ claude mcp list
 # Test server connectivity
 /usr/bin/python3 mcp_manager.py --list
 
-# Functional testing in Claude Code
+# Functional testing in Gemini Code
 # Type: /mcp
 # Test basic operations with each server
 ```
@@ -242,7 +242,7 @@ claude mcp list
 **Development Velocity Improvements:**
 - **2-10x development velocity** improvements reported by early enterprise adopters
 - **55% faster task completion** rates (GitHub internal engineering studies)
-- **40-70% reduction in debugging time** (Microsoft engineering teams with Claude Code integration)
+- **40-70% reduction in debugging time** (Microsoft engineering teams with Gemini Code integration)
 - **45% reduction in onboarding time** for new developers joining existing projects
 
 **Quality and Consistency Improvements:**
@@ -254,12 +254,12 @@ claude mcp list
 #### Common Issues & Solutions
 
 **Missing or Invalid Tokens:**
-- Check credential storage per [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
+- Check credential storage per [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
 - Verify token scopes and permissions
 - Test token validity with direct API calls
 
 **Server Not Found or Installation Issues:**
-- Verify installation with `claude mcp list`
+- Verify installation with `gemini mcp list`
 - Check Node.js version compatibility (minimum v18)
 - Review server-specific installation requirements
 
@@ -287,13 +287,13 @@ Configure these custom commands based on your project's specific tooling and req
 **Example Usage:**
 ```bash
 # Run comprehensive test suite
-claude "/project:test"
+gemini "/project:test"
 
 # Perform security analysis before deployment
-claude "/project:review focus on authentication endpoints"
+gemini "/project:review focus on authentication endpoints"
 
 # Deploy to staging environment
-claude "/project:deploy staging"
+gemini "/project:deploy staging"
 ```
 
 ### Servers to Install
@@ -301,7 +301,7 @@ claude "/project:deploy staging"
 #### Monitoring & Analytics
 **Sentry MCP Server** - Error tracking and debugging
 ```bash
-claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
 ```
 **Capabilities:**
 - Real-time error monitoring and alerting
@@ -311,7 +311,7 @@ claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
 
 **PostHog MCP Server** - Product analytics
 ```bash
-claude mcp add --transport sse posthog https://mcp.posthog.com/sse
+gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
 ```
 **Capabilities:**
 - User behavior analysis and insights
@@ -322,7 +322,7 @@ claude mcp add --transport sse posthog https://mcp.posthog.com/sse
 #### Infrastructure as Code
 **Terraform MCP Server** - Infrastructure automation
 ```bash
-claude mcp add terraform npx @modelcontextprotocol/server-terraform
+gemini mcp add terraform npx @modelcontextprotocol/server-terraform
 ```
 **Capabilities:**
 - Infrastructure-as-code generation and management
@@ -332,7 +332,7 @@ claude mcp add terraform npx @modelcontextprotocol/server-terraform
 
 **AWS Cloud Control API MCP Server** - AWS resource management
 ```bash
-claude mcp add aws npx @modelcontextprotocol/server-aws
+gemini mcp add aws npx @modelcontextprotocol/server-aws
 ```
 **Capabilities:**
 - AWS service integration and management
@@ -342,7 +342,7 @@ claude mcp add aws npx @modelcontextprotocol/server-aws
 
 **Kubernetes MCP Server** - Container orchestration
 ```bash
-claude mcp add kubernetes npx @modelcontextprotocol/server-kubernetes
+gemini mcp add kubernetes npx @modelcontextprotocol/server-kubernetes
 ```
 **Capabilities:**
 - Kubernetes manifest generation and validation
@@ -353,7 +353,7 @@ claude mcp add kubernetes npx @modelcontextprotocol/server-kubernetes
 #### Testing and Quality Assurance
 **Playwright MCP Server** - Web automation and testing
 ```bash
-claude mcp add playwright npx @modelcontextprotocol/server-playwright
+gemini mcp add playwright npx @modelcontextprotocol/server-playwright
 ```
 **Capabilities:**
 - End-to-end test automation
@@ -365,10 +365,10 @@ claude mcp add playwright npx @modelcontextprotocol/server-playwright
 **Azure DevOps or Buildkite MCP Server** - Pipeline management
 ```bash
 # Azure DevOps integration
-claude mcp add azure-devops npx @azure-devops/mcp
+gemini mcp add azure-devops npx @azure-devops/mcp
 
 # Buildkite for teams using Buildkite
-claude mcp add buildkite npx @buildkite/mcp-server
+gemini mcp add buildkite npx @buildkite/mcp-server
 ```
 **Capabilities:**
 - Pipeline configuration and optimization
@@ -381,36 +381,36 @@ claude mcp add buildkite npx @buildkite/mcp-server
 #### 1. Monitoring and Analytics Setup
 ```bash
 # Configure Sentry for error tracking
-claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
 # Configure with project-specific DSN and environment settings
 
 # Setup PostHog for analytics
-claude mcp add --transport sse posthog https://mcp.posthog.com/sse
+gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
 # Configure with API key and project settings
 ```
 
 #### 2. Infrastructure Tools Configuration
 ```bash
 # Terraform setup with cloud provider credentials
-claude mcp add terraform npx @modelcontextprotocol/server-terraform
+gemini mcp add terraform npx @modelcontextprotocol/server-terraform
 # Configure with appropriate cloud provider credentials
 
 # AWS integration for cloud resources
-claude mcp add aws npx @modelcontextprotocol/server-aws
+gemini mcp add aws npx @modelcontextprotocol/server-aws
 # Requires AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
 
 # Kubernetes for container orchestration
-claude mcp add kubernetes npx @modelcontextprotocol/server-kubernetes
+gemini mcp add kubernetes npx @modelcontextprotocol/server-kubernetes
 # Configure with kubeconfig file or cluster credentials
 ```
 
 #### 3. Testing and CI/CD Integration
 ```bash
 # Playwright for web testing
-claude mcp add playwright npx @modelcontextprotocol/server-playwright
+gemini mcp add playwright npx @modelcontextprotocol/server-playwright
 
 # CI/CD pipeline integration
-claude mcp add azure-devops npx @azure-devops/mcp
+gemini mcp add azure-devops npx @azure-devops/mcp
 # Or Buildkite alternative based on team preference
 ```
 
@@ -423,15 +423,15 @@ claude mcp add azure-devops npx @azure-devops/mcp
 
 ## Phase 3: Framework Integration & Advanced Workflows
 
-### Claude Framework Integration Patterns
+### Gemini Framework Integration Patterns
 
-Modern Claude development benefits from integration with established AI frameworks, each offering distinct advantages for different use cases and team structures.
+Modern Gemini development benefits from integration with established AI frameworks, each offering distinct advantages for different use cases and team structures.
 
 ### Container Orchestration with Podman
 
 **Podman Architecture for Secure Container Management**
 
-Podman provides superior security through daemonless, rootless architecture, making it ideal for Claude Code's container management needs:
+Podman provides superior security through daemonless, rootless architecture, making it ideal for Gemini Code's container management needs:
 
 ```yaml
 Container Management Layer:
@@ -447,11 +447,11 @@ Container Management Layer:
 - **SystemD integration** for Linux service management
 - **Pod support** for grouping related containers
 
-**Podman Commands for Claude Code Integration:**
+**Podman Commands for Gemini Code Integration:**
 ```bash
 # Container lifecycle management
-podman run --rm -d --name claude-workspace alpine:latest
-podman exec claude-workspace /bin/sh -c "command"
+podman run --rm -d --name gemini-workspace alpine:latest
+podman exec gemini-workspace /bin/sh -c "command"
 podman pod create --name development-environment
 
 # Volume and network management
@@ -469,7 +469,7 @@ podman run --security-opt label=level:s0 --user 1000:1000
 A systematic approach to tool discovery ensures quality and security:
 
 **Discovery Pipeline:**
-1. **Repository Scanning**: Parse awesome-claude-code, awesome-mcp-servers
+1. **Repository Scanning**: Parse awesome-gemini-code, awesome-mcp-servers
 2. **Metadata Extraction**: Analyze package.json, README.md, LICENSE files
 3. **Security Scanning**: Integrate vulnerability detection
 4. **Capability Detection**: Automated API endpoint discovery
@@ -486,21 +486,21 @@ podman run --rm -v $(pwd):/workspace tool-discovery:latest \
 
 **Multi-Agent Collaboration via LiteLLM**
 
-CrewAI demonstrates excellent Claude compatibility through LiteLLM integration:
+CrewAI demonstrates excellent Gemini compatibility through LiteLLM integration:
 
 ```python
 # Installation and setup
 pip install crewai
 pip install litellm
 
-# Configure Claude via LiteLLM
+# Configure Gemini via LiteLLM
 import os
 from crewai import Agent, Task, Crew
 from langchain_anthropic import ChatAnthropic
 
-# Configure Claude model
-claude_llm = ChatAnthropic(
-    model="claude-3-5-sonnet-20240620",
+# Configure Gemini model
+gemini_llm = ChatAnthropic(
+    model="gemini-3-5-sonnet-20240620",
     api_key=os.getenv("ANTHROPIC_API_KEY")
 )
 
@@ -509,7 +509,7 @@ senior_engineer = Agent(
     role='Senior Software Engineer',
     goal='Implement complex backend features with high quality',
     backstory='Expert in system architecture and best practices',
-    llm=claude_llm,
+    llm=gemini_llm,
     verbose=True
 )
 
@@ -517,7 +517,7 @@ frontend_specialist = Agent(
     role='Frontend Specialist',
     goal='Create responsive, accessible user interfaces',
     backstory='UI/UX expert with modern frontend framework expertise',
-    llm=claude_llm,
+    llm=gemini_llm,
     verbose=True
 )
 
@@ -563,7 +563,7 @@ Leading-edge implementations demonstrate sophisticated orchestration patterns:
 - **Streaming capabilities** for real-time monitoring
 - **Human-in-the-loop** support for validation workflows
 
-**Claude 007 Agents Architecture:**
+**Gemini 007 Agents Architecture:**
 - **112 specialized agents** across 14 domains
 - **Quality assurance** through "Evil Corp" motivation system
 - **Peer-to-peer communication** patterns
@@ -571,7 +571,7 @@ Leading-edge implementations demonstrate sophisticated orchestration patterns:
 
 ```python
 # Example custom orchestration pattern
-class ClaudeOrchestrator:
+class GeminiOrchestrator:
     def __init__(self):
         self.agents = {}
         self.task_queue = Queue()
@@ -579,7 +579,7 @@ class ClaudeOrchestrator:
 
     def add_agent(self, name, role, specialization):
         """Add specialized agent to orchestration system"""
-        self.agents[name] = ClaudeAgent(
+        self.agents[name] = GeminiAgent(
             role=role,
             specialization=specialization,
             memory=self.memory_store.create_context(name)
@@ -608,32 +608,32 @@ Teams achieve optimal results through intelligent model selection:
 class ModelRouter:
     def route_request(self, task_complexity, urgency, budget):
         if task_complexity == "high" and urgency == "critical":
-            return "claude-opus-4"  # Complex reasoning, premium cost
+            return "gemini-opus-4"  # Complex reasoning, premium cost
         elif task_complexity == "medium":
-            return "claude-sonnet-4"  # Balanced performance/cost
+            return "gemini-sonnet-4"  # Balanced performance/cost
         else:
-            return "claude-haiku-3.5"  # Speed optimization
+            return "gemini-haiku-3.5"  # Speed optimization
 ```
 
 **Specialized Usage Patterns:**
-- **Claude**: Deep analysis, complex reasoning, code architecture
+- **Gemini**: Deep analysis, complex reasoning, code architecture
 - **GPT-4**: Quick iterations, API integrations, general completions
 - **Gemini**: Multimodal processing, image analysis, document OCR
 
 **Platform Solutions:**
 - **ChatHub**: Simultaneous access to all models for comparative analysis
-- **Cursor IDE**: Native Claude integration with Command+Esc quick launch
-- **GitHub Copilot**: Claude 3.5 Sonnet achieving 93.7% on HumanEval benchmarks
+- **Cursor IDE**: Native Gemini integration with Command+Esc quick launch
+- **GitHub Copilot**: Gemini 3.5 Sonnet achieving 93.7% on HumanEval benchmarks
 
 ### IDE and Development Tool Integration
 
 #### Cursor IDE Integration
 
-**Native Claude Support with Advanced Features:**
+**Native Gemini Support with Advanced Features:**
 
 ```bash
 # Quick activation patterns
-Command+Esc              # Quick Claude launch
+Command+Esc              # Quick Gemini launch
 Command+Shift+I          # Inline code assistance
 Command+L               # Chat panel toggle
 ```
@@ -646,7 +646,7 @@ Command+L               # Chat panel toggle
 
 **Team Productivity Results:**
 - **50% reduction in feature implementation time**
-- **Coordinated Cursor-Claude workflows** for complex projects
+- **Coordinated Cursor-Gemini workflows** for complex projects
 - **Pixel-perfect UI implementations** through visual iteration
 
 #### Visual Development Workflows
@@ -679,15 +679,15 @@ def iterate_until_match(mockup_path, implementation_url):
         if visual_similarity(mockup, current) > 0.95:
             return "Implementation matches mockup"
 
-        # Claude analyzes differences and suggests improvements
-        improvements = claude_analyze_visual_diff(mockup, current)
+        # Gemini analyzes differences and suggests improvements
+        improvements = gemini_analyze_visual_diff(mockup, current)
         apply_improvements(improvements)
 
     return "Manual review required"
 ```
 
 **Performance Benchmarks:**
-- **Claude 3 Sonnet**: 70.31% accuracy on screenshot-to-code
+- **Gemini 3 Sonnet**: 70.31% accuracy on screenshot-to-code
 - **GPT-4**: 65.10% accuracy (comparative baseline)
 - **Typical workflow**: 2-3 iterations for pixel-perfect results
 
@@ -751,7 +751,7 @@ Add domain-specific servers based on project needs, industry requirements, and c
 
 **Automated Code Standards Enforcement:**
 ```bash
-# Example configuration in CLAUDE.md
+# Example configuration in GEMINI.md
 development_standards:
   code_style: "PEP8 with type hints for Python, ESLint + Prettier for JavaScript"
   documentation: "Docstrings required for all public functions"
@@ -770,13 +770,13 @@ development_standards:
 **Session Management and Context Optimization:**
 ```bash
 # Optimal session patterns for sustained development
-claude /clear    # Between unrelated tasks
-claude /compact  # At natural breakpoints in related work
+gemini /clear    # Between unrelated tasks
+gemini /compact  # At natural breakpoints in related work
 
 # Context loading efficiency
-# Use hierarchical CLAUDE.md files for project-specific context
-# Global preferences in ~/.claude/CLAUDE.md
-# Project-specific patterns in project/CLAUDE.md
+# Use hierarchical GEMINI.md files for project-specific context
+# Global preferences in ~/.gemini/GEMINI.md
+# Project-specific patterns in project/GEMINI.md
 ```
 
 **AI Task Management Integration:**
@@ -786,13 +786,13 @@ For structured task tracking, priority management, and session continuity patter
 ```bash
 # Enhanced Git workflows with MCP integration
 # Automated commit message generation
-claude "Generate commit message for the authentication system changes"
+gemini "Generate commit message for the authentication system changes"
 
 # PR creation with comprehensive descriptions
-claude "Create PR for user authentication feature with testing documentation"
+gemini "Create PR for user authentication feature with testing documentation"
 
 # Branch management and cleanup
-claude "Analyze and clean up stale feature branches"
+gemini "Analyze and clean up stale feature branches"
 ```
 
 ### Common Commands for MCP Workflows
@@ -800,31 +800,31 @@ claude "Analyze and clean up stale feature branches"
 **Development Workflow Commands:**
 ```bash
 # Project initialization and setup
-claude mcp init-project --template=web-app
-claude mcp configure-standards --framework=django
+gemini mcp init-project --template=web-app
+gemini mcp configure-standards --framework=django
 
 # Daily development operations
-claude mcp status-check         # Verify all servers operational
-claude mcp sync-credentials     # Update and validate credentials
-claude mcp optimize-context     # Clean and optimize context files
+gemini mcp status-check         # Verify all servers operational
+gemini mcp sync-credentials     # Update and validate credentials
+gemini mcp optimize-context     # Clean and optimize context files
 
 # Team coordination
-claude mcp team-sync           # Synchronize team configurations
-claude mcp knowledge-update    # Update shared knowledge base
-claude mcp deploy-coordination # Coordinate deployment workflows
+gemini mcp team-sync           # Synchronize team configurations
+gemini mcp knowledge-update    # Update shared knowledge base
+gemini mcp deploy-coordination # Coordinate deployment workflows
 ```
 
 **Debugging and Troubleshooting:**
 ```bash
 # Server diagnostics
-claude mcp diagnostic --server=github
-claude mcp logs --last-24h
-claude mcp health-check --all
+gemini mcp diagnostic --server=github
+gemini mcp logs --last-24h
+gemini mcp health-check --all
 
 # Performance optimization
-claude mcp analyze-usage --time-period=week
-claude mcp optimize-costs --model-switching=auto
-claude mcp context-cleanup --aggressive
+gemini mcp analyze-usage --time-period=week
+gemini mcp optimize-costs --model-switching=auto
+gemini mcp context-cleanup --aggressive
 ```
 
 
@@ -834,13 +834,13 @@ claude mcp context-cleanup --aggressive
 
 **Hierarchical Context Architecture:**
 ```yaml
-# Global context in ~/.claude/CLAUDE.md
+# Global context in ~/.gemini/GEMINI.md
 global_preferences:
   model_selection: "sonnet-4"
   cost_optimization: "enabled"
   security_scanning: "mandatory"
 
-# Project context in project/CLAUDE.md
+# Project context in project/GEMINI.md
 project_specific:
   architecture: "microservices"
   database: "postgresql"
@@ -848,7 +848,7 @@ project_specific:
 ```
 
 **Session Optimization Strategies:**
-- **Front-load context** in CLAUDE.md files for reuse across sessions
+- **Front-load context** in GEMINI.md files for reuse across sessions
 - **Clear frequently** between unrelated tasks to maintain performance
 - **Use compaction** at natural breakpoints in related work
 - **Monitor token usage** and optimize context loading patterns

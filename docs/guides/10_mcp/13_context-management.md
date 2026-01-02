@@ -1,37 +1,37 @@
 ---
-title: CLAUDE.md Context Management & Optimization
+title: GEMINI.md Context Management & Optimization
 version: 3.2
 updated: 2025-09-13
 changelog:
-  - 3.2: Added Memory Keeper Server and Claude Context MCP integration patterns
+  - 3.2: Added Memory Keeper Server and Gemini Context MCP integration patterns
   - 3.1: Enhanced command system and project template integration
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 related:
-  - ../CLAUDE.md
+  - ../GEMINI.md
   - ../30_implementation/32_workflow-patterns.md
   - ./11_setup.md
 ---
 
-# CLAUDE.md Context Management & Optimization
+# GEMINI.md Context Management & Optimization
 
-Advanced context management strategies for optimal Claude Code performance, including CLAUDE.md workflow patterns, command system mastery, and token efficiency optimization.
+Advanced context management strategies for optimal Gemini Code performance, including GEMINI.md workflow patterns, command system mastery, and token efficiency optimization.
 
-## CLAUDE.md Architecture Fundamentals
+## GEMINI.md Architecture Fundamentals
 
 ### Technical Architecture
 
-CLAUDE.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
+GEMINI.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
 
 **Hierarchical Loading System:**
-- **Global settings first**: `~/.claude.json` (user-level preferences)
-- **Project-specific**: `.claude.json` or `CLAUDE.md` in project root
+- **Global settings first**: `~/.gemini.json` (user-level preferences)
+- **Project-specific**: `.gemini.json` or `GEMINI.md` in project root
 - **Subdirectory-level**: Feature-specific configurations
 
 **Context Window Management:**
-- Typical limit: 200,000 tokens for Claude Code (~500-page technical specifications)
-- Optimal CLAUDE.md size: Under 30,000 tokens for best performance
+- Typical limit: 200,000 tokens for Gemini Code (~500-page technical specifications)
+- Optimal GEMINI.md size: Under 30,000 tokens for best performance
 - Performance degradation occurs at 50,000+ tokens (2-3x slower responses)
-- Advanced practitioners report 40-60% reduction in context provision during sessions with well-structured CLAUDE.md files
+- Advanced practitioners report 40-60% reduction in context provision during sessions with well-structured GEMINI.md files
 - Token efficiency achieved through hierarchical organization and modular structure
 
 ### Workflow Modes
@@ -45,7 +45,7 @@ CLAUDE.md files serve as markdown-based "project constitutions" that AI coding a
 **Edit Mode** - Active code modifications
 - Context-aware development with preserved project knowledge
 - Maintains coding standards and architectural decisions across sessions
-- Use `/clear` to reset conversation while preserving CLAUDE.md configuration
+- Use `/clear` to reset conversation while preserving GEMINI.md configuration
 
 ## Context Management Best Practices
 
@@ -65,7 +65,7 @@ CLAUDE.md files serve as markdown-based "project constitutions" that AI coding a
 - Domain knowledge (not general concepts)
 ```
 
-### Advanced CLAUDE.md Patterns
+### Advanced GEMINI.md Patterns
 
 **Hierarchical Organization:**
 - Parent directories provide broad context
@@ -89,10 +89,10 @@ CLAUDE.md files serve as markdown-based "project constitutions" that AI coding a
 # Implement pre-commit hooks to verify context file syntax
 git add .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
-# Validate CLAUDE.md files
-find . -name "CLAUDE.md" -exec markdown-lint {} \;
+# Validate GEMINI.md files
+find . -name "GEMINI.md" -exec markdown-lint {} \;
 # Check file size limits (30KB)
-find . -name "CLAUDE.md" -size +30k -exec echo "Warning: {} exceeds 30KB limit" \;
+find . -name "GEMINI.md" -size +30k -exec echo "Warning: {} exceeds 30KB limit" \;
 EOF
 chmod +x .git/hooks/pre-commit
 ```
@@ -109,7 +109,7 @@ chmod +x .git/hooks/pre-commit
 
 ## Command System Mastery
 
-Claude Code's command system extends beyond simple text generation to provide sophisticated project management capabilities.
+Gemini Code's command system extends beyond simple text generation to provide sophisticated project management capabilities.
 
 ### Critical Commands for Performance
 
@@ -120,7 +120,7 @@ Claude Code's command system extends beyond simple text generation to provide so
 - `/cost` - Real-time token usage monitoring for proactive management
 
 **Development Commands:**
-- `/init` - Generate initial CLAUDE.md by analyzing project structure
+- `/init` - Generate initial GEMINI.md by analyzing project structure
 - `/mcp` - View and interact with configured MCP servers
 - `/model` - Dynamic model switching for optimal performance-cost balance
 
@@ -138,7 +138,7 @@ Claude Code's command system extends beyond simple text generation to provide so
 **Activation**: Shift+Tab twice
 **Benefits:**
 - Separates research from execution phases
-- Restricts Claude to read-only operations during analysis
+- Restricts Gemini to read-only operations during analysis
 - Provides predictable responses with detailed analysis before code modifications
 - Teams report 65% reduction in error rates when enforcing Plan Mode for significant changes
 
@@ -146,24 +146,24 @@ Claude Code's command system extends beyond simple text generation to provide so
 
 ```bash
 # Generate comprehensive test suites before implementation
-claude "Create test suite for user authentication module"
+gemini "Create test suite for user authentication module"
 
-# Leverage Claude's ability to create edge case coverage
-claude "Add edge cases for email validation tests"
+# Leverage Gemini's ability to create edge case coverage
+gemini "Add edge cases for email validation tests"
 
 # Iterate on tests and implementation together
-claude "Implement user authentication to pass all tests"
+gemini "Implement user authentication to pass all tests"
 ```
 
 #### Visual Iteration Workflows
 
 - Provide screenshots for UI refinement
-- Capitalize on Claude's multimodal capabilities for pixel-perfect implementations
+- Capitalize on Gemini's multimodal capabilities for pixel-perfect implementations
 - Enable design-to-code conversion workflows
 
 ### Multi-Instance Orchestration
 
-Advanced teams implement parallel Claude Code sessions for complex projects using Git worktrees:
+Advanced teams implement parallel Gemini Code sessions for complex projects using Git worktrees:
 
 ```bash
 # Create parallel development streams
@@ -171,7 +171,7 @@ git worktree add ../project-feature-auth feature/auth
 git worktree add ../project-feature-ui feature/ui
 git worktree add ../project-security-review security/review
 
-# Run independent Claude sessions in each worktree
+# Run independent Gemini sessions in each worktree
 # - One instance implements new functionality
 # - Another performs security reviews
 # - Third generates comprehensive tests
@@ -206,14 +206,14 @@ Based on the project template patterns, here's a structured approach to session 
 2. Commit all changes with clear messages
 3. Push to remote repository
 4. Update task status in project tracker
-5. Leave notes for next session in CLAUDE.md
+5. Leave notes for next session in GEMINI.md
 6. Use `/compact` to preserve relevant context
 
 ### Context Priming Strategy
 
 Before requesting implementation, provide comprehensive background through:
 
-**Well-structured CLAUDE.md files:**
+**Well-structured GEMINI.md files:**
 ```markdown
 # Project Context
 - Architecture: [specific pattern, not generic]
@@ -236,23 +236,23 @@ This front-loaded context investment reduces iteration cycles and improves first
 **Hierarchical File Organization:**
 ```
 project/
-├── CLAUDE.md                    # Project overview (30KB max)
+├── GEMINI.md                    # Project overview (30KB max)
 ├── features/
-│   ├── CLAUDE.md               # Feature-specific context (30KB max)
+│   ├── GEMINI.md               # Feature-specific context (30KB max)
 │   ├── auth/
-│   │   └── CLAUDE.md           # Auth-specific patterns (30KB max)
+│   │   └── GEMINI.md           # Auth-specific patterns (30KB max)
 │   └── ui/
-│       └── CLAUDE.md           # UI-specific guidelines (30KB max)
+│       └── GEMINI.md           # UI-specific guidelines (30KB max)
 ```
 
 **Cross-Reference Patterns:**
 ```markdown
-# In project/CLAUDE.md
-For authentication patterns, see [features/auth/CLAUDE.md](./features/auth/CLAUDE.md)
+# In project/GEMINI.md
+For authentication patterns, see [features/auth/GEMINI.md](./features/auth/GEMINI.md)
 
-# In features/auth/CLAUDE.md
-Parent project context: [../../CLAUDE.md](../../CLAUDE.md)
-Related: [../ui/CLAUDE.md](../ui/CLAUDE.md) for user interface patterns
+# In features/auth/GEMINI.md
+Parent project context: [../../GEMINI.md](../../GEMINI.md)
+Related: [../ui/GEMINI.md](../ui/GEMINI.md) for user interface patterns
 ```
 
 ### Context Monitoring
@@ -260,17 +260,17 @@ Related: [../ui/CLAUDE.md](../ui/CLAUDE.md) for user interface patterns
 **Real-time Monitoring:**
 ```bash
 # Check context usage regularly
-claude /context
+gemini /context
 
 # Monitor token costs
-claude /cost
+gemini /cost
 
 # Compact when approaching limits
-claude /compact
+gemini /compact
 ```
 
 **Performance Targets:**
-- CLAUDE.md files: < 30KB each
+- GEMINI.md files: < 30KB each
 - Total context per session: < 100KB initial load
 - Token usage: < 150K tokens for complex sessions
 - Response time: < 5 seconds for context-heavy queries
@@ -278,7 +278,7 @@ claude /compact
 ### Team Coordination
 
 **Shared Standards:**
-- Consistent CLAUDE.md formatting across team members
+- Consistent GEMINI.md formatting across team members
 - Agreed-upon context structure and organization
 - Regular context file reviews and updates
 - Shared context templates for common patterns
@@ -286,7 +286,7 @@ claude /compact
 **Context Synchronization:**
 ```bash
 # Sync context files across team
-git add CLAUDE.md */CLAUDE.md
+git add GEMINI.md */GEMINI.md
 git commit -m "Update context files for v2.0 architecture"
 git push origin main
 ```
@@ -303,10 +303,10 @@ npm run test         # Run test suite
 npm run lint         # Check code style
 
 # Context Management Commands
-claude /clear         # Reset between unrelated tasks
-claude /context       # Monitor token usage
-claude /compact       # Compress related context
-claude /init          # Regenerate CLAUDE.md
+gemini /clear         # Reset between unrelated tasks
+gemini /context       # Monitor token usage
+gemini /compact       # Compress related context
+gemini /init          # Regenerate GEMINI.md
 
 # Project-Specific Commands (example)
 npm run db:migrate    # Run migrations
@@ -318,18 +318,18 @@ podman-compose up     # Start all services
 
 ### Memory Keeper Server (MCP)
 
-Persistent state management across Claude sessions using SQLite-based storage:
+Persistent state management across Gemini sessions using SQLite-based storage:
 
 ```bash
 # Install and configure Memory Keeper MCP Server
 npm install -g mcp-memory-keeper
 
-# Configure in Claude Code MCP settings
+# Configure in Gemini Code MCP settings
 {
   "mcpServers": {
     "memory-keeper": {
       "command": "mcp-memory-keeper",
-      "args": ["--database-path", "./claude_memory.db"]
+      "args": ["--database-path", "./gemini_memory.db"]
     }
   }
 }
@@ -341,19 +341,19 @@ npm install -g mcp-memory-keeper
 - **Session handoffs**: Seamless continuation after context resets
 - **Project memory**: Maintains architectural decisions and implementation plans
 
-### Claude Context MCP Server
+### Gemini Context MCP Server
 
 Advanced vector database integration for semantic code search:
 
 ```bash
-# Install Claude Context for large codebase management
-npm install -g claude-context-mcp
+# Install Gemini Context for large codebase management
+npm install -g gemini-context-mcp
 
 # Configure with multiple embedding providers
 {
   "mcpServers": {
-    "claude-context": {
-      "command": "claude-context-mcp",
+    "gemini-context": {
+      "command": "gemini-context-mcp",
       "args": [
         "--embedding-provider", "openai",
         "--chunk-size", "1000",
@@ -376,13 +376,13 @@ npm install -g claude-context-mcp
 **Usage Patterns:**
 ```bash
 # Search for authentication-related code
-claude "Find all authentication middleware implementations"
+gemini "Find all authentication middleware implementations"
 
 # Semantic code discovery
-claude "Show me error handling patterns in API routes"
+gemini "Show me error handling patterns in API routes"
 
 # Architecture exploration
-claude "What are the database connection patterns used?"
+gemini "What are the database connection patterns used?"
 ```
 
 ### State Synchronization Strategies
@@ -417,7 +417,7 @@ claude "What are the database connection patterns used?"
 
 2. **Modular Focus Phase**
    - Work on isolated components within context limits
-   - Use `.claudeignore` for strategic file exclusion
+   - Use `.geminiignore` for strategic file exclusion
    - Implement tab-completion references for related code
 
 3. **Integration Phase**
@@ -427,7 +427,7 @@ claude "What are the database connection patterns used?"
 
 **Strategic File Exclusion:**
 ```bash
-# .claudeignore patterns for large codebases
+# .geminiignore patterns for large codebases
 node_modules/
 dist/
 *.log
@@ -446,4 +446,4 @@ third-party/
 
 ---
 
-*Context management is the foundation of effective Claude Code development. Master these patterns for optimal performance and team productivity.*
+*Context management is the foundation of effective Gemini Code development. Master these patterns for optimal performance and team productivity.*

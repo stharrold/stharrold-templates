@@ -12,7 +12,7 @@ import pytest
 # Add scripts to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent.parent / ".claude/skills/git-workflow-manager/scripts"),
+    str(Path(__file__).parent.parent.parent.parent / ".gemini/skills/git-workflow-manager/scripts"),
 )
 
 from create_worktree import setup_agentdb_symlink
@@ -30,9 +30,9 @@ class TestSetupAgentdbSymlink:
         worktree.mkdir()
 
         # Create state directories
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Create main repo database
@@ -49,13 +49,13 @@ class TestSetupAgentdbSymlink:
         assert worktree_db.resolve() == main_db
 
     def test_creates_main_state_dir_if_missing(self, tmp_path):
-        """Should create main repo .claude-state directory if it doesn't exist."""
+        """Should create main repo .gemini-state directory if it doesn't exist."""
         # Setup
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Call function
@@ -63,7 +63,7 @@ class TestSetupAgentdbSymlink:
 
         # Verify
         assert result is True
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         assert main_state.exists()
         main_db = main_state / "agentdb.duckdb"
         assert main_db.exists()
@@ -73,12 +73,12 @@ class TestSetupAgentdbSymlink:
         # Setup
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
 
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Main DB doesn't exist yet
@@ -97,14 +97,14 @@ class TestSetupAgentdbSymlink:
         # Setup
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
         main_db = main_state / "agentdb.duckdb"
         main_db.touch()
 
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Create symlink manually
@@ -124,14 +124,14 @@ class TestSetupAgentdbSymlink:
         # Setup
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
         main_db = main_state / "agentdb.duckdb"
         main_db.touch()
 
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Create regular file (not symlink)
@@ -151,14 +151,14 @@ class TestSetupAgentdbSymlink:
         # Setup
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
         main_db = main_state / "agentdb.duckdb"
         main_db.touch()
 
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Call function
@@ -169,7 +169,7 @@ class TestSetupAgentdbSymlink:
         worktree_db = worktree_state / "agentdb.duckdb"
         symlink_target = os.readlink(worktree_db)
         assert not Path(symlink_target).is_absolute()
-        # Should be something like "../../main_repo/.claude-state/agentdb.duckdb"
+        # Should be something like "../../main_repo/.gemini-state/agentdb.duckdb"
         assert ".." in symlink_target
 
     @pytest.mark.skipif(os.geteuid() == 0, reason="Root bypasses permission checks")
@@ -178,14 +178,14 @@ class TestSetupAgentdbSymlink:
         # Setup - create read-only worktree state dir
         main_repo = tmp_path / "main_repo"
         main_repo.mkdir()
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
         main_db = main_state / "agentdb.duckdb"
         main_db.touch()
 
         worktree = tmp_path / "worktree"
         worktree.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         # Make worktree state read-only
@@ -213,9 +213,9 @@ class TestSymlinkIntegration:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -239,9 +239,9 @@ class TestSymlinkIntegration:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -268,9 +268,9 @@ class TestWindowsHardLinkFallback:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -312,9 +312,9 @@ class TestWindowsHardLinkFallback:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -347,9 +347,9 @@ class TestCrossPlatformLinkBehavior:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -380,9 +380,9 @@ class TestCrossPlatformLinkBehavior:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -409,9 +409,9 @@ class TestPathResolution:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"
@@ -433,9 +433,9 @@ class TestPathResolution:
         worktree = tmp_path / "worktree"
         worktree.mkdir()
 
-        main_state = main_repo / ".claude-state"
+        main_state = main_repo / ".gemini-state"
         main_state.mkdir()
-        worktree_state = worktree / ".claude-state"
+        worktree_state = worktree / ".gemini-state"
         worktree_state.mkdir()
 
         main_db = main_state / "agentdb.duckdb"

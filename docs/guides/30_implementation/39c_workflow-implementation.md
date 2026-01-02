@@ -588,10 +588,10 @@ interface CleanupResult {
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: claude-code-orchestrator
+  name: gemini-code-orchestrator
   namespace: multi-agent-system
   labels:
-    app: claude-orchestrator
+    app: gemini-orchestrator
     version: v4.0
 spec:
   replicas: 3
@@ -602,21 +602,21 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: claude-orchestrator
+      app: gemini-orchestrator
   template:
     metadata:
       labels:
-        app: claude-orchestrator
+        app: gemini-orchestrator
         version: v4.0
     spec:
-      serviceAccountName: claude-orchestrator
+      serviceAccountName: gemini-orchestrator
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
         fsGroup: 2000
       containers:
         - name: orchestrator
-          image: claude-orchestrator:v4.0.0
+          image: gemini-orchestrator:v4.0.0
           ports:
             - containerPort: 8080
               name: http
@@ -633,17 +633,17 @@ spec:
             - name: REDIS_URL
               valueFrom:
                 configMapKeyRef:
-                  name: claude-config
+                  name: gemini-config
                   key: redis-url
             - name: KAFKA_BROKERS
               valueFrom:
                 configMapKeyRef:
-                  name: claude-config
+                  name: gemini-config
                   key: kafka-brokers
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: claude-secrets
+                  name: gemini-secrets
                   key: anthropic-api-key
           livenessProbe:
             httpGet:
@@ -670,18 +670,18 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: claude-config
+            name: gemini-config
         - name: logs
           emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: claude-orchestrator-service
+  name: gemini-orchestrator-service
   namespace: multi-agent-system
 spec:
   selector:
-    app: claude-orchestrator
+    app: gemini-orchestrator
   ports:
     - name: http
       port: 80
@@ -694,7 +694,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: claude-config
+  name: gemini-config
   namespace: multi-agent-system
 data:
   redis-url: "redis://redis-cluster:6379"
@@ -710,7 +710,7 @@ data:
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: claude-orchestrator-quota
+  name: gemini-orchestrator-quota
   namespace: multi-agent-system
 spec:
   hard:
@@ -725,13 +725,13 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: claude-orchestrator-pdb
+  name: gemini-orchestrator-pdb
   namespace: multi-agent-system
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: claude-orchestrator
+      app: gemini-orchestrator
 ```
 
 ### Monitoring and Observability
@@ -757,13 +757,13 @@ class HealthCheckService {
   private setupMetrics(): void {
     // Workflow metrics
     const workflowCounter = new promClient.Counter({
-      name: 'claude_workflows_total',
+      name: 'gemini_workflows_total',
       help: 'Total number of workflows executed',
       labelNames: ['status', 'type']
     });
 
     const workflowDuration = new promClient.Histogram({
-      name: 'claude_workflow_duration_seconds',
+      name: 'gemini_workflow_duration_seconds',
       help: 'Workflow execution duration',
       labelNames: ['type', 'status'],
       buckets: [1, 5, 10, 30, 60, 300, 600]
@@ -771,12 +771,12 @@ class HealthCheckService {
 
     // Resource metrics
     const activeContainers = new promClient.Gauge({
-      name: 'claude_active_containers',
+      name: 'gemini_active_containers',
       help: 'Number of active containers'
     });
 
     const mcpConnections = new promClient.Gauge({
-      name: 'claude_mcp_connections',
+      name: 'gemini_mcp_connections',
       help: 'Number of active MCP server connections'
     });
 

@@ -17,7 +17,7 @@ import pytest
 # Add scripts to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent.parent / ".claude/skills/git-workflow-manager/scripts"),
+    str(Path(__file__).parent.parent.parent.parent / ".gemini/skills/git-workflow-manager/scripts"),
 )
 
 
@@ -184,7 +184,7 @@ class TestCreateWorktreeIntegration:
             os.chdir(original_cwd)
 
     def test_worktree_creates_state_directory(self, git_repo_with_remote):
-        """Should create .claude-state directory in worktree."""
+        """Should create .gemini-state directory in worktree."""
         from create_worktree import create_worktree
 
         local_path = git_repo_with_remote
@@ -196,7 +196,7 @@ class TestCreateWorktreeIntegration:
             result = create_worktree("feature", "state-test", "contrib/testuser")
 
             worktree_path = Path(result["worktree_path"])
-            state_dir = worktree_path / ".claude-state"
+            state_dir = worktree_path / ".gemini-state"
             assert state_dir.exists()
             assert (state_dir / ".gitignore").exists()
             assert (state_dir / ".worktree-id").exists()
