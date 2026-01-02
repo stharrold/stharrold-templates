@@ -4,7 +4,7 @@
 **Previous:** [Planning & Implementation (Step 1-2)](workflow-planning.md)
 **Version:** 6.0.0
 
-This document covers the synchronization and deployment steps of the v7x0 workflow.
+This document covers the synchronization and deployment steps of the v7x1 workflow.
 
 ---
 
@@ -12,12 +12,12 @@ This document covers the synchronization and deployment steps of the v7x0 workfl
 
 **Location:** Main repository
 **Branch:** `contrib/<gh-user>`
-**Command:** `/workflow:v7x0_2-integrate ["feature/branch-name"]`
+**Command:** `/workflow:v7x1_2-integrate ["feature/branch-name"]`
 
 After completing development in the worktree, you must integrate the changes back into the main development line.
 
 #### Full Integration (Feature Branch)
-If you provide the branch name, `/workflow:v7x0_2-integrate` will:
+If you provide the branch name, `/workflow:v7x1_2-integrate` will:
 1. Push the feature branch to origin.
 2. Create a Pull Request from **feature** → **contrib**.
 3. **Manual Gate**: You merge the PR in the GitHub UI.
@@ -37,7 +37,7 @@ If you omit the branch name, it assumes you've already merged your feature into 
 **Branch:** `develop` → `release/vX.Y.Z` → `main`
 
 #### 4.1: Release to Production
-**Command:** `/workflow:v7x0_3-release [version]`
+**Command:** `/workflow:v7x1_3-release [version]`
 
 When `develop` is ready for production:
 1. Creates a `release/vX.Y.Z` branch from `develop`.
@@ -46,7 +46,7 @@ When `develop` is ready for production:
 4. Tags the release on `main` automatically after merge.
 
 #### 4.2: Backmerge to Develop
-**Command:** `/workflow:v7x0_4-backmerge`
+**Command:** `/workflow:v7x1_4-backmerge`
 
 After tagging the release, you must sync those changes back to the integration branch:
 1. Creates a Pull Request from **release** → **develop**.
@@ -58,7 +58,7 @@ After tagging the release, you must sync those changes back to the integration b
 
 ## Semantic Versioning
 
-The `/workflow:v7x0_3-release` command uses semantic versioning (`vMAJOR.MINOR.PATCH`):
+The `/workflow:v7x1_3-release` command uses semantic versioning (`vMAJOR.MINOR.PATCH`):
 - **MAJOR**: Breaking changes.
 - **MINOR**: New features.
 - **PATCH**: Bug fixes.

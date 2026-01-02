@@ -141,7 +141,7 @@ python .gemini/skills/initialize-repository/scripts/initialize_repository.py \
    - Stage all files (`git add .`)
    - Create initial commit on main:
      ```
-     chore: initialize repository with workflow system v7x0
+     chore: initialize repository with workflow system v7x1
 
      Bootstrapped from <source-repo> using initialize-repository meta-skill.
 
@@ -225,7 +225,7 @@ python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/app
 2. Validates target is a git repository
 3. Prompts before overwriting existing `.gemini/` (unless `--force`)
 4. Copies `.gemini/skills/` (all skills)
-5. Copies `.gemini/commands/` (v7x0 workflow commands)
+5. Copies `.gemini/commands/` (v7x1 workflow commands)
 6. Copies `WORKFLOW.md`, `CONTRIBUTING.md`
 7. Merges `pyproject.toml` (adds dev dependencies, preserves existing)
 8. Merges `.gitignore` (appends workflow patterns, deduplicates)
@@ -320,7 +320,7 @@ python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/app
 - "Apply the workflow in .tmp/stharrold-templates to this repo"
 - "Apply the workflow in X to Y"
 - "Copy the workflow from the cloned templates"
-- "Install the v7x0 workflow commands"
+- "Install the v7x1 workflow commands"
 
 **Gemini Code should:**
 
@@ -345,7 +345,7 @@ python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/app
 4. **After script completes:**
    - Review changes: `git status`
    - Install dependencies: `uv sync`
-   - Start using v7x0 workflow: `/workflow:v7x0_1-worktree "feature"`
+   - Start using v7x1 workflow: `/workflow:v7x1_1-worktree "feature"`
    - Optional cleanup: `rm -rf .tmp/`
 
 ---
@@ -593,7 +593,7 @@ This file provides guidance to Gemini Code (gemini.ai/code) when working with co
 
 {description}
 
-## Workflow v7x0 Architecture
+## Workflow v7x1 Architecture
 
 This repository uses a **skill-based workflow system** located in `.gemini/skills/`.
 
@@ -651,7 +651,7 @@ context_stats:
   total_workflows_completed: 0
   current_token_usage: 0
   last_checkpoint: "{current_timestamp}"
-  recent_improvements: "Repository initialized with workflow system v7x0"
+  recent_improvements: "Repository initialized with workflow system v7x1"
 ---
 
 # Master TODO Manifest

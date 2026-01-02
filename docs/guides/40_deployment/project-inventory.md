@@ -99,7 +99,7 @@ Not git repositories or special-purpose directories.
 **Location:** D:\Projects\templates\workflow-template
 **Purpose:** Production template for new projects
 **Notes:**
-- Currently based on Standard Workflow v7x0.0 (older than stharrold-templates)
+- Currently based on Standard Workflow v7x1.0 (older than stharrold-templates)
 - Used by initialize-repository script
 - Should be updated from stharrold-templates after merge
 

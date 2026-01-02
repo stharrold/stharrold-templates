@@ -74,30 +74,30 @@ uv run pytest tests/contract/ -v        # Contract tests only
 uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (default in quality gates)
 ```
 
-## v7x0 Workflow (Implementation)
+## v7x1 Workflow (Implementation)
 
 Streamlined 4-phase workflow using built-in Gemini CLI tools:
 
 ```
-/workflow:v7x0_1-worktree "feature description"
+/workflow:v7x1_1-worktree "feature description"
     | creates worktree, user implements feature in worktree
     v
-/workflow:v7x0_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/workflow:v7x1_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
     | PR feature->contrib->develop
     v
-/workflow:v7x0_3-release
+/workflow:v7x1_3-release
     | create release, PR to main, tag
     v
-/workflow:v7x0_4-backmerge
+/workflow:v7x1_4-backmerge
     | PR release->develop, rebase contrib, cleanup
 ```
 
 | Step | Command | Purpose |
 |------|---------|---------|
-| 1 | `/workflow:v7x0_1-worktree "desc"` | Create worktree for isolated development |
-| 2 | `/workflow:v7x0_2-integrate ["branch"]` | PR feature->contrib->develop |
-| 3 | `/workflow:v7x0_3-release` | Create release (develop->release->main) |
-| 4 | `/workflow:v7x0_4-backmerge` | Sync release (PR to develop, rebase contrib) |
+| 1 | `/workflow:v7x1_1-worktree "desc"` | Create worktree for isolated development |
+| 2 | `/workflow:v7x1_2-integrate ["branch"]` | PR feature->contrib->develop |
+| 3 | `/workflow:v7x1_3-release` | Create release (develop->release->main) |
+| 4 | `/workflow:v7x1_4-backmerge` | Sync release (PR to develop, rebase contrib) |
 
 **Detailed Guide**: See [WORKFLOW.md](WORKFLOW.md) for step-by-step instructions.
 
@@ -123,9 +123,9 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | `/workflow:v7x0_3-release` creates, `/workflow:v7x0_4-backmerge` deletes |
+| `release/*` | Ephemeral | `/workflow:v7x1_3-release` creates, `/workflow:v7x1_4-backmerge` deletes |
 ...
-- **Follow v7x0 workflow sequence**: `/workflow:v7x0_1-worktree` -> Implementation -> `/workflow:v7x0_2-integrate` -> `/workflow:v7x0_3-release` -> `/workflow:v7x0_4-backmerge`
+- **Follow v7x1 workflow sequence**: `/workflow:v7x1_1-worktree` -> Implementation -> `/workflow:v7x1_2-integrate` -> `/workflow:v7x1_3-release` -> `/workflow:v7x1_4-backmerge`
 
 ### Skills System (6 skills in `.gemini/skills/`)
 
@@ -158,7 +158,7 @@ uv run python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   feature my-feature contrib/stharrold
 
 # Semantic version calculation
-uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v7x0.0
+uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v7x1.0
 
 # Archive management
 uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
@@ -192,7 +192,7 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.
 # Record workflow transition (called by slash commands)
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern v7x0_1_worktree \
+  --pattern v7x1_1_worktree \
   --source "contrib/stharrold" \
   --target "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
@@ -250,7 +250,7 @@ azure_devops:
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow v7x0 workflow sequence**: `/workflow:v7x0_1-worktree` -> Implementation -> `/workflow:v7x0_2-integrate` -> `/workflow:v7x0_3-release` -> `/workflow:v7x0_4-backmerge`
+- **Follow v7x1 workflow sequence**: `/workflow:v7x1_1-worktree` -> Implementation -> `/workflow:v7x1_2-integrate` -> `/workflow:v7x1_3-release` -> `/workflow:v7x1_4-backmerge`
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
 - **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
 - **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)

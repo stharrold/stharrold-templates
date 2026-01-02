@@ -4,7 +4,7 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 
 ## Features
 
-- **v7x0 Workflow** - Streamlined 4-step autonomous development process
+- **v7x1 Workflow** - Streamlined 4-step autonomous development process
 - **Gemini Code Review** - Automated PR analysis via GitHub Actions
 - **AgentDB Tracking** - Persistent state and metrics using DuckDB
 - **Containerized development** - Podman + uv + Python 3.11 for consistency

@@ -25,7 +25,7 @@ related_skills:
 
 Persistent state management using AgentDB (DuckDB) for workflow state tracking and analytics.
 
-Tracks workflow phase transitions via slash command invocations. Each slash command (/workflow:v7x0_1-worktree through /workflow:v7x0_4-backmerge) records its completion in AgentDB.
+Tracks workflow phase transitions via slash command invocations. Each slash command (/workflow:v7x1_1-worktree through /workflow:v7x1_4-backmerge) records its completion in AgentDB.
 
 **Primary purpose:** Workflow state tracking and analytics
 

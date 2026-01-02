@@ -1,9 +1,9 @@
-["workflow:v7x0_1-worktree"]
+["workflow:v7x1_1-worktree"]
 description = "Create worktree for development (Step 1 of 4)"
 prompt = """
-# /workflow:v7x0_1-worktree - Step 1 of 4
+# /workflow:v7x1_1-worktree - Step 1 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x1 Workflow**: `/workflow:v7x1_1-worktree` → Implementation → `/workflow:v7x1_2-integrate` → `/workflow:v7x1_3-release` → `/workflow:v7x1_4-backmerge`
 
 **Purpose**: Create git worktree for isolated development.
 
@@ -16,12 +16,12 @@ prompt = """
 ## Usage
 
 ```
-/workflow:v7x0_1-worktree "feature description"
+/workflow:v7x1_1-worktree "feature description"
 ```
 
 Example:
 ```
-/workflow:v7x0_1-worktree "add user authentication with JWT tokens"
+/workflow:v7x1_1-worktree "add user authentication with JWT tokens"
 ```
 
 ---
@@ -57,7 +57,7 @@ This creates:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v7x0_1_worktree \
+  --pattern phase_v7x1_1_worktree \
   --source "main_repo" \
   --target "worktree"
 ```
@@ -69,7 +69,7 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
 After creating the worktree, display these instructions to the user:
 
 ```
-[OK] Worktree created for v7x0 workflow
+[OK] Worktree created for v7x1 workflow
 
 Worktree path: {worktree_path}
 Branch: {branch_name}
@@ -88,7 +88,7 @@ Branch: {branch_name}
    cd {main_repo_path}
 
 5. Run integration:
-   /workflow:v7x0_2-integrate "{branch_name}"
+   /workflow:v7x1_2-integrate "{branch_name}"
 ```
 
 ---
@@ -100,12 +100,12 @@ Branch: {branch_name}
 - Quality is ensured by autonomous testing and Gemini Code Review.
 "
 
-["workflow:v7x0_2-integrate"]
+["workflow:v7x1_2-integrate"]
 description = "Integrate feature to develop (Step 2 of 4)"
 prompt = """
-# /workflow:v7x0_2-integrate - Step 2 of 4
+# /workflow:v7x1_2-integrate - Step 2 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x1 Workflow**: `/workflow:v7x1_1-worktree` → Implementation → `/workflow:v7x1_2-integrate` → `/workflow:v7x1_3-release` → `/workflow:v7x1_4-backmerge`
 
 **Purpose**: Create PRs from feature → contrib → develop.
 
@@ -119,12 +119,12 @@ prompt = """
 
 ### Full Integration (with feature branch)
 ```
-/workflow:v7x0_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/workflow:v7x1_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
 
 ### Contrib-Only Integration (no feature branch)
 ```
-/workflow:v7x0_2-integrate
+/workflow:v7x1_2-integrate
 ```
 
 ---
@@ -229,7 +229,7 @@ Integration of latest changes from contrib branch.
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v7x0_2_integrate
+  --pattern phase_v7x1_2_integrate
 ```
 
 ---
@@ -248,7 +248,7 @@ Display to user:
 - Contrib → develop PR created
 - Ready for release when develop has enough changes
 
-Next: Run /workflow:v7x0_3-release when ready for production
+Next: Run /workflow:v7x1_3-release when ready for production
 ```
 
 ---
@@ -260,12 +260,12 @@ Next: Run /workflow:v7x0_3-release when ready for production
 - Always ends on contrib/* branch (editable).
 "
 
-["workflow:v7x0_3-release"]
+["workflow:v7x1_3-release"]
 description = "Release to production (Step 3 of 4)"
 prompt = """
-# /workflow:v7x0_3-release - Step 3 of 4
+# /workflow:v7x1_3-release - Step 3 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x1 Workflow**: `/workflow:v7x1_1-worktree` → Implementation → `/workflow:v7x1_2-integrate` → `/workflow:v7x1_3-release` → `/workflow:v7x1_4-backmerge`
 
 **Purpose**: Create release from develop, create PR to main, tag release.
 
@@ -278,12 +278,12 @@ prompt = """
 ## Usage
 
 ```
-/workflow:v7x0_3-release
+/workflow:v7x1_3-release
 ```
 
 Optional: Specify version
 ```
-/workflow:v7x0_3-release v1.2.0
+/workflow:v7x1_3-release v1.2.0
 ```
 
 ---
@@ -346,7 +346,7 @@ This:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v7x0_3_release
+  --pattern phase_v7x1_3_release
 ```
 
 ---
@@ -362,7 +362,7 @@ Display to user:
 - PR to main: merged
 - Tag: {version} created on main
 
-Next: Run /workflow:v7x0_4-backmerge to sync release to develop
+Next: Run /workflow:v7x1_4-backmerge to sync release to develop
 ```
 
 ---
@@ -374,12 +374,12 @@ Next: Run /workflow:v7x0_4-backmerge to sync release to develop
 - Tag is created on main after PR merge
 "
 
-["workflow:v7x0_4-backmerge"]
+["workflow:v7x1_4-backmerge"]
 description = "Sync release to develop and contrib (Step 4 of 4)"
 prompt = """
-# /workflow:v7x0_4-backmerge - Step 4 of 4
+# /workflow:v7x1_4-backmerge - Step 4 of 4
 
-**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → Implementation → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
+**v7x1 Workflow**: `/workflow:v7x1_1-worktree` → Implementation → `/workflow:v7x1_2-integrate` → `/workflow:v7x1_3-release` → `/workflow:v7x1_4-backmerge`
 
 **Purpose**: Sync release changes back to develop and rebase contrib.
 
@@ -392,7 +392,7 @@ prompt = """
 ## Usage
 
 ```
-/workflow:v7x0_4-backmerge
+/workflow:v7x1_4-backmerge
 ```
 
 ---
@@ -441,7 +441,7 @@ This:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v7x0_4_backmerge
+  --pattern phase_v7x1_4_backmerge
 ```
 
 ---
@@ -458,7 +458,7 @@ Display to user:
 - Release branch cleaned up
 
 Workflow complete! Ready for next feature.
-Next: Run /workflow:v7x0_1-worktree "next feature" to start again
+Next: Run /workflow:v7x1_1-worktree "next feature" to start again
 ```
 
 ---
@@ -471,28 +471,28 @@ Next: Run /workflow:v7x0_1-worktree "next feature" to start again
 "
 
 [commands.workflow]
-description = "Show v7x0 workflow overview"
+description = "Show v7x1 workflow overview"
 prompt = """
-# /workflow - v7x0 Workflow Overview
+# /workflow - v7x1 Workflow Overview
 
-The v7x0 workflow simplifies the process by leveraging built-in Gemini CLI tools for implementation.
+The v7x1 workflow simplifies the process by leveraging built-in Gemini CLI tools for implementation.
 
 ## Steps
 
-1. **[/workflow:v7x0_1-worktree](command:workflow:v7x0_1-worktree)**
+1. **[/workflow:v7x1_1-worktree](command:workflow:v7x1_1-worktree)**
    - Creates a git worktree for isolation.
    - You then use Gemini CLI tools inside the worktree to implement the feature.
 
-2. **[/workflow:v7x0_2-integrate](command:workflow:v7x0_2-integrate)**
+2. **[/workflow:v7x1_2-integrate](command:workflow:v7x1_2-integrate)**
    - Integrates the feature branch into `contrib`.
    - Creates a PR from `contrib` to `develop`.
 
-3. **[/workflow:v7x0_3-release](command:workflow:v7x0_3-release)**
+3. **[/workflow:v7x1_3-release](command:workflow:v7x1_3-release)**
    - Creates a release branch from `develop`.
    - Runs quality checks.
    - Creates a PR to `main` and tags the release.
 
-4. **[/workflow:v7x0_4-backmerge](command:workflow:v7x0_4-backmerge)**
+4. **[/workflow:v7x1_4-backmerge](command:workflow:v7x1_4-backmerge)**
    - Merges the release back to `develop`.
    - Rebases `contrib` on the new `develop`.
    - Cleans up the release branch.
@@ -501,7 +501,7 @@ The v7x0 workflow simplifies the process by leveraging built-in Gemini CLI tools
 
 Start a new feature:
 ```
-/workflow:v7x0_1-worktree "Add user authentication"
+/workflow:v7x1_1-worktree "Add user authentication"
 ```
 "
 

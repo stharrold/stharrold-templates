@@ -542,7 +542,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-Generated with workflow system v7x0.0
+Generated with workflow system v7x1.0
 """
 
     target_file = target_path / "README.md"
@@ -676,7 +676,7 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 
 ---
 
-Generated with workflow system v7x0.0
+Generated with workflow system v7x1.0
 """
 
     target_file = target_path / "GEMINI.md"
@@ -949,7 +949,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial repository setup with workflow system v7x0.0
+- Initial repository setup with workflow system v7x1.0
 
 ## [0.1.0] - """
         + datetime.now(UTC).strftime("%Y-%m-%d")
@@ -1086,7 +1086,7 @@ def phase4_git_initialization(target_path: Path, config: RepositoryConfig) -> No
         # Create initial commit on main
         info("Creating initial commit...")
         subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        commit_msg = f"""chore: initialize repository with workflow system v7x0.0
+        commit_msg = f"""chore: initialize repository with workflow system v7x1.0
 
 Initialized {config.name} with skill-based workflow architecture:
 - 8 specialized skills for development workflow

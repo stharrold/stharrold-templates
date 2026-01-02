@@ -328,7 +328,7 @@ status = adapter.get_pr_status(94)
 # }
 ```
 
-**PR Feedback Methods (Added v7x0.0):**
+**PR Feedback Methods (Added v7x1.0):**
 
 Three new methods for PR feedback handling:
 
