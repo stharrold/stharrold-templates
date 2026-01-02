@@ -8,7 +8,7 @@ Visual representation of the streamlined v6 workflow system.
 flowchart TB
     subgraph Feature["Feature Workflow"]
         Step1[/worktree<br/>Create isolated<br/>environment]
-        Step2[feature-dev<br/>Autonomous implementation<br/>& code review]
+        Step2[Implementation<br/>Autonomous development<br/>using Gemini tools]
         Step3[/integrate<br/>Create PRs from<br/>feature to develop]
 
         Step1 --> Step2 --> Step3
@@ -35,7 +35,7 @@ gitGraph
     branch contrib/user
     commit id: "contrib"
     branch feature/auth
-    commit id: "implement (feature-dev)"
+    commit id: "implement (Gemini tools)"
     commit id: "Gemini review"
     checkout contrib/user
     merge feature/auth id: "PR: feature→contrib"
@@ -44,16 +44,16 @@ gitGraph
     branch release/v7.0
     commit id: "release prep"
     checkout main
-    merge release/v7.0 id: "PR: release→main" tag: "v7.0.0"
+    merge release/v1.0 id: "PR: release→main" tag: "v7.0.0"
     checkout develop
-    merge release/v7.0 id: "backmerge"
+    merge release/v1.0 id: "backmerge"
 ```
 
 ## Autonomous Quality Loop
 
 ```mermaid
 flowchart LR
-    subgraph Loop["feature-dev Loop"]
+    subgraph Loop["Implementation Loop"]
         Plan[Plan]
         Write[Write Code]
         Test[Write Tests]

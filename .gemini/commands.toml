@@ -1,15 +1,15 @@
 [commands.worktree]
-description = "Create worktree for feature-dev (Step 1 of 4)"
+description = "Create worktree for development (Step 1 of 4)"
 prompt = """
 # /worktree - Step 1 of 4
 
-**v6 Workflow**: `/worktree` → [feature-dev] → `/integrate` → `/release` → `/backmerge`
+**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
 
-**Purpose**: Create git worktree for feature development using Claude's feature-dev plugin.
+**Purpose**: Create git worktree for isolated development.
 
 **Prerequisites**: Main repo, `contrib/*` branch
 
-**Outputs**: Feature worktree with instructions for running feature-dev
+**Outputs**: Feature worktree with instructions for implementation
 
 ---
 
@@ -58,7 +58,7 @@ This creates:
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_v6_1_worktree \
-  --source "main_repo" \
+  --source "main_repo"
   --target "worktree"
 ```
 
@@ -81,8 +81,8 @@ Branch: {branch_name}
 2. Navigate to the worktree:
    cd {worktree_path}
 
-3. Open a new session and run feature-dev (or equivalent):
-   /feature-dev "{original_feature_description}"
+3. Open a new session and implement the feature using built-in Gemini CLI tools:
+   "Implement {original_feature_description}"
 
 4. After implementation is complete, return to main repo:
    cd {main_repo_path}
@@ -91,15 +91,13 @@ Branch: {branch_name}
    /integrate "{branch_name}"
 ```
 
-**Important**: Copy the feature description for use with /feature-dev.
-
 ---
 
 ## Notes
 
-- The feature-dev plugin handles all planning, architecture, and code review
-- No planning documents required (unlike v1-v7 workflow)
-- Quality is ensured by feature-dev's code review phase
+- Use built-in Gemini CLI tools for planning, architecture, and implementation.
+- No manual planning documents required.
+- Quality is ensured by autonomous testing and Gemini Code Review.
 "
 
 [commands.integrate]
@@ -107,7 +105,7 @@ description = "Integrate feature to develop (Step 2 of 4)"
 prompt = """
 # /integrate - Step 2 of 4
 
-**v6 Workflow**: `/worktree` → [feature-dev] → `/integrate` → `/release` → `/backmerge`
+**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
 
 **Purpose**: Create PRs from feature → contrib → develop.
 
@@ -157,7 +155,7 @@ gh pr create \
   --title "feat: {slug}" \
   --body "## Summary
 
-Feature implementation from v6 workflow.
+Feature implementation using Gemini CLI.
 
 ## Changes
 
@@ -257,17 +255,17 @@ Next: Run /release when ready for production
 
 ## Notes
 
-- No quality gates in v6 workflow - feature-dev handles quality
-- PRs require manual approval in GitHub UI
-- Always ends on contrib/* branch (editable)
-"
+- Implementation uses built-in Gemini CLI tools.
+- PRs require manual approval in GitHub UI.
+- Always ends on contrib/* branch (editable).
+""
 
 [commands.release]
 description = "Release to production (Step 3 of 4)"
 prompt = """
 # /release - Step 3 of 4
 
-**v6 Workflow**: `/worktree` → [feature-dev] → `/integrate` → `/release` → `/backmerge`
+**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
 
 **Purpose**: Create release from develop, create PR to main, tag release.
 
@@ -308,7 +306,7 @@ latest_tag=$(git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "v0.
 ## Step 2: Create Release Branch
 
 ```bash
-uv run python .gemini/skills/git-workflow-manager/scripts/release_workflow.py create-release
+uv run python .gemini/skills/git-workflow-manager/scripts/create_release.py create-release
 ```
 
 This creates:
@@ -374,14 +372,14 @@ Next: Run /backmerge to sync release to develop
 - Release branch is temporary (deleted in backmerge)
 - Semantic versioning: vMAJOR.MINOR.PATCH
 - Tag is created on main after PR merge
-"
+""
 
 [commands.backmerge]
 description = "Sync release to develop and contrib (Step 4 of 4)"
 prompt = """
 # /backmerge - Step 4 of 4
 
-**v6 Workflow**: `/worktree` → [feature-dev] → `/integrate` → `/release` → `/backmerge`
+**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
 
 **Purpose**: Sync release changes back to develop and rebase contrib.
 
@@ -470,20 +468,20 @@ Next: Run /worktree "next feature" to start again
 - Always ends on contrib/* branch (editable)
 - Contrib is rebased to stay current with develop
 - Release branch is ephemeral (created in release, deleted in backmerge)
-"
+""
 
 [commands.workflow]
 description = "Show v6 workflow overview"
 prompt = """
 # /workflow - v6 Workflow Overview
 
-The v6 workflow simplifies the process by leveraging `feature-dev` for implementation.
+The v6 workflow simplifies the process by leveraging built-in Gemini CLI tools for implementation.
 
 ## Steps
 
 1. **[/worktree](command:worktree)**
    - Creates a git worktree for isolation.
-   - You then use `feature-dev` inside the worktree to implement the feature.
+   - You then use Gemini CLI tools inside the worktree to implement the feature.
 
 2. **[/integrate](command:integrate)**
    - Integrates the feature branch into `contrib`.
@@ -505,7 +503,7 @@ Start a new feature:
 ```
 /worktree "Add user authentication"
 ```
-"
+""
 
 [commands.gemini-review]
 description = "Reviews a pull request with Gemini CLI"
@@ -538,4 +536,4 @@ Perform a comprehensive code review of the pull request and post all feedback us
 
 ## Constraint
 You MUST NOT use shell commands like `gh` or `git` for interaction. Use ONLY the tools listed above.
-"
+""

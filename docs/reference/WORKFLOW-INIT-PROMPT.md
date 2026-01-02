@@ -2,14 +2,14 @@
 name: workflow-v6-initialization-guide
 version: 6.0.0
 type: navigation-guide
-description: Quick reference guide to v6 (feature-dev) workflow system
+description: Quick reference guide to v6 workflow system
 last_updated: 2026-01-01
 follows: DRY principle (references files, doesn't duplicate)
 ---
 
 # Workflow System v6.0.0 - Quick Start Guide
 
-This repository implements a streamlined 4-step development workflow using Gemini's **feature-dev** plugin for implementation and automated **Gemini Code Review** for quality.
+This repository implements a streamlined 4-step development workflow using built-in Gemini CLI tools for autonomous implementation and automated **Gemini Code Review** for quality.
 
 ## Bootstrap a New Repository
 
@@ -33,7 +33,7 @@ This copies all 6 skills, v6 command aliases, documentation, CI/CD configs, and 
 
 ## v6 Workflow Steps
 
-The v6 workflow focuses on **feature-dev** for autonomous implementation.
+The v6 workflow focuses on autonomous implementation using built-in tools.
 
 ### Step 1: Create Worktree
 → **Command:** `/worktree "feature description"`
@@ -41,8 +41,8 @@ The v6 workflow focuses on **feature-dev** for autonomous implementation.
 → **Next:** Navigate to the worktree directory.
 
 ### Step 2: Implement Feature
-→ **Command:** `/feature-dev "feature description"` (Run inside worktree)
-→ **Action:** Gemini autonomously plans, writes, and reviews the feature.
+→ **Action:** Chat with Gemini in the worktree to implement the feature.
+→ **Example:** "Implement user authentication with JWT tokens"
 → **Next:** Return to main repo after completion.
 
 ### Step 3: Integrate
@@ -111,7 +111,7 @@ For detailed documentation on each skill, read their respective SKILL.md files:
 
 **This workflow system provides:**
 - ✅ **Streamlined 4-step flow** (reduced from legacy 7-phase system).
-- ✅ **feature-dev integration** for autonomous implementation.
+- ✅ **Autonomous implementation** using built-in Gemini CLI tools.
 - ✅ **Gemini Code Review** automated via GitHub Actions.
 - ✅ **Token efficiency** through modular skills.
 - ✅ **Cross-platform CI/CD** (GitHub Actions + Azure Pipelines).

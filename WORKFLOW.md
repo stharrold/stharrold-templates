@@ -1,15 +1,15 @@
-# Workflow Guide - v6 (feature-dev)
+# Workflow Guide - v6 (Implementation)
 
 **Version:** 6.0.0
-**Date:** 2025-12-29
-**Architecture:** 4-phase workflow using Gemini's feature-dev plugin
+**Date:** 2026-01-01
+**Architecture:** 4-phase workflow using built-in Gemini CLI tools
 
 ## Overview
 
-This repository uses a streamlined 4-phase workflow for Python feature development:
+This repository uses a streamlined 4-phase workflow for Python development:
 - **Git-flow hybrid** with worktrees for isolation
-- **Gemini feature-dev plugin** for planning, architecture, and code review
-- **No separate quality gates** (feature-dev handles code quality)
+- **Built-in Gemini CLI tools** for planning, architecture, and implementation
+- **No separate manual quality gates** (Gemini Code Review automated via GitHub Actions)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Required tools:
 - **uv** - Python package manager
 - **git** - Version control with worktree support
 - **Python 3.11+** - Language runtime
-- **Gemini Code** - With feature-dev plugin
+- **Gemini Code** - AI development assistant
 
 Verify prerequisites:
 ```bash
@@ -35,10 +35,10 @@ python3 --version       # Must be 3.11+
 
 ```
 /worktree "feature description"
-    | creates worktree, user runs /feature-dev in worktree
+    | creates worktree, user implements feature in worktree
     v
 /integrate "feature/YYYYMMDDTHHMMSSZ_slug"
-    | PR feature->contrib->develop (no quality gates)
+    | PR feature->contrib->develop
     v
 /release
     | create release, PR to main, tag
@@ -59,28 +59,29 @@ Creates isolated git worktree for feature development.
 - Branch: `feature/{timestamp}_{slug}`
 - Worktree: `../{project}_feature_{timestamp}_{slug}/`
 
-**Next steps displayed:** Navigate to worktree and run `/feature-dev`.
+**Next steps displayed:** Navigate to worktree and implement the feature.
 
-### Step 2: Feature Development (`/feature-dev`)
+### Step 2: Feature Implementation
 
-Run in the feature worktree (not main repo):
+Run in the feature worktree (not main repo) using built-in Gemini CLI tools:
 
 ```bash
 cd <worktree-path>
-/feature-dev "add user authentication"
+# Then just chat with Gemini:
+"Implement user authentication with JWT tokens"
 ```
 
-**feature-dev handles:**
+**Gemini handles:**
 - Understanding the codebase
 - Planning the implementation
-- Writing code
-- Code review and refinement
+- Writing code and tests
+- Refinement
 
 No separate planning documents needed.
 
 ### Step 3: Integrate (`/integrate`)
 
-From main repo, after feature-dev is complete:
+From main repo, after implementation is complete:
 
 ```bash
 /integrate "feature/20251229T120000Z_add-user-auth"
@@ -150,10 +151,10 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 
 | Aspect | v1-v7 | v6 |
 |--------|-------|-----|
-| Planning | BMAD documents + SpecKit specs | feature-dev plugin |
-| Quality gates | 5 separate gates | feature-dev code review |
-| Steps | 7 phases | 4 phases |
-| Artifacts | requirements.md, architecture.md, spec.md, plan.md | None (feature-dev handles) |
+| Planning | BMAD documents + SpecKit specs | Built-in Gemini tools |
+| Quality gates | 5 separate gates | Gemini Code Review |
+| Steps | 7 phases | 4 steps |
+| Artifacts | requirements.md, architecture.md, spec.md, plan.md | None (Gemini handles internally) |
 
 ## Skills System
 

@@ -33,17 +33,17 @@ The `/worktree` command handles hotfix creation when run from the `main` branch 
 
 ---
 
-### Step 2: Implement Fix (`feature-dev`)
+### Step 2: Implement Fix
 
 **Location:** Hotfix worktree
-**Command:** `/feature-dev "hotfix: detailed description"`
+**Action:** Implement the fix using built-in Gemini CLI tools.
 
-Inside the worktree, use Gemini `feature-dev` to implement the fix.
+Inside the worktree, chat with Gemini to implement the fix.
 
 **Best Practices:**
 - **Minimal Changes**: Fix only the immediate issue.
 - **Regression Tests**: Always include tests that prove the fix works and prevent recurrence.
-- **Speed with Quality**: Even for urgent fixes, `feature-dev` ensures code quality and correctness.
+- **Speed with Quality**: Even for urgent fixes, Gemini ensures code quality and correctness.
 
 ---
 
@@ -86,7 +86,7 @@ If you need to remove a bad release from the `main` branch history:
 | Aspect | Feature Workflow | Hotfix Workflow |
 |--------|-----------------|-----------------|
 | **Base Branch** | `develop` (via `contrib`) | `main` |
-| **Tool** | `feature-dev` | `feature-dev` |
+| **Tool** | Gemini CLI | Gemini CLI |
 | **Target Branch** | `develop` | `main` (then backmerge to `develop`) |
 | **Urgency** | Standard | High |
 

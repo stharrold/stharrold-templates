@@ -60,7 +60,7 @@ az --version              # Azure CLI (for Azure DevOps repos)
 
 ## Development Workflow (v6)
 
-This repository uses a streamlined **v6 (feature-dev)** workflow.
+This repository uses a streamlined **v6** workflow.
 
 ### Branch Structure
 
@@ -77,7 +77,7 @@ feature/* (isolated worktrees)
 ### Workflow Steps
 
 1. **Create Worktree**: `/worktree "feature description"`
-2. **Implement**: `/feature-dev "feature description"` (in worktree)
+2. **Implement**: Perform implementation using built-in Gemini CLI tools (in worktree).
 3. **Integrate**: `/integrate` (in main repo)
 4. **Release**: `/release`
 5. **Backmerge**: `/backmerge`

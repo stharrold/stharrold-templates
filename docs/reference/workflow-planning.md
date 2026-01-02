@@ -1,4 +1,4 @@
-# Workflow Guide: Planning & Implementation (Step 1-2)
+# Workflow Guide: Implementation (Step 1-2)
 
 **Parent:** [WORKFLOW.md](../../WORKFLOW.md)
 **Version:** 6.0.0
@@ -9,12 +9,12 @@ This document covers the initial steps of the streamlined v6 workflow.
 
 ## v6 Workflow Overview
 
-The v6 workflow simplifies development by leveraging Gemini's **feature-dev** plugin for autonomous planning, architecture, and implementation.
+The v6 workflow simplifies development by leveraging built-in Gemini CLI tools for autonomous planning, architecture, and implementation.
 
-1.  **[/worktree](command:worktree)**: Create isolated development environment.
-2.  **[/feature-dev](command:feature-dev)**: Autonomous implementation.
-3.  **[/integrate](command:integrate)**: Sync with main repo and develop branch.
-4.  **[/release](command:release)** & **[/backmerge](command:backmerge)**: Production deployment.
+1. **[/worktree](command:worktree)**: Create isolated development environment.
+2. **Implementation**: Autonomous development using built-in tools.
+3. **[/integrate](command:integrate)**: Sync with main repo and develop branch.
+4. **[/release](command:release)** & **[/backmerge](command:backmerge)**: Production deployment.
 
 ---
 
@@ -27,46 +27,43 @@ The v6 workflow simplifies development by leveraging Gemini's **feature-dev** pl
 This command automates the creation of an isolated git worktree for your feature.
 
 **What it does:**
-1.  Generates a kebab-case slug from your description.
-2.  Creates a new branch: `feature/YYYYMMDDTHHMMSSZ_slug`.
-3.  Creates a worktree directory at `../{project}_feature_...`.
-4.  Initializes `.gemini-state/` for worktree state isolation.
-5.  Records the transition in **AgentDB**.
+1. Generates a kebab-case slug from your description.
+2. Creates a new branch: `feature/YYYYMMDDTHHMMSSZ_slug`.
+3. Creates a worktree directory at `../{project}_feature_...`.
+4. Initializes `.gemini-state/` for worktree state isolation.
+5. Records the transition in **AgentDB**.
 
 **Output:**
--   Path to the new worktree.
--   Branch name.
--   Instructions for the next step.
+- Path to the new worktree.
+- Branch name.
+- Instructions for the next step.
 
 ---
 
-
-### Step 2: Implement Feature (`feature-dev`)
+### Step 2: Feature Implementation
 
 **Location:** Feature worktree
 **Branch:** `feature/*`
-**Command:** `/feature-dev "feature description"`
 
-Inside the worktree, you use the Gemini `feature-dev` plugin. This is the core of the v6 workflow.
+Inside the worktree, you use built-in Gemini CLI tools to implement the feature.
 
-**feature-dev replaces legacy phases:**
--   ❌ No more manual BMAD planning (Requirements/Architecture/Epics).
--   ❌ No more manual SpecKit specifications (Spec/Plan).
--   ❌ No more manual Quality Gates (feature-dev code review ensures quality).
+**Autonomous implementation replaces legacy phases:**
+- ❌ No more manual BMAD planning (Requirements/Architecture/Epics).
+- ❌ No more manual SpecKit specifications (Spec/Plan).
+- ❌ No more manual Quality Gates (Gemini Code Review ensures quality).
 
 **Process:**
-1.  Gemini analyzes the codebase in the isolated worktree.
-2.  Gemini creates an internal plan.
-3.  Gemini writes the code and tests.
-4.  Gemini reviews its own work for quality and security.
+1. Chat with Gemini in the isolated worktree to implement the feature.
+2. Gemini analyzes the codebase and creates an internal plan.
+3. Gemini writes the code and tests.
+4. Gemini reviews its own work for quality and security.
 
 **Best Practices:**
--   Always run `feature-dev` in a worktree to keep the main repository clean.
--   Provide a clear, detailed description of the feature.
--   Review the implemented code before returning to the main repository.
+- Always perform implementation in a worktree to keep the main repository clean.
+- Provide a clear, detailed description of the feature to Gemini.
+- Review the implemented code before returning to the main repository.
 
 ---
-
 
 ## State Tracking (AgentDB)
 
