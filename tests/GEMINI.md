@@ -25,7 +25,6 @@ Test suite root with unit, contract, and integration tests.
 - `unit/` - Subdirectory
 - `__init__.py` - Python script
 - `conftest.py` - Python script
-- `test_mcp_deduplication.py` - Python script
 
 ## Related
 

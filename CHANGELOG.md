@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **Cross-tool support** - Streamlined for Gemini-only development
+  - Archived and removed `.agents/` and `AGENTS.md`
+  - Archived and removed `.specify/` (deprecated migration source)
+  - Archived and removed out-of-date scripts: `sync_ai_config.py`, `sync_skill_docs.py`
+  - Archived and removed deprecated skills and their tests:
+    - `bmad-planner` (replaced by Gemini feature-dev)
+    - `speckit-author` (replaced by Gemini feature-dev)
+    - `quality-enforcer` (replaced by Gemini feature-dev code review)
+- **Repository cleanup** - Removed build artifacts and legacy maintenance scripts
+  - Archived and removed build artifacts: `dist/`, `stharrold_templates.egg-info/`
+  - Archived and removed legacy bash validation scripts (`test_*.sh`, `validate_documentation.sh`)
+  - Archived and removed third-party tool configurations: `.claude/`, `.codacy/`
+  - Archived and removed manual MCP manager: `mcp_manager.py` (Gemini manages MCP natively)
+
 ### Added
 - **ASCII-only enforcement** (Issue #121) - Pre-commit hook validates Python files
   - Added `check_ascii_only.py` script with 77 Unicode to ASCII mappings

@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Manage archived files: list, extract, create, verify, archive workflows."""
 
+import os
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -145,9 +147,24 @@ def create_archive(
                     archive_name = file_path.name
 
                 try:
-                    zipf.write(file_path, archive_name)
-                    print(f"  Archived: {file_path}")
-                    archived_count += 1
+                    if file_path.is_dir():
+                        for root, _, files_in_dir in os.walk(file_path):
+                            for f in files_in_dir:
+                                full_path = Path(root) / f
+                                if preserve_paths:
+                                    try:
+                                        arcname = str(full_path.relative_to(repo_root))
+                                    except ValueError:
+                                        arcname = str(full_path.relative_to(file_path.parent))
+                                else:
+                                    arcname = str(full_path.relative_to(file_path.parent))
+                                zipf.write(full_path, arcname)
+                        print(f"  Archived directory: {file_path}")
+                        archived_count += 1
+                    else:
+                        zipf.write(file_path, archive_name)
+                        print(f"  Archived: {file_path}")
+                        archived_count += 1
                 except (PermissionError, OSError) as e:
                     error_msg = str(e)
                     failed_files.append((str(file_path), error_msg))
@@ -155,7 +172,10 @@ def create_archive(
                     continue
 
                 if delete_originals:
-                    file_path.unlink()
+                    if file_path.is_dir():
+                        shutil.rmtree(file_path)
+                    else:
+                        file_path.unlink()
                     print(f"  Deleted: {file_path}")
             else:
                 error_msg = "File not found"

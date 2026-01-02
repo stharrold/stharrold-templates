@@ -17,7 +17,6 @@ This file provides guidance to Gemini Code (gemini.ai/code) when working with co
 ## What This Repository Is
 
 **Templates and utilities for MCP (Model Context Protocol) server configuration:**
-- Multi-platform MCP manager (`mcp_manager.py`) for Gemini Code CLI, VS Code, and Gemini Desktop
 - Modular documentation guides (≤30KB per file for AI context optimization)
 - Workflow automation tools (git helpers, archive management, semantic versioning)
 - **Containerized development** - Podman + uv + Python 3.11 for consistent dev/CI environments
@@ -35,7 +34,6 @@ uv run pytest                              # Run tests
 uv run pytest -v -k test_name              # Single test
 uv run ruff check .                        # Lint
 uv run ruff check --fix .                  # Auto-fix
-uv run python mcp_manager.py --status      # MCP status
 
 # Package testing (containerized - for CI/CD)
 podman-compose build                       # Build container
@@ -107,19 +105,6 @@ Streamlined 4-phase workflow using Gemini's feature-dev plugin:
 - Simplified 4-step flow instead of 7 steps
 
 ## Core Architecture
-
-### MCP Manager (`mcp_manager.py`)
-
-**Platform Detection**: Auto-detects gemini-code → vscode → gemini-desktop
-
-**Key Functions**:
-- `MCPConfig(platform, config_path)` - Platform-specific handler
-- `select_target_platform()` - Returns first available platform
-- `deduplicate_servers()` - Preserves DISABLED_ prefixed versions
-
-**Schema Differences**:
-- Gemini Code & Desktop: `"mcpServers": {}`
-- VS Code: `"servers": {}`
 
 ### Branch Structure
 
@@ -207,14 +192,6 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --source "contrib/stharrold" \
   --target "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
-
-## MCP Configuration Paths
-
-| Platform | macOS | Windows | Linux |
-|----------|-------|---------|-------|
-| Gemini Code | `~/.gemini.json` | `~/.gemini.json` | `~/.gemini.json` |
-| VS Code | `~/Library/.../mcp.json` | `~/AppData/.../mcp.json` | `~/.config/.../mcp.json` |
-| Gemini Desktop | `~/Library/.../config.json` | `~/AppData/.../config.json` | `~/.config/.../config.json` |
 
 ## Prerequisites
 
@@ -370,7 +347,6 @@ repo_feature_abc/            # Feature worktree
 | Container not building | `podman info` to verify Podman running (CI/CD only) |
 | pytest not found | Use `uv run pytest` |
 | Import errors | Use `uv run python` |
-| Platform not found | `uv run python mcp_manager.py --status` to check |
 | Worktree conflicts | `git worktree remove` + `git worktree prune` |
 | Ended on wrong branch | `git checkout contrib/stharrold` |
 | Orphaned state dirs | Run `cleanup_orphaned_state()` from worktree_context |
