@@ -102,14 +102,9 @@ def calculate_next_version(current: str) -> str:
 
 def run_quality_gates() -> bool:
     """Run quality gates."""
-    safe_print("\n[Quality Gates] Running quality gates...")
-    script_path = Path(".gemini/skills/quality-enforcer/scripts/run_quality_gates.py")
+    safe_print("\n[Quality Gates] Running tests...")
 
-    if not script_path.exists():
-        safe_print("[WARN]  Quality gates script not found, skipping")
-        return True
-
-    result = subprocess.run(["uv", "run", "python", str(script_path)], check=False)
+    result = subprocess.run(["uv", "run", "pytest"], check=False)
 
     return result.returncode == 0
 
