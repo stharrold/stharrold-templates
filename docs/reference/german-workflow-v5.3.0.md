@@ -124,7 +124,7 @@ hotfix/vX.Y.Z-hotfix.N        ← Production hotfix (worktree)
   - PR is up-to-date with target branch (no "branch out-of-date" warnings)
   - Easier code review (only shows actual changes from release)
   - Follows git best practices
-- **Location:** `.gemini/skills/git-workflow-manager/scripts/backmerge_release.py`
+- **Location:** `.gemini/skills/git-workflow-manager/scripts/workflow:v7x1_4-backmerge_release.py`
 - **No direct commits:** Script creates PR only (merge happens in GitHub/Azure DevOps UI)
 
 #### Technical Enforcement (Recommended)
@@ -1224,7 +1224,7 @@ python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
 ✓ Created annotated tag: v1.1.0
    Message: "Release v1.1.0: Production release with vocabulary modules"
 ✓ Pushed tag to origin
-✓ View release: https://github.com/user/german/releases/tag/v1.1.0
+✓ View release: https://github.com/user/german/workflow:v7x1_3-releases/tag/v1.1.0
 ```
 
 #### Step 5.6: Back-merge Release to Develop
@@ -1233,7 +1233,7 @@ python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
 
 **Command:**
 ```bash
-python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/workflow:v7x1_4-backmerge_release.py \
   v1.1.0 develop
 ```
 
@@ -1304,7 +1304,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 ✓ Verified tag v1.1.0 exists
 ✓ Verified back-merge to develop complete
 ✓ Deleted local branch: release/v1.1.0
-✓ Deleted remote branch: origin/release/v1.1.0
+✓ Deleted remote branch: origin/workflow:v7x1_3-release/v1.1.0
 ✓ Archived: TODO_release_20251023T143000Z_v1-1-0.md
 ✓ Release workflow complete for v1.1.0
 ```
@@ -1627,7 +1627,7 @@ python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
 ✓ Created annotated tag: v1.3.0-hotfix.1
    Message: "Hotfix v1.3.0-hotfix.1: Fix critical auth bypass vulnerability"
 ✓ Pushed tag to origin
-✓ View release: https://github.com/user/german/releases/tag/v1.3.0-hotfix.1
+✓ View release: https://github.com/user/german/workflow:v7x1_3-releases/tag/v1.3.0-hotfix.1
 ```
 
 #### Step 6.10: Back-merge Hotfix to Develop
@@ -1636,7 +1636,7 @@ python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
 
 **Command:**
 ```bash
-python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/workflow:v7x1_4-backmerge_release.py \
   v1.3.0-hotfix.1 develop
 ```
 
@@ -1787,7 +1787,7 @@ git checkout v1.5.0
 # 1. Find the merge commit that introduced v1.5.1
 git log --oneline main | head -10
 # Example output:
-#   abc123f Merge pull request #42 from user/release/v1.5.1
+#   abc123f Merge pull request #42 from user/workflow:v7x1_3-release/v1.5.1
 #   def456g docs(release): update CHANGELOG.md for v1.5.1
 #   ...
 
@@ -1870,7 +1870,7 @@ git checkout v1.5.0-hotfix.1
 # Deploy...
 
 # 6. Back-merge to develop
-python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/workflow:v7x1_4-backmerge_release.py \
   v1.5.0-hotfix.1 develop
 
 # Result:
@@ -1982,7 +1982,7 @@ Production broken after v1.5.1 deployment?
 
 ## TODO.md Manifest System
 
-### Structure (v5.2.0)
+### Structure (v7x1.0)
 
 **File:** `TODO.md` (root of main repository)
 
@@ -2501,12 +2501,12 @@ Output:
 ```
 Skill Versions:
   bmad-planner              v5.1.0
-  speckit-author            v5.0.0
-  workflow-orchestrator     v5.0.0
-  git-workflow-manager      v5.0.0
-  quality-enforcer          v5.0.0
-  tech-stack-adapter        v5.0.0
-  workflow-utilities        v5.0.0
+  speckit-author            v7x1.0
+  workflow-orchestrator     v7x1.0
+  git-workflow-manager      v7x1.0
+  quality-enforcer          v7x1.0
+  tech-stack-adapter        v7x1.0
+  workflow-utilities        v7x1.0
 ```
 
 ### Semi-Automated Sync Tool
@@ -2578,7 +2578,7 @@ python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
 ```
 feat(bmad): add database migration strategy Q&A
 
-Updated bmad-planner from v5.0.0 to v5.1.0:
+Updated bmad-planner from v7x1.0 to v5.1.0:
 - Added interactive Q&A for database migration strategy
 
 Updated documentation:

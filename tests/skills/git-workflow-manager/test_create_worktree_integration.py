@@ -4,7 +4,7 @@
 """Integration tests for git-workflow-manager create_worktree.py.
 
 These tests verify the full workflow of worktree creation using real git repositories.
-Note: v6 workflow removed planning verification (feature-dev handles planning).
+Note: v6 workflow removed planning verification (Gemini handles planning).
 """
 
 import os
@@ -135,7 +135,7 @@ class TestCreateWorktreeIntegration:
 
         local_path = git_repo_with_remote
 
-        # No planning directory - should still work (v6 uses feature-dev plugin)
+        # No planning directory - should still work (v6 uses Gemini tools for planning).
         original_cwd = os.getcwd()
         try:
             os.chdir(local_path)

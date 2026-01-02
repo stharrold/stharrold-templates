@@ -9,9 +9,6 @@ children:
   - scripts/GEMINI.md
 related_skills:
   - workflow-orchestrator
-  - bmad-planner
-  - speckit-author
-  - quality-enforcer
   - git-workflow-manager
   - initialize-repository
   - agentdb-state-manager
@@ -23,7 +20,7 @@ related_skills:
 
 Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, GEMINI.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 
-> **Note**: As of v5.12.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
+> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
 
 ## Directory Structure
 
@@ -444,7 +441,7 @@ result = subprocess.run([
 **Context:** User updated a skill, need to sync documentation
 
 **User says:**
-- "Updated bmad-planner to v5.2.0"
+- "Updated bmad-planner to v7x1.0"
 - "Sync documentation"
 - "Validate versions"
 
@@ -524,17 +521,6 @@ print(f"✓ PR created: {pr_url}")
 
 **All skills depend on workflow-utilities:**
 
-**bmad-planner:**
-- Uses directory_structure.py to create planning/ directories
-- May use deprecate_files.py to archive old planning
-
-**speckit-author:**
-- Uses directory_structure.py to create specs/ directories
-- May use deprecate_files.py to archive old specs
-
-**quality-enforcer:**
-- Uses workflow_progress.py to track quality gate status
-
 **git-workflow-manager:**
 - Uses VCS abstraction layer for PR creation
 - Uses worktree_context.py for worktree state isolation
@@ -550,6 +536,11 @@ print(f"✓ PR created: {pr_url}")
 **agentdb-state-manager:**
 - Workflow state tracking (replaces TODO_*.md workflow)
 - See `agentdb-state-manager` for current state tracking system
+
+**Legacy Skills (Archived):**
+- **bmad-planner**: Replaced by autonomous planning
+- **speckit-author**: Replaced by autonomous implementation
+- **quality-enforcer**: Replaced by Gemini Code Review
 
 ---
 
@@ -632,9 +623,6 @@ directory/
 ## Related Skills
 
 - **workflow-orchestrator** - Uses workflow utilities for phase tracking
-- **bmad-planner** - Uses directory_structure.py for planning directories
-- **speckit-author** - Uses directory_structure.py for specs directories
-- **quality-enforcer** - Uses workflow_progress.py for gate status
 - **git-workflow-manager** - Uses VCS abstraction, worktree_context.py
 - **initialize-repository** - Uses directory_structure.py, create_skill.py
 - **agentdb-state-manager** - Workflow state tracking (replaces TODO_*.md)

@@ -28,7 +28,7 @@ What it does:
 2. Validates target is a git repository
 3. Prompts before overwriting existing .gemini/ (unless --force)
 4. Copies .gemini/skills/ (all skills)
-5. Copies .gemini/commands/ (v6 workflow commands)
+5. Copies .gemini/commands/ (v7x1 workflow commands)
 6. Copies WORKFLOW.md, CONTRIBUTING.md
 7. Merges pyproject.toml (adds dev dependencies, preserves existing)
 8. Merges .gitignore (appends workflow patterns, deduplicates)
@@ -275,9 +275,9 @@ def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
         print_warning("Workflow directory not found after copying commands")
         return 0
 
-    commands = list(workflow_dir.glob("v6_*.md"))
+    commands = list(workflow_dir.glob("v7x1_*.md"))
     if not commands:
-        print_warning("No v6_* workflow commands found in commands/workflow/")
+        print_warning("No v7x1_* workflow commands found in commands/workflow/")
         return 0
 
     for cmd in sorted(commands):
@@ -570,7 +570,7 @@ def print_summary(
     print("  1. Review changes: git status")
     print("  2. Install dependencies: uv sync")
     print("  3. Run tests: uv run pytest")
-    print('  4. Start v6 workflow: /workflow:v6_1_worktree "feature description"')
+    print('  4. Start v7x1 workflow: /workflow:v7x1_1-worktree "feature description"')
     print("  5. Optional cleanup: rm -rf .tmp/")
 
 

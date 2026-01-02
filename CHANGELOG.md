@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Removed
+- **feature-dev command** - Replaced by built-in Gemini CLI tools for autonomous implementation.
+
+## [7.0.0] - 2026-01-01
+
+### Removed
 - **Cross-tool support** - Streamlined for Gemini-only development
   - Archived and removed `.agents/` and `AGENTS.md`
   - Archived and removed `.specify/` (deprecated migration source)
   - Archived and removed out-of-date scripts: `sync_ai_config.py`, `sync_skill_docs.py`
   - Archived and removed deprecated skills and their tests:
-    - `bmad-planner` (replaced by Gemini feature-dev)
-    - `speckit-author` (replaced by Gemini feature-dev)
-    - `quality-enforcer` (replaced by Gemini feature-dev code review)
-- **Repository cleanup** - Removed build artifacts and legacy maintenance scripts
+    - `bmad-planner` (replaced by autonomous implementation)
+    - `speckit-author` (replaced by autonomous implementation)
+    - `quality-enforcer` (replaced by Gemini Code Review)- **Repository cleanup** - Removed build artifacts and legacy maintenance scripts
   - Archived and removed build artifacts: `dist/`, `stharrold_templates.egg-info/`
   - Archived and removed legacy bash validation scripts (`test_*.sh`, `validate_documentation.sh`)
   - Archived and removed third-party tool configurations: `.claude/`, `.codacy/`
@@ -759,6 +763,7 @@ Earlier versions (< 5.0.0) used a different workflow architecture. See `ARCHIVED
 
 | Version | Date       | Type  | Description |
 |---------|------------|-------|-------------|
+| 7.0.0   | 2026-01-01 | MAJOR | Streamlined for Gemini-only development + removed legacy tools |
 | 1.10.0  | 2025-11-16 | MINOR | MIT Agent Synchronization Pattern (Phase 1) + DuckDB compatibility fixes |
 | 1.9.0   | 2025-11-09 | MINOR | Work-item generation workflow + VCS adapter enhancements |
 | 1.8.2   | 2025-11-07 | PATCH | Bug fixes for code quality issues + simplified backmerge workflow |

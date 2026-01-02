@@ -731,7 +731,7 @@ EOF
 # Step 7: Commit workflow system
 git add .gemini/ WORKFLOW.md CONTRIBUTING.md TODO.md
 git add planning/ specs/ ARCHIVED/  # If created
-git commit -m "feat(workflow): integrate workflow v5.2 system
+git commit -m "feat(workflow): integrate workflow v7x1 system
 
 - Add 9 workflow skills for progressive development
 - Add WORKFLOW.md, CONTRIBUTING.md documentation
@@ -807,7 +807,7 @@ cat .workflow-backup/CHANGELOG.md >> CHANGELOG.md
 
 # Step 6: Commit workflow integration
 git add -A
-git commit -m "feat(workflow): integrate workflow v5.2 system
+git commit -m "feat(workflow): integrate workflow v7x1 system
 
 - Add 9 workflow skills
 - Merge workflow documentation with existing content

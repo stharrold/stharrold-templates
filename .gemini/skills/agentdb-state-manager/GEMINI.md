@@ -16,9 +16,7 @@ children:
 related_skills:
   - workflow-orchestrator
   - workflow-utilities
-  - speckit-author
-  - quality-enforcer
-  - bmad-planner
+  - git-workflow-manager
 ---
 
 # Gemini Code Context: agentdb-state-manager
@@ -27,7 +25,7 @@ related_skills:
 
 Persistent state management using AgentDB (DuckDB) for workflow state tracking and analytics.
 
-Tracks workflow phase transitions via slash command invocations. Each slash command (/1_specify through /7_backmerge) records its completion in AgentDB.
+Tracks workflow phase transitions via slash command invocations. Each slash command (/workflow:v7x1_1-worktree through /workflow:v7x1_4-backmerge) records its completion in AgentDB.
 
 **Primary purpose:** Workflow state tracking and analytics
 
@@ -157,13 +155,8 @@ python .gemini/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 - Uses worktree_context.py for state isolation
 - workflow_progress.py reads from AgentDB
 
-**speckit-author:**
-- Uses for as-built metrics analysis
-- Historical planning accuracy queries
-
-**quality-enforcer:**
-- Stores quality gate results
-- Tracks coverage trends over time
+**git-workflow-manager:**
+- Records transitions during worktree creation and PR workflow
 
 ## Best Practices
 
@@ -184,6 +177,4 @@ python .gemini/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 
 - workflow-orchestrator
 - workflow-utilities
-- speckit-author
-- quality-enforcer
-- bmad-planner
+- git-workflow-manager

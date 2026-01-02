@@ -4,7 +4,7 @@
 """Tests for git-workflow-manager create_worktree.py.
 
 Tests the create_worktree function for creating feature worktrees.
-Note: v6 workflow removed verify_planning_committed (feature-dev handles planning).
+Note: v6 workflow removed verify_planning_committed (Gemini handles planning).
 """
 
 import sys
@@ -23,7 +23,7 @@ class TestCreateWorktree:
     """Tests for create_worktree function."""
 
     def test_create_worktree_no_verification(self, tmp_path):
-        """v6 workflow: create_worktree should not verify planning (feature-dev handles it)."""
+        """v6 workflow: create_worktree should not verify planning (Gemini handles planning)."""
         import inspect
 
         source = inspect.getsource(create_worktree.create_worktree)

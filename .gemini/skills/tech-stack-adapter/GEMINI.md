@@ -9,10 +9,7 @@ children:
   - scripts/GEMINI.md
 related_skills:
   - **workflow-orchestrator** - Uses detect_stack.py at session start
-  - **quality-enforcer** - Uses detected test/coverage commands
   - **git-workflow-manager** - Uses project_name and repo_root
-  - **bmad-planner** - Adapts Q&A based on detected stack
-  - **speckit-author** - Includes detected stack in specifications
 ---
 
 # Gemini Code Context: tech-stack-adapter
@@ -229,21 +226,9 @@ else:
 - Stores config in session state
 - Uses config throughout workflow phases
 
-**quality-enforcer:**
-- Uses test_cmd, coverage_cmd, lint_cmd from detection
-- Adapts quality gates to available tools
-
 **git-workflow-manager:**
 - Uses project_name for worktree naming
 - Uses repo_root for path resolution
-
-**bmad-planner:**
-- Uses detected stack in architecture questions
-- Adapts Q&A based on detected tools (e.g., skip database questions if no ORM)
-
-**speckit-author:**
-- Uses detected stack in specification generation
-- Includes detected tools in tech stack documentation
 
 ---
 
@@ -386,7 +371,4 @@ uv build  # from SESSION_CONFIG['build_cmd']
 ## Related Skills
 
 - **workflow-orchestrator** - Uses detect_stack.py at session start
-- **quality-enforcer** - Uses detected test/coverage commands
 - **git-workflow-manager** - Uses project_name and repo_root
-- **bmad-planner** - Adapts Q&A based on detected stack
-- **speckit-author** - Includes detected stack in specifications

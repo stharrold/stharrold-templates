@@ -101,7 +101,7 @@ Update when:
 | Standard Workflow | German Workflow | Date | Notes |
 |-------------------|-----------------|------|-------|
 | v1.15.1 | v5.3.0 | 2025-11-24 | Current |
-| v1.15.0 | v5.2.0 | 2025-11-19 | Added bmad-planner |
+| v1.15.0 | v7x1.0 | 2025-11-19 | Added bmad-planner |
 | v1.14.0 | v5.1.0 | 2025-11-15 | Added agentdb-state-manager |
 
 ## Recommended Practice

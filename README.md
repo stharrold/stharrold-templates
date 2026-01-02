@@ -4,10 +4,12 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 
 ## Features
 
-- **Containerized development** - Podman + uv + Python 3.11 for consistent environments
-- **Workflow automation** - Git helpers, archive management, semantic versioning
+- **v7x1 Workflow** - Streamlined 4-step autonomous development process
+- **Gemini Code Review** - Automated PR analysis via GitHub Actions
+- **AgentDB Tracking** - Persistent state and metrics using DuckDB
+- **Containerized development** - Podman + uv + Python 3.11 for consistency
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
-- **Gemini-first design** - Instructions and workflows optimized for Gemini Code and the Model Context Protocol (MCP)
+- **Gemini-first design** - Optimized for Gemini Code and MCP (Model Context Protocol)
 
 ## Prerequisites
 
@@ -38,10 +40,16 @@ podman-compose run --rm dev pytest
 
 ## Usage
 
-All commands run through the container:
+Workflow commands use `uv run` directly for speed and simplicity:
 
 ```bash
-podman-compose run --rm dev <command>
+uv run <command>
+```
+
+For containerized execution (e.g., in CI or strictly isolated environments):
+
+```bash
+podman-compose run --rm dev uv run <command>
 ```
 
 Common operations:
