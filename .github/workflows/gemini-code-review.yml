@@ -23,7 +23,7 @@ jobs:
         uses: google-github-actions/run-gemini-cli@v0.1.18
         with:
           # Assumes GEMINI_API_KEY is set in repo secrets
-          api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
