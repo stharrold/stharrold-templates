@@ -5,7 +5,7 @@ All notable changes to the Standard Language Learning Repository workflow will b
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [7.0.0] - 2026-01-01
 
 ### Removed
 - **Cross-tool support** - Streamlined for Gemini-only development
@@ -759,6 +759,7 @@ Earlier versions (< 5.0.0) used a different workflow architecture. See `ARCHIVED
 
 | Version | Date       | Type  | Description |
 |---------|------------|-------|-------------|
+| 7.0.0   | 2026-01-01 | MAJOR | Streamlined for Gemini-only development + removed legacy tools |
 | 1.10.0  | 2025-11-16 | MINOR | MIT Agent Synchronization Pattern (Phase 1) + DuckDB compatibility fixes |
 | 1.9.0   | 2025-11-09 | MINOR | Work-item generation workflow + VCS adapter enhancements |
 | 1.8.2   | 2025-11-07 | PATCH | Bug fixes for code quality issues + simplified backmerge workflow |

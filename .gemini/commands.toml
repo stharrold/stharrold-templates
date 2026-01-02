@@ -100,7 +100,7 @@ Branch: {branch_name}
 - The feature-dev plugin handles all planning, architecture, and code review
 - No planning documents required (unlike v1-v7 workflow)
 - Quality is ensured by feature-dev's code review phase
-""
+"
 
 [commands.integrate]
 description = "Integrate feature to develop (Step 2 of 4)"
@@ -260,7 +260,7 @@ Next: Run /release when ready for production
 - No quality gates in v6 workflow - feature-dev handles quality
 - PRs require manual approval in GitHub UI
 - Always ends on contrib/* branch (editable)
-""
+"
 
 [commands.release]
 description = "Release to production (Step 3 of 4)"
@@ -374,7 +374,7 @@ Next: Run /backmerge to sync release to develop
 - Release branch is temporary (deleted in backmerge)
 - Semantic versioning: vMAJOR.MINOR.PATCH
 - Tag is created on main after PR merge
-""
+"
 
 [commands.backmerge]
 description = "Sync release to develop and contrib (Step 4 of 4)"
@@ -470,7 +470,7 @@ Next: Run /worktree "next feature" to start again
 - Always ends on contrib/* branch (editable)
 - Contrib is rebased to stay current with develop
 - Release branch is ephemeral (created in release, deleted in backmerge)
-""
+"
 
 [commands.workflow]
 description = "Show v6 workflow overview"
@@ -505,4 +505,37 @@ Start a new feature:
 ```
 /worktree "Add user authentication"
 ```
-""
+"
+
+[commands.gemini-review]
+description = "Reviews a pull request with Gemini CLI"
+prompt = """
+## Role
+You are a world-class autonomous code review agent operating within a GitHub Actions environment.
+
+## Primary Directive
+Perform a comprehensive code review of the pull request and post all feedback using the provided MCP tools. Any output not submitted via these tools is lost.
+
+## Input Data
+- **Repository**: !{echo $REPOSITORY}
+- **Pull Request**: !{echo $PULL_REQUEST_NUMBER}
+- **Context**: !{echo $ADDITIONAL_CONTEXT}
+
+## Available Tools (github MCP server)
+1. `pull_request_read`: Get PR details, files, and diff.
+2. `create_pending_pull_request_review`: Start a new review.
+3. `add_comment_to_pending_review`: Add a comment to the review.
+4. `submit_pending_pull_request_review`: Finalize the review.
+
+## Instructions
+1. **Gather Data**: Call `pull_request_read` with the repository and PR number to retrieve the title, body, file list, and diff.
+2. **Analyze**: Review the diff for correctness, security, efficiency, and maintainability.
+3. **Start Review**: Call `create_pending_pull_request_review`.
+4. **Add Comments**: For each finding, call `add_comment_to_pending_review`.
+   - Structure: `🔴/🟠/🟡/🟢 [Category] Description`.
+   - Include code suggestions if applicable using markdown blocks.
+5. **Submit**: Call `submit_pending_pull_request_review` with a summary and event type "COMMENT".
+
+## Constraint
+You MUST NOT use shell commands like `gh` or `git` for interaction. Use ONLY the tools listed above.
+"
