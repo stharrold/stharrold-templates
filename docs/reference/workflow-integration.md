@@ -17,7 +17,7 @@ This document covers integration and release workflow phases.
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
+python .gemini/skills/git-workflow-manager/scripts/semantic_version.py \
   develop v1.0.0
 ```
 
@@ -38,16 +38,16 @@ Recommended version: v1.1.0 (MINOR)
 
 #### Step 4.1.5: Sync AI Assistant Configuration
 
-**Purpose:** Ensure CLAUDE.md changes are synced to cross-tool compatible formats before creating PR
+**Purpose:** Ensure GEMINI.md changes are synced to cross-tool compatible formats before creating PR
 
 **When to run:** After quality gates pass, before creating pull request
 
 **Manual sync (Windows/all platforms):**
 ```bash
-# Sync CLAUDE.md to cross-tool formats
-cp CLAUDE.md AGENTS.md
-mkdir -p .github && cp CLAUDE.md .github/copilot-instructions.md
-mkdir -p .agents && cp -r .claude/* .agents/
+# Sync GEMINI.md to cross-tool formats
+cp GEMINI.md AGENTS.md
+mkdir -p .github && cp GEMINI.md .github/copilot-instructions.md
+mkdir -p .agents && cp -r .gemini/* .agents/
 
 # Verify sync
 ls -la AGENTS.md .github/copilot-instructions.md .agents/
@@ -55,30 +55,30 @@ ls -la AGENTS.md .github/copilot-instructions.md .agents/
 
 **PowerShell alternative:**
 ```powershell
-# Sync CLAUDE.md to cross-tool formats
-cp CLAUDE.md AGENTS.md
-mkdir -Force .github; cp CLAUDE.md .github/copilot-instructions.md
-mkdir -Force .agents; cp -Recurse .claude/* .agents/
+# Sync GEMINI.md to cross-tool formats
+cp GEMINI.md AGENTS.md
+mkdir -Force .github; cp GEMINI.md .github/copilot-instructions.md
+mkdir -Force .agents; cp -Recurse .gemini/* .agents/
 ```
 
 **Automatic sync (Linux/macOS with jq + rsync installed):**
 ```bash
-# The PostToolUse hook runs automatically when CLAUDE.md is edited
+# The PostToolUse hook runs automatically when GEMINI.md is edited
 # If hook didn't run, manually execute:
-./.claude/hooks/sync-agents.sh
+./.gemini/hooks/sync-agents.sh
 ```
 
 **What gets synced:**
-- `CLAUDE.md` → `AGENTS.md` (industry standard instruction file)
-- `CLAUDE.md` → `.github/copilot-instructions.md` (GitHub Copilot)
-- `.claude/` → `.agents/` (tool-agnostic configuration directory)
+- `GEMINI.md` → `AGENTS.md` (industry standard instruction file)
+- `GEMINI.md` → `.github/copilot-instructions.md` (GitHub Copilot)
+- `.gemini/` → `.agents/` (tool-agnostic configuration directory)
 
 **Why this matters:**
 - Ensures GitHub Copilot users see updated instructions
 - Enables Cursor, Aider, and other tools to use same configuration
 - Maintains cross-tool compatibility for team members
 
-**Skip if:** You haven't modified CLAUDE.md or .claude/ configuration in this feature
+**Skip if:** You haven't modified GEMINI.md or .gemini/ configuration in this feature
 
 #### Step 4.2: Create Pull Request (feature → contrib)
 
@@ -114,7 +114,7 @@ Recommended: v1.1.0 (MINOR - new feature)
 - Spec: See worktree spec.md
 - Plan: See worktree plan.md
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
 EOF
 )"
 ```
@@ -152,7 +152,7 @@ PR reviewed with comments
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.py 42
+python .gemini/skills/git-workflow-manager/scripts/generate_work_items_from_pr.py 42
 ```
 
 **Output:**
@@ -218,7 +218,7 @@ cd /Users/user/Documents/GitHub/standard
 
 **Atomic cleanup (recommended):**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py \
+python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
   certificate-a1 \
   --summary "Implemented A1 Standard certificate guide with complete exam structure" \
   --version "1.3.0"
@@ -266,7 +266,7 @@ If you need manual control, use these commands IN THIS ORDER:
 
 1. Archive TODO (MUST be first):
 ```bash
-python .claude/skills/workflow-utilities/scripts/workflow_archiver.py \
+python .gemini/skills/workflow-utilities/scripts/workflow_archiver.py \
   TODO_feature_20251023T104248Z_certificate-a1.md \
   --summary "..." \
   --version "1.3.0"
@@ -289,7 +289,7 @@ git push origin --delete feature/20251023T104248Z_certificate-a1
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
+python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py \
   contrib/stharrold
 ```
 
@@ -333,7 +333,7 @@ The release workflow creates a production release from the develop branch, tags 
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/create_release.py \
+python .gemini/skills/git-workflow-manager/scripts/create_release.py \
   v1.1.0 develop
 ```
 
@@ -358,7 +358,7 @@ python .claude/skills/git-workflow-manager/scripts/create_release.py \
 
 1. **Final quality gates:**
    ```bash
-   python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+   python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
    ```
 
 2. **Update release documentation:**
@@ -415,7 +415,7 @@ Production release with new features and improvements from develop branch.
 4. Release notes will be generated
 5. Back-merge to develop will follow
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
 EOF
 )"
 ```
@@ -435,7 +435,7 @@ EOF
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
+python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
   v1.1.0 main
 ```
 
@@ -473,7 +473,7 @@ are merged back to develop, not the entire main branch history.
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
+python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
   v1.1.0 develop
 ```
 
@@ -496,7 +496,7 @@ python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
   1. Review PR in GitHub/Azure DevOps portal
   2. Approve through portal
   3. Merge through portal
-  4. Run cleanup: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py v1.1.0
+  4. Run cleanup: python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py v1.1.0
 ```
 
 **Output (with conflicts):**
@@ -513,7 +513,7 @@ Conflicting files:
   1. Review PR in GitHub/Azure DevOps portal
   2. Resolve conflicts (see PR description for commands)
   3. Approve and merge through portal
-  4. Run cleanup: python .claude/skills/git-workflow-manager/scripts/cleanup_release.py v1.1.0
+  4. Run cleanup: python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py v1.1.0
 ```
 
 **User Action Required:**
@@ -528,7 +528,7 @@ Conflicting files:
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/cleanup_release.py \
+python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
   v1.1.0
 ```
 
@@ -555,7 +555,7 @@ python .claude/skills/git-workflow-manager/scripts/cleanup_release.py \
 
 **Command:**
 ```bash
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
+python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py \
   contrib/stharrold
 ```
 

@@ -611,7 +611,7 @@ async def main():
     # Define repositories to ingest
     repositories = [
         {'name': 'anthropic-sdk', 'url': 'https://github.com/anthropics/anthropic-sdk-python'},
-        {'name': 'claude-cookbook', 'url': 'https://github.com/anthropics/anthropic-cookbook'},
+        {'name': 'gemini-cookbook', 'url': 'https://github.com/anthropics/anthropic-cookbook'},
         {'name': 'dspy', 'url': 'https://github.com/stanfordnlp/dspy'},
         {'name': 'baml', 'url': 'https://github.com/BoundaryML/baml'},
         {'name': 'autogen', 'url': 'https://github.com/microsoft/autogen'},
@@ -842,8 +842,8 @@ class SafeAgent(Module):
                 max_tokens=dspy_config.get('max_tokens', 2000)
             )
         elif 'anthropic' in model:
-            from dspy import Claude
-            llm = Claude(
+            from dspy import Gemini
+            llm = Gemini(
                 model=model.split('/')[-1],
                 temperature=dspy_config.get('temperature', 0.7),
                 max_tokens=dspy_config.get('max_tokens', 2000)

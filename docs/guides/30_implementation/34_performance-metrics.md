@@ -2,7 +2,7 @@
 title: Performance Metrics & Optimization
 version: 4.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -102,7 +102,7 @@ const ExpensiveComponent = React.memo(({ data }) => {
 
 ### Comprehensive Monitoring Architecture
 
-**OpenTelemetry Integration for Claude Code:**
+**OpenTelemetry Integration for Gemini Code:**
 ```yaml
 # podman-compose.yml for observability stack
 version: '3.8'
@@ -143,7 +143,7 @@ services:
 global:
   scrape_interval: 15s
 scrape_configs:
-  - job_name: 'claude-mcp-servers'
+  - job_name: 'gemini-mcp-servers'
     static_configs:
       - targets: ['localhost:8080', 'localhost:8081']
   - job_name: 'otel-collector'
@@ -155,14 +155,14 @@ scrape_configs:
 ```json
 {
   "dashboard": {
-    "title": "Claude Code Performance Metrics",
+    "title": "Gemini Code Performance Metrics",
     "panels": [
       {
         "title": "Response Time",
         "type": "graph",
         "targets": [
           {
-            "expr": "claude_response_time_seconds",
+            "expr": "gemini_response_time_seconds",
             "refId": "A"
           }
         ]
@@ -172,7 +172,7 @@ scrape_configs:
         "type": "stat",
         "targets": [
           {
-            "expr": "rate(claude_tokens_consumed_total[5m])",
+            "expr": "rate(gemini_tokens_consumed_total[5m])",
             "refId": "B"
           }
         ]
@@ -214,10 +214,10 @@ class PerformanceOptimizer:
 ```yaml
 # Alert rules for performance degradation
 groups:
-- name: claude-performance
+- name: gemini-performance
   rules:
   - alert: HighResponseTime
-    expr: claude_response_time_seconds > 5
+    expr: gemini_response_time_seconds > 5
     for: 2m
     labels:
       severity: warning
@@ -225,7 +225,7 @@ groups:
       summary: "High response time detected"
 
   - alert: TokenUsageSpike
-    expr: rate(claude_tokens_consumed_total[5m]) > 1000
+    expr: rate(gemini_tokens_consumed_total[5m]) > 1000
     for: 1m
     labels:
       severity: critical
@@ -239,8 +239,8 @@ groups:
 
 #### Critical Operational Limitations
 
-**Claude Code Usage Challenges:**
-Usage limits represent Claude Code's most significant operational challenge, affecting even Max plan subscribers ($200/month) with substantial constraints that can interrupt critical development work.
+**Gemini Code Usage Challenges:**
+Usage limits represent Gemini Code's most significant operational challenge, affecting even Max plan subscribers ($200/month) with substantial constraints that can interrupt critical development work.
 
 **Specific Limitation Impact:**
 - **5-hour session limits** that can interrupt complex development tasks
@@ -255,18 +255,18 @@ Usage limits represent Claude Code's most significant operational challenge, aff
 **Proactive Usage Monitoring:**
 ```bash
 # Monitor usage patterns and costs proactively
-claude /cost --detailed-breakdown --optimization-suggestions
-claude /usage --session-analytics --efficiency-metrics
+gemini /cost --detailed-breakdown --optimization-suggestions
+gemini /usage --session-analytics --efficiency-metrics
 
 # Set up automated alerts for usage thresholds
-claude config set-usage-alerts --daily-threshold=80% --weekly-threshold=90%
+gemini config set-usage-alerts --daily-threshold=80% --weekly-threshold=90%
 ```
 
 **Strategic Session Clearing Patterns:**
 ```bash
 # Implement optimal clearing strategies
-claude /clear    # Between unrelated tasks to reset context
-claude /compact  # At natural breakpoints in related work
+gemini /clear    # Between unrelated tasks to reset context
+gemini /compact  # At natural breakpoints in related work
 
 # Principle: "clear early, clear often" for sustained productivity
 # Recommended pattern: 5-10 message conversations before reset
@@ -278,9 +278,9 @@ claude /compact  # At natural breakpoints in related work
 ```yaml
 # Optimal context organization for efficiency
 context_architecture:
-  global_config: ~/.claude/CLAUDE.md        # Universal preferences
-  project_config: ./CLAUDE.md               # Project-specific context
-  feature_config: ./features/CLAUDE.md      # Feature-specific patterns
+  global_config: ~/.gemini/GEMINI.md        # Universal preferences
+  project_config: ./GEMINI.md               # Project-specific context
+  feature_config: ./features/GEMINI.md      # Feature-specific patterns
 
 context_loading_strategy:
   inheritance: "parent_to_child"
@@ -290,10 +290,10 @@ context_loading_strategy:
 ```
 
 **Context Optimization Techniques:**
-- **Front-load context** in CLAUDE.md files for reuse across sessions
+- **Front-load context** in GEMINI.md files for reuse across sessions
 - **Break large projects** into focused sessions with clear objectives and bounded scope
 - **Maintain 5-10 message conversations** followed by strategic context reset
-- **Use hierarchical CLAUDE.md system** to minimize context duplication
+- **Use hierarchical GEMINI.md system** to minimize context duplication
 
 #### Cost-Effective Workflow Patterns
 
@@ -303,7 +303,7 @@ context_loading_strategy:
 git worktree add ../project-feature-a feature/authentication
 git worktree add ../project-feature-b feature/user-interface
 
-# Run multiple Claude instances to distribute load
+# Run multiple Gemini instances to distribute load
 # Instance 1: Authentication system development
 # Instance 2: UI component development
 ```
@@ -344,7 +344,7 @@ Teams implementing proper usage management report 40-60% cost reductions while m
 **Team Collaboration Effectiveness:**
 ```bash
 # Team productivity analytics and reporting
-claude analytics team-productivity \
+gemini analytics team-productivity \
   --time-period=monthly \
   --include-collaboration-metrics \
   --include-knowledge-sharing \
@@ -380,7 +380,7 @@ Total Cost of Ownership = License + Maintenance + Training + Infrastructure + Op
 **ROI Measurement Implementation:**
 ```bash
 # Automated ROI calculation and reporting
-claude analytics roi-calculation \
+gemini analytics roi-calculation \
   --baseline-period=pre-implementation-6-months \
   --measurement-period=post-implementation-6-months \
   --include-intangible-benefits \
@@ -414,7 +414,7 @@ claude analytics roi-calculation \
 **Qualitative Feedback Collection:**
 ```bash
 # Automated satisfaction surveys and feedback collection
-claude analytics satisfaction-survey \
+gemini analytics satisfaction-survey \
   --frequency=monthly \
   --include-feature-requests \
   --include-pain-points \
@@ -433,7 +433,7 @@ claude analytics satisfaction-survey \
 
 **Integrated Performance Benchmarks:**
 ```yaml
-# Enhanced performance targets in CLAUDE.md
+# Enhanced performance targets in GEMINI.md
 performance_targets:
   page_load: "<2s LCP for dashboard interfaces"
   api_response: "<200ms p95 for database queries"
@@ -443,7 +443,7 @@ performance_targets:
 
 mcp_specific_targets:
   server_response: "<3s for complex queries"
-  context_loading: "<5s for large CLAUDE.md files"
+  context_loading: "<5s for large GEMINI.md files"
   token_efficiency: ">30% reduction through optimization"
   error_rates: "<2% for standard operations"
 ```
@@ -453,21 +453,21 @@ mcp_specific_targets:
 **Automated Performance Monitoring:**
 ```bash
 # Daily performance checks integrated with template maintenance
-claude performance daily-check \
+gemini performance daily-check \
   --include-server-health \
   --include-response-times \
   --include-error-rates \
   --alert-on-degradation
 
 # Weekly optimization analysis
-claude performance weekly-optimization \
+gemini performance weekly-optimization \
   --analyze-usage-patterns \
   --identify-bottlenecks \
   --suggest-improvements \
   --update-configurations
 
 # Monthly comprehensive review
-claude performance monthly-review \
+gemini performance monthly-review \
   --roi-analysis \
   --team-satisfaction \
   --strategic-recommendations \
@@ -485,14 +485,14 @@ claude performance monthly-review \
 **Performance-Driven Decision Making:**
 ```bash
 # Automated performance reporting for stakeholders
-claude performance stakeholder-report \
+gemini performance stakeholder-report \
   --audience=executive \
   --include-business-impact \
   --include-roi-analysis \
   --include-strategic-recommendations
 
 # Team performance communication
-claude performance team-update \
+gemini performance team-update \
   --include-productivity-metrics \
   --include-optimization-opportunities \
   --include-training-needs \
@@ -511,11 +511,11 @@ claude performance team-update \
 
 **Intelligent Model Routing for Performance and Cost Balance**
 
-Strategic model selection optimizes performance while managing costs across Claude's lineup:
+Strategic model selection optimizes performance while managing costs across Gemini's lineup:
 
 ```python
 # Intelligent routing based on task complexity and budget
-class ClaudeModelRouter:
+class GeminiModelRouter:
     def __init__(self):
         self.models = {
             "opus-4": {"cost": 15, "performance": 72.5, "speed": "slow"},
@@ -572,9 +572,9 @@ class ExtendedThinkingConfig:
 thinking_config = ExtendedThinkingConfig()
 budget = thinking_config.configure_thinking_mode("complex_architecture", "unlimited")
 
-# Claude API call with extended thinking
-response = claude.messages.create(
-    model="claude-3-opus-20240229",
+# Gemini API call with extended thinking
+response = gemini.messages.create(
+    model="gemini-3-opus-20240229",
     max_tokens=4000,
     thinking_budget=budget,
     messages=[{"role": "user", "content": "Design a scalable microservices architecture"}]
@@ -753,13 +753,13 @@ optimization_results = {
 **Multi-Instance Performance Optimization:**
 ```bash
 # Load balancing and performance distribution
-claude performance optimize-distribution \
+gemini performance optimize-distribution \
   --multi-instance-coordination \
   --load-balancing=intelligent \
   --resource-allocation=dynamic
 
 # Performance monitoring across instances
-claude performance monitor-fleet \
+gemini performance monitor-fleet \
   --instance-count=auto \
   --performance-aggregation=enabled \
   --optimization-coordination=active
@@ -776,13 +776,13 @@ claude performance monitor-fleet \
 **Real-Time Performance Tracking:**
 ```bash
 # Monitor cache hit rates, response times, cost per request
-claude performance monitor --real-time --include-optimization-suggestions
+gemini performance monitor --real-time --include-optimization-suggestions
 
 # Track batch success rates and thinking token usage
-claude performance analytics --weekly-report --cost-breakdown
+gemini performance analytics --weekly-report --cost-breakdown
 
 # Performance baselines before and after optimization
-claude performance baseline --establish --track-improvements
+gemini performance baseline --establish --track-improvements
 ```
 
 **Key Monitoring Metrics:**

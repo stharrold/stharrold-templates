@@ -25,8 +25,8 @@ Use `archive_manager.py` to list and extract archived files:
 
 ```bash
 # List archives
-uv run python .claude/skills/workflow-utilities/scripts/archive_manager.py list
+uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
 
 # Extract specific archive
-uv run python .claude/skills/workflow-utilities/scripts/archive_manager.py extract ARCHIVED/<archive>.zip
+uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py extract ARCHIVED/<archive>.zip
 ```

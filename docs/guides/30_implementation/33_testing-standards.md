@@ -2,7 +2,7 @@
 title: Testing Standards & Validation
 version: 4.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -20,7 +20,7 @@ related:
   - ../20_credentials/24_audit-compliance.md
 changelog:
   - 4.0: BREAKING CHANGE - Added essential LLM testing tools (DeepEval, Hypothesis) for production validation
-  - 3.2: Added advanced testing methodologies including TDD with Claude and screenshot-driven development patterns
+  - 3.2: Added advanced testing methodologies including TDD with Gemini and screenshot-driven development patterns
   - 3.1: Enhanced with template testing requirements and known issues
   - Added error handling patterns and troubleshooting procedures
   - Integrated advanced configurations and multi-environment setup
@@ -102,16 +102,16 @@ describe("Authentication Service", () => {
 });
 ```
 
-### Advanced Testing Methodologies with Claude
+### Advanced Testing Methodologies with Gemini
 
-#### Test-Driven Development (TDD) with Claude
+#### Test-Driven Development (TDD) with Gemini
 
 **AI-Enhanced Red-Green-Refactor Cycles**
 
-Claude excels at TDD because binary success metrics prevent hallucination and scope drift:
+Gemini excels at TDD because binary success metrics prevent hallucination and scope drift:
 
 ```javascript
-// 1. RED: Claude generates comprehensive failing tests
+// 1. RED: Gemini generates comprehensive failing tests
 describe("User Registration System", () => {
   it("should create user account with valid data", async () => {
     // Arrange
@@ -146,11 +146,11 @@ describe("User Registration System", () => {
 });
 
 // 2. GREEN: Implement minimal code to pass tests
-// 3. REFACTOR: Claude assists with optimization while maintaining test passage
+// 3. REFACTOR: Gemini assists with optimization while maintaining test passage
 ```
 
 **TDD Success Patterns:**
-- **Binary success metrics** prevent Claude from hallucinating solutions
+- **Binary success metrics** prevent Gemini from hallucinating solutions
 - **Comprehensive edge case generation** through AI analysis
 - **95%+ test coverage** achieved systematically (based on Anthropic Security Engineering team results)
 - **Independent subagent verification** of implementation quality
@@ -204,7 +204,7 @@ class ScreenshotDrivenTesting:
             if similarity > 0.95:  # 95% visual similarity threshold
                 return f"✅ Visual match achieved in {iteration + 1} iterations"
 
-            # Claude analyzes differences and suggests improvements
+            # Gemini analyzes differences and suggests improvements
             improvements = self.analyze_visual_differences(mockup, current)
             self.apply_improvements(improvements)
 
@@ -221,7 +221,7 @@ def test_ui_implementation():
 ```
 
 **Performance Benchmarks:**
-- **Claude 3 Sonnet**: 70.31% accuracy on screenshot-to-code tasks
+- **Gemini 3 Sonnet**: 70.31% accuracy on screenshot-to-code tasks
 - **GPT-4**: 65.10% accuracy (comparative baseline)
 - **Typical workflow**: Pixel-perfect results in 2-3 iterations
 - **WSL screenshot integration** for cross-platform development
@@ -256,7 +256,7 @@ describe("Responsive Design Validation", () => {
 **Server Connectivity and Performance:**
 ```bash
 # Daily server health check
-claude mcp health-check --all --detailed
+gemini mcp health-check --all --detailed
 
 # Expected output validation:
 # ✅ GitHub MCP Server: Connected, API rate limit 4,847/5,000
@@ -279,8 +279,8 @@ claude mcp health-check --all --detailed
 **Context and Performance Monitoring:**
 ```bash
 # Context usage and optimization check
-claude /context --usage-summary
-claude /cost --daily-breakdown
+gemini /context --usage-summary
+gemini /cost --daily-breakdown
 
 # Performance indicators to monitor:
 # - Response time under 3 seconds for standard queries
@@ -292,9 +292,9 @@ claude /cost --daily-breakdown
 
 **DeepEval for LLM-Specific Testing:**
 ```bash
-# LLM evaluation framework for Claude Code workflows
+# LLM evaluation framework for Gemini Code workflows
 pip install deepeval
-deepeval test generate --model claude-3-5-sonnet
+deepeval test generate --model gemini-3-5-sonnet
 ```
 
 **Hypothesis for Property-Based Testing:**
@@ -306,7 +306,7 @@ pip install hypothesis
 
 **Testing Pyramid (pytest/Jest/Playwright/Locust):**
 - **Unit**: Individual MCP server functions
-- **Integration**: Server-to-Claude communication
+- **Integration**: Server-to-Gemini communication
 - **E2E**: Complete workflow validation
 - **Load**: Performance under concurrent usage
 
@@ -315,16 +315,16 @@ pip install hypothesis
 **Core Workflow Verification:**
 ```bash
 # Test essential workflows daily
-claude "Create a simple test commit with current timestamp"
-claude "Query database for table schema of users table"
-claude "Run security scan on the most recently modified file"
-claude "Generate a brief status report of recent development activity"
+gemini "Create a simple test commit with current timestamp"
+gemini "Query database for table schema of users table"
+gemini "Run security scan on the most recently modified file"
+gemini "Generate a brief status report of recent development activity"
 ```
 
 **Cross-Server Integration Testing:**
 ```bash
 # Validate server interoperability
-claude "Use GitHub to list recent PRs, then check Sentry for any related errors, and update our project documentation accordingly"
+gemini "Use GitHub to list recent PRs, then check Sentry for any related errors, and update our project documentation accordingly"
 ```
 
 ### Quality Metrics Monitoring
@@ -348,18 +348,18 @@ claude "Use GitHub to list recent PRs, then check Sentry for any related errors,
 **Performance Analysis and Optimization:**
 ```bash
 # Weekly performance review
-claude /usage --weekly-report --team-analytics
-claude /cost --weekly-breakdown --optimization-recommendations
+gemini /usage --weekly-report --team-analytics
+gemini /cost --weekly-breakdown --optimization-recommendations
 
 # Server performance deep dive
-claude mcp analyze-performance --time-period=week --include-recommendations
+gemini mcp analyze-performance --time-period=week --include-recommendations
 ```
 
 **Security and Compliance Validation:**
 ```bash
 # Security posture assessment
 ./.codacy/cli.sh analyze --tool trivy .
-claude audit --security-review --compliance-check
+gemini audit --security-review --compliance-check
 
 # Credential rotation check
 /usr/bin/python3 mcp_manager.py --check-expiration --alert-threshold=30-days
@@ -376,7 +376,7 @@ claude audit --security-review --compliance-check
 **Multi-Environment Validation:**
 ```bash
 # Test across development, staging, and production configurations
-claude mcp test-environments --validate-all
+gemini mcp test-environments --validate-all
 ```
 
 **Backward Compatibility:**
@@ -391,7 +391,7 @@ claude mcp test-environments --validate-all
 **ROI and Value Realization Analysis:**
 ```bash
 # Monthly metrics compilation
-claude /analytics --monthly-report --roi-calculation
+gemini /analytics --monthly-report --roi-calculation
 ```
 
 **ROI Calculation Framework:**
@@ -414,7 +414,7 @@ Where:
 ### Long-term Sustainability Assessment
 
 **Technical Debt and Maintenance:**
-- **CLAUDE.md file maintenance** and optimization for context efficiency
+- **GEMINI.md file maintenance** and optimization for context efficiency
 - **Server configuration drift** detection and correction
 - **Knowledge base quality** and relevance assessment
 - **Documentation currency** and accuracy validation
@@ -498,7 +498,7 @@ nslookup api.github.com
 curl -I https://api.github.com
 
 # Test MCP server-specific endpoints
-claude mcp test-connection --server=github --verbose
+gemini mcp test-connection --server=github --verbose
 ```
 
 **Firewall and Proxy Configuration:**
@@ -523,8 +523,8 @@ claude mcp test-connection --server=github --verbose
 curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/rate_limit
 
 # Implement rate limiting strategies
-claude config set-rate-limiting conservative
-claude config set-retry-backoff exponential
+gemini config set-rate-limiting conservative
+gemini config set-retry-backoff exponential
 ```
 
 **Repository Access Problems:**
@@ -559,11 +559,11 @@ except Exception as e:
 **Performance Monitoring:**
 ```bash
 # Track response time patterns
-claude /performance --analyze-trends --time-period=week
-claude /context --optimization-report
+gemini /performance --analyze-trends --time-period=week
+gemini /context --optimization-report
 
 # Identify performance bottlenecks
-claude /debug --performance-profiling --detailed
+gemini /debug --performance-profiling --detailed
 ```
 
 **Optimization Strategies:**
@@ -577,8 +577,8 @@ claude /debug --performance-profiling --detailed
 **Usage Analysis:**
 ```bash
 # Analyze token consumption patterns
-claude /cost --breakdown-by-task --optimization-opportunities
-claude /usage --inefficiency-detection --recommendations
+gemini /cost --breakdown-by-task --optimization-opportunities
+gemini /usage --inefficiency-detection --recommendations
 ```
 
 **Cost Optimization Techniques:**
@@ -644,13 +644,13 @@ claude /usage --inefficiency-detection --recommendations
 **Environment-Aware Development Workflows:**
 ```bash
 # Switch between environment configurations
-claude config set-environment development
-claude config set-environment staging
-claude config set-environment production
+gemini config set-environment development
+gemini config set-environment staging
+gemini config set-environment production
 
 # Validate environment-specific configurations
-claude mcp validate-environment --environment=staging
-claude mcp test-all-environments --dry-run
+gemini mcp validate-environment --environment=staging
+gemini mcp test-all-environments --dry-run
 ```
 
 **Safety and Isolation Measures:**
@@ -761,12 +761,12 @@ if __name__ == "__main__":
 npm test  # TypeScript servers
 pytest    # Python servers
 
-# Integration testing with Claude Code
-claude mcp add custom-server ./custom-server
-claude mcp test-server --server=custom-server --comprehensive
+# Integration testing with Gemini Code
+gemini mcp add custom-server ./custom-server
+gemini mcp test-server --server=custom-server --comprehensive
 
 # Performance and load testing
-claude mcp benchmark --server=custom-server --duration=300s
+gemini mcp benchmark --server=custom-server --duration=300s
 ```
 
 **Production Deployment Guidelines:**
@@ -807,7 +807,7 @@ Update procedures and monitoring recommendations.
 
 **Minimum Testing Requirements:**
 ```yaml
-# Enhanced testing standards in CLAUDE.md
+# Enhanced testing standards in GEMINI.md
 testing_requirements:
   unit_tests: ">80% code coverage with comprehensive edge case testing"
   integration_tests: "All API endpoints and database operations"
@@ -870,9 +870,9 @@ def handle_mcp_operation_error(operation: str, error: Exception) -> ErrorRespons
 **Mitigation Strategies:**
 ```bash
 # Automated pre-deployment checks
-claude validate-deployment-readiness --environment=production
-claude check-dependencies --critical-services
-claude verify-configuration --security-compliance
+gemini validate-deployment-readiness --environment=production
+gemini check-dependencies --critical-services
+gemini verify-configuration --security-compliance
 ```
 
 ## Error Handling Standards

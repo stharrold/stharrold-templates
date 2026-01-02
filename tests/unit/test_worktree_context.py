@@ -10,7 +10,7 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
+    str(Path(__file__).parent.parent.parent / ".gemini/skills/workflow-utilities/scripts"),
 )
 
 
@@ -54,12 +54,12 @@ class TestWorktreeIdGeneration:
 class TestStateDirProperty:
     """Unit tests for state_dir property."""
 
-    def test_state_dir_is_claude_state(self):
-        """Test: state_dir is .claude-state in worktree_root."""
+    def test_state_dir_is_gemini_state(self):
+        """Test: state_dir is .gemini-state in worktree_root."""
         from worktree_context import get_worktree_context
 
         ctx = get_worktree_context()
-        assert ctx.state_dir.name == ".claude-state"
+        assert ctx.state_dir.name == ".gemini-state"
         assert ctx.state_dir.parent == ctx.worktree_root
 
     def test_state_dir_uses_worktree_root(self):

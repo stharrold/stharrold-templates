@@ -4,11 +4,10 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 
 ## Features
 
-- **Multi-platform MCP manager** (`mcp_manager.py`) - Configure Claude Code CLI, VS Code, and Claude Desktop
 - **Containerized development** - Podman + uv + Python 3.11 for consistent environments
 - **Workflow automation** - Git helpers, archive management, semantic versioning
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
-- **Cross-tool AI compatibility** - Configuration syncs to `.agents/` ([OpenAI agents.md spec](https://github.com/openai/agents.md)) and `.github/copilot-instructions.md` for Cursor, Windsurf, GitHub Copilot, and other AI assistants
+- **Gemini-first design** - Instructions and workflows optimized for Gemini Code and the Model Context Protocol (MCP)
 
 ## Prerequisites
 
@@ -35,9 +34,6 @@ podman-compose build
 
 # Run tests
 podman-compose run --rm dev pytest
-
-# Check MCP status
-podman-compose run --rm dev python mcp_manager.py --status
 ```
 
 ## Usage
@@ -54,7 +50,6 @@ Common operations:
 |---------|-------------|
 | `pytest` | Run tests |
 | `ruff check .` | Lint code |
-| `python mcp_manager.py --status` | Check MCP configuration |
 
 ## Secrets Management
 
@@ -124,7 +119,7 @@ See `secrets.toml` for secret definitions.
 
 | Document | Purpose |
 |----------|---------|
-| [CLAUDE.md](CLAUDE.md) | AI agent instructions |
+| [GEMINI.md](GEMINI.md) | AI agent instructions |
 | [WORKFLOW.md](WORKFLOW.md) | Complete workflow guide |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
@@ -133,13 +128,12 @@ See `secrets.toml` for secret definitions.
 ## Project Structure
 
 ```
-├── mcp_manager.py          # Main MCP configuration tool
 ├── tests/                  # pytest test suite
 ├── docs/                   # Documentation
 │   ├── guides/             # Production guides
 │   ├── research/           # Exploratory documents
 │   └── reference/          # Reference materials
-├── .claude/skills/         # AI workflow skills (6 active)
+├── .gemini/skills/         # AI workflow skills (6 active)
 ├── scripts/                # Utility scripts (secrets, run helpers)
 └── ARCHIVED/               # Archived specs, planning docs, deprecated code
 ```

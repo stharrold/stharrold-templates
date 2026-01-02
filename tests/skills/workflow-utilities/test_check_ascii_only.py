@@ -12,7 +12,7 @@ import pytest
 # Add the scripts directory to the path for imports
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts"),
+    str(Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts"),
 )
 
 from check_ascii_only import (
@@ -135,7 +135,7 @@ class TestShouldSkip:
     def test_does_not_skip_regular_files(self):
         """Does not skip regular Python files."""
         assert not should_skip(Path("src/module.py"))
-        assert not should_skip(Path(".claude/skills/foo/scripts/bar.py"))
+        assert not should_skip(Path(".gemini/skills/foo/scripts/bar.py"))
 
 
 class TestCheckFile:

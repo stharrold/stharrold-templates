@@ -31,12 +31,12 @@ Production-ready LangGraph implementation for enterprise-scale multi-agent coord
 
 ### LangGraph as Enterprise Orchestration Solution
 
-**LangGraph**[LangGraph-docs] emerges as the optimal choice for Claude Code's agent orchestration needs, offering native agent orchestration capabilities, comprehensive state management, and production-ready deployment through LangGraph Platform[LangGraph-platform]. With **4.2M monthly downloads** and enterprise adoption by companies like Klarna and Elastic, it provides the maturity and scalability required for enterprise deployments.
+**LangGraph**[LangGraph-docs] emerges as the optimal choice for Gemini Code's agent orchestration needs, offering native agent orchestration capabilities, comprehensive state management, and production-ready deployment through LangGraph Platform[LangGraph-platform]. With **4.2M monthly downloads** and enterprise adoption by companies like Klarna and Elastic, it provides the maturity and scalability required for enterprise deployments.
 
-**Key advantages for Claude Code:**
+**Key advantages for Gemini Code:**
 - **Graph-based workflow definition** perfectly maps to sequential steps (w00.0-w09.0)
 - **Built-in state persistence** with automatic checkpointing and recovery
-- **Native TypeScript support** aligning with Claude Code's environment
+- **Native TypeScript support** aligning with Gemini Code's environment
 - **Streaming and debugging capabilities** for real-time workflow monitoring
 - **Human-in-the-loop support** for validation and approval steps
 
@@ -82,7 +82,7 @@ interface AgentState {
   toolResults: Record<string, any>;
 }
 
-class ClaudeWorkflowOrchestrator {
+class GeminiWorkflowOrchestrator {
   private workflow: StateGraph<AgentState>;
 
   constructor() {
@@ -267,7 +267,7 @@ class ClaudeWorkflowOrchestrator {
 ```typescript
 import { MemorySaver } from "@langchain/langgraph";
 
-class HumanApprovalWorkflow extends ClaudeWorkflowOrchestrator {
+class HumanApprovalWorkflow extends GeminiWorkflowOrchestrator {
   private checkpointer = new MemorySaver();
 
   constructor() {
@@ -344,7 +344,7 @@ class HumanApprovalWorkflow extends ClaudeWorkflowOrchestrator {
 ```typescript
 import { StreamEvent } from "@langchain/core/tracers/base";
 
-class StreamingWorkflowOrchestrator extends ClaudeWorkflowOrchestrator {
+class StreamingWorkflowOrchestrator extends GeminiWorkflowOrchestrator {
   async executeWithStreaming(
     initialInput: Record<string, any>,
     onEvent: (event: StreamEvent) => void
@@ -417,7 +417,7 @@ interface EnterpriseWorkflowConfig {
 
 class EnterpriseWorkflowManager {
   private config: EnterpriseWorkflowConfig;
-  private activeWorkflows = new Map<string, ClaudeWorkflowOrchestrator>();
+  private activeWorkflows = new Map<string, GeminiWorkflowOrchestrator>();
 
   constructor(config: EnterpriseWorkflowConfig) {
     this.config = config;
@@ -466,11 +466,11 @@ class EnterpriseWorkflowManager {
   async createWorkflow(workflowType: string, config?: RunnableConfig): Promise<string> {
     const workflowId = `${workflowType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    let workflow: ClaudeWorkflowOrchestrator;
+    let workflow: GeminiWorkflowOrchestrator;
 
     switch (workflowType) {
       case "standard":
-        workflow = new ClaudeWorkflowOrchestrator();
+        workflow = new GeminiWorkflowOrchestrator();
         break;
       case "human-approval":
         workflow = new HumanApprovalWorkflow();

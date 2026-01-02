@@ -2,7 +2,7 @@
 title: Team Collaboration & Communication Patterns
 version: 1.0
 updated: 2025-09-13
-parent: ./CLAUDE.md
+parent: ./GEMINI.md
 related:
   - ./32_workflow-patterns.md
   - ./36_ai-task-management.md
@@ -11,7 +11,7 @@ related:
 
 # Team Collaboration & Communication Patterns
 
-Advanced collaboration strategies for multi-developer teams using Claude Code, including communication platform integration, workflow automation, and team coordination patterns.
+Advanced collaboration strategies for multi-developer teams using Gemini Code, including communication platform integration, workflow automation, and team coordination patterns.
 
 ## Phase 3: Collaboration Integration (Weeks 5-6)
 
@@ -37,10 +37,10 @@ Enable team collaboration and workflow automation through communication platform
 **Best Practices for Context Efficiency:**
 ```bash
 # Clear conversation history between major tasks
-claude /clear
+gemini /clear
 
 # Compact after large file operations
-claude /compact
+gemini /compact
 
 # Use Plan Mode for architectural decisions
 # Shift+Tab x2 to activate, then describe complex changes
@@ -53,7 +53,7 @@ claude /compact
 ```bash
 # Slack integration via Composio
 npx @composio/mcp@latest setup slack
-claude mcp add slack npx @composio/slack-mcp
+gemini mcp add slack npx @composio/slack-mcp
 ```
 **Capabilities:**
 - Automated team notifications and updates
@@ -63,7 +63,7 @@ claude mcp add slack npx @composio/slack-mcp
 
 **Notion MCP Server** - Documentation management
 ```bash
-claude mcp add notion npx @modelcontextprotocol/server-notion
+gemini mcp add notion npx @modelcontextprotocol/server-notion
 ```
 **Capabilities:**
 - Automated documentation generation and updates
@@ -73,7 +73,7 @@ claude mcp add notion npx @modelcontextprotocol/server-notion
 
 **Atlassian MCP Server** - Jira and Confluence integration (if applicable)
 ```bash
-claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
+gemini mcp add atlassian npx @modelcontextprotocol/server-atlassian
 ```
 **Capabilities:**
 - Automated ticket creation and updates
@@ -84,7 +84,7 @@ claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
 #### Workflow Automation
 **Zapier MCP Server** - Cross-platform automation
 ```bash
-claude mcp add zapier npx @modelcontextprotocol/server-zapier
+gemini mcp add zapier npx @modelcontextprotocol/server-zapier
 ```
 **Capabilities:**
 - Multi-platform workflow automation
@@ -94,7 +94,7 @@ claude mcp add zapier npx @modelcontextprotocol/server-zapier
 
 **Memory Bank MCP Server** - Session continuity
 ```bash
-claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
+gemini mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
 ```
 **Capabilities:**
 - Persistent context and knowledge retention
@@ -111,22 +111,22 @@ npx @composio/mcp@latest setup slack
 # Follow OAuth flow for team integration
 
 # Notion workspace connection
-claude mcp add notion npx @modelcontextprotocol/server-notion
+gemini mcp add notion npx @modelcontextprotocol/server-notion
 # Configure with workspace integration token
 
 # Atlassian integration (if using Jira/Confluence)
-claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
+gemini mcp add atlassian npx @modelcontextprotocol/server-atlassian
 # Configure with API tokens and workspace URLs
 ```
 
 #### 2. Automation and Memory Setup
 ```bash
 # Zapier for cross-platform automation
-claude mcp add zapier npx @modelcontextprotocol/server-zapier
+gemini mcp add zapier npx @modelcontextprotocol/server-zapier
 # Configure with Zapier API key and automation rules
 
 # Memory Bank for persistent context
-claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
+gemini mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
 # Configure with team-specific knowledge persistence settings
 ```
 
@@ -241,13 +241,13 @@ claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
 **Usage Analytics and Cost Management:**
 ```bash
 # Regular performance monitoring
-claude /cost --breakdown-by-model --time-period=weekly
-claude /usage --team-analytics --optimization-recommendations
+gemini /cost --breakdown-by-model --time-period=weekly
+gemini /usage --team-analytics --optimization-recommendations
 
 # Automated optimization
-claude config set-cost-optimization aggressive
-claude config set-model-switching automatic
-claude config set-context-optimization enabled
+gemini config set-cost-optimization aggressive
+gemini config set-model-switching automatic
+gemini config set-context-optimization enabled
 ```
 
 **Team Performance Metrics:**

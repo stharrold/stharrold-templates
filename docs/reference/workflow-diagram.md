@@ -60,7 +60,7 @@ flowchart LR
         G2[2. Tests<br/>All pass]
         G3[3. Build<br/>uv build]
         G4[4. Linting<br/>ruff check]
-        G5[5. AI Sync<br/>CLAUDE.md]
+        G5[5. AI Sync<br/>GEMINI.md]
 
         G1 --> G2 --> G3 --> G4 --> G5
     end

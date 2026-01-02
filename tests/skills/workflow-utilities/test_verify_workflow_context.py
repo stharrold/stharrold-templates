@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 # Add scripts to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts"))
 
 from verify_workflow_context import (
     PendingWorktree,
@@ -280,7 +280,7 @@ class TestStrictMode:
     def test_strict_mode_exits_code_2_with_pending_worktrees(self, mock_is_worktree: MagicMock, mock_validate: MagicMock, mock_detect: MagicMock) -> None:
         """--strict mode should exit with code 2 when pending worktrees exist."""
         # Get the script path
-        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
+        script_path = Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
 
         # Mock the subprocess to test actual CLI behavior
         # We'll run the actual script with mocked git commands
@@ -306,7 +306,7 @@ class TestStrictMode:
 
     def test_strict_flag_is_recognized(self) -> None:
         """--strict flag should be a valid CLI argument."""
-        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
+        script_path = Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts" / "verify_workflow_context.py"
 
         # Run with --help to verify --strict is documented
         result = subprocess.run(

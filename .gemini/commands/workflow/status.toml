@@ -1,0 +1,14 @@
+description = "Show v6 workflow overview and status"
+prompt = """
+# /workflow:status - v6 Workflow
+
+**Current State**: !{python3 .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py}
+
+**Branch**: !{git branch --show-current}
+
+## Commands
+- `/workflow:worktree "desc"` - Step 1
+- `/workflow:integrate ["branch"]` - Step 2
+- `/workflow:release` - Step 3
+- `/workflow:backmerge` - Step 4
+"""

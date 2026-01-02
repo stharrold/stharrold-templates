@@ -72,7 +72,7 @@ Archive process:
 
 **Command:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/todo_updater.py .
+python .gemini/skills/workflow-utilities/scripts/todo_updater.py .
 ```
 
 **Auto-updates when:**
@@ -161,39 +161,39 @@ gh auth login
 uv sync
 
 # Detect technology stack
-python .claude/skills/tech-stack-adapter/scripts/detect_stack.py
+python .gemini/skills/tech-stack-adapter/scripts/detect_stack.py
 ```
 
 ### Workflow Management
 ```bash
 # Update TODO.md manifest
-python .claude/skills/workflow-utilities/scripts/todo_updater.py .
+python .gemini/skills/workflow-utilities/scripts/todo_updater.py .
 
 # Create feature worktree
-python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   feature <slug> contrib/<gh-user>
 
 # Daily rebase contrib branch
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
+python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py \
   contrib/<gh-user>
 
 # Run quality gates
-python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
+python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
 
 # Calculate semantic version
-python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
+python .gemini/skills/git-workflow-manager/scripts/semantic_version.py \
   develop v1.0.0
 
 # Archive workflow (Phase 4.4)
-python .claude/skills/workflow-utilities/scripts/workflow_archiver.py \
+python .gemini/skills/workflow-utilities/scripts/workflow_archiver.py \
   TODO_feature_*.md --summary "What was completed" --version "X.Y.Z"
 
-# Create directory with standards (CLAUDE.md, README.md, ARCHIVED/)
-python .claude/skills/workflow-utilities/scripts/directory_structure.py \
+# Create directory with standards (GEMINI.md, README.md, ARCHIVED/)
+python .gemini/skills/workflow-utilities/scripts/directory_structure.py \
   create <directory-path> "<purpose-description>"
 
 # Deprecate files (archive with timestamp)
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   <todo-file> "<description>" <file1> <file2> ...
 ```
 
@@ -260,7 +260,7 @@ gh pr create --base "develop" --head "contrib/<gh-user>"
 
 **At 100K tokens used (~73% of effective capacity):**
 
-Claude will **automatically**:
+Gemini will **automatically**:
 1. Save all task state to TODO_*.md (update YAML frontmatter)
 2. Document current context in TODO body:
    - Current phase and step
@@ -271,7 +271,7 @@ Claude will **automatically**:
 3. Commit TODO_*.md updates
 
 Then **you must**:
-1. Run `/init` to update CLAUDE.md memory files with current state
+1. Run `/init` to update GEMINI.md memory files with current state
 2. Run `/compact` to compress memory and reduce token usage
 3. Continue working - context is preserved in TODO_*.md
 
@@ -286,7 +286,7 @@ Token usage: 100543/200000; 99457 remaining
 ```
 
 **When you see usage approaching 100K:**
-- Claude will proactively save state to TODO_*.md
+- Gemini will proactively save state to TODO_*.md
 - Wait for "✓ State saved to TODO file" confirmation
 - Run /init (updates memory files) and /compact (compresses memory)
 - Continue working with reduced token usage
@@ -342,13 +342,13 @@ When implementation replaces or removes existing files, use proper deprecation t
 
 **Command:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   <todo-file> "<description>" <file1> <file2> ...
 ```
 
 **Example:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   TODO_feature_20251023T104248Z_auth-refactor.md \
   "old-oauth-implementation" \
   src/auth/old_oauth.py \
@@ -369,7 +369,7 @@ python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
 **Example 1: Replace authentication system**
 ```bash
 # Deprecate old OAuth implementation
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   TODO_feature_20251023T140000Z_auth-v2.md \
   "oauth-v1-system" \
   src/auth/oauth_v1.py \
@@ -382,7 +382,7 @@ Result: `ARCHIVED/20251023T140000Z_oauth-v1-system.zip`
 **Example 2: Consolidate vocabulary modules**
 ```bash
 # Deprecate separate A1/A2 files (now combined)
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   TODO_feature_20251024T090000Z_vocab-consolidation.md \
   "separate-level-modules" \
   src/vocabulary/a1_nouns.py \
@@ -396,7 +396,7 @@ Result: `ARCHIVED/20251024T090000Z_separate-level-modules.zip`
 **Example 3: Remove unused components**
 ```bash
 # Deprecate experimental features that didn't work out
-python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
+python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
   TODO_feature_20251025T110000Z_cleanup.md \
   "experimental-quiz-engine" \
   src/quiz/experimental_engine.py \
@@ -468,17 +468,17 @@ When modifying skill implementations (scripts, templates, Q&A flow), **all relat
 
 **Full update checklist:**
 ```bash
-cat .claude/skills/UPDATE_CHECKLIST.md
+cat .gemini/skills/UPDATE_CHECKLIST.md
 ```
 
 **Validate versions:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/validate_versions.py --verbose
+python .gemini/skills/workflow-utilities/scripts/validate_versions.py --verbose
 ```
 
 **Semi-automated sync:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
+python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
   <skill-name> <new-version>
 ```
 
@@ -499,11 +499,11 @@ Use semantic versioning: `MAJOR.MINOR.PATCH`
 The complete 12-step checklist ensures all files are updated:
 
 ```
-.claude/skills/<skill-name>/SKILL.md       ← Version, commands, integration
-.claude/skills/<skill-name>/CLAUDE.md      ← Usage examples
-.claude/skills/<skill-name>/CHANGELOG.md   ← Version history
+.gemini/skills/<skill-name>/SKILL.md       ← Version, commands, integration
+.gemini/skills/<skill-name>/GEMINI.md      ← Usage examples
+.gemini/skills/<skill-name>/CHANGELOG.md   ← Version history
 WORKFLOW.md                                 ← Phase sections, commands
-CLAUDE.md                                   ← Command reference
+GEMINI.md                                   ← Command reference
 [Integration files]                         ← Other skills affected
 ```
 
@@ -511,7 +511,7 @@ CLAUDE.md                                   ← Command reference
 
 **Automatic validation:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/validate_versions.py
+python .gemini/skills/workflow-utilities/scripts/validate_versions.py
 ```
 
 Validates:
@@ -522,7 +522,7 @@ Validates:
 
 **View current versions:**
 ```bash
-python .claude/skills/workflow-utilities/scripts/validate_versions.py --verbose
+python .gemini/skills/workflow-utilities/scripts/validate_versions.py --verbose
 ```
 
 Output:
@@ -542,7 +542,7 @@ Skill Versions:
 **Update skill documentation in one command:**
 
 ```bash
-python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
+python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
   bmad-planner 5.2.0
 ```
 
@@ -563,11 +563,11 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 **Example:**
 ```bash
 # Dry run to preview changes
-python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
+python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
   bmad-planner 5.2.0 --dry-run
 
 # Update with archive
-python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
+python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
   bmad-planner 5.2.0 --archive
 ```
 
@@ -577,7 +577,7 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 - All script changes require version bump
 
 ❌ **Inconsistent command examples**
-- Commands must match exactly in SKILL.md, CLAUDE.md, WORKFLOW.md
+- Commands must match exactly in SKILL.md, GEMINI.md, WORKFLOW.md
 
 ❌ **Forgetting to update WORKFLOW.md**
 - Phase sections must reflect current skill behavior
@@ -595,12 +595,12 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 **Version bump:** 5.0.0 → 5.1.0 (MINOR - new feature)
 
 **Files updated:**
-1. `.claude/skills/bmad-planner/SKILL.md` (version, Q&A flow)
-2. `.claude/skills/bmad-planner/CLAUDE.md` (examples)
-3. `.claude/skills/bmad-planner/CHANGELOG.md` (new entry)
+1. `.gemini/skills/bmad-planner/SKILL.md` (version, Q&A flow)
+2. `.gemini/skills/bmad-planner/GEMINI.md` (examples)
+3. `.gemini/skills/bmad-planner/CHANGELOG.md` (new entry)
 4. `WORKFLOW.md` (Phase 1 interactive session)
-5. `CLAUDE.md` (Phase 1 description)
-6. `.claude/skills/speckit-author/SKILL.md` (integration note)
+5. `GEMINI.md` (Phase 1 description)
+6. `.gemini/skills/speckit-author/SKILL.md` (integration note)
 
 **Commit message:**
 ```
@@ -610,17 +610,17 @@ Updated bmad-planner from v5.0.0 to v5.1.0:
 - Added interactive Q&A for database migration strategy
 
 Updated documentation:
-- SKILL.md, CLAUDE.md, WORKFLOW.md, CHANGELOG.md
+- SKILL.md, GEMINI.md, WORKFLOW.md, CHANGELOG.md
 
-Refs: .claude/skills/bmad-planner/CHANGELOG.md
+Refs: .gemini/skills/bmad-planner/CHANGELOG.md
 ```
 
 ### Related Documentation
 
-- **[UPDATE_CHECKLIST.md](.claude/skills/UPDATE_CHECKLIST.md)** - Complete 12-step checklist
+- **[UPDATE_CHECKLIST.md](.gemini/skills/UPDATE_CHECKLIST.md)** - Complete 12-step checklist
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributor guidelines
 - **[CHANGELOG.md](CHANGELOG.md)** - Repository changelog
-- **[CLAUDE.md](CLAUDE.md)** - Quick command reference
+- **[GEMINI.md](GEMINI.md)** - Quick command reference
 
 ---
 
@@ -652,7 +652,7 @@ uv run mypy src/ --show-error-codes
 ### TODO.md Out of Sync
 ```bash
 # Rebuild manifest
-python .claude/skills/workflow-utilities/scripts/todo_updater.py .
+python .gemini/skills/workflow-utilities/scripts/todo_updater.py .
 
 # Verify
 cat TODO.md
@@ -699,22 +699,22 @@ Track these metrics to validate workflow effectiveness:
 
 ## Related Documentation
 
-- **[CLAUDE.md](CLAUDE.md)** - Claude Code interaction guide and quick command reference
+- **[GEMINI.md](GEMINI.md)** - Gemini Code interaction guide and quick command reference
 - **[README.md](README.md)** - Project overview and getting started
 
 ### Skill Documentation
 
 Referenced throughout this workflow:
-- **Phase 0 (Initialization):** [initialize-repository](/.claude/skills/initialize-repository/SKILL.md) (meta-skill for bootstrapping new repos)
-- **Phase 0 (Setup):** [tech-stack-adapter](/.claude/skills/tech-stack-adapter/SKILL.md), [git-workflow-manager](/.claude/skills/git-workflow-manager/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 1:** [bmad-planner](/.claude/skills/bmad-planner/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 2:** [git-workflow-manager](/.claude/skills/git-workflow-manager/SKILL.md), [speckit-author](/.claude/skills/speckit-author/SKILL.md), [quality-enforcer](/.claude/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 3:** [quality-enforcer](/.claude/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 4:** [git-workflow-manager](/.claude/skills/git-workflow-manager/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 5:** [git-workflow-manager](/.claude/skills/git-workflow-manager/SKILL.md), [quality-enforcer](/.claude/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Phase 6:** [git-workflow-manager](/.claude/skills/git-workflow-manager/SKILL.md), [speckit-author](/.claude/skills/speckit-author/SKILL.md) (optional), [quality-enforcer](/.claude/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.claude/skills/workflow-utilities/SKILL.md)
-- **Always available:** [workflow-orchestrator](/.claude/skills/workflow-orchestrator/SKILL.md)
+- **Phase 0 (Initialization):** [initialize-repository](/.gemini/skills/initialize-repository/SKILL.md) (meta-skill for bootstrapping new repos)
+- **Phase 0 (Setup):** [tech-stack-adapter](/.gemini/skills/tech-stack-adapter/SKILL.md), [git-workflow-manager](/.gemini/skills/git-workflow-manager/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 1:** [bmad-planner](/.gemini/skills/bmad-planner/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 2:** [git-workflow-manager](/.gemini/skills/git-workflow-manager/SKILL.md), [speckit-author](/.gemini/skills/speckit-author/SKILL.md), [quality-enforcer](/.gemini/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 3:** [quality-enforcer](/.gemini/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 4:** [git-workflow-manager](/.gemini/skills/git-workflow-manager/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 5:** [git-workflow-manager](/.gemini/skills/git-workflow-manager/SKILL.md), [quality-enforcer](/.gemini/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Phase 6:** [git-workflow-manager](/.gemini/skills/git-workflow-manager/SKILL.md), [speckit-author](/.gemini/skills/speckit-author/SKILL.md) (optional), [quality-enforcer](/.gemini/skills/quality-enforcer/SKILL.md), [workflow-utilities](/.gemini/skills/workflow-utilities/SKILL.md)
+- **Always available:** [workflow-orchestrator](/.gemini/skills/workflow-orchestrator/SKILL.md)
 
 ---
 
-**For more details on specific skills, see `.claude/skills/<skill-name>/SKILL.md`**
+**For more details on specific skills, see `.gemini/skills/<skill-name>/SKILL.md`**

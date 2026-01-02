@@ -19,10 +19,10 @@ target:
   file: "10_draft-merged/20_credentials/25_mcp-security-tools.md"
   action: "enhance_existing"
   size_limit_kb: 30
-  parent_orchestrator: "10_draft-merged/20_credentials/CLAUDE.md"
+  parent_orchestrator: "10_draft-merged/20_credentials/GEMINI.md"
 
 dependencies:
-  - Enhanced CLAUDE.md with unified git conventions
+  - Enhanced GEMINI.md with unified git conventions
   - GitHub issue #12 created
   - Worktree structure established
 
@@ -42,7 +42,7 @@ success_criteria:
 ## Overview
 Integrate practical security workflow examples from `09_workflow-secrets-mcp.md` into the existing `25_mcp-security-tools.md` file to enhance security patterns documentation.
 
-**Implementation Approach**: This is the BMAD method implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit) and TODO_FOR_feat-12-integrate-workflow-secrets-claude.md (Claude).
+**Implementation Approach**: This is the BMAD method implementation. For other approaches, see TODO_FOR_feat-12-integrate-workflow-secrets.md (Speckit) and TODO_FOR_feat-12-integrate-workflow-secrets-gemini.md (Gemini).
 
 **Part of main roadmap**: See [TODO.md](TODO.md) for complete project status and priority context.
 
@@ -99,7 +99,7 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets-bmad
 ## Quality Assurance
 
 ### [ ] 7. Update cross-references
-- [ ] Update `20_credentials/CLAUDE.md` if needed
+- [ ] Update `20_credentials/GEMINI.md` if needed
 - [ ] Verify navigation reflects enhanced content
 - [ ] Check internal links work correctly
 
