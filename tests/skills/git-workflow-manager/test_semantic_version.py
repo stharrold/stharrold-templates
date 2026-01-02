@@ -168,13 +168,13 @@ class TestBumpVersion:
 
     def test_major_resets_minor_and_patch(self):
         """Major bump should reset both minor and patch to 0."""
-        result = bump_version("v5.12.7", "major")
-        assert result == "v6.0.0"
+        result = bump_version("v1.2.3", "major")
+        assert result == "v2.0.0"
 
     def test_minor_resets_patch_only(self):
         """Minor bump should reset only patch to 0."""
-        result = bump_version("v5.12.7", "minor")
-        assert result == "v5.13.0"
+        result = bump_version("v1.2.3", "minor")
+        assert result == "v1.3.0"
 
 
 class TestCalculateSemanticVersion:

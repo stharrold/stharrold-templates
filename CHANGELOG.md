@@ -5,6 +5,11 @@ All notable changes to the Standard Language Learning Repository workflow will b
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Removed
+- **feature-dev command** - Replaced by built-in Gemini CLI tools for autonomous implementation.
+
 ## [7.0.0] - 2026-01-01
 
 ### Removed
@@ -13,10 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Archived and removed `.specify/` (deprecated migration source)
   - Archived and removed out-of-date scripts: `sync_ai_config.py`, `sync_skill_docs.py`
   - Archived and removed deprecated skills and their tests:
-    - `bmad-planner` (replaced by Gemini feature-dev)
-    - `speckit-author` (replaced by Gemini feature-dev)
-    - `quality-enforcer` (replaced by Gemini feature-dev code review)
-- **Repository cleanup** - Removed build artifacts and legacy maintenance scripts
+    - `bmad-planner` (replaced by autonomous implementation)
+    - `speckit-author` (replaced by autonomous implementation)
+    - `quality-enforcer` (replaced by Gemini Code Review)- **Repository cleanup** - Removed build artifacts and legacy maintenance scripts
   - Archived and removed build artifacts: `dist/`, `stharrold_templates.egg-info/`
   - Archived and removed legacy bash validation scripts (`test_*.sh`, `validate_documentation.sh`)
   - Archived and removed third-party tool configurations: `.claude/`, `.codacy/`

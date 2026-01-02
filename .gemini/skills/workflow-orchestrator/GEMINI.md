@@ -1,7 +1,7 @@
 ---
 type: gemini-context
 directory: .gemini/skills/workflow-orchestrator
-purpose: Workflow Orchestrator is **the main coordinator skill** for the 7-phase workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
+purpose: Workflow Orchestrator is **the main coordinator skill** for the 4-phase v7x0 workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
 parent: ../GEMINI.md
 sibling_readme: README.md
 children:
@@ -10,10 +10,7 @@ children:
   - templates/GEMINI.md
 related_skills:
   - tech-stack-adapter
-  - bmad-planner
   - git-workflow-manager
-  - speckit-author
-  - quality-enforcer
   - workflow-utilities
   - agentdb-state-manager
 ---
@@ -24,7 +21,7 @@ related_skills:
 
 Workflow Orchestrator is **the main coordinator skill** for the 7-phase workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Gemini Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
 
-> **Note**: As of v5.12.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Use `query_workflow_state.py` from `agentdb-state-manager` to determine current phase instead of parsing TODO files.
+> **Note**: As of v7x0.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Use `query_workflow_state.py` from `agentdb-state-manager` to determine current phase instead of parsing TODO files.
 
 ## Directory Structure
 
@@ -385,64 +382,38 @@ if quality_gates_passed() and not pr_created():
 
 ---
 
-## Workflow Phase Map
+## Workflow Phase Map (v7x0)
 
 ```
 Phase 0: Session Start
 ├── Load: tech-stack-adapter
 └── Action: Detect project configuration
 
-Phase 1: Planning (main repo, contrib branch)
-├── Load: bmad-planner
-└── Action: Create planning/ documents
+Phase 1: Worktree (/workflow:v7x0_1-worktree)
+├── Load: git-workflow-manager
+├── Action: Create feature worktree
+└── Action: Record state in AgentDB
 
-Phase 2: Implementation (worktree)
-├── 2.1: Load: git-workflow-manager
-│   └── Action: Create worktree
-├── 2.2: User: cd ../german_feature_<slug>
-├── 2.3: Load: speckit-author
-│   └── Action: Create specs/ documents
-└── 2.4: User: Implement feature
+Phase 2: Integration (/workflow:v7x0_2-integrate)
+├── Load: git-workflow-manager
+├── Action: Push feature → Create PR (feature -> contrib)
+├── Action: Cleanup worktree
+├── Action: Push contrib → Create PR (contrib -> develop)
+└── Action: Record state in AgentDB
 
-Phase 3: Quality (worktree)
-├── Load: quality-enforcer, git-workflow-manager
-├── Action: Run quality gates
-└── Action: Calculate semantic version
-
-Phase 4: Integration (main repo, contrib branch)
-├── 4.1: Load: git-workflow-manager
-│   └── Action: Create PR (feature → contrib)
-├── 4.2: User: Reviewers add comments in web portal
-├── 4.3: Load: git-workflow-manager (optional)
-│   └── Action: Generate work-items from unresolved PR conversations
-│   └── Pattern: For each work-item, repeat Phase 2-4 with new feature worktree
-├── 4.4: User: Approve and merge PR in GitHub/Azure DevOps UI
-├── 4.5: Load: workflow-utilities
-│   └── Action: Archive workflow and delete worktree
-├── 4.6: Load: speckit-author (optional)
-│   └── Action: Update BMAD with as-built
-├── 4.7: Load: git-workflow-manager
-│   └── Action: Daily rebase contrib onto develop
-└── 4.8: Action: Create PR (contrib → develop)
-
-Phase 5: Release (main repo)
-├── Load: git-workflow-manager, quality-enforcer
+Phase 3: Release (/workflow:v7x0_3-release)
+├── Load: git-workflow-manager
 ├── Action: Create release branch
-├── Action: Final QA
-├── Action: Create PR (release → main)
+├── Action: Create PR (release -> main)
 ├── Action: Tag release
-├── Action: Back-merge to develop
-└── Action: Cleanup release branch
+└── Action: Record state in AgentDB
 
-Phase 6: Hotfix (hotfix worktree)
-├── Load: git-workflow-manager, quality-enforcer
-├── Load: speckit-author (optional for complex fixes)
-├── Action: Create hotfix worktree from main
-├── Action: Implement minimal fix
-├── Action: Run quality gates
-├── Action: Create PR (hotfix → main)
-├── Action: Tag hotfix
-└── Action: Back-merge to develop
+Phase 4: Backmerge (/workflow:v7x0_4-backmerge)
+├── Load: git-workflow-manager
+├── Action: Create PR (release -> develop)
+├── Action: Rebase contrib on develop
+├── Action: Cleanup release branch
+└── Action: Record state in AgentDB
 ```
 
 ---
@@ -493,7 +464,7 @@ Phase 6: Hotfix (hotfix worktree)
 - **[SKILL.md](SKILL.md)** - Complete orchestration algorithms and decision trees
 - **[README.md](README.md)** - Human-readable overview
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 6-phase workflow guide
+- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 4-phase workflow guide
 
 **Child Directories:**
 - **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived files
@@ -501,9 +472,6 @@ Phase 6: Hotfix (hotfix worktree)
 ## Related Skills
 
 - **tech-stack-adapter** - Always loaded first
-- **bmad-planner** - Loaded in Phase 1
-- **git-workflow-manager** - Loaded in Phases 2, 3, 4, 5, 6
-- **speckit-author** - Loaded in Phase 2.3, Phase 4 (optional)
-- **quality-enforcer** - Loaded in Phase 3, Phase 5, Phase 6
+- **git-workflow-manager** - Loaded in Phases 1, 2, 3, 4
 - **workflow-utilities** - Loaded as needed
-- **agentdb-state-manager** - Loaded for complex queries (optional)
+- **agentdb-state-manager** - Tracks workflow state
