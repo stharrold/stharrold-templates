@@ -24,7 +24,7 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v6_2_integrate
+  --pattern phase_v7x0_2_integrate
 ```
 
 **Analyze Metrics:**
@@ -77,7 +77,7 @@ uv run python .gemini/skills/workflow-utilities/scripts/deprecate_files.py \
 Result: `ARCHIVED/YYYYMMDDTHHMMSSZ_description.zip`
 
 ### Worktree Cleanup
-If a worktree was not cleaned up automatically by `/integrate`:
+If a worktree was not cleaned up automatically by `/workflow:v7x0_2-integrate`:
 
 ```bash
 uv run python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py slug

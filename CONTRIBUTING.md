@@ -76,11 +76,11 @@ feature/* (isolated worktrees)
 
 ### Workflow Steps
 
-1. **Create Worktree**: `/worktree "feature description"`
+1. **Create Worktree**: `/workflow:v7x0_1-worktree "feature description"`
 2. **Implement**: Perform implementation using built-in Gemini CLI tools (in worktree).
-3. **Integrate**: `/integrate` (in main repo)
-4. **Release**: `/release`
-5. **Backmerge**: `/backmerge`
+3. **Integrate**: `/workflow:v7x0_2-integrate` (in main repo)
+4. **Release**: `/workflow:v7x0_3-release`
+5. **Backmerge**: `/workflow:v7x0_4-backmerge`
 
 ### Manual Maintenance
 
@@ -108,7 +108,7 @@ All directories must have:
 
 ### 1. Create Pull Request
 
-Use the `/integrate` command to automate PR creation, or do it manually:
+Use the `/workflow:v7x0_2-integrate` command to automate PR creation, or do it manually:
 
 ```bash
 # Create PR to contrib/stharrold

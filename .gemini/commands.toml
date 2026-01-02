@@ -1,9 +1,9 @@
-[commands.worktree]
+["workflow:v7x0_1-worktree"]
 description = "Create worktree for development (Step 1 of 4)"
 prompt = """
-# /worktree - Step 1 of 4
+# /workflow:v7x0_1-worktree - Step 1 of 4
 
-**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create git worktree for isolated development.
 
@@ -16,12 +16,12 @@ prompt = """
 ## Usage
 
 ```
-/worktree "feature description"
+/workflow:v7x0_1-worktree "feature description"
 ```
 
 Example:
 ```
-/worktree "add user authentication with JWT tokens"
+/workflow:v7x0_1-worktree "add user authentication with JWT tokens"
 ```
 
 ---
@@ -57,8 +57,8 @@ This creates:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v6_1_worktree \
-  --source "main_repo"
+  --pattern phase_v7x0_1_worktree \
+  --source "main_repo" \
   --target "worktree"
 ```
 
@@ -69,7 +69,7 @@ uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
 After creating the worktree, display these instructions to the user:
 
 ```
-[OK] Worktree created for v6 workflow
+[OK] Worktree created for v7x0 workflow
 
 Worktree path: {worktree_path}
 Branch: {branch_name}
@@ -88,7 +88,7 @@ Branch: {branch_name}
    cd {main_repo_path}
 
 5. Run integration:
-   /integrate "{branch_name}"
+   /workflow:v7x0_2-integrate "{branch_name}"
 ```
 
 ---
@@ -100,12 +100,12 @@ Branch: {branch_name}
 - Quality is ensured by autonomous testing and Gemini Code Review.
 "
 
-[commands.integrate]
+["workflow:v7x0_2-integrate"]
 description = "Integrate feature to develop (Step 2 of 4)"
 prompt = """
-# /integrate - Step 2 of 4
+# /workflow:v7x0_2-integrate - Step 2 of 4
 
-**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create PRs from feature → contrib → develop.
 
@@ -119,12 +119,12 @@ prompt = """
 
 ### Full Integration (with feature branch)
 ```
-/integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/workflow:v7x0_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
 ```
 
 ### Contrib-Only Integration (no feature branch)
 ```
-/integrate
+/workflow:v7x0_2-integrate
 ```
 
 ---
@@ -229,7 +229,7 @@ Integration of latest changes from contrib branch.
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v6_2_integrate
+  --pattern phase_v7x0_2_integrate
 ```
 
 ---
@@ -248,7 +248,7 @@ Display to user:
 - Contrib → develop PR created
 - Ready for release when develop has enough changes
 
-Next: Run /release when ready for production
+Next: Run /workflow:v7x0_3-release when ready for production
 ```
 
 ---
@@ -258,14 +258,14 @@ Next: Run /release when ready for production
 - Implementation uses built-in Gemini CLI tools.
 - PRs require manual approval in GitHub UI.
 - Always ends on contrib/* branch (editable).
-""
+"
 
-[commands.release]
+["workflow:v7x0_3-release"]
 description = "Release to production (Step 3 of 4)"
 prompt = """
-# /release - Step 3 of 4
+# /workflow:v7x0_3-release - Step 3 of 4
 
-**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Create release from develop, create PR to main, tag release.
 
@@ -278,12 +278,12 @@ prompt = """
 ## Usage
 
 ```
-/release
+/workflow:v7x0_3-release
 ```
 
 Optional: Specify version
 ```
-/release v1.2.0
+/workflow:v7x0_3-release v1.2.0
 ```
 
 ---
@@ -306,7 +306,7 @@ latest_tag=$(git describe --tags --abbrev=0 origin/main 2>/dev/null || echo "v0.
 ## Step 2: Create Release Branch
 
 ```bash
-uv run python .gemini/skills/git-workflow-manager/scripts/create_release.py create-release
+uv run python .gemini/skills/git-workflow-manager/scripts/release_workflow.py create-release
 ```
 
 This creates:
@@ -346,7 +346,7 @@ This:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v6_3_release
+  --pattern phase_v7x0_3_release
 ```
 
 ---
@@ -362,7 +362,7 @@ Display to user:
 - PR to main: merged
 - Tag: {version} created on main
 
-Next: Run /backmerge to sync release to develop
+Next: Run /workflow:v7x0_4-backmerge to sync release to develop
 ```
 
 ---
@@ -372,14 +372,14 @@ Next: Run /backmerge to sync release to develop
 - Release branch is temporary (deleted in backmerge)
 - Semantic versioning: vMAJOR.MINOR.PATCH
 - Tag is created on main after PR merge
-""
+"
 
-[commands.backmerge]
+["workflow:v7x0_4-backmerge"]
 description = "Sync release to develop and contrib (Step 4 of 4)"
 prompt = """
-# /backmerge - Step 4 of 4
+# /workflow:v7x0_4-backmerge - Step 4 of 4
 
-**v6 Workflow**: `/worktree` → [Implementation] → `/integrate` → `/release` → `/backmerge`
+**v7x0 Workflow**: `/workflow:v7x0_1-worktree` → [Implementation] → `/workflow:v7x0_2-integrate` → `/workflow:v7x0_3-release` → `/workflow:v7x0_4-backmerge`
 
 **Purpose**: Sync release changes back to develop and rebase contrib.
 
@@ -392,7 +392,7 @@ prompt = """
 ## Usage
 
 ```
-/backmerge
+/workflow:v7x0_4-backmerge
 ```
 
 ---
@@ -441,7 +441,7 @@ This:
 ```bash
 uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_v6_4_backmerge
+  --pattern phase_v7x0_4_backmerge
 ```
 
 ---
@@ -458,7 +458,7 @@ Display to user:
 - Release branch cleaned up
 
 Workflow complete! Ready for next feature.
-Next: Run /worktree "next feature" to start again
+Next: Run /workflow:v7x0_1-worktree "next feature" to start again
 ```
 
 ---
@@ -468,31 +468,31 @@ Next: Run /worktree "next feature" to start again
 - Always ends on contrib/* branch (editable)
 - Contrib is rebased to stay current with develop
 - Release branch is ephemeral (created in release, deleted in backmerge)
-""
+"
 
 [commands.workflow]
-description = "Show v6 workflow overview"
+description = "Show v7x0 workflow overview"
 prompt = """
-# /workflow - v6 Workflow Overview
+# /workflow - v7x0 Workflow Overview
 
-The v6 workflow simplifies the process by leveraging built-in Gemini CLI tools for implementation.
+The v7x0 workflow simplifies the process by leveraging built-in Gemini CLI tools for implementation.
 
 ## Steps
 
-1. **[/worktree](command:worktree)**
+1. **[/workflow:v7x0_1-worktree](command:workflow:v7x0_1-worktree)**
    - Creates a git worktree for isolation.
    - You then use Gemini CLI tools inside the worktree to implement the feature.
 
-2. **[/integrate](command:integrate)**
+2. **[/workflow:v7x0_2-integrate](command:workflow:v7x0_2-integrate)**
    - Integrates the feature branch into `contrib`.
    - Creates a PR from `contrib` to `develop`.
 
-3. **[/release](command:release)**
+3. **[/workflow:v7x0_3-release](command:workflow:v7x0_3-release)**
    - Creates a release branch from `develop`.
    - Runs quality checks.
    - Creates a PR to `main` and tags the release.
 
-4. **[/backmerge](command:backmerge)**
+4. **[/workflow:v7x0_4-backmerge](command:workflow:v7x0_4-backmerge)**
    - Merges the release back to `develop`.
    - Rebases `contrib` on the new `develop`.
    - Cleans up the release branch.
@@ -501,9 +501,9 @@ The v6 workflow simplifies the process by leveraging built-in Gemini CLI tools f
 
 Start a new feature:
 ```
-/worktree "Add user authentication"
+/workflow:v7x0_1-worktree "Add user authentication"
 ```
-""
+"
 
 [commands.gemini-review]
 description = "Reviews a pull request with Gemini CLI"
@@ -536,4 +536,4 @@ Perform a comprehensive code review of the pull request and post all feedback us
 
 ## Constraint
 You MUST NOT use shell commands like `gh` or `git` for interaction. Use ONLY the tools listed above.
-""
+"
