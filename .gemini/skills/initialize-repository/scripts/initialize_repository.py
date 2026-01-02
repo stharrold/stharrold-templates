@@ -1098,7 +1098,7 @@ Repository purpose: {config.purpose}
 
 [BOT] Generated with [Gemini Code](https://gemini.com/gemini-code)
 
-Co-Authored-By: Gemini <noreply@anthropic.com>
+Co-Authored-By: Gemini <noreply@google.com>
 """
         subprocess.run(["git", "commit", "-m", commit_msg], check=True, capture_output=True)
         success("Initial commit created on main")
