@@ -34,25 +34,25 @@ python3 --version       # Must be 3.11+
 ## v6 Workflow
 
 ```
-/workflow:v6_1_worktree "feature description"
+/worktree "feature description"
     | creates worktree, user runs /feature-dev in worktree
     v
-/workflow:v6_2_integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/integrate "feature/YYYYMMDDTHHMMSSZ_slug"
     | PR feature->contrib->develop (no quality gates)
     v
-/workflow:v6_3_release
+/release
     | create release, PR to main, tag
     v
-/workflow:v6_4_backmerge
+/backmerge
     | PR release->develop, rebase contrib, cleanup
 ```
 
-### Step 1: Create Worktree (`/workflow:v6_1_worktree`)
+### Step 1: Create Worktree (`/worktree`)
 
 Creates isolated git worktree for feature development.
 
 ```bash
-/workflow:v6_1_worktree "add user authentication"
+/worktree "add user authentication"
 ```
 
 **Output:**
@@ -78,12 +78,12 @@ cd <worktree-path>
 
 No separate planning documents needed.
 
-### Step 3: Integrate (`/workflow:v6_2_integrate`)
+### Step 3: Integrate (`/integrate`)
 
 From main repo, after feature-dev is complete:
 
 ```bash
-/workflow:v6_2_integrate "feature/20251229T120000Z_add-user-auth"
+/integrate "feature/20251229T120000Z_add-user-auth"
 ```
 
 **Two modes:**
@@ -92,13 +92,13 @@ From main repo, after feature-dev is complete:
 
 **Manual gates:** PRs require approval in GitHub/Azure DevOps UI.
 
-### Step 4: Release (`/workflow:v6_3_release`)
+### Step 4: Release (`/release`)
 
 Creates release from develop:
 
 ```bash
-/workflow:v6_3_release           # Auto-calculate version
-/workflow:v6_3_release v1.2.0    # Explicit version
+/release           # Auto-calculate version
+/release v1.2.0    # Explicit version
 ```
 
 **Creates:**
@@ -106,12 +106,12 @@ Creates release from develop:
 - PR to main (requires approval)
 - Tag on main after merge
 
-### Step 5: Backmerge (`/workflow:v6_4_backmerge`)
+### Step 5: Backmerge (`/backmerge`)
 
 Syncs release changes back:
 
 ```bash
-/workflow:v6_4_backmerge
+/backmerge
 ```
 
 **Actions:**
@@ -144,7 +144,7 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 - `feature/*` - Feature development
 
 **Ephemeral branches:**
-- `release/*` - Created in v6_3_release, deleted in v6_4_backmerge
+- `release/*` - Created in `/release`, deleted in `/backmerge`
 
 ## Key Differences from v1-v7
 

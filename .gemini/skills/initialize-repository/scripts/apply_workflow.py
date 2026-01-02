@@ -570,7 +570,7 @@ def print_summary(
     print("  1. Review changes: git status")
     print("  2. Install dependencies: uv sync")
     print("  3. Run tests: uv run pytest")
-    print('  4. Start v6 workflow: /workflow:v6_1_worktree "feature description"')
+    print('  4. Start v6 workflow: /worktree "feature description"')
     print("  5. Optional cleanup: rm -rf .tmp/")
 
 

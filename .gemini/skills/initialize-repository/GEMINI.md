@@ -348,7 +348,7 @@ python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/app
 4. **After script completes:**
    - Review changes: `git status`
    - Install dependencies: `uv sync`
-   - Start using v6 workflow: `/workflow:v6_1_worktree "feature"`
+   - Start using v6 workflow: `/worktree "feature"`
    - Optional cleanup: `rm -rf .tmp/`
 
 ---

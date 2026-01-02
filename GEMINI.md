@@ -79,25 +79,25 @@ uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (defa
 Streamlined 4-phase workflow using Gemini's feature-dev plugin:
 
 ```
-/workflow:v6_1_worktree "feature description"
+/worktree "feature description"
     | creates worktree, user runs /feature-dev in worktree
     v
-/workflow:v6_2_integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/integrate "feature/YYYYMMDDTHHMMSSZ_slug"
     | PR feature->contrib->develop
     v
-/workflow:v6_3_release
+/release
     | create release, PR to main, tag
     v
-/workflow:v6_4_backmerge
+/backmerge
     | PR release->develop, rebase contrib, cleanup
 ```
 
 | Step | Command | Purpose |
 |------|---------|---------|
-| 1 | `/workflow:v6_1_worktree "desc"` | Create worktree, prompt for /feature-dev |
-| 2 | `/workflow:v6_2_integrate ["branch"]` | PR feature->contrib->develop |
-| 3 | `/workflow:v6_3_release` | Create release (develop->release->main) |
-| 4 | `/workflow:v6_4_backmerge` | Sync release (PR to develop, rebase contrib) |
+| 1 | `/worktree "desc"` | Create worktree, prompt for /feature-dev |
+| 2 | `/integrate ["branch"]` | PR feature->contrib->develop |
+| 3 | `/release` | Create release (develop->release->main) |
+| 4 | `/backmerge` | Sync release (PR to develop, rebase contrib) |
 
 **Key differences from old v1-v7 workflow:**
 - No BMAD planning or SpecKit specifications (feature-dev handles planning)
@@ -121,7 +121,9 @@ main (production) ← develop (integration) ← contrib/stharrold (active) ← f
 | `contrib/*` | Yes | Yes |
 | `develop` | No | PRs only |
 | `main` | No | PRs only |
-| `release/*` | Ephemeral | v6_3_release creates, v6_4_backmerge deletes |
+| `release/*` | Ephemeral | `/release` creates, `/backmerge` deletes |
+...
+- **Follow v6 workflow sequence**: `/worktree` -> `feature-dev` -> `/integrate` -> `/release` -> `/backmerge`
 
 ### Skills System (6 skills in `.gemini/skills/`)
 
@@ -246,7 +248,7 @@ azure_devops:
 - **End on editable branch**: All workflows must end on `contrib/*` (never `develop` or `main`)
 - **ALWAYS prefer editing existing files** over creating new ones
 - **NEVER proactively create documentation files** unless explicitly requested
-- **Follow v6 workflow sequence**: v6_1_worktree -> feature-dev -> v6_2_integrate -> v6_3_release -> v6_4_backmerge
+- **Follow v6 workflow sequence**: `/worktree` -> `feature-dev` -> `/integrate` -> `/release` -> `/backmerge`
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
 - **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
 - **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)
