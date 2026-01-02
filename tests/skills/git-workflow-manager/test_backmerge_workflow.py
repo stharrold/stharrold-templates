@@ -216,12 +216,11 @@ class TestBackmergeWorkflowEdgeCases:
         """Should handle version tags with leading v."""
         mock_run.side_effect = [
             MagicMock(returncode=0),
-            MagicMock(stdout="v5.13.0\n", returncode=0),
+            MagicMock(stdout="v7.0.0\n", returncode=0),
         ]
 
         result = get_latest_version()
-
-        assert result == "v5.13.0"
+        assert result == "v7.0.0"
 
     @patch("backmerge_workflow.run_cmd")
     def test_multiple_release_branches_returns_highest_version(self, mock_run):

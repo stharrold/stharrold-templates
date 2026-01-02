@@ -1,6 +1,6 @@
 ---
 name: workflow-v7x0-initialization-guide
-version: 6.0.0
+version: 7.0.0
 type: navigation-guide
 description: Quick reference guide to v7x0 workflow system
 last_updated: 2026-01-01

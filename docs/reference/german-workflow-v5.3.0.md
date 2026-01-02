@@ -1982,7 +1982,7 @@ Production broken after v1.5.1 deployment?
 
 ## TODO.md Manifest System
 
-### Structure (v5.2.0)
+### Structure (v7x0.0)
 
 **File:** `TODO.md` (root of main repository)
 
@@ -2501,12 +2501,12 @@ Output:
 ```
 Skill Versions:
   bmad-planner              v5.1.0
-  speckit-author            v5.0.0
-  workflow-orchestrator     v5.0.0
-  git-workflow-manager      v5.0.0
-  quality-enforcer          v5.0.0
-  tech-stack-adapter        v5.0.0
-  workflow-utilities        v5.0.0
+  speckit-author            v7x0.0
+  workflow-orchestrator     v7x0.0
+  git-workflow-manager      v7x0.0
+  quality-enforcer          v7x0.0
+  tech-stack-adapter        v7x0.0
+  workflow-utilities        v7x0.0
 ```
 
 ### Semi-Automated Sync Tool
@@ -2578,7 +2578,7 @@ python .gemini/skills/workflow-utilities/scripts/sync_skill_docs.py \
 ```
 feat(bmad): add database migration strategy Q&A
 
-Updated bmad-planner from v5.0.0 to v5.1.0:
+Updated bmad-planner from v7x0.0 to v5.1.0:
 - Added interactive Q&A for database migration strategy
 
 Updated documentation:

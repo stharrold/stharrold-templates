@@ -9,10 +9,7 @@ children:
   - scripts/GEMINI.md
 related_skills:
   - workflow-orchestrator
-  - speckit-author
-  - quality-enforcer
   - workflow-utilities
-  - bmad-planner
   - agentdb-state-manager
 ---
 
@@ -22,7 +19,7 @@ related_skills:
 
 Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub/Azure DevOps).
 
-> **Note**: As of v5.12.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
+> **Note**: As of v7x0.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
 
 ## Directory Structure
 
@@ -680,25 +677,22 @@ subprocess.run([
 ## Integration with Other Skills
 
 **workflow-orchestrator:**
-- Orchestrator calls create_worktree.py at Phase 2 start
-- Orchestrator calls semantic_version.py at Phase 3
+- Orchestrator calls create_worktree.py at workflow start
+- Orchestrator calls semantic_version.py at release phase
 - Orchestrator calls daily_rebase.py as needed
-
-**speckit-author:**
-- SpecKit runs in worktrees created by create_worktree.py
-- SpecKit reads TODO file created by create_worktree.py
-
-**quality-enforcer:**
-- Quality enforcer calls semantic_version.py to calculate version
-- Updates TODO frontmatter with semantic_version result
 
 **workflow-utilities:**
 - Uses workflow_archiver.py to archive TODO files
 - Uses vcs abstraction for PR creation (gh/az cli)
 
-**bmad-planner:**
-- BMAD planning happens before create_worktree.py
-- Worktree references ../planning/<slug>/ for context
+**agentdb-state-manager:**
+- Tracks workflow state transitions
+- Replaces legacy TODO file tracking
+
+**Legacy Skills (Archived):**
+- **bmad-planner**: Replaced by autonomous planning
+- **speckit-author**: Replaced by autonomous implementation
+- **quality-enforcer**: Replaced by Gemini Code Review
 
 ---
 
@@ -746,7 +740,7 @@ This skill implements a hybrid workflow:
 - **[SKILL.md](SKILL.md)** - Complete skill documentation
 - **[README.md](README.md)** - Human-readable overview
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 6-phase workflow guide
+- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 4-phase workflow guide
 
 **Child Directories:**
 - **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived files
@@ -754,7 +748,5 @@ This skill implements a hybrid workflow:
 ## Related Skills
 
 - **workflow-orchestrator** - Calls git-workflow-manager scripts
-- **speckit-author** - Runs in worktrees created by this skill
-- **quality-enforcer** - Uses semantic_version.py
 - **workflow-utilities** - Provides VCS abstraction and TODO utilities
-- **bmad-planner** - Planning happens before worktree creation
+- **agentdb-state-manager** - Tracks workflow state

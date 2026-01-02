@@ -1,7 +1,7 @@
 ---
 type: gemini-context
 directory: .gemini/skills
-purpose: Modular skill implementations (6 skills) for workflow automation.
+purpose: Modular skill implementations (6 skills) for v7x0 workflow automation.
 parent: ../GEMINI.md
 sibling_readme: null
 children:
@@ -20,19 +20,20 @@ children:
 Modular skill implementations (6 skills) for v7x0 workflow automation.
 
 **Archived skills** (see `ARCHIVED/`):
-- bmad-planner - Replaced by feature-dev plugin
-- speckit-author - Replaced by feature-dev plugin
-- quality-enforcer - Replaced by feature-dev code review
+- bmad-planner - Replaced by autonomous implementation
+- speckit-author - Replaced by autonomous implementation
+- quality-enforcer - Replaced by Gemini Code Review
 
 ## Contents
 
 - `UPDATE_CHECKLIST.md` - Documentation
 - `agentdb-state-manager/` - Subdirectory
-- `bmad-planner/` - Subdirectory
 - `git-workflow-manager/` - Subdirectory
 - `initialize-repository/` - Subdirectory
+- `tech-stack-adapter/` - Subdirectory
+- `workflow-orchestrator/` - Subdirectory
+- `workflow-utilities/` - Subdirectory
 - `__init__.py` - Python script
-- *...and 1 more items*
 
 ## Related
 

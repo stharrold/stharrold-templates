@@ -11,9 +11,6 @@ related_skills:
   - workflow-orchestrator - Main coordinator for workflow phases
   - tech-stack-adapter - Detects Python/uv project configuration
   - git-workflow-manager - Git operations, worktrees, semantic versioning
-  - bmad-planner - Creates BMAD planning documents (Phase 1)
-  - speckit-author - Creates detailed specifications (Phase 2)
-  - quality-enforcer - Enforces quality gates (Phase 3)
   - workflow-utilities - Shared utilities for all skills
   - agentdb-state-manager - Persistent state tracking (optional)
   - initialize-repository - This meta-skill (for future replication)
@@ -144,7 +141,7 @@ python .gemini/skills/initialize-repository/scripts/initialize_repository.py \
    - Stage all files (`git add .`)
    - Create initial commit on main:
      ```
-     chore: initialize repository with workflow system v5.2
+     chore: initialize repository with workflow system v7x0
 
      Bootstrapped from <source-repo> using initialize-repository meta-skill.
 
@@ -498,16 +495,13 @@ Phase 1-6: Normal workflow (bmad, speckit, quality, git, etc.)
 
 ### Always Copied (Required)
 
-**9 workflow skills:**
+**6 workflow skills:**
 1. workflow-orchestrator - Main coordinator for workflow phases
 2. tech-stack-adapter - Detects Python/uv project configuration
 3. git-workflow-manager - Git operations, worktrees, semantic versioning
-4. bmad-planner - Creates BMAD planning documents
-5. speckit-author - Creates detailed specifications
-6. quality-enforcer - Enforces quality gates (≥80% coverage)
-7. workflow-utilities - Shared utilities for all skills
-8. agentdb-state-manager - Persistent state tracking (optional)
-9. initialize-repository - This meta-skill (for future replication)
+4. workflow-utilities - Shared utilities for all skills
+5. agentdb-state-manager - Persistent state tracking (optional)
+6. initialize-repository - This meta-skill (for future replication)
 
 **Documentation:**
 - WORKFLOW.md (copied verbatim) - Complete 6-phase workflow guide
@@ -599,7 +593,7 @@ This file provides guidance to Gemini Code (gemini.ai/code) when working with co
 
 {description}
 
-## Workflow v5.2 Architecture
+## Workflow v7x0 Architecture
 
 This repository uses a **skill-based workflow system** located in `.gemini/skills/`.
 
@@ -657,7 +651,7 @@ context_stats:
   total_workflows_completed: 0
   current_token_usage: 0
   last_checkpoint: "{current_timestamp}"
-  recent_improvements: "Repository initialized with workflow system v5.2"
+  recent_improvements: "Repository initialized with workflow system v7x0"
 ---
 
 # Master TODO Manifest
@@ -997,9 +991,6 @@ SKILL_NAMES = [
     'workflow-orchestrator',
     'tech-stack-adapter',
     'git-workflow-manager',
-    'bmad-planner',
-    'speckit-author',
-    'quality-enforcer',
     'workflow-utilities',
     'agentdb-state-manager',
     'initialize-repository',

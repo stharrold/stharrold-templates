@@ -1,6 +1,6 @@
 # Workflow Guide - v7x0 (Implementation)
 
-**Version:** 6.0.0
+**Version:** 7.0.0
 **Date:** 2026-01-01
 **Architecture:** 4-phase workflow using built-in Gemini CLI tools
 
@@ -29,6 +29,21 @@ az account show         # Azure DevOps: Must be logged in
 
 uv --version            # Must be installed
 python3 --version       # Must be 3.11+
+```
+
+## Phase 0: Bootstrapping a New Repository
+
+This repository provides a meta-skill to bootstrap other projects with this workflow system.
+
+### From This Repository
+```bash
+python .gemini/skills/initialize-repository/scripts/initialize_repository.py . /path/to/new-repo
+```
+
+### From a Cloned Release
+If you have cloned `stharrold-templates` into a subdirectory (e.g., `.tmp/`):
+```bash
+python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/apply_workflow.py .tmp/stharrold-templates .
 ```
 
 ## v7x0 Workflow

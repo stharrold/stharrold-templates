@@ -99,6 +99,8 @@ Streamlined 4-phase workflow using built-in Gemini CLI tools:
 | 3 | `/workflow:v7x0_3-release` | Create release (develop->release->main) |
 | 4 | `/workflow:v7x0_4-backmerge` | Sync release (PR to develop, rebase contrib) |
 
+**Detailed Guide**: See [WORKFLOW.md](WORKFLOW.md) for step-by-step instructions.
+
 **Key differences from old v1-v7 workflow:**
 - No BMAD planning or SpecKit specifications (Implementation uses built-in tools)
 - No manual quality gates (Gemini Code Review automated via GitHub Actions)
@@ -156,7 +158,7 @@ uv run python .gemini/skills/git-workflow-manager/scripts/create_worktree.py \
   feature my-feature contrib/stharrold
 
 # Semantic version calculation
-uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v5.0.0
+uv run python .gemini/skills/git-workflow-manager/scripts/semantic_version.py develop v7x0.0
 
 # Archive management
 uv run python .gemini/skills/workflow-utilities/scripts/archive_manager.py list
@@ -436,9 +438,8 @@ git fetch --prune
 This repository can bootstrap new projects with the full workflow system:
 
 ```bash
-# From any location with stharrold-templates available:
-python stharrold-templates/.gemini/skills/initialize-repository/scripts/initialize_repository.py \
-  stharrold-templates /path/to/target-repo
+# From within stharrold-templates:
+python .gemini/skills/initialize-repository/scripts/initialize_repository.py . /path/to/target-repo
 ```
 
 **Interactive 4-phase Q&A:**
