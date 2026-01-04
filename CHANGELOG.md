@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **feature-dev command** - Replaced by built-in Gemini CLI tools for autonomous implementation.
 
+## [7.2.0] - 2026-01-04
+
+### Changed
+- **Dependencies** - Added `tomlkit` as a development dependency.
+- **Testing** - Updated `test_secrets.py` to use `tmp_path` fixture for better isolation.
+- **Workflow** - Disabled `gemini-dispatch.yml` workflow.
+- **Documentation** - Updated `GEMINI.md` references.
+
 ## [7.0.0] - 2026-01-01
 
 ### Removed
@@ -763,6 +771,7 @@ Earlier versions (< 5.0.0) used a different workflow architecture. See `ARCHIVED
 
 | Version | Date       | Type  | Description |
 |---------|------------|-------|-------------|
+| 7.2.0   | 2026-01-04 | MINOR | Disabled dispatch workflow + dependency updates |
 | 7.0.0   | 2026-01-01 | MAJOR | Streamlined for Gemini-only development + removed legacy tools |
 | 1.10.0  | 2025-11-16 | MINOR | MIT Agent Synchronization Pattern (Phase 1) + DuckDB compatibility fixes |
 | 1.9.0   | 2025-11-09 | MINOR | Work-item generation workflow + VCS adapter enhancements |
