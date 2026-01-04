@@ -173,7 +173,7 @@ service = "test-service"
         config_file.write_text(config_content)
 
         with patch.object(run, "get_repo_root", return_value=tmp_path):
-            config = run.load_secrets_config()
+            config = run.load_secrets_config(tmp_path)
             assert config["required"] == ["SECRET_A", "SECRET_B"]
             assert config["optional"] == ["SECRET_C"]
             assert config["service"] == "test-service"
@@ -194,7 +194,7 @@ service = "empty-service"
         config_file.write_text(config_content)
 
         with patch.object(run, "get_repo_root", return_value=tmp_path):
-            config = run.load_secrets_config()
+            config = run.load_secrets_config(tmp_path)
             assert config["required"] == []
             assert config["optional"] == []
 
@@ -224,7 +224,7 @@ service = "test-service"
                         # Remove env var if it exists
                         os.environ.pop("INJECT_TEST", None)
 
-                        config = run.load_secrets_config()
+                        config = run.load_secrets_config(tmp_path)
                         missing_req, missing_opt = run.inject_secrets(config)
 
                         assert missing_req == []
@@ -254,7 +254,7 @@ service = "test-service"
                     with patch.object(run, "get_secret_from_keyring", return_value=None):
                         os.environ.pop("MISSING_SECRET", None)
 
-                        config = run.load_secrets_config()
+                        config = run.load_secrets_config(tmp_path)
                         missing_req, missing_opt = run.inject_secrets(config)
 
                         assert "MISSING_SECRET" in missing_req
@@ -280,7 +280,7 @@ service = "test-service"
                     with patch.object(run, "get_secret_from_keyring", return_value=None):
                         os.environ.pop("OPTIONAL_SECRET", None)
 
-                        config = run.load_secrets_config()
+                        config = run.load_secrets_config(tmp_path)
                         missing_req, missing_opt = run.inject_secrets(config)
 
                         assert missing_req == []  # No required failures
@@ -307,7 +307,7 @@ service = "test-service"
 
         with patch.object(secrets_setup, "get_repo_root", return_value=tmp_path):
             with patch.object(secrets_setup, "get_secret", return_value="exists"):
-                config = secrets_setup.load_secrets_config()
+                config = secrets_setup.load_secrets_config(tmp_path)
                 result = secrets_setup.check_secrets(config)
                 assert result == 0
 
@@ -328,6 +328,6 @@ service = "test-service"
 
         with patch.object(secrets_setup, "get_repo_root", return_value=tmp_path):
             with patch.object(secrets_setup, "get_secret", return_value=None):
-                config = secrets_setup.load_secrets_config()
+                config = secrets_setup.load_secrets_config(tmp_path)
                 result = secrets_setup.check_secrets(config)
                 assert result == 1
