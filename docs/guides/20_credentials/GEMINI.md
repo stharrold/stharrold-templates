@@ -139,3 +139,7 @@ This directory implements credential management template patterns:
 ---
 
 *Each file in this directory maintains the 30KB limit for optimal AI context processing. Cross-references provide navigation without context pollution.*
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: guides

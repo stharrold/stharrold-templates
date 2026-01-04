@@ -41,3 +41,15 @@ Modular skill implementations (6 skills) for v7x1 workflow automation.
 - **agentdb-state-manager**: [agentdb-state-manager/GEMINI.md](agentdb-state-manager/GEMINI.md)
 - **bmad-planner**: [bmad-planner/GEMINI.md](bmad-planner/GEMINI.md)
 - **git-workflow-manager**: [git-workflow-manager/GEMINI.md](git-workflow-manager/GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: .gemini
+
+**Child Directories:**
+- **[agentdb-state-manager/GEMINI.md](agentdb-state-manager/GEMINI.md)** - Agentdb State Manager
+- **[git-workflow-manager/GEMINI.md](git-workflow-manager/GEMINI.md)** - Git Workflow Manager
+- **[initialize-repository/GEMINI.md](initialize-repository/GEMINI.md)** - Initialize Repository
+- **[tech-stack-adapter/GEMINI.md](tech-stack-adapter/GEMINI.md)** - Tech Stack Adapter
+- **[workflow-orchestrator/GEMINI.md](workflow-orchestrator/GEMINI.md)** - Workflow Orchestrator
+- **[workflow-utilities/GEMINI.md](workflow-utilities/GEMINI.md)** - Workflow Utilities

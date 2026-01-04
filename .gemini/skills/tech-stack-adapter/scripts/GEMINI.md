@@ -22,3 +22,7 @@ Executable Python scripts for this skill.
 ## Related
 
 - **Parent**: [tech-stack-adapter](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: tech-stack-adapter

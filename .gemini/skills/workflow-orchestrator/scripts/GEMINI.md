@@ -21,3 +21,7 @@ Executable Python scripts for this skill.
 ## Related
 
 - **Parent**: [workflow-orchestrator](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: workflow-orchestrator

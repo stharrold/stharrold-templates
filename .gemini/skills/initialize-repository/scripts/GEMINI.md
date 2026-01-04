@@ -23,3 +23,7 @@ Executable Python scripts for this skill.
 ## Related
 
 - **Parent**: [initialize-repository](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: initialize-repository

@@ -22,3 +22,10 @@ Slash command definitions organized by category.
 
 - **Parent**: [.gemini](../GEMINI.md)
 - **workflow**: [workflow/GEMINI.md](workflow/GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: .gemini
+
+**Child Directories:**
+- **[workflow/GEMINI.md](workflow/GEMINI.md)** - Workflow

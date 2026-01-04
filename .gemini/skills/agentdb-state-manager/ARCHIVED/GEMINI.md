@@ -20,5 +20,5 @@ been superseded by newer versions but are preserved for reference.
 
 ## Related Documentation
 
-- **[README.md](README.md)** - Human-readable documentation for archived files
-- **[../GEMINI.md](../GEMINI.md)** - Current agentdb-state-manager context
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: agentdb-state-manager

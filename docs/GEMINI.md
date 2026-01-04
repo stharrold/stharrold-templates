@@ -31,3 +31,13 @@ Documentation root for guides, references, and archives.
 - **guides**: [guides/GEMINI.md](guides/GEMINI.md)
 - **reference**: [reference/GEMINI.md](reference/GEMINI.md)
 - **research**: [research/GEMINI.md](research/GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: Root
+
+**Child Directories:**
+- **[archived/GEMINI.md](archived/GEMINI.md)** - Archived
+- **[guides/GEMINI.md](guides/GEMINI.md)** - Guides
+- **[reference/GEMINI.md](reference/GEMINI.md)** - Reference
+- **[research/GEMINI.md](research/GEMINI.md)** - Research

@@ -31,3 +31,8 @@ Workflow reference documentation and quick-reference guides.
 
 - **Parent**: [docs](../GEMINI.md)
 - **Main Workflow**: [WORKFLOW.md](../../WORKFLOW.md) (14KB overview + links)
+
+## Related Documentation
+
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: docs

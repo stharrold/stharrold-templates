@@ -19,5 +19,5 @@ This directory contains deprecated files from the initialize-repository skill th
 
 ## Related Documentation
 
-- **[README.md](README.md)** - Human-readable documentation for archived files
-- **[../GEMINI.md](../GEMINI.md)** - Current initialize-repository context
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: initialize-repository
