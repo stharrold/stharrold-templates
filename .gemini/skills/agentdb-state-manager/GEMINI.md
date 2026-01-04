@@ -166,12 +166,17 @@ python .gemini/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 4. **Session awareness:** AgentDB lasts 24 hours, re-initialize if expired
 5. **specs/*/tasks.md is truth:** AgentDB caches specs data for efficiency
 
+
 ## Related Documentation
 
-- **[SKILL.md](SKILL.md)** - Complete skill documentation
-- **[README.md](README.md)** - Human-readable overview
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[templates/workflow-states.json](templates/workflow-states.json)** - State definitions
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: skills
+
+**Child Directories:**
+- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived
+- **[schemas/GEMINI.md](schemas/GEMINI.md)** - Schemas
+- **[scripts/GEMINI.md](scripts/GEMINI.md)** - Scripts
+- **[templates/GEMINI.md](templates/GEMINI.md)** - Templates
 
 ## Related Skills
 

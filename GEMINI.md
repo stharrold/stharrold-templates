@@ -479,3 +479,12 @@ uv run python .gemini/skills/workflow-utilities/scripts/generate_gemini_md.py
 # Update children references in existing GEMINI.md files
 uv run python .gemini/skills/workflow-utilities/scripts/update_gemini_md_refs.py
 ```
+
+## Related Documentation
+
+- **[README.md](README.md)** - Human-readable documentation for this directory
+
+**Child Directories:**
+- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived
+- **[docs/GEMINI.md](docs/GEMINI.md)** - Docs
+- **[tests/GEMINI.md](tests/GEMINI.md)** - Tests

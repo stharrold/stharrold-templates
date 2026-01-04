@@ -24,3 +24,7 @@ Integration tests for end-to-end workflow verification.
 ## Related
 
 - **Parent**: [tests](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: tests

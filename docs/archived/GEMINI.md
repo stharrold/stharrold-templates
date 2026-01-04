@@ -25,3 +25,7 @@ Compressed and deprecated documentation.
 ## Related
 
 - **Parent**: [docs](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: docs

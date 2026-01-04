@@ -35,3 +35,11 @@ Contents:
 - **Parent**: [stharrold-templates](../GEMINI.md)
 - **commands**: [commands/GEMINI.md](commands/GEMINI.md)
 - **skills**: [skills/GEMINI.md](skills/GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: Root
+
+**Child Directories:**
+- **[commands/GEMINI.md](commands/GEMINI.md)** - Commands
+- **[skills/GEMINI.md](skills/GEMINI.md)** - Skills

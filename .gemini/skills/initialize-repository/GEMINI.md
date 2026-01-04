@@ -1102,17 +1102,15 @@ SKILL_NAMES = [
 
 ---
 
+
 ## Related Documentation
 
-- **[SKILL.md](SKILL.md)** - Complete skill documentation (558 lines)
-- **[README.md](README.md)** - Human-readable overview
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 6-phase workflow guide
-- **[CONTRIBUTING.md](../../CONTRIBUTING.md)** - Contributor guidelines
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: skills
 
 **Child Directories:**
-- **[scripts/](scripts/)** - Initialization script (initialize_repository.py, 993 lines)
-- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived files
+- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived
+- **[scripts/GEMINI.md](scripts/GEMINI.md)** - Scripts
 
 ## Related Skills
 

@@ -26,3 +26,7 @@ Executable Python scripts for this skill.
 ## Related
 
 - **Parent**: [git-workflow-manager](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: git-workflow-manager

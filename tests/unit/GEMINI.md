@@ -24,3 +24,7 @@ Unit tests for individual components and functions.
 ## Related
 
 - **Parent**: [tests](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: tests

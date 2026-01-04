@@ -25,3 +25,7 @@ Contract tests verifying API boundaries and interfaces.
 ## Related
 
 - **Parent**: [tests](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: tests

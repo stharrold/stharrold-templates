@@ -21,3 +21,7 @@ Markdown and code templates for this skill.
 ## Related
 
 - **Parent**: [agentdb-state-manager](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: agentdb-state-manager

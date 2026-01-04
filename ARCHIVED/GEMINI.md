@@ -20,3 +20,8 @@ Zip files containing deprecated code and resources.
 ## Restoration
 
 Use archive_manager.py to list and extract archived files.
+
+## Related Documentation
+
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: Root

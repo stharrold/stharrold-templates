@@ -459,15 +459,16 @@ Phase 4: Backmerge (/workflow:v7x1_4-backmerge)
 
 ---
 
+
 ## Related Documentation
 
-- **[SKILL.md](SKILL.md)** - Complete orchestration algorithms and decision trees
-- **[README.md](README.md)** - Human-readable overview
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[WORKFLOW.md](../../WORKFLOW.md)** - Complete 4-phase workflow guide
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: skills
 
 **Child Directories:**
-- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived files
+- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived
+- **[scripts/GEMINI.md](scripts/GEMINI.md)** - Scripts
+- **[templates/GEMINI.md](templates/GEMINI.md)** - Templates
 
 ## Related Skills
 

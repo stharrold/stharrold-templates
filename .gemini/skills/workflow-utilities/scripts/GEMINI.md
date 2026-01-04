@@ -27,3 +27,7 @@ Executable Python scripts for this skill.
 ## Related
 
 - **Parent**: [workflow-utilities](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: workflow-utilities
