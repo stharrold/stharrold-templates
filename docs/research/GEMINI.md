@@ -32,3 +32,7 @@ Research reports and analysis documents for AI agent workflows, architectures, a
 ## Related
 
 - **Parent**: [docs](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: docs

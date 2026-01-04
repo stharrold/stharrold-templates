@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["keyring>=24.0.0"]
+# dependencies = ["keyring>=24.0.0", "tomlkit"]
 # ///
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
@@ -11,12 +11,14 @@ This script helps configure secrets in the OS keyring for local development.
 It reads secret definitions from secrets.toml and prompts for values.
 
 Usage:
-    uv run scripts/secrets_setup.py           # Interactive setup
-    uv run scripts/secrets_setup.py --check   # Verify secrets exist
+    uv run scripts/secrets_setup.py                     # Interactive setup
+    uv run scripts/secrets_setup.py --check             # Verify secrets exist
+    uv run scripts/secrets_setup.py --set NAME [VALUE]  # Set specific secret
+    uv run scripts/secrets_setup.py --root PATH         # Specify project root
 
 Example:
-    $ uv run scripts/secrets_setup.py
-    [INFO] Setting up secrets for service: stharrold-templates
+    $ uv run scripts/secrets_setup.py --root ../my-project
+    [INFO] Setting up secrets for service: my-project
 
     Setting up required secrets:
     DB_PASSWORD: [exists] Keep existing value? [Y/n]:
@@ -35,10 +37,18 @@ import tomllib
 from pathlib import Path
 
 import keyring
+import tomlkit
 
 
-def get_repo_root() -> Path:
-    """Get the repository root directory as an absolute path."""
+def get_repo_root(target_path: Path | None = None) -> Path:
+    """Get the repository root directory as an absolute path.
+
+    Args:
+        target_path: Optional manual override for the root path.
+    """
+    if target_path:
+        return target_path.resolve()
+
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -52,13 +62,16 @@ def get_repo_root() -> Path:
         return Path(__file__).parent.parent.resolve()
 
 
-def load_secrets_config() -> dict:
+def load_secrets_config(root_path: Path) -> dict:
     """Load secrets configuration from secrets.toml.
+
+    Args:
+        root_path: The project root directory.
 
     Returns:
         Dictionary with 'required', 'optional', and 'service' keys.
     """
-    config_path = get_repo_root() / "secrets.toml"
+    config_path = root_path / "secrets.toml"
     if not config_path.exists():
         print(f"[FAIL] secrets.toml not found at: {config_path}")
         print()
@@ -84,6 +97,57 @@ def load_secrets_config() -> dict:
         "optional": data.get("secrets", {}).get("optional", []),
         "service": data.get("keyring", {}).get("service", "default"),
     }
+
+
+def add_secret_to_config(root_path: Path, name: str, is_required: bool) -> bool:
+    """Add a secret to secrets.toml using tomlkit to preserve formatting.
+
+    Args:
+        root_path: The project root directory.
+        name: Secret name.
+        is_required: If True, add to 'required' list, else 'optional'.
+
+    Returns:
+        True if successful, False otherwise.
+    """
+    config_path = root_path / "secrets.toml"
+    if not config_path.exists():
+        print(f"[FAIL] secrets.toml not found at: {config_path}")
+        return False
+
+    try:
+        with open(config_path, encoding="utf-8") as f:
+            doc = tomlkit.parse(f.read())
+
+        # Ensure [secrets] table exists
+        secrets_section = doc.get("secrets")
+        if secrets_section is None:
+            doc["secrets"] = tomlkit.table()
+            secrets_section = doc["secrets"]
+
+        key = "required" if is_required else "optional"
+
+        # Ensure list exists
+        current_list = secrets_section.get(key)
+        if current_list is None:
+            secrets_section[key] = []
+            current_list = secrets_section[key]
+
+        # Add if not present
+        if name not in current_list:
+            current_list.append(name)
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                f.write(doc.as_string())
+            print(f"[INFO] Added '{name}' to '{key}' secrets in secrets.toml")
+            return True
+        else:
+            print(f"[INFO] '{name}' already exists in '{key}' secrets")
+            return True
+
+    except Exception as e:
+        print(f"[FAIL] Failed to update secrets.toml: {e}")
+        return False
 
 
 def is_ci() -> bool:
@@ -291,17 +355,61 @@ def interactive_setup(config: dict) -> int:
         return 0
 
 
+def set_single_secret_cmd(root_path: Path, config: dict, name: str, value: str | None = None) -> int:
+    """Set a single secret, optionally prompting for value.
+
+    Args:
+        root_path: The project root directory.
+        config: Secrets configuration.
+        name: Secret name.
+        value: Secret value (optional).
+
+    Returns:
+        Exit code.
+    """
+    service = config["service"]
+
+    # Check if secret is defined in config
+    all_secrets = config["required"] + config["optional"]
+    if name not in all_secrets:
+        print(f"[WARN] '{name}' is not defined in secrets.toml")
+        should_add = input(f"Add '{name}' to secrets.toml? [Y/n]: ").strip().lower()
+        if should_add in ("", "y", "yes"):
+            is_req_input = input("Add to 'required' list? (default: optional) [y/N]: ").strip().lower()
+            is_required = is_req_input in ("y", "yes")
+            if add_secret_to_config(root_path, name, is_required):
+                # We assume success means it's now in the file.
+                pass
+
+    if value is None:
+        print(f"Setting secret: {name}")
+        # Use getpass to hide input
+        value = getpass.getpass("Enter value: ")
+        if not value:
+            print("[FAIL] Secret value cannot be empty")
+            return 1
+
+    if set_secret(service, name, value):
+        print(f"[OK] Secret '{name}' saved to keyring service '{service}'")
+        return 0
+    return 1
+
+
 def print_usage() -> None:
     """Print usage information."""
-    print("Usage: uv run scripts/secrets_setup.py [--check]")
+    print("Usage: uv run scripts/secrets_setup.py [options]")
     print()
     print("Options:")
-    print("  --check    Verify secrets exist without modifying")
-    print("  --help     Show this help message")
+    print("  --check              Verify secrets exist without modifying")
+    print("  --set <name> [val]   Set a specific secret (prompts if value missing)")
+    print("  --root <path>        Specify the project root (defaults to CWD)")
+    print("  --help               Show this help message")
     print()
     print("Examples:")
-    print("  uv run scripts/secrets_setup.py          # Interactive setup")
-    print("  uv run scripts/secrets_setup.py --check  # Verify secrets")
+    print("  uv run scripts/secrets_setup.py                       # Interactive setup (all)")
+    print("  uv run scripts/secrets_setup.py --check               # Verify secrets")
+    print("  uv run scripts/secrets_setup.py --set API_KEY         # Set one secret (prompt)")
+    print("  uv run scripts/secrets_setup.py --root ../my-project  # Set secrets for other repo")
 
 
 def main() -> int:
@@ -330,13 +438,46 @@ def main() -> int:
         print_usage()
         return 0
 
-    # Load configuration
-    config = load_secrets_config()
+    target_root = None
+    if "--root" in args:
+        try:
+            idx = args.index("--root")
+            if len(args) > idx + 1:
+                target_root = Path(args[idx + 1])
+                # Clean up args so other parsers don't get confused
+                # We simply remove them from the list we process later
+                del args[idx : idx + 2]
+            else:
+                print("[FAIL] Usage: --root <path>")
+                return 1
+        except IndexError:
+            pass
+
+    # Determine project root and load config
+    root_path = get_repo_root(target_root)
+    config = load_secrets_config(root_path)
 
     if "--check" in args:
         return check_secrets(config)
-    else:
-        return interactive_setup(config)
+
+    if "--set" in args:
+        try:
+            idx = args.index("--set")
+            if len(args) <= idx + 1:
+                print("[FAIL] Usage: --set <name> [value]")
+                return 1
+
+            name = args[idx + 1]
+            value = None
+            if len(args) > idx + 2:
+                value = args[idx + 2]
+
+            return set_single_secret_cmd(root_path, config, name, value)
+        except IndexError:
+            print("[FAIL] Usage: --set <name> [value]")
+            return 1
+
+    return interactive_setup(config)
 
 
 if __name__ == "__main__":

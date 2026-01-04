@@ -610,15 +610,17 @@ directory/
 
 ---
 
+
+
+
 ## Related Documentation
 
-- **[SKILL.md](SKILL.md)** - Complete skill documentation
-- **[README.md](README.md)** - Human-readable overview
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-- **[UPDATE_CHECKLIST.md](../../UPDATE_CHECKLIST.md)** - Skill update checklist
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: skills
 
 **Child Directories:**
-- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived files
+- **[ARCHIVED/GEMINI.md](ARCHIVED/GEMINI.md)** - Archived
+- **[scripts/GEMINI.md](scripts/GEMINI.md)** - Scripts
 
 ## Related Skills
 

@@ -16,11 +16,14 @@ It supports multiple secret sources with the following precedence:
 4. Local development -> fetch from OS keyring
 
 Usage:
-    uv run scripts/run.py <command> [args...]
+    uv run scripts/run.py [options] <command> [args...]
+
+Options:
+    --root PATH    Specify project root containing secrets.toml
 
 Example:
     uv run scripts/run.py uv run pytest
-    uv run scripts/run.py python main.py --debug
+    uv run scripts/run.py --root ../project python main.py
 """
 
 from __future__ import annotations
@@ -44,8 +47,15 @@ def load_keyring() -> None:
         keyring = kr
 
 
-def get_repo_root() -> Path:
-    """Get the repository root directory as an absolute path."""
+def get_repo_root(target_path: Path | None = None) -> Path:
+    """Get the repository root directory as an absolute path.
+
+    Args:
+        target_path: Optional manual override for the root path.
+    """
+    if target_path:
+        return target_path.resolve()
+
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -59,13 +69,16 @@ def get_repo_root() -> Path:
         return Path(__file__).parent.parent.resolve()
 
 
-def load_secrets_config() -> dict:
+def load_secrets_config(root_path: Path) -> dict:
     """Load secrets configuration from secrets.toml.
+
+    Args:
+        root_path: Project root directory.
 
     Returns:
         Dictionary with 'required', 'optional', and 'service' keys.
     """
-    config_path = get_repo_root() / "secrets.toml"
+    config_path = root_path / "secrets.toml"
     if not config_path.exists():
         print(f"[FAIL] secrets.toml not found at: {config_path}")
         print()
@@ -213,7 +226,7 @@ def inject_secrets(config: dict) -> tuple[list[str], list[str]]:
             print(f"[OK] {name}: loaded from {source}")
         else:
             missing_required.append(name)
-            print(f"[FAIL] {name}: {source}")
+            print(f"[FAIL] {name}: {source} (service: {service})")
 
     # Process optional secrets
     for name in config["optional"]:
@@ -230,13 +243,16 @@ def inject_secrets(config: dict) -> tuple[list[str], list[str]]:
 
 def print_usage() -> None:
     """Print usage information."""
-    print("Usage: uv run scripts/run.py <command> [args...]")
+    print("Usage: uv run scripts/run.py [options] <command> [args...]")
     print()
     print("Injects secrets from keyring/environment, then runs the command.")
     print()
+    print("Options:")
+    print("  --root PATH    Specify project root containing secrets.toml")
+    print()
     print("Examples:")
     print("  uv run scripts/run.py uv run pytest")
-    print("  uv run scripts/run.py python main.py")
+    print("  uv run scripts/run.py --root ../my-project python main.py")
     print()
     print("Setup (local development):")
     print("  uv run scripts/secrets_setup.py")
@@ -248,12 +264,29 @@ def main() -> int:
     Returns:
         Exit code (0 for success, non-zero for failure).
     """
-    if len(sys.argv) < 2:
+    args = sys.argv[1:]
+    target_root = None
+
+    # Parse --root flag manually before handing over to command
+    # We only look at the start of args to avoid stealing flags from the wrapped command
+    if len(args) > 0 and args[0] == "--root":
+        try:
+            if len(args) > 1:
+                target_root = Path(args[1])
+                del args[0:2]  # Remove --root and value
+            else:
+                print("[FAIL] Usage: --root <path>")
+                return 1
+        except IndexError:
+            pass
+
+    if len(args) < 1:
         print_usage()
         return 1
 
     # Load configuration
-    config = load_secrets_config()
+    root_path = get_repo_root(target_root)
+    config = load_secrets_config(root_path)
 
     # Inject secrets
     missing_required, _ = inject_secrets(config)
@@ -275,7 +308,7 @@ def main() -> int:
 
     # Execute the command
     print()
-    cmd = sys.argv[1:]
+    cmd = args
     print(f"[INFO] Running: {' '.join(cmd)}")
     print("-" * 60)
 

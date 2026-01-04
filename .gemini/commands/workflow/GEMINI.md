@@ -25,3 +25,7 @@ children:
 ## Related
 
 - **Parent**: [commands](../GEMINI.md)
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: commands

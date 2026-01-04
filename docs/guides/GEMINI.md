@@ -111,3 +111,13 @@ For new projects using this template structure:
 ---
 
 *This orchestrator defines the architectural foundation for all subdirectory guides. Update project metadata above to customize for specific projects.*
+
+## Related Documentation
+
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: docs
+
+**Child Directories:**
+- **[10_mcp/GEMINI.md](10_mcp/GEMINI.md)** - 10 Mcp
+- **[20_credentials/GEMINI.md](20_credentials/GEMINI.md)** - 20 Credentials
+- **[30_implementation/GEMINI.md](30_implementation/GEMINI.md)** - 30 Implementation
+- **[40_deployment/GEMINI.md](40_deployment/GEMINI.md)** - 40 Deployment

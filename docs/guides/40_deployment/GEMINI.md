@@ -39,3 +39,8 @@ bash apply-workflow-batch.sh
 ```bash
 bash verify-workflow.sh
 ```
+
+## Related Documentation
+
+- **[README.md](README.md)** - Human-readable documentation for this directory
+- **[../GEMINI.md](../GEMINI.md)** - Parent directory: guides
