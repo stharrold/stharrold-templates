@@ -14,10 +14,11 @@ Usage:
     uv run scripts/secrets_setup.py                     # Interactive setup
     uv run scripts/secrets_setup.py --check             # Verify secrets exist
     uv run scripts/secrets_setup.py --set NAME [VALUE]  # Set specific secret
+    uv run scripts/secrets_setup.py --root PATH         # Specify project root
 
 Example:
-    $ uv run scripts/secrets_setup.py
-    [INFO] Setting up secrets for service: stharrold-templates
+    $ uv run scripts/secrets_setup.py --root ../my-project
+    [INFO] Setting up secrets for service: my-project
 
     Setting up required secrets:
     DB_PASSWORD: [exists] Keep existing value? [Y/n]:
@@ -39,8 +40,15 @@ import keyring
 import tomlkit
 
 
-def get_repo_root() -> Path:
-    """Get the repository root directory as an absolute path."""
+def get_repo_root(target_path: Path | None = None) -> Path:
+    """Get the repository root directory as an absolute path.
+
+    Args:
+        target_path: Optional manual override for the root path.
+    """
+    if target_path:
+        return target_path.resolve()
+
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -54,13 +62,16 @@ def get_repo_root() -> Path:
         return Path(__file__).parent.parent.resolve()
 
 
-def load_secrets_config() -> dict:
+def load_secrets_config(root_path: Path) -> dict:
     """Load secrets configuration from secrets.toml.
+
+    Args:
+        root_path: The project root directory.
 
     Returns:
         Dictionary with 'required', 'optional', and 'service' keys.
     """
-    config_path = get_repo_root() / "secrets.toml"
+    config_path = root_path / "secrets.toml"
     if not config_path.exists():
         print(f"[FAIL] secrets.toml not found at: {config_path}")
         print()
@@ -88,17 +99,18 @@ def load_secrets_config() -> dict:
     }
 
 
-def add_secret_to_config(name: str, is_required: bool) -> bool:
+def add_secret_to_config(root_path: Path, name: str, is_required: bool) -> bool:
     """Add a secret to secrets.toml using tomlkit to preserve formatting.
 
     Args:
+        root_path: The project root directory.
         name: Secret name.
         is_required: If True, add to 'required' list, else 'optional'.
 
     Returns:
         True if successful, False otherwise.
     """
-    config_path = get_repo_root() / "secrets.toml"
+    config_path = root_path / "secrets.toml"
     if not config_path.exists():
         print(f"[FAIL] secrets.toml not found at: {config_path}")
         return False
@@ -343,10 +355,11 @@ def interactive_setup(config: dict) -> int:
         return 0
 
 
-def set_single_secret_cmd(config: dict, name: str, value: str | None = None) -> int:
+def set_single_secret_cmd(root_path: Path, config: dict, name: str, value: str | None = None) -> int:
     """Set a single secret, optionally prompting for value.
 
     Args:
+        root_path: The project root directory.
         config: Secrets configuration.
         name: Secret name.
         value: Secret value (optional).
@@ -364,7 +377,7 @@ def set_single_secret_cmd(config: dict, name: str, value: str | None = None) -> 
         if should_add in ("", "y", "yes"):
             is_req_input = input("Add to 'required' list? (default: optional) [y/N]: ").strip().lower()
             is_required = is_req_input in ("y", "yes")
-            if add_secret_to_config(name, is_required):
+            if add_secret_to_config(root_path, name, is_required):
                 # We assume success means it's now in the file.
                 pass
 
@@ -389,13 +402,14 @@ def print_usage() -> None:
     print("Options:")
     print("  --check              Verify secrets exist without modifying")
     print("  --set <name> [val]   Set a specific secret (prompts if value missing)")
+    print("  --root <path>        Specify the project root (defaults to CWD)")
     print("  --help               Show this help message")
     print()
     print("Examples:")
     print("  uv run scripts/secrets_setup.py                       # Interactive setup (all)")
     print("  uv run scripts/secrets_setup.py --check               # Verify secrets")
     print("  uv run scripts/secrets_setup.py --set API_KEY         # Set one secret (prompt)")
-    print("  uv run scripts/secrets_setup.py --set API_KEY myval   # Set one secret (direct)")
+    print("  uv run scripts/secrets_setup.py --root ../my-project  # Set secrets for other repo")
 
 
 def main() -> int:
@@ -424,8 +438,24 @@ def main() -> int:
         print_usage()
         return 0
 
-    # Load configuration
-    config = load_secrets_config()
+    target_root = None
+    if "--root" in args:
+        try:
+            idx = args.index("--root")
+            if len(args) > idx + 1:
+                target_root = Path(args[idx + 1])
+                # Clean up args so other parsers don't get confused
+                # We simply remove them from the list we process later
+                del args[idx : idx + 2]
+            else:
+                print("[FAIL] Usage: --root <path>")
+                return 1
+        except IndexError:
+            pass
+
+    # Determine project root and load config
+    root_path = get_repo_root(target_root)
+    config = load_secrets_config(root_path)
 
     if "--check" in args:
         return check_secrets(config)
@@ -442,7 +472,7 @@ def main() -> int:
             if len(args) > idx + 2:
                 value = args[idx + 2]
 
-            return set_single_secret_cmd(config, name, value)
+            return set_single_secret_cmd(root_path, config, name, value)
         except IndexError:
             print("[FAIL] Usage: --set <name> [value]")
             return 1
