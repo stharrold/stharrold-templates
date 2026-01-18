@@ -201,7 +201,7 @@ Please resolve conflicts in GitHub UI and merge.
 
 ### cleanup_release.py
 
-Deletes release branch after successful release and back-merge.
+Instructs user to delete release branch after successful release and back-merge.
 
 ```bash
 python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
@@ -219,8 +219,8 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 
 **Steps:**
 1. Runs comprehensive safety checks
-2. Deletes local release branch (git branch -d)
-3. Deletes remote release branch
+2. Instructs user to manually delete local release branch
+3. Instructs user to manually delete remote release branch
 4. Archives TODO file
 
 **Output:**
@@ -228,8 +228,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 ✓ Verified tag v1.1.0 exists
 ✓ Verified tag on main branch
 ✓ Verified back-merge to develop complete
-✓ Deleted local branch: release/v1.1.0
-✓ Deleted remote branch: origin/release/v1.1.0
+[NOTE] Manual branch deletion required for: release/v1.1.0
 ✓ Archived: TODO_release_20251023T143000Z_v1-1-0.md
 ✓ Release workflow complete for v1.1.0
 ```
@@ -397,7 +396,7 @@ The release scripts implement the 8-step process documented in WORKFLOW.md Phase
 | 5.4 | Manual | User merges in GitHub UI |
 | 5.5 | tag_release.py | Tag release on main |
 | 5.6 | backmerge_release.py | Back-merge to develop |
-| 5.7 | cleanup_release.py | Delete release branch |
+| 5.7 | cleanup_release.py | Archive state (manual branch deletion) |
 | 5.8 | daily_rebase.py | Update contrib branch |
 
 ### Error Recovery
