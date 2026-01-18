@@ -655,19 +655,27 @@ subprocess.run([
     'main'
 ], check=True)
 
-# Step 5: Back-merge to develop
+# Step 5: Back-merge to develop (Part 1: PR)
 subprocess.run([
     'python',
-    '.gemini/skills/git-workflow-manager/scripts/backmerge_release.py',
-    'v1.6.0',
-    'develop'
+    '.gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py',
+    'pr-develop'
 ], check=True)
 
-# Step 6: Cleanup release branch
+# Step 6: User merges PR (release -> develop) in GitHub UI
+
+# Step 7: Rebase contrib (Part 2)
 subprocess.run([
     'python',
-    '.gemini/skills/git-workflow-manager/scripts/cleanup_release.py',
-    'v1.6.0'
+    '.gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py',
+    'rebase-contrib'
+], check=True)
+
+# Step 8: Cleanup release branch (Part 3)
+subprocess.run([
+    'python',
+    '.gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py',
+    'cleanup-release'
 ], check=True)
 ```
 
