@@ -59,7 +59,7 @@ python .tmp/stharrold-templates/.gemini/skills/initialize-repository/scripts/app
     | create release, PR to main, tag
     v
 /workflow:v7x1_4-backmerge
-    | PR release->develop, rebase contrib, cleanup
+    | PR release->develop, rebase contrib, manual cleanup
 ```
 
 ### Step 1: Create Worktree (`/workflow:v7x1_1-worktree`)
@@ -103,7 +103,7 @@ From main repo, after implementation is complete:
 ```
 
 **Two modes:**
-- **Full mode** (with branch arg): PR feature->contrib, cleanup worktree, PR contrib->develop
+- **Full mode** (with branch arg): PR feature->contrib, manual worktree cleanup, manual branch cleanup, PR contrib->develop
 - **Contrib-only mode** (no arg): PR contrib->develop only
 
 **Manual gates:** PRs require approval in GitHub/Azure DevOps UI.
@@ -133,7 +133,7 @@ Syncs release changes back:
 **Actions:**
 - PR release->develop (requires approval)
 - Rebases contrib on develop
-- Deletes release branch
+- Instructs manual deletion of release branch
 
 ## Branch Structure
 
@@ -160,7 +160,7 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 - `feature/*` - Feature development
 
 **Ephemeral branches:**
-- `release/*` - Created in `/workflow:v7x1_3-release`, deleted in `/workflow:v7x1_4-backmerge`
+- `release/*` - Created in `/workflow:v7x1_3-release`, manually deleted after `/workflow:v7x1_4-backmerge`
 
 ## Key Differences from v1-v7
 

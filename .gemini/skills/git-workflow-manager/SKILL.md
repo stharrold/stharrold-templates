@@ -41,12 +41,8 @@ hotfix/vX.Y.Z-hotfix.N       ← Production hotfix (worktree)
 
 **All scripts in this skill comply with:**
 1. No direct commits to `main` (except tag operations)
-2. No direct commits to `develop` (except backmerge_release.py - documented exception)
+2. No direct commits to `develop`
 3. All merges via pull requests (user merges in GitHub/Azure DevOps UI)
-
-**Exception documented:**
-- `backmerge_release.py` commits to `develop` during Phase 5.5 back-merge
-- This is safe: merges from release branch only, no code changes, maintains history
 
 **Script validation:**
 - All scripts in `scripts/` directory are validated for compliance
@@ -161,47 +157,32 @@ python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
 ✓ GitHub release created: https://github.com/user/german/releases/tag/v1.1.0
 ```
 
-### backmerge_release.py
+### backmerge_workflow.py
 
-Merges release branch back to develop after main merge.
+Orchestrates backmerge of release changes to develop via manual PR.
 
 ```bash
-python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
-  <version> <target_branch>
+python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py \
+  <step>
 ```
-
-**Arguments:**
-- `version`: Release version (e.g., v1.1.0)
-- `target_branch`: Branch to merge into (typically 'develop')
 
 **Steps:**
-1. Validates version and verifies tag exists
-2. Checks out and pulls target branch
-3. Attempts merge with --no-ff strategy
-4. On success: pushes to remote
-5. On conflicts: creates PR for manual resolution
+1. `pr-develop`: Creates PR from release branch to develop
+2. `rebase-contrib`: Rebases contrib on updated develop (after manual merge)
+3. `cleanup-release`: Instructs manual release branch deletion
 
-**Output (no conflicts):**
+**Output:**
 ```
-✓ Checked out develop
-✓ Pulled latest changes
-✓ Merged release/v1.1.0 into develop (no conflicts)
-✓ Pushed to origin/develop
-✓ Back-merge complete
-```
-
-**Output (with conflicts):**
-```
-⚠ Merge conflicts detected
 ✓ Created PR: https://github.com/user/german/pull/46
-  Title: "chore(release): back-merge v1.1.0 to develop"
+  Title: "backmerge: v1.1.0 -> develop"
 
-Please resolve conflicts in GitHub UI and merge.
+MANUAL STEP: Merge the PR in GitHub
+Then run: backmerge_workflow.py rebase-contrib
 ```
 
 ### cleanup_release.py
 
-Deletes release branch after successful release and back-merge.
+Instructs user to delete release branch after successful release and back-merge.
 
 ```bash
 python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
@@ -219,8 +200,8 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 
 **Steps:**
 1. Runs comprehensive safety checks
-2. Deletes local release branch (git branch -d)
-3. Deletes remote release branch
+2. Instructs user to manually delete local release branch
+3. Instructs user to manually delete remote release branch
 4. Archives TODO file
 
 **Output:**
@@ -228,8 +209,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 ✓ Verified tag v1.1.0 exists
 ✓ Verified tag on main branch
 ✓ Verified back-merge to develop complete
-✓ Deleted local branch: release/v1.1.0
-✓ Deleted remote branch: origin/release/v1.1.0
+[NOTE] Manual branch deletion required for: release/v1.1.0
 ✓ Archived: TODO_release_20251023T143000Z_v1-1-0.md
 ✓ Release workflow complete for v1.1.0
 ```
@@ -372,17 +352,20 @@ gh pr create --base main --title "Release v1.1.0"
 python .gemini/skills/git-workflow-manager/scripts/tag_release.py \
   v1.1.0 main
 
-# Step 6: Back-merge to develop
-python .gemini/skills/git-workflow-manager/scripts/backmerge_release.py \
-  v1.1.0 develop
+# Step 6: Back-merge to develop (Part 1)
+python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py \
+  pr-develop
 
-# Step 7: Cleanup release branch
-python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
-  v1.1.0
+# Step 7: User merges PR in GitHub UI
+# (Manual step)
 
-# Step 8: Update contrib branch
-python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py \
-  contrib/<gh-user>
+# Step 8: Rebase contrib (Part 2)
+python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py \
+  rebase-contrib
+
+# Step 9: Cleanup release branch (Part 3)
+python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py \
+  cleanup-release
 ```
 
 ### Integration with Phase 5
@@ -396,9 +379,9 @@ The release scripts implement the 8-step process documented in WORKFLOW.md Phase
 | 5.3 | gh pr create | Create PR to main |
 | 5.4 | Manual | User merges in GitHub UI |
 | 5.5 | tag_release.py | Tag release on main |
-| 5.6 | backmerge_release.py | Back-merge to develop |
-| 5.7 | cleanup_release.py | Delete release branch |
-| 5.8 | daily_rebase.py | Update contrib branch |
+| 5.6 | backmerge_workflow.py | Create PR to develop |
+| 5.7 | Manual | User merges in GitHub UI |
+| 5.8 | backmerge_workflow.py | Rebase contrib & manual cleanup |
 
 ### Error Recovery
 
@@ -406,7 +389,7 @@ If a release workflow step fails:
 
 1. **create_release.py fails**: Branch and TODO file are cleaned up automatically
 2. **tag_release.py fails**: Local tag is cleaned up on push failure
-3. **backmerge_release.py conflicts**: PR is created for manual resolution
+3. **backmerge_workflow.py failure**: Manual PR creation or merge required
 4. **cleanup_release.py safety checks fail**: Branch is NOT deleted, manual cleanup required
 
 All scripts include comprehensive error messages with recovery instructions.
