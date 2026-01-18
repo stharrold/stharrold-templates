@@ -16,7 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependencies** - Added `tomlkit` as a development dependency.
 - **Testing** - Updated `test_secrets.py` to use `tmp_path` fixture for better isolation.
 - **Workflow** - Disabled `gemini-dispatch.yml` workflow.
+- **Workflow** - Slash commands and scripts updated to output manual instructions instead of automatic deletion/merging for critical steps.
 - **Documentation** - Updated `GEMINI.md` references.
+- **Documentation** - Updated `WORKFLOW.md`, `GEMINI.md`, and skill docs to reflect manual cleanup workflow.
 
 ## [7.0.0] - 2026-01-01
 
