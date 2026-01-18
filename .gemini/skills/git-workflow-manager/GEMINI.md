@@ -27,7 +27,7 @@ Git Workflow Manager provides **automated git operations** for the git-flow + Gi
 .gemini/skills/git-workflow-manager/
 ├── scripts/                      # Git operation automation
 │   ├── create_worktree.py        # Create feature/release/hotfix worktrees (Phase 2)
-│   ├── cleanup_feature.py        # Atomic cleanup: archive TODO + delete worktree + manual branch deletion (Phase 4)
+│   ├── cleanup_feature.py        # Atomic cleanup: archive TODO + manual worktree/branch deletion (Phase 4)
 │   ├── daily_rebase.py          # Rebase contrib onto develop (daily maintenance)
 │   ├── semantic_version.py       # Calculate semantic version from changes (Phase 3)
 │   ├── create_release.py         # Create release branch from develop (Phase 5)
@@ -169,13 +169,13 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
 2. **Finds worktree:** Searches for `../feature_{slug}/` or `../{project}_feature_{slug}/`
 3. **Finds branch:** Searches for `feature/*_{slug}` branch
 4. **Archives TODO:** Calls `workflow_archiver.py` (MUST succeed before proceeding)
-5. **Deletes worktree:** Removes worktree directory (only if archive succeeded)
+5. **Instructions:** Prints commands for manual worktree deletion
 6. **Instructions:** Prints commands for manual branch deletion (git branches are NEVER deleted automatically)
 
 **Key features:**
 - **Atomic operation:** Either everything succeeds or nothing changes (safe to retry)
-- **Correct ordering:** Cannot delete worktree without archiving TODO first
-- **Error handling:** If TODO archive fails, worktree/branches NOT deleted (safe state)
+- **Correct ordering:** Instructions provided only after archiving TODO
+- **Error handling:** If TODO archive fails, instructions not printed (safe state)
 - **Single command:** Replaces 4 separate manual commands
 - **Clear feedback:** Emojis and progress indicators for each step
 
@@ -188,8 +188,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
 **Failure modes:**
 - **TODO not found:** Script fails immediately, nothing deleted
 - **Archive fails:** Script exits, worktree/branches preserved (safe to retry)
-- **Worktree deletion fails:** TODO archived, but worktree remains (manual cleanup instructions provided)
-- **Manual branch cleanup:** User responsibility (script provides commands)
+- **Manual cleanup:** User responsibility (script provides commands)
 
 ---
 

@@ -103,7 +103,7 @@ From main repo, after implementation is complete:
 ```
 
 **Two modes:**
-- **Full mode** (with branch arg): PR feature->contrib, cleanup worktree, manual branch cleanup, PR contrib->develop
+- **Full mode** (with branch arg): PR feature->contrib, manual worktree cleanup, manual branch cleanup, PR contrib->develop
 - **Contrib-only mode** (no arg): PR contrib->develop only
 
 **Manual gates:** PRs require approval in GitHub/Azure DevOps UI.
