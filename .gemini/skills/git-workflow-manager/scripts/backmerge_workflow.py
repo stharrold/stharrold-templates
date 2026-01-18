@@ -322,16 +322,12 @@ def step_cleanup_release(version: str | None = None) -> bool:
 
     # Cleanup release branch
     release_branch = f"release/{version}"
-    safe_print(f"\n[Delete] Cleaning up {release_branch}...")
-    run_cmd(["git", "branch", "-D", release_branch], check=False)
-    result = run_cmd(["git", "push", "origin", "--delete", release_branch], check=False)
-    if result.returncode != 0:
-        if "remote ref does not exist" in result.stderr:
-            safe_print("  Release branch already deleted or never existed")
-        else:
-            safe_print(f"[WARN]  Release branch delete warning: {result.stderr}")
+    safe_print(f"\n[Info] Ready to cleanup {release_branch}")
+    safe_print("[NOTE] Branches must be deleted manually:")
+    safe_print(f"  git branch -d {release_branch}")
+    safe_print(f"  git push origin --delete {release_branch}")
 
-    safe_print("[OK] Step 3 complete: Release branch cleaned up")
+    safe_print("[OK] Step 3 complete: Release cleanup instructions provided")
     return True
 
 
