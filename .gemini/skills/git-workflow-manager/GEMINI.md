@@ -27,13 +27,13 @@ Git Workflow Manager provides **automated git operations** for the git-flow + Gi
 .gemini/skills/git-workflow-manager/
 ├── scripts/                      # Git operation automation
 │   ├── create_worktree.py        # Create feature/release/hotfix worktrees (Phase 2)
-│   ├── cleanup_feature.py        # Atomic cleanup: archive TODO + delete worktree + delete branches (Phase 4)
+│   ├── cleanup_feature.py        # Atomic cleanup: archive TODO + delete worktree + manual branch deletion (Phase 4)
 │   ├── daily_rebase.py          # Rebase contrib onto develop (daily maintenance)
 │   ├── semantic_version.py       # Calculate semantic version from changes (Phase 3)
 │   ├── create_release.py         # Create release branch from develop (Phase 5)
 │   ├── tag_release.py            # Tag release on main after merge (Phase 5)
 │   ├── backmerge_workflow.py     # Backmerge workflow orchestrator (Step 7)
-│   ├── cleanup_release.py        # Cleanup release branch after completion (Phase 5)
+│   ├── cleanup_release.py        # Cleanup release branch (manual deletion) (Phase 5)
 │   └── __init__.py               # Package initialization
 ├── templates/                    # (none - no template files)
 ├── SKILL.md                      # Complete skill documentation
@@ -170,7 +170,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
 3. **Finds branch:** Searches for `feature/*_{slug}` branch
 4. **Archives TODO:** Calls `workflow_archiver.py` (MUST succeed before proceeding)
 5. **Deletes worktree:** Removes worktree directory (only if archive succeeded)
-6. **Deletes branches:** Removes local and remote branches (only if worktree deletion succeeded)
+6. **Instructions:** Prints commands for manual branch deletion (git branches are NEVER deleted automatically)
 
 **Key features:**
 - **Atomic operation:** Either everything succeeds or nothing changes (safe to retry)
@@ -189,7 +189,7 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_feature.py \
 - **TODO not found:** Script fails immediately, nothing deleted
 - **Archive fails:** Script exits, worktree/branches preserved (safe to retry)
 - **Worktree deletion fails:** TODO archived, but worktree remains (manual cleanup instructions provided)
-- **Branch deletion fails:** TODO archived, worktree deleted, but branches remain (manual cleanup instructions provided)
+- **Manual branch cleanup:** User responsibility (script provides commands)
 
 ---
 
@@ -365,7 +365,7 @@ python .gemini/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup
 1. Creates PR from release branch to develop
 2. (Manual) User merges PR in GitHub UI
 3. Rebases contrib branch on updated develop
-4. Deletes release branch
+4. Instructs user to manually delete release branch
 
 **Key features:**
 - Uses release branch directly (no separate backmerge branch)
@@ -396,13 +396,13 @@ python .gemini/skills/git-workflow-manager/scripts/cleanup_release.py \
 
 **What it does:**
 1. Validates release is tagged and merged
-2. Deletes local branch: `release/<version>`
-3. Deletes remote branch: `origin/release/<version>`
+2. Instructs user to manually delete local branch: `release/<version>`
+3. Instructs user to manually delete remote branch: `origin/release/<version>`
 4. Archives TODO file to ARCHIVED/
 
 **Key features:**
 - Safety checks (tag must exist, branch must be merged)
-- Cleans up both local and remote branches
+- Prevents accidental deletion (manual steps required)
 - Archives release TODO file
 
 ---
