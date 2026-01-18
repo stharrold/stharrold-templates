@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - **feature-dev command** - Replaced by built-in Gemini CLI tools for autonomous implementation.
 
+## [7.3.0] - 2026-01-18
+
+### Changed
+- **Workflow** - Archived and removed legacy Gemini GitHub Actions workflows and command configurations.
+
 ## [7.2.0] - 2026-01-04
 
 ### Changed
@@ -773,7 +778,8 @@ Earlier versions (< 5.0.0) used a different workflow architecture. See `ARCHIVED
 
 | Version | Date       | Type  | Description |
 |---------|------------|-------|-------------|
-| 7.2.0   | 2026-01-04 | MINOR | Disabled dispatch workflow + dependency updates |
+| 7.3.0   | 2026-01-18 | MINOR | Removal of legacy Gemini configs |
+| 7.2.0   | 2026-01-04 | MINOR | Manual workflow transition + disabled dispatch workflow |
 | 7.0.0   | 2026-01-01 | MAJOR | Streamlined for Gemini-only development + removed legacy tools |
 | 1.10.0  | 2025-11-16 | MINOR | MIT Agent Synchronization Pattern (Phase 1) + DuckDB compatibility fixes |
 | 1.9.0   | 2025-11-09 | MINOR | Work-item generation workflow + VCS adapter enhancements |
