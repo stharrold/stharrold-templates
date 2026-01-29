@@ -534,7 +534,7 @@ async def trigger_sync_completion(
 
         logger.info(f"Sync triggered: agent={agent_id}, action={action}, flow_token={flow_token}, executions={len(execution_ids)}")
 
-        # TODO (Phase 4): Execute target actions
+        # See #187: Execute target actions (Phase 4)
         # For now, just log them
         for exec_id in execution_ids:
             logger.info(f"Target execution queued: {exec_id}")

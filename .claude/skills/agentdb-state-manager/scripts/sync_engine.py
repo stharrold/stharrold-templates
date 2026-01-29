@@ -283,7 +283,7 @@ class SynchronizationEngine:
         Returns:
             List of matching sync rules (ordered by priority, highest first)
         """
-        # TODO: Implement caching with TTL
+        # See #183: Implement caching with TTL
         # For now, query database directly
 
         # Query for matching syncs
@@ -345,7 +345,7 @@ class SynchronizationEngine:
         Returns:
             True if PHI detected, False otherwise
         """
-        # TODO (Phase 3): Implement sophisticated PHI detection
+        # See #184: Implement sophisticated PHI detection (Phase 3)
         # For Phase 2, return False (defer to Phase 3)
         return False
 
@@ -438,7 +438,7 @@ class SynchronizationEngine:
                 prov_hash,
                 json.dumps(trigger_state),
                 "pending",
-                1,  # TODO: Proper sequence number (query max order + 1)
+                1,  # See #185: Proper sequence number (query max order + 1)
                 "read",  # Phase 2: placeholder operation type
                 "success",  # Phase 2: execution just recorded, not actually run yet
                 False,  # No PHI in Phase 2 (defer to Phase 3)
@@ -459,7 +459,7 @@ class SynchronizationEngine:
             },
         )
 
-        # TODO (Phase 3): Actually trigger target agent
+        # See #186: Actually trigger target agent (Phase 3)
         # This is the integration point with Phase 3 (Integration Layer)
         # For now, just record the execution
 
