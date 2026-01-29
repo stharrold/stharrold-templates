@@ -171,7 +171,7 @@ security add-generic-password \
   -w "new-token-value"
 ```
 
-## Configure ~/.gemini.json (Claude Code CLI)
+## Configure ~/.claude.json (Claude Code CLI)
 
 Create or update your Claude Code configuration file:
 

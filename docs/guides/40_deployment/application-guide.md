@@ -312,7 +312,7 @@ Applied stharrold-templates workflow to existing repository:
 
 Source: D:\Projects\stharrold-templates (v1.15.1)
 
-🤖 Generated with [Claude Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Gemini <noreply@anthropic.com>"
 ```

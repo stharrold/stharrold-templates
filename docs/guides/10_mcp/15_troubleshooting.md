@@ -28,7 +28,7 @@ Comprehensive troubleshooting guide for MCP server issues, security consideratio
 /usr/bin/python3 mcp_manager.py --list
 
 # Check specific config file
-cat ~/.gemini.json | jq .mcpServers
+cat ~/.claude.json | jq .mcpServers
 
 # Verify Claude Code can access config
 gemini mcp list
@@ -171,7 +171,7 @@ esac
 
 ### Universal (All Platforms)
 ```bash
-~/.gemini.json                        # Claude Code CLI user config
+~/.claude.json                        # Claude Code CLI user config
 ./.mcp.json                          # Claude Code CLI project config
 ~/bin/sync-mcp.sh                    # Sync script
 ```
@@ -301,7 +301,7 @@ npm update -g @modelcontextprotocol/server-filesystem
 **Rollback Procedures:**
 ```bash
 # Restore from backup if needed
-cp ~/.gemini.json.backup ~/.gemini.json
+cp ~/.claude.json.backup ~/.claude.json
 
 # Restart services
 ~/bin/sync-mcp.sh

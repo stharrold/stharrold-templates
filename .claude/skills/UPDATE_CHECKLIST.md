@@ -280,7 +280,7 @@ Token efficiency:
 
 Refs: .claude/skills/<skill-name>/CHANGELOG.md
 
-🤖 Generated with [Claude Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Gemini <noreply@anthropic.com>
 "
@@ -414,7 +414,7 @@ Updated documentation:
 
 Refs: .claude/skills/bmad-planner/CHANGELOG.md
 
-🤖 Generated with [Claude Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Gemini <noreply@anthropic.com>
 ```

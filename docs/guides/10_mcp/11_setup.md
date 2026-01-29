@@ -43,10 +43,10 @@ Claude Code operates as a command-line interface requiring Node.js 18 or newer:
 
 ```bash
 # Install Claude Code globally
-npm install -g @anthropic-ai/gemini-code
+npm install -g @anthropic-ai/claude-code
 
 # Initialize in your project directory
-gemini
+claude
 ```
 
 ### Authentication Options
@@ -130,9 +130,9 @@ gemini mcp list
 ```
 
 **Config Scopes:**
-- **User scope**: `~/.gemini.json` (global, all projects)
+- **User scope**: `~/.claude.json` (global, all projects)
 - **Project scope**: `.mcp.json` in project root (shared via git)
-- **Local scope**: `~/.gemini.json` with project-specific section
+- **Local scope**: `~/.claude.json` with project-specific section
 
 **Testing:**
 - Open Claude Code: Command Palette → "Run Claude Code"

@@ -132,7 +132,7 @@ gh pr create \
 
 <body>
 
-🤖 Generated with [Claude Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 ```
 
 **Types:** feat, fix, docs, style, refactor, test, chore.

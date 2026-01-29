@@ -12,7 +12,7 @@ children:
 
 # CLAUDE.md
 
-This file provides guidance to Claude Code (gemini.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What This Repository Is
 

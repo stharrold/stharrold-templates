@@ -653,7 +653,7 @@ Scheduling and booking management automation.
 
 Different MCP clients use slightly different configuration schemas:
 
-### Claude Code CLI (`~/.gemini.json`)
+### Claude Code CLI (`~/.claude.json`)
 ```json
 {
   "mcpServers": {

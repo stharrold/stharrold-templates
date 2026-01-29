@@ -44,6 +44,8 @@ from pathlib import Path
 import keyring
 import tomlkit
 
+from scripts.environment_utils import is_ci, is_container
+
 
 def get_repo_root(target_path: Path | None = None) -> Path:
     """Get the repository root directory as an absolute path.
@@ -153,9 +155,6 @@ def add_secret_to_config(root_path: Path, name: str, is_required: bool) -> bool:
     except Exception as e:
         print(f"[FAIL] Failed to update secrets.toml: {e}")
         return False
-
-
-from scripts.environment_utils import is_ci, is_container
 
 
 def get_secret(service: str, name: str) -> str | None:

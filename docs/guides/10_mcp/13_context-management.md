@@ -23,8 +23,8 @@ Advanced context management strategies for optimal Claude Code performance, incl
 CLAUDE.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
 
 **Hierarchical Loading System:**
-- **Global settings first**: `~/.gemini.json` (user-level preferences)
-- **Project-specific**: `.gemini.json` or `CLAUDE.md` in project root
+- **Global settings first**: `~/.claude.json` (user-level preferences)
+- **Project-specific**: `.claude.json` or `CLAUDE.md` in project root
 - **Subdirectory-level**: Feature-specific configurations
 
 **Context Window Management:**

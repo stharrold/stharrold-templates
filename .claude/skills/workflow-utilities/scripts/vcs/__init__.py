@@ -46,7 +46,7 @@ def get_vcs_adapter() -> BaseVCSAdapter:
         provider = config.get("vcs_provider")
         if provider == "github":
             return GitHubAdapter()
-        else:
+        if provider is not None:
             raise ValueError(f"Unknown VCS provider in config: {provider}")
 
     # Default to GitHub
