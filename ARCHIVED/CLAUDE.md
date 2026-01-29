@@ -1,13 +1,13 @@
 ---
-type: gemini-context
+type: claude-context
 directory: ARCHIVED
 purpose: Archive of deprecated files from workflow migrations.
-parent: ../GEMINI.md
+parent: ../CLAUDE.md
 sibling_readme: README.md
 children: []
 ---
 
-# Gemini Code Context: Archived Content
+# Claude Code Context: Archived Content
 
 ## Purpose
 
@@ -24,4 +24,4 @@ Use archive_manager.py to list and extract archived files.
 ## Related Documentation
 
 - **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../GEMINI.md](../GEMINI.md)** - Parent directory: Root
+- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: Root
