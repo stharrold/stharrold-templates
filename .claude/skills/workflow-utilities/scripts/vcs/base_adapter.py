@@ -7,7 +7,7 @@ This module defines the interface that all VCS adapters must implement.
 
 Design:
 - Abstract base class enforces consistent interface across providers
-- Concrete adapters implement provider-specific CLI commands
+- Concrete adapters implement provider-specific CLI commands (currently GitHub only)
 """
 
 from abc import ABC, abstractmethod
@@ -29,7 +29,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh auth status
-            Azure DevOps: az account show
         """
         pass
 
@@ -45,7 +44,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh api user --jq '.login'
-            Azure DevOps: az devops user show --user me --query user.emailAddress
         """
         pass
 
@@ -67,7 +65,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh pr create --base target --head source --title "..." --body "..."
-            Azure DevOps: az repos pr create --source-branch source --target-branch target
         """
         pass
 
@@ -91,7 +88,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh pr view <pr> --json reviews,comments
-            Azure DevOps: az repos pr show --id <pr> --query threads
         """
         pass
 
@@ -109,7 +105,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh pr edit <pr> --title "..." --body "..."
-            Azure DevOps: az repos pr update --id <pr> --title "..." --description "..."
         """
         pass
 
@@ -132,7 +127,6 @@ class BaseVCSAdapter(ABC):
 
         Example:
             GitHub: gh pr view <pr> --json state,mergeable,reviewDecision
-            Azure DevOps: az repos pr show --id <pr> --query status,mergeStatus
         """
         pass
 
@@ -140,7 +134,7 @@ class BaseVCSAdapter(ABC):
         """Get human-readable provider name.
 
         Returns:
-            Provider name (e.g., "GitHub", "Azure DevOps")
+            Provider name (e.g., "GitHub")
 
         Note:
             This is a concrete method with a default implementation.
