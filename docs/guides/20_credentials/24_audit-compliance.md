@@ -130,7 +130,7 @@ class CredentialAuditLogger {
 **Basic Audit Server Setup:**
 ```bash
 # Enterprise audit logging with comprehensive tracking
-gemini mcp add audit-logger "python -m enterprise_audit" \
+claude mcp add audit-logger "python -m enterprise_audit" \
   --env LOG_LEVEL="detailed" \
   --env RETENTION_DAYS="2555"  \
   --env ALERT_THRESHOLDS="./security_thresholds.json" \
@@ -359,7 +359,7 @@ const emergencyManager = new EmergencyCredentialManager();
 **SIEM Integration:**
 ```bash
 # Forward audit logs to enterprise SIEM systems
-gemini mcp add siem-forwarder "python -m siem_integration" \
+claude mcp add siem-forwarder "python -m siem_integration" \
   --env SPLUNK_HEC_URL="https://splunk.company.com:8088/services/collector" \
   --env ELASTIC_ENDPOINT="https://elastic.company.com:9200" \
   --env LOG_FORMAT="cef"  # Common Event Format for security tools
@@ -378,7 +378,7 @@ gemini mcp add siem-forwarder "python -m siem_integration" \
 **Classification Implementation:**
 ```bash
 # Data Loss Prevention monitoring with ML classification
-gemini mcp add dlp-monitor "python -m data_loss_prevention" \
+claude mcp add dlp-monitor "python -m data_loss_prevention" \
   --env SCAN_PATTERNS="./pii_patterns.json" \
   --env ML_MODEL_PATH="./classification_model.joblib" \
   --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook" \
@@ -463,7 +463,7 @@ npm audit --audit-level high
 npm audit fix --force
 
 # Automated dependency monitoring
-gemini mcp add vuln-scanner "python -m vulnerability_monitor" \
+claude mcp add vuln-scanner "python -m vulnerability_monitor" \
   --env SCAN_FREQUENCY="daily" \
   --env ALERT_SEVERITY="medium" \
   --env AUTO_UPDATE="patch_only"
@@ -582,7 +582,7 @@ def test_authentication_security():
 **Sentry Integration for Runtime Security:**
 ```bash
 # Error tracking and security incident detection
-gemini mcp add sentry "python -m sentry_mcp" \
+claude mcp add sentry "python -m sentry_mcp" \
   --env SENTRY_DSN="https://key@sentry.io/project" \
   --env ENVIRONMENT="production" \
   --env ENABLE_SECURITY_ALERTS="true"
@@ -699,7 +699,7 @@ Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) 
    ```bash
    # Immediate token revocation
    security delete-generic-password -a "$USER" -s "COMPROMISED_TOKEN"
-   gemini mcp disable --all  # Disable all MCP servers temporarily
+   claude mcp disable --all  # Disable all MCP servers temporarily
    ```
 
 2. **Threat Assessment:**
@@ -715,10 +715,10 @@ Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) 
 4. **System Updates:**
    ```bash
    # Update all MCP server configurations
-   gemini mcp update-credentials --interactive
+   claude mcp update-credentials --interactive
 
    # Restart services with new credentials
-   gemini mcp restart --all
+   claude mcp restart --all
    ```
 
 5. **Incident Documentation:**
@@ -781,7 +781,7 @@ tasks:
     action: "create_jira_ticket_if_high_severity"
 
   - name: "MCP server health check"
-    command: "gemini mcp health-check --all --detailed"
+    command: "claude mcp health-check --all --detailed"
     alert_on: "any_failures"
 ```
 

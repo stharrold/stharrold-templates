@@ -31,7 +31,7 @@ MCP servers enable AI assistants to interact with external tools and data source
 ## Quick Start Workflow
 
 1. **Setup Credentials**: Follow [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md) for your platform
-2. **Add Servers**: Use `gemini mcp add` commands or auto-sync setup below
+2. **Add Servers**: Use `claude mcp add` commands or auto-sync setup below
 3. **Validate Setup**: Run `/mcp` in Claude Code to verify servers
 4. **Configure Auto-Sync**: Follow platform-specific sync setup
 
@@ -121,12 +121,12 @@ gemini /init
 
 ```bash
 # Add servers via CLI
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /Users/stharrold
-gemini mcp add github npx @modelcontextprotocol/server-github
-gemini mcp add memory npx @modelcontextprotocol/server-memory
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /Users/stharrold
+claude mcp add github npx @modelcontextprotocol/server-github
+claude mcp add memory npx @modelcontextprotocol/server-memory
 
 # List configured servers
-gemini mcp list
+claude mcp list
 ```
 
 **Config Scopes:**

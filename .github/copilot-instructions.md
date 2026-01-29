@@ -218,28 +218,17 @@ az extension add --name azure-devops  # Required extension
 
 ## VCS Provider Configuration
 
-The workflow **auto-detects** GitHub or Azure DevOps from your git remote URL:
-- `github.com` → GitHub adapter (uses `gh` CLI)
-- `dev.azure.com`, `*.visualstudio.com` → Azure DevOps adapter (uses `az` CLI)
+The workflow uses GitHub via the `gh` CLI.
 
-For explicit configuration (or when auto-detection fails), create `.vcs_config.yaml`:
+For explicit configuration, create `.vcs_config.yaml`:
 
 ```yaml
-# GitHub (usually auto-detected)
 vcs_provider: github
-
-# OR Azure DevOps
-vcs_provider: azure_devops
-azure_devops:
-  organization: "https://dev.azure.com/myorg"
-  project: "MyProject"
-  repository: "MyRepo"  # Optional, defaults to project name
 ```
 
 **VCS abstraction layer:** `.claude/skills/workflow-utilities/scripts/vcs/`
-- `provider.py` - Auto-detection from git remote
+- `provider.py` - Provider detection
 - `github_adapter.py` - GitHub CLI operations
-- `azure_adapter.py` - Azure DevOps CLI operations
 - `config.py` - Configuration file loader
 
 ## Critical Guidelines
@@ -252,7 +241,7 @@ azure_devops:
 - **SPDX headers required**: All Python files must have Apache 2.0 license headers
 - **ASCII-only**: Use only ASCII characters in Python files (Issue #121)
 - **Absolute paths**: Use dynamically populated absolute paths in scripts (Issue #122)
-- **Use GitHub Issues**: Task tracking uses GitHub Issues/Azure DevOps work items (not TODO*.md files)
+- **Use GitHub Issues**: Task tracking uses GitHub Issues (not TODO*.md files)
 
 ## ASCII-Only Characters (Issue #121)
 
@@ -442,7 +431,7 @@ python stharrold-templates/.claude/skills/initialize-repository/scripts/initiali
 ```
 
 **Interactive 4-phase Q&A:**
-1. **Configuration** - Project name, description, VCS provider (GitHub/Azure DevOps)
+1. **Configuration** - Project name, description, VCS provider (GitHub)
 2. **Component selection** - Which skills to include
 3. **File generation** - Creates pyproject.toml, README.md, CLAUDE.md, etc.
 4. **Git initialization** - Sets up main/develop/contrib branch structure
@@ -452,7 +441,7 @@ python stharrold-templates/.claude/skills/initialize-repository/scripts/initiali
 - `pytest` for testing
 - `ruff` + `mypy` for linting
 - Podman for containerization
-- GitHub (`gh`) OR Azure DevOps (`az`) CLI
+- GitHub (`gh`) CLI
 
 **See:** `.claude/skills/initialize-repository/CLAUDE.md` for full documentation.
 
