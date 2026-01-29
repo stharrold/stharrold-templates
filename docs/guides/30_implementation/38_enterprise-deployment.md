@@ -449,9 +449,9 @@ spec:
 **Healthcare and Life Sciences:**
 ```bash
 # HIPAA-compliant healthcare integrations
-gemini mcp add healthcare-emr npx @modelcontextprotocol/server-healthcare-emr
-gemini mcp add fhir-integration npx @modelcontextprotocol/server-fhir
-gemini mcp add medical-coding npx @modelcontextprotocol/server-medical-coding
+claude mcp add healthcare-emr npx @modelcontextprotocol/server-healthcare-emr
+claude mcp add fhir-integration npx @modelcontextprotocol/server-fhir
+claude mcp add medical-coding npx @modelcontextprotocol/server-medical-coding
 
 # Enhanced privacy and audit controls
 gemini config set-privacy-mode healthcare
@@ -462,9 +462,9 @@ gemini config set-encryption-level maximum
 **Financial Services and Banking:**
 ```bash
 # Financial compliance and trading integrations
-gemini mcp add bloomberg-terminal npx @modelcontextprotocol/server-bloomberg
-gemini mcp add risk-management npx @modelcontextprotocol/server-risk-analytics
-gemini mcp add regulatory-reporting npx @modelcontextprotocol/server-fintech-compliance
+claude mcp add bloomberg-terminal npx @modelcontextprotocol/server-bloomberg
+claude mcp add risk-management npx @modelcontextprotocol/server-risk-analytics
+claude mcp add regulatory-reporting npx @modelcontextprotocol/server-fintech-compliance
 
 # SOX compliance configuration
 gemini config set-compliance-mode sox
@@ -475,9 +475,9 @@ gemini config set-change-management approval-required
 **Manufacturing and Supply Chain:**
 ```bash
 # Industrial IoT and supply chain integration
-gemini mcp add erp-integration npx @modelcontextprotocol/server-sap-erp
-gemini mcp add supply-chain npx @modelcontextprotocol/server-supply-analytics
-gemini mcp add quality-management npx @modelcontextprotocol/server-quality-systems
+claude mcp add erp-integration npx @modelcontextprotocol/server-sap-erp
+claude mcp add supply-chain npx @modelcontextprotocol/server-supply-analytics
+claude mcp add quality-management npx @modelcontextprotocol/server-quality-systems
 
 # Industry 4.0 configuration
 gemini config set-iot-integration enabled
@@ -488,9 +488,9 @@ gemini config set-supply-chain-visibility enhanced
 **Government and Public Sector:**
 ```bash
 # Government security and compliance
-gemini mcp add government-systems npx @modelcontextprotocol/server-gov-integration
-gemini mcp add classified-handling npx @modelcontextprotocol/server-classified-docs
-gemini mcp add public-records npx @modelcontextprotocol/server-public-records
+claude mcp add government-systems npx @modelcontextprotocol/server-gov-integration
+claude mcp add classified-handling npx @modelcontextprotocol/server-classified-docs
+claude mcp add public-records npx @modelcontextprotocol/server-public-records
 
 # FedRAMP compliance configuration
 gemini config set-security-clearance moderate

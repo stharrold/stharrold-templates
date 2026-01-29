@@ -31,7 +31,7 @@ Comprehensive troubleshooting guide for MCP server issues, security consideratio
 cat ~/.claude.json | jq .mcpServers
 
 # Verify Claude Code can access config
-gemini mcp list
+claude mcp list
 ```
 
 **Solutions:**
@@ -40,7 +40,7 @@ gemini mcp list
 /usr/bin/python3 mcp_manager.py --add
 
 # Or add using Gemini CLI directly
-gemini mcp add test npx @modelcontextprotocol/server-filesystem /tmp
+claude mcp add test npx @modelcontextprotocol/server-filesystem /tmp
 
 # Restart Claude Code completely
 # Command Palette → "Developer: Reload Window"
@@ -81,7 +81,7 @@ tail -f /tmp/sync-mcp.error.log
 **Command Line Verification:**
 ```bash
 # List configured servers
-gemini mcp list
+claude mcp list
 
 # Test specific server
 gemini /mcp
@@ -117,22 +117,22 @@ plutil -lint ~/Library/LaunchAgents/com.user.sync-mcp.plist
 **Automated Import:**
 ```bash
 # If desktop config exists at standard location
-gemini mcp add-from-gemini-desktop
+claude mcp add-from-gemini-desktop
 ```
 
 **Manual Import by Platform:**
 ```bash
 # macOS
 jq '.mcpServers' "$HOME/Library/Application Support/Gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 
 # Windows
 jq '.mcpServers' "$HOME/AppData/Roaming/Gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 
 # Linux
 jq '.mcpServers' "$HOME/.config/gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 ```
 
 ## Cross-System Compatibility
@@ -252,7 +252,7 @@ cat > ~/bin/mcp-health-check.sh << 'EOF'
 echo "=== MCP Health Check $(date) ==="
 
 # Check server availability
-gemini mcp list | grep -q "filesystem" || echo "WARNING: filesystem server missing"
+claude mcp list | grep -q "filesystem" || echo "WARNING: filesystem server missing"
 
 # Check credentials
 /usr/bin/python3 mcp_manager.py --check-credentials
@@ -318,7 +318,7 @@ find /tmp -name "*mcp*" -type f -mtime +7 -delete
 grep "server usage" ~/.claude/logs/* | sort | uniq -c
 
 # Remove unused servers
-gemini mcp remove unused-server-name
+claude mcp remove unused-server-name
 ```
 
 **Optimization Strategies:**

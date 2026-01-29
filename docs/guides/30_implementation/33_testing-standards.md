@@ -256,7 +256,7 @@ describe("Responsive Design Validation", () => {
 **Server Connectivity and Performance:**
 ```bash
 # Daily server health check
-gemini mcp health-check --all --detailed
+claude mcp health-check --all --detailed
 
 # Expected output validation:
 # ✅ GitHub MCP Server: Connected, API rate limit 4,847/5,000
@@ -352,7 +352,7 @@ gemini /usage --weekly-report --team-analytics
 gemini /cost --weekly-breakdown --optimization-recommendations
 
 # Server performance deep dive
-gemini mcp analyze-performance --time-period=week --include-recommendations
+claude mcp analyze-performance --time-period=week --include-recommendations
 ```
 
 **Security and Compliance Validation:**
@@ -376,7 +376,7 @@ gemini audit --security-review --compliance-check
 **Multi-Environment Validation:**
 ```bash
 # Test across development, staging, and production configurations
-gemini mcp test-environments --validate-all
+claude mcp test-environments --validate-all
 ```
 
 **Backward Compatibility:**
@@ -498,7 +498,7 @@ nslookup api.github.com
 curl -I https://api.github.com
 
 # Test MCP server-specific endpoints
-gemini mcp test-connection --server=github --verbose
+claude mcp test-connection --server=github --verbose
 ```
 
 **Firewall and Proxy Configuration:**
@@ -649,8 +649,8 @@ gemini config set-environment staging
 gemini config set-environment production
 
 # Validate environment-specific configurations
-gemini mcp validate-environment --environment=staging
-gemini mcp test-all-environments --dry-run
+claude mcp validate-environment --environment=staging
+claude mcp test-all-environments --dry-run
 ```
 
 **Safety and Isolation Measures:**
@@ -762,11 +762,11 @@ npm test  # TypeScript servers
 pytest    # Python servers
 
 # Integration testing with Claude Code
-gemini mcp add custom-server ./custom-server
-gemini mcp test-server --server=custom-server --comprehensive
+claude mcp add custom-server ./custom-server
+claude mcp test-server --server=custom-server --comprehensive
 
 # Performance and load testing
-gemini mcp benchmark --server=custom-server --duration=300s
+claude mcp benchmark --server=custom-server --duration=300s
 ```
 
 **Production Deployment Guidelines:**

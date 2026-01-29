@@ -98,7 +98,7 @@ security add-generic-password \
 #### Implementation Pattern
 ```bash
 # Configure access control MCP server
-gemini mcp add access-control "python -m enterprise_acl" \
+claude mcp add access-control "python -m enterprise_acl" \
   --env USER_DIRECTORY="ldap://company.ldap" \
   --env CLASSIFICATION_SERVICE="./data_classification.json" \
   --env COMPLIANCE_MODE="GDPR,HIPAA"
@@ -142,7 +142,7 @@ Prevent sensitive information leakage when using external enrichment sources or 
 **Example Configuration:**
 ```bash
 # Data Loss Prevention MCP Server
-gemini mcp add dlp-monitor "python -m data_loss_prevention" \
+claude mcp add dlp-monitor "python -m data_loss_prevention" \
   --env SCAN_PATTERNS="./pii_patterns.json" \
   --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook" \
   --env COMPLIANCE_OFFICER="security@company.com"
@@ -548,7 +548,7 @@ Set-MCPUserContext -Permissions $mcpPermissions
 ### LDAP Integration
 ```bash
 # LDAP user context for Unix/Linux environments
-gemini mcp add ldap-auth "python -m enterprise_ldap" \
+claude mcp add ldap-auth "python -m enterprise_ldap" \
   --env LDAP_SERVER="ldap://company.ldap:389" \
   --env BIND_DN="cn=mcp-service,ou=services,dc=company,dc=com" \
   --env USER_BASE_DN="ou=users,dc=company,dc=com"

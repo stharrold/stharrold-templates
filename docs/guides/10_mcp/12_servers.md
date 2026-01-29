@@ -336,9 +336,9 @@ mcp_monitoring:
 **Health Dashboard Integration:**
 ```bash
 # Health monitoring commands
-gemini mcp health-check --all-servers --detailed
-gemini mcp monitor --dashboard --real-time
-gemini mcp alerts configure --webhook https://monitoring.company.com/alerts
+claude mcp health-check --all-servers --detailed
+claude mcp monitor --dashboard --real-time
+claude mcp alerts configure --webhook https://monitoring.company.com/alerts
 ```
 
 ## Tier 1: Essential Core Development Servers
@@ -357,8 +357,8 @@ Repository management, PR analysis, and CI/CD workflow monitoring.
 
 **Installation:**
 ```bash
-gemini mcp add --transport http github https://api.githubcopilot.com/mcp/
-# Or: gemini mcp add github npx @modelcontextprotocol/server-github  # Requires GITHUB_TOKEN
+claude mcp add --transport http github https://api.githubcopilot.com/mcp/
+# Or: claude mcp add github npx @modelcontextprotocol/server-github  # Requires GITHUB_TOKEN
 ```
 
 #### Git MCP Server
@@ -378,7 +378,7 @@ Secure file operations with configurable access controls.
 
 **Installation:**
 ```bash
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
 ```
 
 ### Development & Testing Infrastructure
@@ -392,7 +392,7 @@ Methodical problem-solving through structured thinking processes.
 
 **Installation:**
 ```bash
-gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
 ```
 
 #### Playwright MCP Server
@@ -404,7 +404,7 @@ Web automation and cross-browser testing.
 
 **Installation:**
 ```bash
-gemini mcp add playwright npx -- @playwright/mcp@latest
+claude mcp add playwright npx -- @playwright/mcp@latest
 ```
 
 #### Context7 MCP Server
@@ -416,7 +416,7 @@ Real-time documentation fetching from source repositories.
 
 **Installation:**
 ```bash
-gemini mcp add --transport http context7 https://mcp.context7.com/mcp
+claude mcp add --transport http context7 https://mcp.context7.com/mcp
 ```
 
 ### Database & Data Management
@@ -439,7 +439,7 @@ Lightweight database operations for development and testing.
 
 **Installation:**
 ```bash
-gemini mcp add sqlite npx @modelcontextprotocol/server-sqlite /path/to/db
+claude mcp add sqlite npx @modelcontextprotocol/server-sqlite /path/to/db
 ```
 
 #### Memory MCP Server
@@ -447,7 +447,7 @@ Session context retention across coding sessions.
 
 **Installation:**
 ```bash
-gemini mcp add memory npx @modelcontextprotocol/server-memory
+claude mcp add memory npx @modelcontextprotocol/server-memory
 ```
 
 ## Tier 2: High-Impact Productivity Servers
@@ -481,7 +481,7 @@ Error tracking and performance monitoring integration.
 
 **Installation:**
 ```bash
-gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
 ```
 
 ### CI/CD & DevOps
@@ -495,7 +495,7 @@ Comprehensive project management and build pipeline integration.
 
 **Installation:**
 ```bash
-gemini mcp add azure npx @azure-devops/mcp org-name  # Requires AZURE_DEVOPS_PAT
+claude mcp add azure npx @azure-devops/mcp org-name  # Requires AZURE_DEVOPS_PAT
 ```
 
 #### Buildkite MCP Server
@@ -571,7 +571,7 @@ Product analytics and user behavior insights.
 
 **Installation:**
 ```bash
-gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
+claude mcp add --transport sse posthog https://mcp.posthog.com/sse
 ```
 
 #### Memory Bank MCP Server
@@ -742,14 +742,14 @@ Cross-platform management of all MCP configurations:
 
 ```bash
 # Add servers to Claude Code specifically
-gemini mcp add github npx @modelcontextprotocol/server-github
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
+claude mcp add github npx @modelcontextprotocol/server-github
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
 
 # List Claude Code servers
-gemini mcp list
+claude mcp list
 
 # Remove servers
-gemini mcp remove github
+claude mcp remove github
 ```
 
 ### Complete Setup Example
@@ -802,16 +802,16 @@ gemini mcp remove github
 **Development Environment:**
 ```bash
 # Essential development servers
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem ./
-gemini mcp add memory npx @modelcontextprotocol/server-memory
-gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem ./
+claude mcp add memory npx @modelcontextprotocol/server-memory
+claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
 ```
 
 **Production Environment:**
 ```bash
 # Production monitoring and management
-gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
-gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
+claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+claude mcp add --transport sse posthog https://mcp.posthog.com/sse
 ```
 
 ## Next Steps
