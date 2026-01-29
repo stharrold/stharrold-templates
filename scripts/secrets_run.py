@@ -16,14 +16,14 @@ It supports multiple secret sources with the following precedence:
 4. Local development -> fetch from OS keyring
 
 Usage:
-    uv run scripts/run.py [options] <command> [args...]
+    uv run scripts/secrets_run.py [options] <command> [args...]
 
 Options:
     --root PATH    Specify project root containing secrets.toml
 
 Example:
-    uv run scripts/run.py uv run pytest
-    uv run scripts/run.py --root ../project python main.py
+    uv run scripts/secrets_run.py uv run pytest
+    uv run scripts/secrets_run.py --root ../project python main.py
 """
 
 from __future__ import annotations
@@ -199,7 +199,7 @@ def inject_secrets(config: dict) -> tuple[list[str], list[str]]:
 
 def print_usage() -> None:
     """Print usage information."""
-    print("Usage: uv run scripts/run.py [options] <command> [args...]")
+    print("Usage: uv run scripts/secrets_run.py [options] <command> [args...]")
     print()
     print("Injects secrets from keyring/environment, then runs the command.")
     print()
@@ -207,8 +207,8 @@ def print_usage() -> None:
     print("  --root PATH    Specify project root containing secrets.toml")
     print()
     print("Examples:")
-    print("  uv run scripts/run.py uv run pytest")
-    print("  uv run scripts/run.py --root ../my-project python main.py")
+    print("  uv run scripts/secrets_run.py uv run pytest")
+    print("  uv run scripts/secrets_run.py --root ../my-project python main.py")
     print()
     print("Setup (local development):")
     print("  uv run scripts/secrets_setup.py")

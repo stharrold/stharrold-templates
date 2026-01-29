@@ -77,11 +77,11 @@ uv run scripts/secrets_setup.py --check
 
 ```bash
 # Run any command with secrets injected
-uv run scripts/run.py <command> [args...]
+uv run scripts/secrets_run.py <command> [args...]
 
 # Examples
-uv run scripts/run.py uv run pytest
-uv run scripts/run.py python main.py
+uv run scripts/secrets_run.py uv run pytest
+uv run scripts/secrets_run.py python main.py
 ```
 
 ### How It Works

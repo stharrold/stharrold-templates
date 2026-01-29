@@ -306,7 +306,7 @@ def interactive_setup(config: dict) -> int:
         print("[OK] All secrets configured successfully")
         print()
         print("You can now run commands with secrets:")
-        print("  uv run scripts/run.py <command>")
+        print("  uv run scripts/secrets_run.py <command>")
         return 0
 
 

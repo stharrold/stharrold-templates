@@ -15,7 +15,7 @@ children:
 ## Status
 
 Migration from Gemini Code to Claude Code conventions is in progress (tracked in #166).
-- `.claude/` renamed to `.claude/`, `GEMINI.md` renamed to `CLAUDE.md`
+- `.gemini/` renamed to `.claude/`, `GEMINI.md` renamed to `CLAUDE.md`
 - Next release: v8.0.0 (tracking issue #182)
 - pyproject.toml version: 7.3.0 (aligned with CHANGELOG)
 
@@ -38,4 +38,4 @@ uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
 - `synavistra` repo (`../synavistra/`) is the reference for `claude-code-review.yml` workflow
 - CI suppresses 5542 linting errors via `continue-on-error: true` in `tests.yml` (#177)
 - AgentDB state manager (`.claude/skills/agentdb-state-manager/`) has 0% test coverage (#174)
-- `scripts/run.py` is being renamed to `scripts/secrets_run.py` (#169)
+- `scripts/run.py` renamed to `scripts/secrets_run.py` (#169)
