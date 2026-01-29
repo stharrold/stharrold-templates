@@ -42,7 +42,7 @@ Implementation challenges highlight important considerations. Performance degrad
 
 ## Practical examples demonstrate complexity boundaries
 
-Concrete coding examples illustrate performance differences across complexity tiers, providing templates for TextComplexityScorer analysis. Simple tasks (complexity < 0.3) like basic loops and string manipulation see universal success, though Haiku provides fastest response times at 0.36 seconds TTFT versus Sonnet's 0.64 seconds[34]. Even at this level, failures occur—Gemini Code recently struggled with simple pandas filtering operations[35], demonstrating that no model is infallible.
+Concrete coding examples illustrate performance differences across complexity tiers, providing templates for TextComplexityScorer analysis. Simple tasks (complexity < 0.3) like basic loops and string manipulation see universal success, though Haiku provides fastest response times at 0.36 seconds TTFT versus Sonnet's 0.64 seconds[34]. Even at this level, failures occur—Claude Code recently struggled with simple pandas filtering operations[35], demonstrating that no model is infallible.
 
 Intermediate tasks (0.3-0.7) reveal clearer differentiation. **Dijkstra's algorithm implementation shows Sonnet's superiority in code organization and explanation quality[36]**, while Haiku struggles with algorithmic complexity. Bug fixing in existing codebases particularly highlights Sonnet's advantages—successfully categorizing errors, maintaining readability, and adding explanatory comments where Haiku fails. A striking example: creating a full-featured Tetris game, where Sonnet delivered "gorgeous game with scores, next-piece preview, and great controls" while following instructions comprehensively[37].
 
@@ -122,13 +122,13 @@ The key to successful implementation lies in accurate complexity measurement usi
 
 [31] Lessons learned from Thoughtworks and DoltHub implementation experiences.
 
-[32] DoltHub. "Gemini Code Gotchas." Performance degradation observations after context compaction.
+[32] DoltHub. "Claude Code Gotchas." Performance degradation observations after context compaction.
 
-[33] Known issue documented in Gemini Code GitHub repository and user reports.
+[33] Known issue documented in Claude Code GitHub repository and user reports.
 
 [34] KeywordsAI. "Gemini 3.5 Haiku vs. Sonnet: Speed or Power?" Response time comparisons.
 
-[35] Thoughtworks. "Gemini Code saved us 97% of the work — then failed utterly." Documentation of pandas filtering failures.
+[35] Thoughtworks. "Claude Code saved us 97% of the work — then failed utterly." Documentation of pandas filtering failures.
 
 [36] Performance analysis from coding benchmark comparisons and user evaluations.
 

@@ -23,10 +23,10 @@ targets:
     - "30_implementation/32_workflow-patterns.md"
     - "10_mcp/12_server-management.md"
   size_limit_kb: 30
-  parent_orchestrator: "10_draft-merged/GEMINI.md"
+  parent_orchestrator: "10_draft-merged/CLAUDE.md"
 
 dependencies:
-  - Enhanced GEMINI.md with unified git conventions
+  - Enhanced CLAUDE.md with unified git conventions
   - GitHub issue #12 created
   - Multi-guide target directory structure
   - Alternative timestamp directory available
@@ -212,7 +212,7 @@ git commit -m "feat: distribute workflow secrets across multiple guides (Gemini2
 
 Closes #12
 
-🤖 Generated with Gemini Code (Gemini2 Method)
+🤖 Generated with Claude Code (Gemini2 Method)
 
 Co-Authored-By: Gemini <noreply@anthropic.com>"
 ```

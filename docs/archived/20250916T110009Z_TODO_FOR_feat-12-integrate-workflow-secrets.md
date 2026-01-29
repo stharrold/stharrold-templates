@@ -20,10 +20,10 @@ target:
   file: "10_draft-merged/20_credentials/25_mcp-security-tools.md"
   action: "enhance_existing"
   size_limit_kb: 30
-  parent_orchestrator: "10_draft-merged/20_credentials/GEMINI.md"
+  parent_orchestrator: "10_draft-merged/20_credentials/CLAUDE.md"
 
 dependencies:
-  - Enhanced GEMINI.md with unified git conventions
+  - Enhanced CLAUDE.md with unified git conventions
   - GitHub issue #12 created
   - Worktree structure established
 
@@ -99,7 +99,7 @@ cd ../stharrold-templates.worktrees/feat/12-integrate-workflow-secrets
 ## Quality Assurance
 
 ### [x] 7. Update cross-references
-- [x] Update `20_credentials/GEMINI.md` if needed
+- [x] Update `20_credentials/CLAUDE.md` if needed
 - [x] Verify navigation reflects enhanced content
 - [x] Check internal links work correctly
 

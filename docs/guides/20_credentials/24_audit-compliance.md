@@ -2,7 +2,7 @@
 title: Security Auditing & Compliance
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -31,7 +31,7 @@ changelog:
 
 # Security Auditing & Compliance
 
-Comprehensive security auditing, compliance monitoring, and vulnerability management for enterprise MCP server deployments with Gemini Code.
+Comprehensive security auditing, compliance monitoring, and vulnerability management for enterprise MCP server deployments with Claude Code.
 
 ## Security Context Foundation
 
@@ -438,11 +438,11 @@ policies:
 **Critical Vulnerabilities (2025):**
 
 **CVE-2025-52882 (Critical - Score: 9.8/10)**
-- **Impact**: WebSocket authentication bypass in Gemini Code Extension allowing unauthorized MCP server access
+- **Impact**: WebSocket authentication bypass in Claude Code Extension allowing unauthorized MCP server access
 - **Affected Versions**: All versions < 1.0.24
 - **Attack Vector**: Network-accessible WebSocket endpoints with weak authentication
 - **Exploitation**: Remote attackers can bypass authentication and execute arbitrary MCP commands
-- **Mitigation**: Update to Gemini Code version 1.0.24 or higher immediately
+- **Mitigation**: Update to Claude Code version 1.0.24 or higher immediately
 - **Verification**: `gemini --version` should show 1.0.24 or higher
 - **Additional Protection**: Enable network-level access controls and monitor WebSocket traffic
 
@@ -496,7 +496,7 @@ gemini mcp add vuln-scanner "python -m vulnerability_monitor" \
 # All AI-generated code must be clearly labeled in commits
 git commit -m "feat: add user authentication
 
-AI-Generated: Gemini Code assisted implementation
+AI-Generated: Claude Code assisted implementation
 Security-Review: Required for authentication logic
 Reviewer: @security-team
 Risk-Level: High
@@ -575,7 +575,7 @@ def test_authentication_security():
 
 **Local Codacy CLI (Mandatory per Repository Guidelines):**
 ```bash
-# Required after ANY file edit per GEMINI.md guidelines
+# Required after ANY file edit per CLAUDE.md guidelines
 ./.codacy/cli.sh analyze --tool pylint edited_file.py
 ```
 
@@ -840,4 +840,4 @@ Cross-reference with performance metrics to identify security impacts:
 
 ---
 
-*This module completes the security and compliance framework. For implementation patterns, see [../30_implementation/GEMINI.md](../30_implementation/GEMINI.md).*
+*This module completes the security and compliance framework. For implementation patterns, see [../30_implementation/CLAUDE.md](../30_implementation/CLAUDE.md).*

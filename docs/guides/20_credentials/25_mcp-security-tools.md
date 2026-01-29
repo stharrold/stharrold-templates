@@ -2,7 +2,7 @@
 title: MCP Security Tools & Ecosystem
 version: 1.2
 updated: 2025-09-16
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true

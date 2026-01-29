@@ -2,10 +2,10 @@
 title: MCP Server Configurations
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./11_setup.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
 changelog:
   - 4.0: BREAKING CHANGE - Enhanced with resource-based credential sharing, production security patterns, and MCP tool ecosystem integration
@@ -26,7 +26,7 @@ Choose servers based on your project needs and development phase:
 - **Tier 4**: Specialized domain-specific tools
 
 **Prerequisites**: Many servers require API tokens. Configure credentials first:
-→ [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+→ [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 
 ## MCP Hybrid Architecture
 
@@ -550,7 +550,7 @@ npx @composio/mcp@latest setup slack
 Documentation management and project requirement tracking.
 
 **Features:**
-- Task updates directly from Gemini Code
+- Task updates directly from Claude Code
 - Project requirement tracking
 
 #### Atlassian MCP Server (Jira & Confluence)
@@ -653,7 +653,7 @@ Scheduling and booking management automation.
 
 Different MCP clients use slightly different configuration schemas:
 
-### Gemini Code CLI (`~/.gemini.json`)
+### Claude Code CLI (`~/.claude.json`)
 ```json
 {
   "mcpServers": {
@@ -700,7 +700,7 @@ Different MCP clients use slightly different configuration schemas:
 
 ### Key Differences
 
-| Feature | Gemini Code CLI | VS Code Extension | Gemini Desktop |
+| Feature | Claude Code CLI | VS Code Extension | Gemini Desktop |
 |---------|----------------|-------------------|----------------|
 | Root key | `mcpServers` | `servers` | `mcpServers` |
 | Type field | Optional | Optional | Optional |
@@ -738,14 +738,14 @@ Cross-platform management of all MCP configurations:
 /usr/bin/python3 mcp_manager.py --backup-only
 ```
 
-### Using Gemini Code CLI
+### Using Claude Code CLI
 
 ```bash
-# Add servers to Gemini Code specifically
+# Add servers to Claude Code specifically
 gemini mcp add github npx @modelcontextprotocol/server-github
 gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
 
-# List Gemini Code servers
+# List Claude Code servers
 gemini mcp list
 
 # Remove servers
@@ -756,8 +756,8 @@ gemini mcp remove github
 
 ```bash
 # 1. Setup credentials (choose your platform)
-# macOS: Follow ../20_credentials/GEMINI.md keychain setup
-# Windows: Follow ../20_credentials/GEMINI.md credential manager setup
+# macOS: Follow ../20_credentials/CLAUDE.md keychain setup
+# Windows: Follow ../20_credentials/CLAUDE.md credential manager setup
 
 # 2. Add GitHub server using mcp_manager.py
 /usr/bin/python3 mcp_manager.py --add
@@ -769,7 +769,7 @@ gemini mcp remove github
 /usr/bin/python3 mcp_manager.py --check-credentials
 /usr/bin/python3 mcp_manager.py --list
 
-# 4. Test in Gemini Code
+# 4. Test in Claude Code
 # Type: /mcp
 # Should see: github server with tools available
 ```
@@ -822,4 +822,4 @@ gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
 
 ---
 
-*Server configurations are synchronized across all Gemini Code platforms via the auto-sync setup from [11_setup.md](./11_setup.md).*
+*Server configurations are synchronized across all Claude Code platforms via the auto-sync setup from [11_setup.md](./11_setup.md).*

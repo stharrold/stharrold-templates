@@ -9,10 +9,10 @@ This document explains the version numbering schemes used in stharrold-templates
 **Purpose:** IU Health CBIA adaptation version
 **Current:** v1.15.1
 **Found in:**
-- `D:\Projects\GEMINI.md` (meta-repository)
+- `D:\Projects\CLAUDE.md` (meta-repository)
 - `D:\Projects\apply-workflow-batch.sh`
-- `D:\Projects\templates\workflow-template\GEMINI.md`
-- Individual project GEMINI.md files (workflow section)
+- `D:\Projects\templates\workflow-template\CLAUDE.md`
+- Individual project CLAUDE.md files (workflow section)
 
 **Example:**
 ```markdown
@@ -32,7 +32,6 @@ This repository uses **Standard Workflow v1.15.1** system...
 **Source:** External repository (D:\Temp\standard\ or upstream)
 **Found in:**
 - `stharrold-templates/WORKFLOW.md` line 3: `Version: 5.3.0`
-- `stharrold-templates/ARCHITECTURE.md`
 - `stharrold-templates/docs/reference/german-workflow-v5.3.0.md`
 - `stharrold-templates/docs/reference/WORKFLOW-INIT-PROMPT.md`
 
@@ -81,8 +80,8 @@ Update when:
 
 Files to update:
 1. `apply-workflow-batch.sh` line 2
-2. `D:\Projects\GEMINI.md` references
-3. Each project's GEMINI.md workflow section
+2. `D:\Projects\CLAUDE.md` references
+3. Each project's CLAUDE.md workflow section
 
 ### German Workflow (v5.x.x)
 Update when:
@@ -110,7 +109,7 @@ Update when:
 2. **For upstream sync:** Reference German Workflow version (v5.x.x)
 3. **For package releases:** Use pyproject.toml version
 
-**Example GEMINI.md section:**
+**Example CLAUDE.md section:**
 ```markdown
 ## Standard Workflow System
 

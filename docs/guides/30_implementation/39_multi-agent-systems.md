@@ -2,7 +2,7 @@
 title: Multi-Agent Systems & Orchestration Patterns
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -21,7 +21,7 @@ related:
   - ./37_team-collaboration.md
   - ./38_enterprise-deployment.md
   - ../10_mcp/12_servers.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
 changelog:
   - 4.0: BREAKING CHANGE - Replaced Gemini-Flow with LangGraph orchestration, split into modular subcategories
   - 1.0: Initial multi-agent systems guide with advanced orchestration patterns

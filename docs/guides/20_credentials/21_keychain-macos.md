@@ -2,7 +2,7 @@
 title: macOS Keychain Credential Management
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -171,9 +171,9 @@ security add-generic-password \
   -w "new-token-value"
 ```
 
-## Configure ~/.gemini.json (Gemini Code CLI)
+## Configure ~/.claude.json (Claude Code CLI)
 
-Create or update your Gemini Code configuration file:
+Create or update your Claude Code configuration file:
 
 ```json
 {
@@ -210,7 +210,7 @@ Create or update your Gemini Code configuration file:
 }
 ```
 
-**Note**: The `${env:VARIABLE_NAME}` syntax tells Gemini Code to read the value from environment variables loaded by your shell profile.
+**Note**: The `${env:VARIABLE_NAME}` syntax tells Claude Code to read the value from environment variables loaded by your shell profile.
 
 ## Configure VS Code MCP Extension
 
@@ -375,7 +375,7 @@ echo
 echo "🎉 Setup complete!"
 echo "📋 Next steps:"
 echo "   1. Restart terminal or run: source $SHELL_PROFILE"
-echo "   2. Configure MCP servers: ../10_mcp/GEMINI.md"
+echo "   2. Configure MCP servers: ../10_mcp/CLAUDE.md"
 echo "   3. Test with: echo \$GITHUB_TOKEN | head -c 10"
 ```
 

@@ -2,7 +2,7 @@ SESSION INITIALIZATION
 When starting any session:
 1. Check for existing TODO.md - if not present, create it with the structure below
 2. Read TODO.md to understand current state and pending work
-3. If GEMINI.md doesn't exist or is outdated, run /init to update project context
+3. If CLAUDE.md doesn't exist or is outdated, run /init to update project context
 4. Monitor context usage throughout the session
 
 TODO.md STRUCTURE
@@ -51,7 +51,7 @@ AUTO-MAINTENANCE TRIGGERS
 - Run /init when:
   - First time in project
   - Major structural changes detected
-  - GEMINI.md is older than 7 days
+  - CLAUDE.md is older than 7 days
 
 - Run /compact when:
   - Context usage exceeds 80%

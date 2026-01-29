@@ -5,11 +5,11 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 ## Features
 
 - **v7x1 Workflow** - Streamlined 4-step autonomous development process
-- **Gemini Code Review** - Automated PR analysis via GitHub Actions
+- **Claude Code Review** - Automated PR analysis via GitHub Actions
 - **AgentDB Tracking** - Persistent state and metrics using DuckDB
 - **Containerized development** - Podman + uv + Python 3.11 for consistency
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
-- **Gemini-first design** - Optimized for Gemini Code and MCP (Model Context Protocol)
+- **Gemini-first design** - Optimized for Claude Code and MCP (Model Context Protocol)
 
 ## Prerequisites
 
@@ -77,11 +77,11 @@ uv run scripts/secrets_setup.py --check
 
 ```bash
 # Run any command with secrets injected
-uv run scripts/run.py <command> [args...]
+uv run scripts/secrets_run.py <command> [args...]
 
 # Examples
-uv run scripts/run.py uv run pytest
-uv run scripts/run.py python main.py
+uv run scripts/secrets_run.py uv run pytest
+uv run scripts/secrets_run.py python main.py
 ```
 
 ### How It Works
@@ -127,9 +127,8 @@ See `secrets.toml` for secret definitions.
 
 | Document | Purpose |
 |----------|---------|
-| [GEMINI.md](GEMINI.md) | AI agent instructions |
+| [CLAUDE.md](CLAUDE.md) | AI agent instructions |
 | [WORKFLOW.md](WORKFLOW.md) | Complete workflow guide |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 
@@ -141,7 +140,7 @@ See `secrets.toml` for secret definitions.
 │   ├── guides/             # Production guides
 │   ├── research/           # Exploratory documents
 │   └── reference/          # Reference materials
-├── .gemini/skills/         # AI workflow skills (6 active)
+├── .claude/skills/         # AI workflow skills (6 active)
 ├── scripts/                # Utility scripts (secrets, run helpers)
 └── ARCHIVED/               # Archived specs, planning docs, deprecated code
 ```

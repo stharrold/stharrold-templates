@@ -1,37 +1,37 @@
 ---
-title: GEMINI.md Context Management & Optimization
+title: CLAUDE.md Context Management & Optimization
 version: 3.2
 updated: 2025-09-13
 changelog:
   - 3.2: Added Memory Keeper Server and Gemini Context MCP integration patterns
   - 3.1: Enhanced command system and project template integration
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
-  - ../GEMINI.md
+  - ../CLAUDE.md
   - ../30_implementation/32_workflow-patterns.md
   - ./11_setup.md
 ---
 
-# GEMINI.md Context Management & Optimization
+# CLAUDE.md Context Management & Optimization
 
-Advanced context management strategies for optimal Gemini Code performance, including GEMINI.md workflow patterns, command system mastery, and token efficiency optimization.
+Advanced context management strategies for optimal Claude Code performance, including CLAUDE.md workflow patterns, command system mastery, and token efficiency optimization.
 
-## GEMINI.md Architecture Fundamentals
+## CLAUDE.md Architecture Fundamentals
 
 ### Technical Architecture
 
-GEMINI.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
+CLAUDE.md files serve as markdown-based "project constitutions" that AI coding assistants automatically ingest at session start, functioning as high-priority system prompts that transform generic AI tools into project-aware development partners.
 
 **Hierarchical Loading System:**
-- **Global settings first**: `~/.gemini.json` (user-level preferences)
-- **Project-specific**: `.gemini.json` or `GEMINI.md` in project root
+- **Global settings first**: `~/.claude.json` (user-level preferences)
+- **Project-specific**: `.claude.json` or `CLAUDE.md` in project root
 - **Subdirectory-level**: Feature-specific configurations
 
 **Context Window Management:**
-- Typical limit: 200,000 tokens for Gemini Code (~500-page technical specifications)
-- Optimal GEMINI.md size: Under 30,000 tokens for best performance
+- Typical limit: 200,000 tokens for Claude Code (~500-page technical specifications)
+- Optimal CLAUDE.md size: Under 30,000 tokens for best performance
 - Performance degradation occurs at 50,000+ tokens (2-3x slower responses)
-- Advanced practitioners report 40-60% reduction in context provision during sessions with well-structured GEMINI.md files
+- Advanced practitioners report 40-60% reduction in context provision during sessions with well-structured CLAUDE.md files
 - Token efficiency achieved through hierarchical organization and modular structure
 
 ### Workflow Modes
@@ -45,7 +45,7 @@ GEMINI.md files serve as markdown-based "project constitutions" that AI coding a
 **Edit Mode** - Active code modifications
 - Context-aware development with preserved project knowledge
 - Maintains coding standards and architectural decisions across sessions
-- Use `/clear` to reset conversation while preserving GEMINI.md configuration
+- Use `/clear` to reset conversation while preserving CLAUDE.md configuration
 
 ## Context Management Best Practices
 
@@ -65,7 +65,7 @@ GEMINI.md files serve as markdown-based "project constitutions" that AI coding a
 - Domain knowledge (not general concepts)
 ```
 
-### Advanced GEMINI.md Patterns
+### Advanced CLAUDE.md Patterns
 
 **Hierarchical Organization:**
 - Parent directories provide broad context
@@ -89,10 +89,10 @@ GEMINI.md files serve as markdown-based "project constitutions" that AI coding a
 # Implement pre-commit hooks to verify context file syntax
 git add .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
-# Validate GEMINI.md files
-find . -name "GEMINI.md" -exec markdown-lint {} \;
+# Validate CLAUDE.md files
+find . -name "CLAUDE.md" -exec markdown-lint {} \;
 # Check file size limits (30KB)
-find . -name "GEMINI.md" -size +30k -exec echo "Warning: {} exceeds 30KB limit" \;
+find . -name "CLAUDE.md" -size +30k -exec echo "Warning: {} exceeds 30KB limit" \;
 EOF
 chmod +x .git/hooks/pre-commit
 ```
@@ -109,7 +109,7 @@ chmod +x .git/hooks/pre-commit
 
 ## Command System Mastery
 
-Gemini Code's command system extends beyond simple text generation to provide sophisticated project management capabilities.
+Claude Code's command system extends beyond simple text generation to provide sophisticated project management capabilities.
 
 ### Critical Commands for Performance
 
@@ -120,7 +120,7 @@ Gemini Code's command system extends beyond simple text generation to provide so
 - `/cost` - Real-time token usage monitoring for proactive management
 
 **Development Commands:**
-- `/init` - Generate initial GEMINI.md by analyzing project structure
+- `/init` - Generate initial CLAUDE.md by analyzing project structure
 - `/mcp` - View and interact with configured MCP servers
 - `/model` - Dynamic model switching for optimal performance-cost balance
 
@@ -163,7 +163,7 @@ gemini "Implement user authentication to pass all tests"
 
 ### Multi-Instance Orchestration
 
-Advanced teams implement parallel Gemini Code sessions for complex projects using Git worktrees:
+Advanced teams implement parallel Claude Code sessions for complex projects using Git worktrees:
 
 ```bash
 # Create parallel development streams
@@ -206,14 +206,14 @@ Based on the project template patterns, here's a structured approach to session 
 2. Commit all changes with clear messages
 3. Push to remote repository
 4. Update task status in project tracker
-5. Leave notes for next session in GEMINI.md
+5. Leave notes for next session in CLAUDE.md
 6. Use `/compact` to preserve relevant context
 
 ### Context Priming Strategy
 
 Before requesting implementation, provide comprehensive background through:
 
-**Well-structured GEMINI.md files:**
+**Well-structured CLAUDE.md files:**
 ```markdown
 # Project Context
 - Architecture: [specific pattern, not generic]
@@ -236,23 +236,23 @@ This front-loaded context investment reduces iteration cycles and improves first
 **Hierarchical File Organization:**
 ```
 project/
-├── GEMINI.md                    # Project overview (30KB max)
+├── CLAUDE.md                    # Project overview (30KB max)
 ├── features/
-│   ├── GEMINI.md               # Feature-specific context (30KB max)
+│   ├── CLAUDE.md               # Feature-specific context (30KB max)
 │   ├── auth/
-│   │   └── GEMINI.md           # Auth-specific patterns (30KB max)
+│   │   └── CLAUDE.md           # Auth-specific patterns (30KB max)
 │   └── ui/
-│       └── GEMINI.md           # UI-specific guidelines (30KB max)
+│       └── CLAUDE.md           # UI-specific guidelines (30KB max)
 ```
 
 **Cross-Reference Patterns:**
 ```markdown
-# In project/GEMINI.md
-For authentication patterns, see [features/auth/GEMINI.md](./features/auth/GEMINI.md)
+# In project/CLAUDE.md
+For authentication patterns, see [features/auth/CLAUDE.md](./features/auth/CLAUDE.md)
 
-# In features/auth/GEMINI.md
-Parent project context: [../../GEMINI.md](../../GEMINI.md)
-Related: [../ui/GEMINI.md](../ui/GEMINI.md) for user interface patterns
+# In features/auth/CLAUDE.md
+Parent project context: [../../CLAUDE.md](../../CLAUDE.md)
+Related: [../ui/CLAUDE.md](../ui/CLAUDE.md) for user interface patterns
 ```
 
 ### Context Monitoring
@@ -270,7 +270,7 @@ gemini /compact
 ```
 
 **Performance Targets:**
-- GEMINI.md files: < 30KB each
+- CLAUDE.md files: < 30KB each
 - Total context per session: < 100KB initial load
 - Token usage: < 150K tokens for complex sessions
 - Response time: < 5 seconds for context-heavy queries
@@ -278,7 +278,7 @@ gemini /compact
 ### Team Coordination
 
 **Shared Standards:**
-- Consistent GEMINI.md formatting across team members
+- Consistent CLAUDE.md formatting across team members
 - Agreed-upon context structure and organization
 - Regular context file reviews and updates
 - Shared context templates for common patterns
@@ -286,7 +286,7 @@ gemini /compact
 **Context Synchronization:**
 ```bash
 # Sync context files across team
-git add GEMINI.md */GEMINI.md
+git add CLAUDE.md */CLAUDE.md
 git commit -m "Update context files for v2.0 architecture"
 git push origin main
 ```
@@ -306,7 +306,7 @@ npm run lint         # Check code style
 gemini /clear         # Reset between unrelated tasks
 gemini /context       # Monitor token usage
 gemini /compact       # Compress related context
-gemini /init          # Regenerate GEMINI.md
+gemini /init          # Regenerate CLAUDE.md
 
 # Project-Specific Commands (example)
 npm run db:migrate    # Run migrations
@@ -324,7 +324,7 @@ Persistent state management across Gemini sessions using SQLite-based storage:
 # Install and configure Memory Keeper MCP Server
 npm install -g mcp-memory-keeper
 
-# Configure in Gemini Code MCP settings
+# Configure in Claude Code MCP settings
 {
   "mcpServers": {
     "memory-keeper": {
@@ -347,13 +347,13 @@ Advanced vector database integration for semantic code search:
 
 ```bash
 # Install Gemini Context for large codebase management
-npm install -g gemini-context-mcp
+npm install -g claude-context-mcp
 
 # Configure with multiple embedding providers
 {
   "mcpServers": {
-    "gemini-context": {
-      "command": "gemini-context-mcp",
+    "claude-context": {
+      "command": "claude-context-mcp",
       "args": [
         "--embedding-provider", "openai",
         "--chunk-size", "1000",
@@ -446,4 +446,4 @@ third-party/
 
 ---
 
-*Context management is the foundation of effective Gemini Code development. Master these patterns for optimal performance and team productivity.*
+*Context management is the foundation of effective Claude Code development. Master these patterns for optimal performance and team productivity.*

@@ -82,14 +82,14 @@ From the complete german workflow system, we integrated:
 ## Related Documentation
 
 **In stharrold-templates:**
-- `GEMINI.md` - Main repository guide with workflow integration section
+- `CLAUDE.md` - Main repository guide with workflow integration section
 - `CONTRIBUTING.md` - Contributor guidelines adapted for templates
 - `tools/README.md` - Integrated workflow tools documentation
 - `pyproject.toml` - Development dependencies configuration
 
 **External:**
 - German workflow repository: (reference implementation)
-- Gemini Code official docs: https://docs.gemini.com/en/docs/gemini-code/
+- Claude Code official docs: https://docs.gemini.com/en/docs/gemini-code/
 
 ## Version Information
 
@@ -102,5 +102,5 @@ From the complete german workflow system, we integrated:
 
 For questions about:
 - **Integrated tools**: See `tools/README.md` or `CONTRIBUTING.md`
-- **MCP management**: See main `GEMINI.md`
+- **MCP management**: See main `CLAUDE.md`
 - **German workflow concepts**: Read `german-workflow-v5.3.0.md` in this directory

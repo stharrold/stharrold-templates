@@ -1,4 +1,4 @@
-# Gemini Code Prompt: Air-Gapped Healthcare Graph ML Integration
+# Claude Code Prompt: Air-Gapped Healthcare Graph ML Integration
 
 ## Project Context
 

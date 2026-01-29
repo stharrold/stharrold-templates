@@ -2,7 +2,7 @@
 title: Testing Standards & Validation
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -292,7 +292,7 @@ gemini /cost --daily-breakdown
 
 **DeepEval for LLM-Specific Testing:**
 ```bash
-# LLM evaluation framework for Gemini Code workflows
+# LLM evaluation framework for Claude Code workflows
 pip install deepeval
 deepeval test generate --model gemini-3-5-sonnet
 ```
@@ -414,7 +414,7 @@ Where:
 ### Long-term Sustainability Assessment
 
 **Technical Debt and Maintenance:**
-- **GEMINI.md file maintenance** and optimization for context efficiency
+- **CLAUDE.md file maintenance** and optimization for context efficiency
 - **Server configuration drift** detection and correction
 - **Knowledge base quality** and relevance assessment
 - **Documentation currency** and accuracy validation
@@ -761,7 +761,7 @@ if __name__ == "__main__":
 npm test  # TypeScript servers
 pytest    # Python servers
 
-# Integration testing with Gemini Code
+# Integration testing with Claude Code
 gemini mcp add custom-server ./custom-server
 gemini mcp test-server --server=custom-server --comprehensive
 
@@ -807,7 +807,7 @@ Update procedures and monitoring recommendations.
 
 **Minimum Testing Requirements:**
 ```yaml
-# Enhanced testing standards in GEMINI.md
+# Enhanced testing standards in CLAUDE.md
 testing_requirements:
   unit_tests: ">80% code coverage with comprehensive edge case testing"
   integration_tests: "All API endpoints and database operations"

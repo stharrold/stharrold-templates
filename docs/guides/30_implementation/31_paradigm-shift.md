@@ -2,7 +2,7 @@
 title: Agentic Development Paradigm
 version: 3.1
 updated: 2025-09-12
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -26,13 +26,13 @@ changelog:
 
 # Agentic Development Paradigm
 
-Strategic foundation for transforming software development from traditional IDE-based coding to agentic, conversation-driven programming with Gemini Code as an autonomous development partner.
+Strategic foundation for transforming software development from traditional IDE-based coding to agentic, conversation-driven programming with Claude Code as an autonomous development partner.
 
 ## Fundamental Paradigm Shift
 
 ### From Code Completion to Development Partnership
 
-Gemini Code fundamentally transforms software development by moving beyond traditional autocomplete suggestions to become an **autonomous development partner** capable of executing complex, multi-step workflows with minimal supervision.
+Claude Code fundamentally transforms software development by moving beyond traditional autocomplete suggestions to become an **autonomous development partner** capable of executing complex, multi-step workflows with minimal supervision.
 
 **Traditional IDE Limitations:**
 - **Code completion tools** (GitHub Copilot, Cursor) provide suggestions but require manual orchestration
@@ -46,9 +46,9 @@ Gemini Code fundamentally transforms software development by moving beyond tradi
 - **Autonomous task execution** completes entire features from conception to deployment rather than simple code completion
 - **Multi-step reasoning** handles complex architectural decisions and cross-cutting concerns
 
-### Positioning Gemini Code as Development Partner
+### Positioning Claude Code as Development Partner
 
-Rather than treating Gemini Code as a code completion tool, successful teams position it as an autonomous development partner through strategic delegation and orchestration.
+Rather than treating Claude Code as a code completion tool, successful teams position it as an autonomous development partner through strategic delegation and orchestration.
 
 ## Model Selection Strategy
 
@@ -95,7 +95,7 @@ gemini "Implement user authentication system with:
 - Role-based permissions
 - Session management
 - Password reset functionality
-Following our Django patterns in GEMINI.md"
+Following our Django patterns in CLAUDE.md"
 ```
 
 **Autonomous Decision Making:**
@@ -120,7 +120,7 @@ git worktree add ../project-ui feature/user-interface
 git worktree add ../project-tests feature/test-suite
 git worktree add ../project-api feature/api-endpoints
 
-# Run independent Gemini Code sessions:
+# Run independent Claude Code sessions:
 # Instance 1: Implements authentication system
 # Instance 2: Builds UI components
 # Instance 3: Generates comprehensive test suite
@@ -153,7 +153,7 @@ git merge feature/test-suite
 **Strategic Context Architecture:**
 Before requesting implementation, successful teams provide comprehensive background through structured information architecture:
 
-#### 1. Well-Structured GEMINI.md Files
+#### 1. Well-Structured CLAUDE.md Files
 
 **Project-Level Context:**
 ```yaml
@@ -178,7 +178,7 @@ standards:
 
 **Domain-Specific Patterns:**
 ```python
-# Example coding standards in GEMINI.md
+# Example coding standards in CLAUDE.md
 def process_payment(amount: Decimal, payment_method: str) -> PaymentResult:
     """
     All payment functions must:
@@ -365,9 +365,9 @@ domain_knowledge:
 
 ## Competitive Analysis & Strategic Positioning
 
-### When to Use Gemini Code vs Alternatives
+### When to Use Claude Code vs Alternatives
 
-**Gemini Code Optimal Scenarios:**
+**Claude Code Optimal Scenarios:**
 - **Complex, long-running projects** with stable architectures requiring deep context understanding
 - **Enterprise applications** with strict coding standards and compliance requirements
 - **Legacy system modernization** where comprehensive understanding of existing patterns is critical
@@ -385,7 +385,7 @@ domain_knowledge:
 - **File-by-file editing** with minimal cross-file dependencies
 - **Developers preferring IDE-centric** workflows with enhanced autocomplete
 
-**Gemini Code Strategic Advantages:**
+**Claude Code Strategic Advantages:**
 - **Autonomous project management** - handles entire features end-to-end
 - **Terminal-native operations** - sophisticated Git workflows and automation
 - **Persistent project knowledge** - maintains context across sessions
@@ -430,7 +430,7 @@ domain_knowledge:
 
 **Platform Maturation Indicators:**
 - **1,600+ MCP servers** signal evolution beyond individual tool status to comprehensive platform
-- **Enterprise integrations** with Jira, Slack, Google Drive, Salesforce transform Gemini Code into unified development platform
+- **Enterprise integrations** with Jira, Slack, Google Drive, Salesforce transform Claude Code into unified development platform
 - **Custom MCP development** enables domain-specific integrations (Unity game development, PayPal business operations, specialized industry tools)
 
 **Ecosystem Network Effects:**
@@ -539,7 +539,7 @@ When starting a new session:
 
 **Context Preparation:**
 - Clear irrelevant conversation history with `/clear`
-- Load project-specific GEMINI.md context
+- Load project-specific CLAUDE.md context
 - Identify critical files and dependencies for the task
 - Prepare relevant test files and documentation
 

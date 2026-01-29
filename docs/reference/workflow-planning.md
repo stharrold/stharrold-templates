@@ -30,7 +30,7 @@ This command automates the creation of an isolated git worktree for your feature
 1. Generates a kebab-case slug from your description.
 2. Creates a new branch: `feature/YYYYMMDDTHHMMSSZ_slug`.
 3. Creates a worktree directory at `../{project}_feature_...`.
-4. Initializes `.gemini-state/` for worktree state isolation.
+4. Initializes `.claude-state/` for worktree state isolation.
 5. Records the transition in **AgentDB**.
 
 **Output:**
@@ -50,7 +50,7 @@ Inside the worktree, you use built-in Gemini CLI tools to implement the feature.
 **Autonomous implementation replaces legacy phases:**
 - ❌ No more manual BMAD planning (Requirements/Architecture/Epics).
 - ❌ No more manual SpecKit specifications (Spec/Plan).
-- ❌ No more manual Quality Gates (Gemini Code Review ensures quality).
+- ❌ No more manual Quality Gates (Claude Code Review ensures quality).
 
 **Process:**
 1. Chat with Gemini in the isolated worktree to implement the feature.
@@ -67,16 +67,16 @@ Inside the worktree, you use built-in Gemini CLI tools to implement the feature.
 
 ## State Tracking (AgentDB)
 
-Workflow state is tracked in **AgentDB** (DuckDB) located in `.gemini-state/agentdb.duckdb`.
+Workflow state is tracked in **AgentDB** (DuckDB) located in `.claude-state/agentdb.duckdb`.
 
 **Query State:**
 ```bash
-uv run python .gemini/skills/agentdb-state-manager/scripts/query_workflow_state.py
+uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
 ```
 
 **Record Transition:**
 ```bash
-uv run python .gemini/skills/agentdb-state-manager/scripts/record_sync.py \
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
   --pattern phase_v7x1_1_worktree
 ```

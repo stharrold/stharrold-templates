@@ -2,7 +2,7 @@
 title: Enterprise Deployment & CI/CD Integration
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true

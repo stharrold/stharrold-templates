@@ -11,7 +11,7 @@ import sys
 import pytest
 
 # Add workflow-utilities/scripts to path
-sys.path.insert(0, ".gemini/skills/workflow-utilities/scripts")
+sys.path.insert(0, ".claude/skills/workflow-utilities/scripts")
 
 from safe_output import (
     SYMBOLS,

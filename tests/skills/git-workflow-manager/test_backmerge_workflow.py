@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 # Add scripts to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent.parent / ".gemini/skills/git-workflow-manager/scripts"),
+    str(Path(__file__).parent.parent.parent.parent / ".claude/skills/git-workflow-manager/scripts"),
 )
 
 from backmerge_workflow import (

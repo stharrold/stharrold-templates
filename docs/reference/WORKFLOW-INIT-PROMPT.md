@@ -9,7 +9,7 @@ follows: DRY principle (references files, doesn't duplicate)
 
 # Workflow System v7x1.0.0 - Quick Start Guide
 
-This repository implements a streamlined 4-step development workflow using built-in Gemini CLI tools for autonomous implementation and automated **Gemini Code Review** for quality.
+This repository implements a streamlined 4-step development workflow using built-in Gemini CLI tools for autonomous implementation and automated **Claude Code Review** for quality.
 
 ## Bootstrap a New Repository
 
@@ -17,14 +17,14 @@ This repository implements a streamlined 4-step development workflow using built
 
 ### From This Repo
 ```bash
-python .gemini/skills/initialize-repository/scripts/initialize_repository.py . ../new-repo
+python .claude/skills/initialize-repository/scripts/initialize_repository.py . ../new-repo
 ```
 
 ### From Downloaded Release (for existing repositories)
 
-User downloads stharrold-templates release to untracked directory in their repo, then tells Gemini Code:
+User downloads stharrold-templates release to untracked directory in their repo, then tells Claude Code:
 
-**Prompt for Gemini Code:**
+**Prompt for Claude Code:**
 > "Read `/path/to/stharrold-templates`. Apply the workflow from `/path/to/stharrold-templates` to the current repository."
 
 This copies all 6 skills, v7x1 command aliases, documentation, CI/CD configs, and directory structure.
@@ -60,7 +60,7 @@ The v7x1 workflow focuses on autonomous implementation using built-in tools.
 
 ## Essential Reading
 
-### 1. `GEMINI.md` (~300 tokens)
+### 1. `CLAUDE.md` (~300 tokens)
 **Purpose:** Repository-specific guidance and v7x1 workflow overview.
 **When:** First time working with this repository.
 
@@ -75,22 +75,22 @@ The v7x1 workflow focuses on autonomous implementation using built-in tools.
 For detailed documentation on each skill, read their respective SKILL.md files:
 
 ### Core Skills
-1. **workflow-orchestrator** - `.gemini/skills/workflow-orchestrator/SKILL.md`
+1. **workflow-orchestrator** - `.claude/skills/workflow-orchestrator/SKILL.md`
    - Purpose: Coordinate workflow phases and command aliases.
 
-2. **git-workflow-manager** - `.gemini/skills/git-workflow-manager/SKILL.md`
+2. **git-workflow-manager** - `.claude/skills/git-workflow-manager/SKILL.md`
    - Purpose: Git operations (worktrees, branches, versioning, PRs).
 
-3. **tech-stack-adapter** - `.gemini/skills/tech-stack-adapter/SKILL.md`
+3. **tech-stack-adapter** - `.claude/skills/tech-stack-adapter/SKILL.md`
    - Purpose: Detect project configuration (Python/uv/Podman).
 
-4. **workflow-utilities** - `.gemini/skills/workflow-utilities/SKILL.md`
+4. **workflow-utilities** - `.claude/skills/workflow-utilities/SKILL.md`
    - Purpose: Shared utilities (directories, file deprecation, VCS abstraction).
 
-5. **agentdb-state-manager** - `.gemini/skills/agentdb-state-manager/SKILL.md`
+5. **agentdb-state-manager** - `.claude/skills/agentdb-state-manager/SKILL.md`
    - Purpose: Persistent state tracking with AgentDB (DuckDB).
 
-6. **initialize-repository** - `.gemini/skills/initialize-repository/SKILL.md`
+6. **initialize-repository** - `.claude/skills/initialize-repository/SKILL.md`
    - Purpose: Bootstrap new repositories with this workflow system.
 
 ---
@@ -112,6 +112,6 @@ For detailed documentation on each skill, read their respective SKILL.md files:
 **This workflow system provides:**
 - ✅ **Streamlined 4-step flow** (reduced from legacy 7-phase system).
 - ✅ **Autonomous implementation** using built-in Gemini CLI tools.
-- ✅ **Gemini Code Review** automated via GitHub Actions.
+- ✅ **Claude Code Review** automated via GitHub Actions.
 - ✅ **Token efficiency** through modular skills.
 - ✅ **Cross-platform CI/CD** (GitHub Actions + Azure Pipelines).
