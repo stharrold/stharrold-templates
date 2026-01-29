@@ -10,6 +10,13 @@
 This script helps configure secrets in the OS keyring for local development.
 It reads secret definitions from secrets.toml and prompts for values.
 
+First-time setup:
+    1. Create a GitHub fine-grained PAT at:
+       https://github.com/settings/tokens?type=beta
+       Permissions: Issues (R/W), Pull requests (R/W), Contents (R/W)
+    2. Run: uv run scripts/secrets_setup.py
+    3. Paste the token when prompted
+
 Usage:
     uv run scripts/secrets_setup.py                     # Interactive setup
     uv run scripts/secrets_setup.py --check             # Verify secrets exist
@@ -17,12 +24,11 @@ Usage:
     uv run scripts/secrets_setup.py --root PATH         # Specify project root
 
 Example:
-    $ uv run scripts/secrets_setup.py --root ../my-project
-    [INFO] Setting up secrets for service: my-project
+    $ uv run scripts/secrets_setup.py
+    [INFO] Setting up secrets for service: stharrold-templates
 
     Setting up required secrets:
-    DB_PASSWORD: [exists] Keep existing value? [Y/n]:
-    API_KEY: Enter value: ********
+    GH_TOKEN: Enter value: ********
 
     [OK] All secrets configured successfully
 """
