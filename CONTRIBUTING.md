@@ -86,16 +86,16 @@ feature/* (isolated worktrees)
 
 ```bash
 # Rebase contrib branch onto develop
-uv run python .gemini/skills/git-workflow-manager/scripts/daily_rebase.py contrib/stharrold
+uv run python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/stharrold
 ```
 
 ## Documentation Requirements
 
-### Modular GEMINI.md Pattern
+### Modular CLAUDE.md Pattern
 
 All directories must have:
 
-1. **GEMINI.md** - AI context and navigation.
+1. **CLAUDE.md** - AI context and navigation.
 2. **README.md** - Human-readable documentation.
 3. **ARCHIVED/** - Deprecated files subdirectory.
 
@@ -121,7 +121,7 @@ gh pr create \
 ### 2. PR Requirements
 
 - [ ] All CI/CD tests pass.
-- [ ] Gemini Code Review completed.
+- [ ] Claude Code Review completed.
 - [ ] Documentation updated to reflect changes.
 - [ ] Commit messages follow Conventional Commits.
 
@@ -132,7 +132,7 @@ gh pr create \
 
 <body>
 
-🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://gemini.com/gemini-code)
 ```
 
 **Types:** feat, fix, docs, style, refactor, test, chore.
@@ -148,7 +148,7 @@ gh pr create \
 
 ### Workflow Tools
 
-This repository includes 6 active workflow skills in `.gemini/skills/`:
+This repository includes 6 active workflow skills in `.claude/skills/`:
 - `workflow-orchestrator`: Main coordinator.
 - `git-workflow-manager`: Git automation.
 - `tech-stack-adapter`: Stack detection.
@@ -160,16 +160,16 @@ This repository includes 6 active workflow skills in `.gemini/skills/`:
 
 | To change... | Edit this | NOT this |
 |--------------|-----------|----------|
-| Skills | `.gemini/skills/` | `.agents/` |
-| Commands | `.gemini/commands.toml` | N/A |
-| Root instructions | `GEMINI.md` | `AGENTS.md` |
+| Skills | `.claude/skills/` | `.agents/` |
+| Commands | `.claude/commands.toml` | N/A |
+| Root instructions | `CLAUDE.md` | `AGENTS.md` |
 
-**Note**: `.agents/` and `AGENTS.md` are automatically synced from `.gemini/` sources.
+**Note**: `.agents/` and `AGENTS.md` are automatically synced from `.claude/` sources.
 
 ## Questions or Issues?
 
 - Open an issue on GitHub.
-- Check `GEMINI.md` for detailed guidance.
+- Check `CLAUDE.md` for detailed guidance.
 
 ## License
 

@@ -12,7 +12,7 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / ".gemini/skills/workflow-utilities/scripts"),
+    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
 )
 
 import pytest
@@ -21,13 +21,13 @@ import pytest
 class TestGetStateDirContract:
     """Contract tests for get_state_dir() function."""
 
-    def test_returns_path_to_gemini_state(self, tmp_path, monkeypatch):
-        """Test: Returns Path to .gemini-state/."""
+    def test_returns_path_to_claude_state(self, tmp_path, monkeypatch):
+        """Test: Returns Path to .claude-state/."""
         from worktree_context import get_state_dir
 
         result = get_state_dir()
         assert isinstance(result, Path)
-        assert result.name == ".gemini-state"
+        assert result.name == ".claude-state"
 
     def test_creates_directory_if_not_exists(self, tmp_path, monkeypatch):
         """Test: Creates directory if not exists."""

@@ -2,7 +2,7 @@
 title: AI Task Management & Session Workflow
 version: 1.0
 updated: 2025-01-27
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -185,7 +185,7 @@ graph TD
 **At Session Start:**
 ```markdown
 1. **Context Loading**:
-   - Review project context from GEMINI.md
+   - Review project context from CLAUDE.md
    - Check current TODO status
    - Load relevant MCP server configurations
 

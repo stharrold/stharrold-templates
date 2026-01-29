@@ -2,7 +2,7 @@
 title: Team Collaboration & Communication Patterns
 version: 1.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./32_workflow-patterns.md
   - ./36_ai-task-management.md
@@ -11,7 +11,7 @@ related:
 
 # Team Collaboration & Communication Patterns
 
-Advanced collaboration strategies for multi-developer teams using Gemini Code, including communication platform integration, workflow automation, and team coordination patterns.
+Advanced collaboration strategies for multi-developer teams using Claude Code, including communication platform integration, workflow automation, and team coordination patterns.
 
 ## Phase 3: Collaboration Integration (Weeks 5-6)
 

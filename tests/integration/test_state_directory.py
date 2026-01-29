@@ -12,7 +12,7 @@ from pathlib import Path
 # Add the worktree_context module to path
 sys.path.insert(
     0,
-    str(Path(__file__).parent.parent.parent / ".gemini/skills/workflow-utilities/scripts"),
+    str(Path(__file__).parent.parent.parent / ".claude/skills/workflow-utilities/scripts"),
 )
 
 
@@ -20,9 +20,9 @@ class TestStateDirectoryCreation:
     """Integration tests for state directory creation."""
 
     def test_directory_created_with_correct_path(self):
-        """Given: No .gemini-state/ exists (or exists).
+        """Given: No .claude-state/ exists (or exists).
         When: get_state_dir() called.
-        Then: Directory exists at worktree_root/.gemini-state/.
+        Then: Directory exists at worktree_root/.claude-state/.
         """
         from worktree_context import get_state_dir, get_worktree_context
 
@@ -31,7 +31,7 @@ class TestStateDirectoryCreation:
 
         assert state_dir.exists()
         assert state_dir.is_dir()
-        assert state_dir == ctx.worktree_root / ".gemini-state"
+        assert state_dir == ctx.worktree_root / ".claude-state"
 
     def test_gitignore_file_created(self):
         """Given: get_state_dir() called.
@@ -83,7 +83,7 @@ class TestStateDirectoryCreation:
 
     def test_state_dir_is_gitignored(self):
         """Given: State directory created.
-        Then: .gemini-state/ is in root .gitignore.
+        Then: .claude-state/ is in root .gitignore.
         """
         from worktree_context import get_state_dir, get_worktree_context
 
@@ -93,4 +93,4 @@ class TestStateDirectoryCreation:
         root_gitignore = ctx.worktree_root / ".gitignore"
         if root_gitignore.exists():
             content = root_gitignore.read_text()
-            assert ".gemini-state" in content
+            assert ".claude-state" in content

@@ -13,7 +13,7 @@ from unittest.mock import patch
 import pytest
 
 # Add the scripts directory to the path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts"))
 
 from archive_manager import create_archive, ensure_archived_directory, get_repo_root
 
@@ -45,15 +45,15 @@ class TestEnsureArchivedDirectory:
         assert result == archived_dir
         assert archived_dir.exists()
 
-    def test_creates_gemini_md(self, tmp_path: Path):
-        """Creates GEMINI.md in ARCHIVED directory."""
+    def test_creates_claude_md(self, tmp_path: Path):
+        """Creates CLAUDE.md in ARCHIVED directory."""
         archived_dir = tmp_path / "ARCHIVED"
         ensure_archived_directory(archived_dir)
 
-        gemini_md = archived_dir / "GEMINI.md"
-        assert gemini_md.exists()
-        content = gemini_md.read_text()
-        assert "Gemini Code Context" in content
+        claude_md = archived_dir / "CLAUDE.md"
+        assert claude_md.exists()
+        content = claude_md.read_text()
+        assert "Claude Code Context" in content
         assert "deprecated" in content.lower()
 
     def test_creates_readme_md(self, tmp_path: Path):
@@ -72,14 +72,14 @@ class TestEnsureArchivedDirectory:
         ensure_archived_directory(archived_dir)
 
         # Modify files
-        (archived_dir / "GEMINI.md").write_text("Custom content")
+        (archived_dir / "CLAUDE.md").write_text("Custom content")
         (archived_dir / "README.md").write_text("Custom readme")
 
         # Run again
         ensure_archived_directory(archived_dir)
 
         # Files should not be overwritten
-        assert (archived_dir / "GEMINI.md").read_text() == "Custom content"
+        assert (archived_dir / "CLAUDE.md").read_text() == "Custom content"
         assert (archived_dir / "README.md").read_text() == "Custom readme"
 
 
@@ -272,7 +272,7 @@ class TestCreateArchive:
         assert failed_files == []
 
     def test_creates_archived_structure_by_default(self, tmp_path: Path):
-        """Creates GEMINI.md and README.md in archive directory by default."""
+        """Creates CLAUDE.md and README.md in archive directory by default."""
         # Create test file
         test_file = tmp_path / "test.txt"
         test_file.write_text("test content")
@@ -287,12 +287,12 @@ class TestCreateArchive:
                 timestamp="20251228T120000Z",
             )
 
-        assert (archived_dir / "GEMINI.md").exists()
+        assert (archived_dir / "CLAUDE.md").exists()
         assert (archived_dir / "README.md").exists()
         assert failed_files == []
 
     def test_skips_archived_structure_when_disabled(self, tmp_path: Path):
-        """Skips GEMINI.md and README.md when ensure_archived_structure=False."""
+        """Skips CLAUDE.md and README.md when ensure_archived_structure=False."""
         # Create test file
         test_file = tmp_path / "test.txt"
         test_file.write_text("test content")
@@ -308,7 +308,7 @@ class TestCreateArchive:
                 timestamp="20251228T120000Z",
             )
 
-        assert not (archived_dir / "GEMINI.md").exists()
+        assert not (archived_dir / "CLAUDE.md").exists()
         assert not (archived_dir / "README.md").exists()
         assert failed_files == []
 
@@ -364,7 +364,7 @@ class TestArchiveManagerCLI:
         archived_dir = tmp_path / "ARCHIVED"
 
         # Get the script path
-        script_path = Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
 
         # Run CLI with one valid file and one nonexistent file
         result = subprocess.run(
@@ -400,7 +400,7 @@ class TestArchiveManagerCLI:
         archived_dir = tmp_path / "ARCHIVED"
 
         # Get the script path
-        script_path = Path(__file__).parent.parent.parent.parent / ".gemini" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
+        script_path = Path(__file__).parent.parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts" / "archive_manager.py"
 
         # Run CLI with valid files only
         result = subprocess.run(

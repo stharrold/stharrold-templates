@@ -75,7 +75,7 @@ This planning document remains in the main repository for tracking and reference
 ### Target Location
 - **Directory**: `10_draft-merged/30_implementation/`
 - **File**: `42_documentation-patterns.md` (new file)
-- **Navigation**: Will be added to `30_implementation/GEMINI.md`
+- **Navigation**: Will be added to `30_implementation/CLAUDE.md`
 
 ### File Numbering Strategy
 - **42**: Follows logical sequence after `41_ai-ml-tools.md` (Issue #13)
@@ -83,7 +83,7 @@ This planning document remains in the main repository for tracking and reference
 - **Position**: Early in implementation sequence for foundational documentation tools
 
 ### Integration Context
-- **Parent Guide**: `30_implementation/GEMINI.md` orchestrator
+- **Parent Guide**: `30_implementation/CLAUDE.md` orchestrator
 - **Related Files**: Cross-references with AI/ML tools (41), testing standards (33)
 - **Workflow Position**: Foundation for documentation automation before complex implementations
 
@@ -138,7 +138,7 @@ Production → "Production Deployment & Scaling"
 - [ ] Ensure type constraint examples are preserved
 
 ### Phase 3: Navigation Updates (20 minutes)
-- [ ] Update `30_implementation/GEMINI.md` to include 42_documentation-patterns.md
+- [ ] Update `30_implementation/CLAUDE.md` to include 42_documentation-patterns.md
 - [ ] Add file to the files list in YAML frontmatter
 - [ ] Update changelog with new addition
 - [ ] Verify hierarchical navigation works correctly
@@ -166,7 +166,7 @@ Production → "Production Deployment & Scaling"
 title: "Documentation Patterns - BAML Schema-First Extraction"
 version: 1.0
 updated: 2025-09-16
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 source_integration: "00_draft-initial/12_report-baml-documentation-extractor.md"
 template_version: 1.0
 project_template:
@@ -232,7 +232,7 @@ changelog:
 ### Completion Criteria
 - ✅ New file `42_documentation-patterns.md` created and integrated
 - ✅ File size ≤ 30KB with all content preserved
-- ✅ Navigation updated in parent GEMINI.md
+- ✅ Navigation updated in parent CLAUDE.md
 - ✅ Codacy analysis passes without critical issues
 - ✅ Source document archived with timestamp
 - ✅ GitHub Issue #15 closed with completion summary
@@ -251,7 +251,7 @@ changelog:
 **Phase Breakdown:**
 1. **Pre-Integration** (15 min) - Setup and validation
 2. **Content Integration** (60 min) - File creation and content structuring
-3. **Navigation Updates** (20 min) - GEMINI.md updates
+3. **Navigation Updates** (20 min) - CLAUDE.md updates
 4. **Quality Assurance** (30 min) - Testing and validation
 5. **Completion** (15 min) - Archiving and issue closure
 
@@ -282,7 +282,7 @@ changelog:
 - **Next in Sequence**: Issue #16 (Document #13) - BAML Kuzu graph schema
 - Source archived for audit trail
 - Integration tracked in [TODO.md](TODO.md) (Priority 2 - Document #12)
-- Change logged in 30_implementation/GEMINI.md
+- Change logged in 30_implementation/CLAUDE.md
 - GitHub issue updated with completion summary
 
 ---

@@ -2,7 +2,7 @@
 title: Implementation Workflow Patterns
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -17,7 +17,7 @@ related:
   - ./33_testing-standards.md
   - ./37_team-collaboration.md
   - ../10_mcp/12_servers.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
 changelog:
   - 4.0: BREAKING CHANGE - Replaced Docker with Podman for container management, added automated tool discovery pipeline, LangGraph orchestration
   - 3.2: Added Gemini framework integration patterns (LangChain, CrewAI, custom orchestration), extracted team collaboration to separate guide
@@ -103,7 +103,7 @@ gemini mcp add git npx @modelcontextprotocol/server-git
 - Always create feature branches from main
 - Squash commits before merging
 
-**Recommended Git Commands for Gemini Code:**
+**Recommended Git Commands for Claude Code:**
 ```bash
 # Create feature branch
 git checkout -b feature/task-description
@@ -114,7 +114,7 @@ git add . && git commit -m "feat(auth): implement JWT token validation"
 # Push with upstream tracking
 git push -u origin feature/task-description
 
-# Create PR via Gemini Code GitHub integration
+# Create PR via Claude Code GitHub integration
 gemini "Create PR for this feature with comprehensive description"
 ```
 
@@ -175,7 +175,7 @@ gemini mcp add sqlite npx @modelcontextprotocol/server-sqlite
 - Code quality analysis and recommendations
 - Compliance checking for industry standards
 - Integration with CI/CD pipelines
-- **Note:** Required per repository GEMINI.md guidelines for all file edits
+- **Note:** Required per repository CLAUDE.md guidelines for all file edits
 
 ### Setup Steps
 
@@ -200,7 +200,7 @@ $githubToken = ConvertTo-SecureString "your-github-token" -AsPlainText -Force
 New-StoredCredential -Target "GITHUB_TOKEN" -UserName "token" -SecurePassword $githubToken -Persist LocalMachine
 ```
 
-**Reference:** For complete credential setup, see [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+**Reference:** For complete credential setup, see [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 
 #### 2. Server Installation and Configuration
 ```bash
@@ -223,7 +223,7 @@ gemini mcp list
 # Test server connectivity
 /usr/bin/python3 mcp_manager.py --list
 
-# Functional testing in Gemini Code
+# Functional testing in Claude Code
 # Type: /mcp
 # Test basic operations with each server
 ```
@@ -242,7 +242,7 @@ gemini mcp list
 **Development Velocity Improvements:**
 - **2-10x development velocity** improvements reported by early enterprise adopters
 - **55% faster task completion** rates (GitHub internal engineering studies)
-- **40-70% reduction in debugging time** (Microsoft engineering teams with Gemini Code integration)
+- **40-70% reduction in debugging time** (Microsoft engineering teams with Claude Code integration)
 - **45% reduction in onboarding time** for new developers joining existing projects
 
 **Quality and Consistency Improvements:**
@@ -254,7 +254,7 @@ gemini mcp list
 #### Common Issues & Solutions
 
 **Missing or Invalid Tokens:**
-- Check credential storage per [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+- Check credential storage per [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 - Verify token scopes and permissions
 - Test token validity with direct API calls
 
@@ -431,7 +431,7 @@ Modern Gemini development benefits from integration with established AI framewor
 
 **Podman Architecture for Secure Container Management**
 
-Podman provides superior security through daemonless, rootless architecture, making it ideal for Gemini Code's container management needs:
+Podman provides superior security through daemonless, rootless architecture, making it ideal for Claude Code's container management needs:
 
 ```yaml
 Container Management Layer:
@@ -447,7 +447,7 @@ Container Management Layer:
 - **SystemD integration** for Linux service management
 - **Pod support** for grouping related containers
 
-**Podman Commands for Gemini Code Integration:**
+**Podman Commands for Claude Code Integration:**
 ```bash
 # Container lifecycle management
 podman run --rm -d --name gemini-workspace alpine:latest
@@ -751,7 +751,7 @@ Add domain-specific servers based on project needs, industry requirements, and c
 
 **Automated Code Standards Enforcement:**
 ```bash
-# Example configuration in GEMINI.md
+# Example configuration in CLAUDE.md
 development_standards:
   code_style: "PEP8 with type hints for Python, ESLint + Prettier for JavaScript"
   documentation: "Docstrings required for all public functions"
@@ -774,9 +774,9 @@ gemini /clear    # Between unrelated tasks
 gemini /compact  # At natural breakpoints in related work
 
 # Context loading efficiency
-# Use hierarchical GEMINI.md files for project-specific context
-# Global preferences in ~/.gemini/GEMINI.md
-# Project-specific patterns in project/GEMINI.md
+# Use hierarchical CLAUDE.md files for project-specific context
+# Global preferences in ~/.claude/CLAUDE.md
+# Project-specific patterns in project/CLAUDE.md
 ```
 
 **AI Task Management Integration:**
@@ -834,13 +834,13 @@ gemini mcp context-cleanup --aggressive
 
 **Hierarchical Context Architecture:**
 ```yaml
-# Global context in ~/.gemini/GEMINI.md
+# Global context in ~/.claude/CLAUDE.md
 global_preferences:
   model_selection: "sonnet-4"
   cost_optimization: "enabled"
   security_scanning: "mandatory"
 
-# Project context in project/GEMINI.md
+# Project context in project/CLAUDE.md
 project_specific:
   architecture: "microservices"
   database: "postgresql"
@@ -848,7 +848,7 @@ project_specific:
 ```
 
 **Session Optimization Strategies:**
-- **Front-load context** in GEMINI.md files for reuse across sessions
+- **Front-load context** in CLAUDE.md files for reuse across sessions
 - **Clear frequently** between unrelated tasks to maintain performance
 - **Use compaction** at natural breakpoints in related work
 - **Monitor token usage** and optimize context loading patterns

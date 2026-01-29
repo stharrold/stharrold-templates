@@ -2,20 +2,20 @@
 title: MCP Installation & Setup
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./12_servers.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
 ---
 
 # MCP Installation & Setup
 
-Complete installation guide for Model Context Protocol servers across Gemini Code CLI, VS Code MCP Extension, and Gemini Desktop App.
+Complete installation guide for Model Context Protocol servers across Claude Code CLI, VS Code MCP Extension, and Gemini Desktop App.
 
 ## Overview
 
-MCP servers enable AI assistants to interact with external tools and data sources. This guide covers platform-specific installation, configuration, and auto-synchronization across all Gemini Code environments.
+MCP servers enable AI assistants to interact with external tools and data sources. This guide covers platform-specific installation, configuration, and auto-synchronization across all Claude Code environments.
 
 **Key Benefits:**
 - **Development Velocity**: 2-10x improvements reported by early adopters
@@ -26,23 +26,23 @@ MCP servers enable AI assistants to interact with external tools and data source
 ## Prerequisites
 
 **Credentials Required**: Many MCP servers need API tokens.
-→ **Set up credentials first**: [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+→ **Set up credentials first**: [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 
 ## Quick Start Workflow
 
-1. **Setup Credentials**: Follow [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md) for your platform
+1. **Setup Credentials**: Follow [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md) for your platform
 2. **Add Servers**: Use `gemini mcp add` commands or auto-sync setup below
-3. **Validate Setup**: Run `/mcp` in Gemini Code to verify servers
+3. **Validate Setup**: Run `/mcp` in Claude Code to verify servers
 4. **Configure Auto-Sync**: Follow platform-specific sync setup
 
-## Gemini Code Installation & Setup
+## Claude Code Installation & Setup
 
 ### Installation and Authentication
 
-Gemini Code operates as a command-line interface requiring Node.js 18 or newer:
+Claude Code operates as a command-line interface requiring Node.js 18 or newer:
 
 ```bash
-# Install Gemini Code globally
+# Install Claude Code globally
 npm install -g @anthropic-ai/gemini-code
 
 # Initialize in your project directory
@@ -64,7 +64,7 @@ gemini
 ### Project Initialization Workflow
 
 ```bash
-# Generate initial GEMINI.md by analyzing codebase structure
+# Generate initial CLAUDE.md by analyzing codebase structure
 gemini /init
 
 # This creates a starting template that should be customized with:
@@ -79,7 +79,7 @@ gemini /init
 ### macOS
 ```
 ~/
-├── .gemini.json                                    # Gemini Code CLI configuration
+├── .gemini.json                                    # Claude Code CLI configuration
 ├── bin/
 │   └── sync-mcp.sh                                # Auto-sync script
 └── Library/Application Support/
@@ -92,7 +92,7 @@ gemini /init
 ### Windows
 ```
 ~/
-├── .gemini.json                                    # Gemini Code CLI configuration
+├── .gemini.json                                    # Claude Code CLI configuration
 ├── bin/
 │   └── sync-mcp.sh                                # Auto-sync script
 └── AppData/Roaming/
@@ -105,7 +105,7 @@ gemini /init
 ### Linux
 ```
 ~/
-├── .gemini.json                                    # Gemini Code CLI configuration
+├── .gemini.json                                    # Claude Code CLI configuration
 ├── bin/
 │   └── sync-mcp.sh                                # Auto-sync script
 └── .config/
@@ -117,7 +117,7 @@ gemini /init
 
 ## Application Configuration
 
-### Gemini Code CLI
+### Claude Code CLI
 
 ```bash
 # Add servers via CLI
@@ -135,7 +135,7 @@ gemini mcp list
 - **Local scope**: `~/.gemini.json` with project-specific section
 
 **Testing:**
-- Open Gemini Code: Command Palette → "Run Gemini Code"
+- Open Claude Code: Command Palette → "Run Claude Code"
 - Type `/mcp` to see configured servers
 - Test: "List files in /Users/stharrold"
 
@@ -709,4 +709,4 @@ launchctl unload -w ~/Library/LaunchAgents/com.user.sync-mcp.plist
 
 ---
 
-*Installation complete. All MCP configurations now synchronized across Gemini Code CLI, VS Code, and Gemini Desktop.*
+*Installation complete. All MCP configurations now synchronized across Claude Code CLI, VS Code, and Gemini Desktop.*

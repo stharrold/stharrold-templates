@@ -2,10 +2,10 @@
 title: Enterprise Search & RAG Architecture with MCP
 version: 3.1
 updated: 2025-09-12
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ../20_credentials/23_enterprise-sso.md
-  - ../30_implementation/GEMINI.md
+  - ../30_implementation/CLAUDE.md
   - ./12_servers.md
 ---
 
@@ -459,7 +459,7 @@ alerts:
 
 1. **Implement troubleshooting strategies** → [15_troubleshooting.md](./15_troubleshooting.md)
 2. **Configure advanced security patterns** → [../20_credentials/23_enterprise-sso.md](../20_credentials/23_enterprise-sso.md)
-3. **Develop implementation strategy** → [../30_implementation/GEMINI.md](../30_implementation/GEMINI.md)
+3. **Develop implementation strategy** → [../30_implementation/CLAUDE.md](../30_implementation/CLAUDE.md)
 
 ---
 

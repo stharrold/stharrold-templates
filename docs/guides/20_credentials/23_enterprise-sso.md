@@ -2,7 +2,7 @@
 title: Enterprise SSO & Authentication
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -27,7 +27,7 @@ changelog:
 
 # Enterprise SSO & Authentication
 
-Advanced authentication patterns for enterprise teams using Gemini Code with MCP servers, including SSO integration, multi-source credential management, and enterprise search security.
+Advanced authentication patterns for enterprise teams using Claude Code with MCP servers, including SSO integration, multi-source credential management, and enterprise search security.
 
 ## Enterprise Search Data Security
 
@@ -391,7 +391,7 @@ const server = tls.createServer(options, (socket) => {
 Enterprise teams can leverage centralized authentication through SSO and domain capture, ensuring consistent access management across development teams.
 
 #### SSO Integration Benefits
-- **Single sign-on** across all Gemini Code instances
+- **Single sign-on** across all Claude Code instances
 - **Centralized user provisioning** and deprovisioning
 - **compliance with enterprise identity management** policies
 - **Audit trail integration** with existing security systems
@@ -452,7 +452,7 @@ gemini config set-session-timeout 480  # 8 hours in minutes
 
 ### API Billing & Cost Management
 
-Strategic cost optimization for enterprise Gemini Code deployments with intelligent model selection and usage optimization.
+Strategic cost optimization for enterprise Claude Code deployments with intelligent model selection and usage optimization.
 
 #### Pay-Per-Use API Billing Options
 

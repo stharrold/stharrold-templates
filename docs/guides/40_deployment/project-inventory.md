@@ -72,7 +72,7 @@ Not git repositories or special-purpose directories.
 | Directory | Type | Workflow Status | Reason |
 |-----------|------|-----------------|--------|
 | **Azure/** | Infrastructure | N/A | Not a git repository (ARM, Bicep, Functions) |
-| **Gemini_Sessions/** | Workspace | N/A | Container for temporary Gemini Code workspaces |
+| **Gemini_Sessions/** | Workspace | N/A | Container for temporary Claude Code workspaces |
 | **Databases/** | Tools | N/A | DBeaver workspaces, exports |
 | **Notebooks/** | Analysis | N/A | marimo notebooks (not git) |
 | **onboarding-guide/** | Documentation | N/A | Not a git repository |
@@ -268,14 +268,14 @@ bash verify-workflow.sh
 
 # Check specific project
 cd D:\Projects\<project>
-ls .gemini/skills/ | wc -l  # Should be 9
+ls .claude/skills/ | wc -l  # Should be 9
 ```
 
 To verify quality gates:
 
 ```bash
 cd D:\Projects\<project>
-python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
+python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 ---
@@ -285,4 +285,4 @@ python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
 - [Application Guide](application-guide.md) - How to apply workflow
 - [Decision Matrix](decision-matrix.md) - Method selection
 - [Version Mapping](version-mapping.md) - Version numbering
-- [D:\Projects\GEMINI.md](../../../GEMINI.md) - Meta-repository overview
+- [D:\Projects\CLAUDE.md](../../../CLAUDE.md) - Meta-repository overview
