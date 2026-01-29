@@ -20,12 +20,12 @@ Slash command definitions organized by category.
 
 ## Related
 
-- **Parent**: [.gemini](../CLAUDE.md)
+- **Parent**: [.claude](../CLAUDE.md)
 - **workflow**: [workflow/CLAUDE.md](workflow/CLAUDE.md)
 
 ## Related Documentation
 
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: .gemini
+- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: .claude
 
 **Child Directories:**
 - **[workflow/CLAUDE.md](workflow/CLAUDE.md)** - Workflow

@@ -113,7 +113,7 @@ python stharrold-templates/.claude/skills/initialize-repository/scripts/initiali
 cp -r D:\Projects\existing-repo D:\Projects\existing-repo-test
 
 # 2. Copy workflow components
-cp -r D:\Projects\stharrold-templates\.gemini D:\Projects\existing-repo-test\
+cp -r D:\Projects\stharrold-templates\.claude D:\Projects\existing-repo-test\
 cp D:\Projects\stharrold-templates\WORKFLOW.md D:\Projects\existing-repo-test\
 
 # 3. Review changes
@@ -125,7 +125,7 @@ git diff
 # Open both files and copy workflow section from stharrold-templates/CLAUDE.md
 
 # 5. Apply to production if satisfied
-cp -r D:\Projects\existing-repo-test\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\existing-repo-test\.claude D:\Projects\existing-repo\
 # ... (repeat for other files)
 
 # 6. Commit
@@ -273,7 +273,7 @@ bash verify-workflow.sh
 
 **Process:**
 ```bash
-cp -r D:\Projects\stharrold-templates\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\stharrold-templates\.claude D:\Projects\existing-repo\
 cp D:\Projects\stharrold-templates\WORKFLOW.md D:\Projects\existing-repo\
 # Manually add workflow section to CLAUDE.md
 git commit -m "feat: add workflow system"

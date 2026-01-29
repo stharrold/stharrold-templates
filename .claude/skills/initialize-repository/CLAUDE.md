@@ -443,7 +443,7 @@ git reset --hard HEAD~1  # if you want to revert
 **Option 3: Manual selective copy (MOST CONTROL)**
 ```bash
 # Copy only .claude/skills/ directory
-cp -r ~/Code/german/.gemini ~/Code/my-existing-repo/
+cp -r ~/Code/german/.claude ~/Code/my-existing-repo/
 
 # Copy WORKFLOW.md, CONTRIBUTING.md
 cp ~/Code/german/WORKFLOW.md ~/Code/my-existing-repo/
@@ -976,7 +976,7 @@ python .claude/skills/initialize-repository/scripts/initialize_repository.py \
 **Option 3: Manual selective copy (MOST CONTROL)**
 ```bash
 # Copy only specific components
-cp -r ~/Code/german/.gemini ~/Code/my-repo/
+cp -r ~/Code/german/.claude ~/Code/my-repo/
 cp ~/Code/german/WORKFLOW.md ~/Code/my-repo/
 # Merge pyproject.toml, README.md manually (don't overwrite)
 ```

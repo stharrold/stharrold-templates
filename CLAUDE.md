@@ -15,7 +15,7 @@ children:
 ## Status
 
 Migration from Gemini Code to Claude Code conventions is in progress (tracked in #166).
-- `.gemini/` renamed to `.claude/`, `GEMINI.md` renamed to `CLAUDE.md`
+- `.claude/` renamed to `.claude/`, `GEMINI.md` renamed to `CLAUDE.md`
 - Next release: v8.0.0 (tracking issue #182)
 - pyproject.toml version: 7.3.0 (aligned with CHANGELOG)
 

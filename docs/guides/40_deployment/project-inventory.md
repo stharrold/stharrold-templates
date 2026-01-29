@@ -188,7 +188,7 @@ Projects that should be added to batch script:
   - 4-file output (SQL, JSONL, log, config)
   - YAML frontmatter
 - **Workflow Applied:** 2025-11-19
-- **Source Used:** sql/.gemini (self)
+- **Source Used:** sql/.claude (self)
 
 #### catalog/ (EDW Data Catalog)
 - **Status:** ✅ Complete (9 skills)
@@ -229,7 +229,7 @@ Projects that should be added to batch script:
 All development projects (app_geocode, CBIA, Demand, GeocodedAddresses, Huddles, NRC, PerformanceGoals, Rooms, SysIntg) have:
 - ✅ Workflow installed (9 skills)
 - Applied: 2025-11-19
-- Source: sql/.gemini
+- Source: sql/.claude
 
 ### Reference Projects
 

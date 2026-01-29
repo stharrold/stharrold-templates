@@ -1,6 +1,6 @@
 ---
 type: claude-context
-directory: .gemini
+directory: .claude
 purpose: Claude Code configuration root containing commands, skills, and settings.
 parent: ../CLAUDE.md
 sibling_readme: null
@@ -9,7 +9,7 @@ children:
   - skills/CLAUDE.md
 ---
 
-# Claude Code Context: .gemini
+# Claude Code Context: .claude
 
 ## Purpose
 

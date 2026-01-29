@@ -37,14 +37,14 @@ Modular skill implementations (6 skills) for v7x1 workflow automation.
 
 ## Related
 
-- **Parent**: [.gemini](../CLAUDE.md)
+- **Parent**: [.claude](../CLAUDE.md)
 - **agentdb-state-manager**: [agentdb-state-manager/CLAUDE.md](agentdb-state-manager/CLAUDE.md)
 - **bmad-planner**: [bmad-planner/CLAUDE.md](bmad-planner/CLAUDE.md)
 - **git-workflow-manager**: [git-workflow-manager/CLAUDE.md](git-workflow-manager/CLAUDE.md)
 
 ## Related Documentation
 
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: .gemini
+- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: .claude
 
 **Child Directories:**
 - **[agentdb-state-manager/CLAUDE.md](agentdb-state-manager/CLAUDE.md)** - Agentdb State Manager

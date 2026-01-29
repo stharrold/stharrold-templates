@@ -54,7 +54,7 @@ git pull    # Get latest changes
 
 ```bash
 # For new repository in Gemini_Sessions
-python D:\Projects\stharrold-templates\.gemini\skills\initialize-repository\scripts\initialize_repository.py \
+python D:\Projects\stharrold-templates\.claude\skills\initialize-repository\scripts\initialize_repository.py \
   D:\Projects\stharrold-templates \
   D:\Projects\Gemini_Sessions\my-new-project
 ```
@@ -170,8 +170,8 @@ cp -r existing-repo existing-repo-test
 ```bash
 cd D:\Projects\existing-repo-test
 
-# Copy .gemini directory
-cp -r D:\Projects\stharrold-templates\.gemini .
+# Copy .claude directory
+cp -r D:\Projects\stharrold-templates\.claude .
 
 # Copy workflow documentation
 cp D:\Projects\stharrold-templates\WORKFLOW.md .
@@ -279,7 +279,7 @@ If satisfied with test copy:
 
 ```bash
 # Copy to production
-cp -r D:\Projects\existing-repo-test\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\existing-repo-test\.claude D:\Projects\existing-repo\
 cp D:\Projects\existing-repo-test\WORKFLOW.md D:\Projects\existing-repo\
 cp D:\Projects\existing-repo-test\WORKFLOW-INIT-PROMPT.md D:\Projects\existing-repo\
 
@@ -337,14 +337,14 @@ code D:\Projects\apply-workflow-batch.sh
 
 **Current:**
 ```bash
-SOURCE_GEMINI="D:/Projects/sql/.gemini"
+SOURCE_CLAUDE="D:/Projects/sql/.claude"
 SOURCE_WORKFLOW="D:/Projects/sql/WORKFLOW.md"
 SOURCE_WORKFLOW_INIT="D:/Projects/sql/WORKFLOW-INIT-PROMPT.md"
 ```
 
 **Updated to use stharrold-templates:**
 ```bash
-SOURCE_GEMINI="D:/Projects/stharrold-templates/.gemini"
+SOURCE_CLAUDE="D:/Projects/stharrold-templates/.claude"
 SOURCE_WORKFLOW="D:/Projects/stharrold-templates/WORKFLOW.md"
 SOURCE_WORKFLOW_INIT="D:/Projects/stharrold-templates/docs/reference/WORKFLOW-INIT-PROMPT.md"
 ```
@@ -418,7 +418,7 @@ bash apply-workflow-batch.sh
 ```
 ================================================
 Applying Standard Workflow v1.15.1 to 15 projects
-Source: D:/Projects/stharrold-templates/.gemini
+Source: D:/Projects/stharrold-templates/.claude
 ================================================
 
 ========================================
@@ -535,20 +535,20 @@ Check that these files exist:
 ```bash
 # On Windows, run as administrator
 # Or check file permissions:
-icacls D:\Projects\stharrold-templates\.gemini
+icacls D:\Projects\stharrold-templates\.claude
 ```
 
-### Issue 2: Script skips all projects with "Already has .gemini directory"
+### Issue 2: Script skips all projects with "Already has .claude directory"
 
 **Cause:** Projects already have `.claude/` (batch script skips by default)
 **Solution:**
 ```bash
 # Option A: Remove existing .claude/ first (backup first!)
-mv .gemini .gemini-backup-$(date +%Y%m%d)
+mv .claude .claude-backup-$(date +%Y%m%d)
 bash apply-workflow-batch.sh
 
 # Option B: Manual copy to update
-cp -r D:\Projects\stharrold-templates\.gemini\skills\* D:\Projects\<project>\.gemini\skills\
+cp -r D:\Projects\stharrold-templates\.claude\skills\* D:\Projects\<project>\.claude\skills\
 ```
 
 ### Issue 3: Git commit fails with "nothing to commit"

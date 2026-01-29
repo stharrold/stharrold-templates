@@ -682,7 +682,7 @@ cat pyproject.toml   # Review generated config
 cd /path/to/existing-repo
 
 # Copy workflow system (safe to overwrite)
-cp -r /path/to/existing-repo-test/.gemini .
+cp -r /path/to/existing-repo-test/.claude .
 
 # Merge documentation (manual)
 # - Copy workflow sections from test/README.md to your README.md
