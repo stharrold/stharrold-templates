@@ -2,7 +2,7 @@
 title: Security Auditing & Compliance
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -31,7 +31,7 @@ changelog:
 
 # Security Auditing & Compliance
 
-Comprehensive security auditing, compliance monitoring, and vulnerability management for enterprise MCP server deployments with Gemini Code.
+Comprehensive security auditing, compliance monitoring, and vulnerability management for enterprise MCP server deployments with Claude Code.
 
 ## Security Context Foundation
 
@@ -130,7 +130,7 @@ class CredentialAuditLogger {
 **Basic Audit Server Setup:**
 ```bash
 # Enterprise audit logging with comprehensive tracking
-gemini mcp add audit-logger "python -m enterprise_audit" \
+claude mcp add audit-logger "python -m enterprise_audit" \
   --env LOG_LEVEL="detailed" \
   --env RETENTION_DAYS="2555"  \
   --env ALERT_THRESHOLDS="./security_thresholds.json" \
@@ -359,7 +359,7 @@ const emergencyManager = new EmergencyCredentialManager();
 **SIEM Integration:**
 ```bash
 # Forward audit logs to enterprise SIEM systems
-gemini mcp add siem-forwarder "python -m siem_integration" \
+claude mcp add siem-forwarder "python -m siem_integration" \
   --env SPLUNK_HEC_URL="https://splunk.company.com:8088/services/collector" \
   --env ELASTIC_ENDPOINT="https://elastic.company.com:9200" \
   --env LOG_FORMAT="cef"  # Common Event Format for security tools
@@ -378,7 +378,7 @@ gemini mcp add siem-forwarder "python -m siem_integration" \
 **Classification Implementation:**
 ```bash
 # Data Loss Prevention monitoring with ML classification
-gemini mcp add dlp-monitor "python -m data_loss_prevention" \
+claude mcp add dlp-monitor "python -m data_loss_prevention" \
   --env SCAN_PATTERNS="./pii_patterns.json" \
   --env ML_MODEL_PATH="./classification_model.joblib" \
   --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook" \
@@ -438,11 +438,11 @@ policies:
 **Critical Vulnerabilities (2025):**
 
 **CVE-2025-52882 (Critical - Score: 9.8/10)**
-- **Impact**: WebSocket authentication bypass in Gemini Code Extension allowing unauthorized MCP server access
+- **Impact**: WebSocket authentication bypass in Claude Code Extension allowing unauthorized MCP server access
 - **Affected Versions**: All versions < 1.0.24
 - **Attack Vector**: Network-accessible WebSocket endpoints with weak authentication
 - **Exploitation**: Remote attackers can bypass authentication and execute arbitrary MCP commands
-- **Mitigation**: Update to Gemini Code version 1.0.24 or higher immediately
+- **Mitigation**: Update to Claude Code version 1.0.24 or higher immediately
 - **Verification**: `gemini --version` should show 1.0.24 or higher
 - **Additional Protection**: Enable network-level access controls and monitor WebSocket traffic
 
@@ -463,7 +463,7 @@ npm audit --audit-level high
 npm audit fix --force
 
 # Automated dependency monitoring
-gemini mcp add vuln-scanner "python -m vulnerability_monitor" \
+claude mcp add vuln-scanner "python -m vulnerability_monitor" \
   --env SCAN_FREQUENCY="daily" \
   --env ALERT_SEVERITY="medium" \
   --env AUTO_UPDATE="patch_only"
@@ -496,7 +496,7 @@ gemini mcp add vuln-scanner "python -m vulnerability_monitor" \
 # All AI-generated code must be clearly labeled in commits
 git commit -m "feat: add user authentication
 
-AI-Generated: Gemini Code assisted implementation
+AI-Generated: Claude Code assisted implementation
 Security-Review: Required for authentication logic
 Reviewer: @security-team
 Risk-Level: High
@@ -575,14 +575,14 @@ def test_authentication_security():
 
 **Local Codacy CLI (Mandatory per Repository Guidelines):**
 ```bash
-# Required after ANY file edit per GEMINI.md guidelines
+# Required after ANY file edit per CLAUDE.md guidelines
 ./.codacy/cli.sh analyze --tool pylint edited_file.py
 ```
 
 **Sentry Integration for Runtime Security:**
 ```bash
 # Error tracking and security incident detection
-gemini mcp add sentry "python -m sentry_mcp" \
+claude mcp add sentry "python -m sentry_mcp" \
   --env SENTRY_DSN="https://key@sentry.io/project" \
   --env ENVIRONMENT="production" \
   --env ENABLE_SECURITY_ALERTS="true"
@@ -699,7 +699,7 @@ Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) 
    ```bash
    # Immediate token revocation
    security delete-generic-password -a "$USER" -s "COMPROMISED_TOKEN"
-   gemini mcp disable --all  # Disable all MCP servers temporarily
+   claude mcp disable --all  # Disable all MCP servers temporarily
    ```
 
 2. **Threat Assessment:**
@@ -715,10 +715,10 @@ Get-EventLog -LogName Security -InstanceId 4648 -After (Get-Date).AddHours(-24) 
 4. **System Updates:**
    ```bash
    # Update all MCP server configurations
-   gemini mcp update-credentials --interactive
+   claude mcp update-credentials --interactive
 
    # Restart services with new credentials
-   gemini mcp restart --all
+   claude mcp restart --all
    ```
 
 5. **Incident Documentation:**
@@ -781,7 +781,7 @@ tasks:
     action: "create_jira_ticket_if_high_severity"
 
   - name: "MCP server health check"
-    command: "gemini mcp health-check --all --detailed"
+    command: "claude mcp health-check --all --detailed"
     alert_on: "any_failures"
 ```
 
@@ -840,4 +840,4 @@ Cross-reference with performance metrics to identify security impacts:
 
 ---
 
-*This module completes the security and compliance framework. For implementation patterns, see [../30_implementation/GEMINI.md](../30_implementation/GEMINI.md).*
+*This module completes the security and compliance framework. For implementation patterns, see [../30_implementation/CLAUDE.md](../30_implementation/CLAUDE.md).*

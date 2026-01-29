@@ -31,12 +31,12 @@ Production-ready LangGraph implementation for enterprise-scale multi-agent coord
 
 ### LangGraph as Enterprise Orchestration Solution
 
-**LangGraph**[LangGraph-docs] emerges as the optimal choice for Gemini Code's agent orchestration needs, offering native agent orchestration capabilities, comprehensive state management, and production-ready deployment through LangGraph Platform[LangGraph-platform]. With **4.2M monthly downloads** and enterprise adoption by companies like Klarna and Elastic, it provides the maturity and scalability required for enterprise deployments.
+**LangGraph**[LangGraph-docs] emerges as the optimal choice for Claude Code's agent orchestration needs, offering native agent orchestration capabilities, comprehensive state management, and production-ready deployment through LangGraph Platform[LangGraph-platform]. With **4.2M monthly downloads** and enterprise adoption by companies like Klarna and Elastic, it provides the maturity and scalability required for enterprise deployments.
 
-**Key advantages for Gemini Code:**
+**Key advantages for Claude Code:**
 - **Graph-based workflow definition** perfectly maps to sequential steps (w00.0-w09.0)
 - **Built-in state persistence** with automatic checkpointing and recovery
-- **Native TypeScript support** aligning with Gemini Code's environment
+- **Native TypeScript support** aligning with Claude Code's environment
 - **Streaming and debugging capabilities** for real-time workflow monitoring
 - **Human-in-the-loop support** for validation and approval steps
 

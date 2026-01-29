@@ -2,10 +2,10 @@
 title: Enterprise Search & RAG Architecture with MCP
 version: 3.1
 updated: 2025-09-12
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ../20_credentials/23_enterprise-sso.md
-  - ../30_implementation/GEMINI.md
+  - ../30_implementation/CLAUDE.md
   - ./12_servers.md
 ---
 
@@ -39,11 +39,11 @@ Systematic inventory and classification of enterprise knowledge sources:
 
 ```bash
 # Use MCP servers to inventory critical knowledge sources
-gemini mcp add data-census "python -m data_census" \
+claude mcp add data-census "python -m data_census" \
   --env DATA_SOURCES="confluence,sharepoint,wikis,gdrive"
 
 # Regular data quality audits
-gemini mcp add data-audit "python -m audit_knowledge_base" \
+claude mcp add data-audit "python -m audit_knowledge_base" \
   --schedule weekly
 ```
 
@@ -59,7 +59,7 @@ gemini mcp add data-audit "python -m audit_knowledge_base" \
 **MCP Server for Governance:**
 ```bash
 # Data governance enforcement
-gemini mcp add data-governance "python -m governance_server" \
+claude mcp add data-governance "python -m governance_server" \
   --env POLICIES_PATH="./data_governance_policies.yaml" \
   --env AUDIT_LOG_PATH="./access_audit.log"
 ```
@@ -108,12 +108,12 @@ Enterprise environments lack web search signals (PageRank, click-through rates, 
 
 ```bash
 # Configure hybrid retrieval MCP server
-gemini mcp add enterprise-search "uvx enterprise-search-server" \
+claude mcp add enterprise-search "uvx enterprise-search-server" \
   --env SEARCH_METHODS="bm25,embeddings,graph" \
   --env RERANK_MODEL="cross-encoder/ms-marco-MiniLM-L-12-v2"
 
 # Knowledge graph server for entity relationships
-gemini mcp add knowledge-graph "python -m knowledge_graph_server" \
+claude mcp add knowledge-graph "python -m knowledge_graph_server" \
   --env GRAPH_DB="neo4j://localhost:7687" \
   --env SCHEMA_PATH="./enterprise_ontology.json"
 ```
@@ -152,13 +152,13 @@ Traditional RAG fails when wrong documents are retrieved initially. Enterprise R
 
 ```bash
 # Document processing pipeline
-gemini mcp add doc-intelligence "python -m document_processor" \
+claude mcp add doc-intelligence "python -m document_processor" \
   --env PARSE_LAYOUT="true" \
   --env EXTRACT_METADATA="true" \
   --env TRACK_PROVENANCE="true"
 
 # Instructable reranker with business rules
-gemini mcp add reranker "python -m business_reranker" \
+claude mcp add reranker "python -m business_reranker" \
   --config rerank_rules.yaml
 ```
 
@@ -207,12 +207,12 @@ Graphs provide the reliable signals missing from unstructured text by identifyin
 
 ```bash
 # Knowledge graph with entity extraction
-gemini mcp add kuzu-graph "python -m kuzu_graph_server" \
+claude mcp add kuzu-graph "python -m kuzu_graph_server" \
   --env GRAPH_PATH="./enterprise_knowledge.db" \
   --env ENTITY_TYPES="person,project,document,policy"
 
 # Automated relationship extraction
-gemini mcp add relation-extractor "python -m extract_relations" \
+claude mcp add relation-extractor "python -m extract_relations" \
   --env SOURCE_TYPES="email,slack,confluence,jira"
 ```
 
@@ -303,7 +303,7 @@ Instead of monolithic enterprise search, build multiple curated "answer engines"
 
 **HR Policy Engine:**
 ```bash
-gemini mcp add hr-engine "python -m hr_answer_engine" \
+claude mcp add hr-engine "python -m hr_answer_engine" \
   --env DOCUMENT_SOURCES="hr_policies,employee_handbook" \
   --env CITATION_REQUIRED="true" \
   --env RESPONSE_MODE="conservative"
@@ -311,7 +311,7 @@ gemini mcp add hr-engine "python -m hr_answer_engine" \
 
 **IT Support Engine:**
 ```bash
-gemini mcp add it-support-engine "python -m it_support_engine" \
+claude mcp add it-support-engine "python -m it_support_engine" \
   --env KNOWLEDGE_BASE="technical_docs,troubleshooting_guides" \
   --env INCLUDE_PROCEDURES="true" \
   --env AUTO_ESCALATE="complex_issues"
@@ -319,7 +319,7 @@ gemini mcp add it-support-engine "python -m it_support_engine" \
 
 **Legal Compliance Engine:**
 ```bash
-gemini mcp add legal-engine "python -m legal_compliance_engine" \
+claude mcp add legal-engine "python -m legal_compliance_engine" \
   --env DOCUMENT_TYPES="regulations,policies,contracts" \
   --env AUDIT_TRAIL="required" \
   --env CONFIDENCE_THRESHOLD="0.85"
@@ -327,7 +327,7 @@ gemini mcp add legal-engine "python -m legal_compliance_engine" \
 
 **Engineering Documentation Engine:**
 ```bash
-gemini mcp add eng-docs-engine "python -m engineering_docs_engine" \
+claude mcp add eng-docs-engine "python -m engineering_docs_engine" \
   --env SOURCES="code_repos,architecture_docs,adr" \
   --env VERSION_CONTROL="git_integration" \
   --env CODE_EXAMPLES="included"
@@ -386,25 +386,25 @@ Policy -> approved_by -> Department
 **Web Application Projects:**
 ```bash
 # Standard web app search integration
-gemini mcp add user-docs "python -m user_documentation_engine"
-gemini mcp add api-docs "python -m api_documentation_engine"
-gemini mcp add feature-specs "python -m feature_specification_engine"
+claude mcp add user-docs "python -m user_documentation_engine"
+claude mcp add api-docs "python -m api_documentation_engine"
+claude mcp add feature-specs "python -m feature_specification_engine"
 ```
 
 **Data Analysis Projects:**
 ```bash
 # Data-focused knowledge integration
-gemini mcp add data-catalog "python -m data_catalog_engine"
-gemini mcp add analysis-templates "python -m analysis_template_engine"
-gemini mcp add domain-glossary "python -m domain_glossary_engine"
+claude mcp add data-catalog "python -m data_catalog_engine"
+claude mcp add analysis-templates "python -m analysis_template_engine"
+claude mcp add domain-glossary "python -m domain_glossary_engine"
 ```
 
 **Infrastructure Projects:**
 ```bash
 # Infrastructure documentation engines
-gemini mcp add runbooks "python -m operations_runbook_engine"
-gemini mcp add architecture-docs "python -m architecture_documentation_engine"
-gemini mcp add incident-history "python -m incident_knowledge_engine"
+claude mcp add runbooks "python -m operations_runbook_engine"
+claude mcp add architecture-docs "python -m architecture_documentation_engine"
+claude mcp add incident-history "python -m incident_knowledge_engine"
 ```
 
 ## Security and Compliance
@@ -413,7 +413,7 @@ gemini mcp add incident-history "python -m incident_knowledge_engine"
 
 ```bash
 # Role-based access control for search results
-gemini mcp add rbac-search "python -m rbac_search_filter" \
+claude mcp add rbac-search "python -m rbac_search_filter" \
   --env USER_ATTRIBUTES="department,role,clearance_level" \
   --env POLICY_ENGINE="enterprise_authz"
 ```
@@ -422,7 +422,7 @@ gemini mcp add rbac-search "python -m rbac_search_filter" \
 
 ```bash
 # Search audit logging
-gemini mcp add search-audit "python -m search_audit_logger" \
+claude mcp add search-audit "python -m search_audit_logger" \
   --env LOG_DESTINATION="security_log_aggregator" \
   --env RETENTION_POLICY="7_years"
 ```
@@ -433,7 +433,7 @@ gemini mcp add search-audit "python -m search_audit_logger" \
 
 ```bash
 # Query performance monitoring
-gemini mcp add search-analytics "python -m search_performance_monitor" \
+claude mcp add search-analytics "python -m search_performance_monitor" \
   --env METRICS_BACKEND="prometheus" \
   --env ALERT_THRESHOLDS="response_time:500ms,relevance_score:0.7"
 ```
@@ -459,7 +459,7 @@ alerts:
 
 1. **Implement troubleshooting strategies** → [15_troubleshooting.md](./15_troubleshooting.md)
 2. **Configure advanced security patterns** → [../20_credentials/23_enterprise-sso.md](../20_credentials/23_enterprise-sso.md)
-3. **Develop implementation strategy** → [../30_implementation/GEMINI.md](../30_implementation/GEMINI.md)
+3. **Develop implementation strategy** → [../30_implementation/CLAUDE.md](../30_implementation/CLAUDE.md)
 
 ---
 

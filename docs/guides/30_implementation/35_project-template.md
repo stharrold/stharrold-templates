@@ -2,7 +2,7 @@
 title: Project Configuration Template
 version: 1.0
 updated: 2025-09-12
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -18,8 +18,8 @@ related:
   - ./31_paradigm-shift.md
   - ./32_workflow-patterns.md
   - ./33_testing-standards.md
-  - ../10_mcp/GEMINI.md
-  - ../20_credentials/GEMINI.md
+  - ../10_mcp/CLAUDE.md
+  - ../20_credentials/CLAUDE.md
 changelog:
   - Initial creation from merged project configuration template
   - Integrated technology stack and development standards
@@ -29,7 +29,7 @@ changelog:
 
 # Project Configuration Template
 
-Complete project configuration template for Gemini Code development workflows, including project metadata, technology stack, development standards, and team preferences.
+Complete project configuration template for Claude Code development workflows, including project metadata, technology stack, development standards, and team preferences.
 
 ## Project Overview Template
 
@@ -46,7 +46,7 @@ Complete project configuration template for Gemini Code development workflows, i
 
 **Template Customization:**
 ```yaml
-# In your project's GEMINI.md frontmatter
+# In your project's CLAUDE.md frontmatter
 project_template:
   name: "MyProject"
   purpose: "Customer relationship management system"
@@ -271,4 +271,4 @@ This project template integrates with the broader MCP implementation strategy:
 
 ---
 
-*This project configuration template provides a comprehensive foundation for Gemini Code development workflows. Customize based on your specific project requirements and team preferences.*
+*This project configuration template provides a comprehensive foundation for Claude Code development workflows. Customize based on your specific project requirements and team preferences.*

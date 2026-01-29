@@ -72,7 +72,7 @@ The actual implementation work is being completed in a dedicated git worktree to
 ### Target Location
 - **Directory**: `10_draft-merged/30_implementation/`
 - **File**: `41_ai-ml-tools.md` (new file)
-- **Navigation**: Will be added to `30_implementation/GEMINI.md`
+- **Navigation**: Will be added to `30_implementation/CLAUDE.md`
 
 ### File Numbering Strategy
 - **41**: Follows logical sequence after existing files (31-39)
@@ -80,7 +80,7 @@ The actual implementation work is being completed in a dedicated git worktree to
 - **Position**: Early in implementation sequence for foundational tools
 
 ### Integration Context
-- **Parent Guide**: `30_implementation/GEMINI.md` orchestrator
+- **Parent Guide**: `30_implementation/CLAUDE.md` orchestrator
 - **Related Files**: Will cross-reference with future agent architecture guides (40+)
 - **Workflow Position**: Foundational AI/ML tools before complex implementations
 
@@ -133,7 +133,7 @@ Benchmarks → "Performance Benchmarks & Selection"
 - [ ] Add integration metadata and changelog
 
 ### Phase 3: Navigation Updates (20 minutes)
-- [ ] Update `30_implementation/GEMINI.md` to include 41_ai-ml-tools.md
+- [ ] Update `30_implementation/CLAUDE.md` to include 41_ai-ml-tools.md
 - [ ] Add file to the files list in YAML frontmatter
 - [ ] Update changelog with new addition
 - [ ] Verify hierarchical navigation works correctly
@@ -160,7 +160,7 @@ Benchmarks → "Performance Benchmarks & Selection"
 title: "AI/ML Tools - Embedding Models for Semantic Search"
 version: 1.0
 updated: 2025-09-16
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 source_integration: "00_draft-initial/11_report-embedding-model.md"
 template_version: 1.0
 project_template:
@@ -176,7 +176,7 @@ agent_capabilities:
 related:
   - 33_testing-standards.md
   - 34_performance-metrics.md
-  - ../10_mcp/GEMINI.md
+  - ../10_mcp/CLAUDE.md
 files_referenced:
   - pyproject.toml
   - requirements files
@@ -224,7 +224,7 @@ changelog:
 ### Completion Criteria
 - ✅ New file `41_ai-ml-tools.md` created and integrated
 - ✅ File size ≤ 30KB with all content preserved
-- ✅ Navigation updated in parent GEMINI.md
+- ✅ Navigation updated in parent CLAUDE.md
 - ✅ Codacy analysis passes without critical issues
 - ✅ Source document archived with timestamp
 - ✅ GitHub Issue #13 closed with completion summary
@@ -242,7 +242,7 @@ changelog:
 **Phase Breakdown:**
 1. **Pre-Integration** (15 min) - Setup and validation
 2. **Content Integration** (45 min) - File creation and content structuring
-3. **Navigation Updates** (20 min) - GEMINI.md updates
+3. **Navigation Updates** (20 min) - CLAUDE.md updates
 4. **Quality Assurance** (30 min) - Testing and validation
 5. **Completion** (15 min) - Archiving and issue closure
 
@@ -265,13 +265,13 @@ changelog:
 ### Cross-References After Integration
 - **Testing**: `33_testing-standards.md` for AI/ML testing patterns
 - **Performance**: `34_performance-metrics.md` for benchmarking
-- **MCP Integration**: `../10_mcp/GEMINI.md` for context optimization
+- **MCP Integration**: `../10_mcp/CLAUDE.md` for context optimization
 - **Future Agent Guides**: Will reference this for embedding infrastructure
 
 ### Documentation Dependencies
 - Source archived for audit trail
 - Integration tracked in TODO.md
-- Change logged in 30_implementation/GEMINI.md
+- Change logged in 30_implementation/CLAUDE.md
 - GitHub issue updated with completion summary
 
 ---

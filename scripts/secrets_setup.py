@@ -10,6 +10,13 @@
 This script helps configure secrets in the OS keyring for local development.
 It reads secret definitions from secrets.toml and prompts for values.
 
+First-time setup:
+    1. Create a GitHub fine-grained PAT at:
+       https://github.com/settings/tokens?type=beta
+       Permissions: Issues (R/W), Pull requests (R/W), Contents (R/W)
+    2. Run: uv run scripts/secrets_setup.py
+    3. Paste the token when prompted
+
 Usage:
     uv run scripts/secrets_setup.py                     # Interactive setup
     uv run scripts/secrets_setup.py --check             # Verify secrets exist
@@ -17,12 +24,11 @@ Usage:
     uv run scripts/secrets_setup.py --root PATH         # Specify project root
 
 Example:
-    $ uv run scripts/secrets_setup.py --root ../my-project
-    [INFO] Setting up secrets for service: my-project
+    $ uv run scripts/secrets_setup.py
+    [INFO] Setting up secrets for service: stharrold-templates
 
     Setting up required secrets:
-    DB_PASSWORD: [exists] Keep existing value? [Y/n]:
-    API_KEY: Enter value: ********
+    GH_TOKEN: Enter value: ********
 
     [OK] All secrets configured successfully
 """
@@ -30,7 +36,6 @@ Example:
 from __future__ import annotations
 
 import getpass
-import os
 import subprocess
 import sys
 import tomllib
@@ -38,6 +43,8 @@ from pathlib import Path
 
 import keyring
 import tomlkit
+
+from scripts.environment_utils import is_ci, is_container
 
 
 def get_repo_root(target_path: Path | None = None) -> Path:
@@ -148,53 +155,6 @@ def add_secret_to_config(root_path: Path, name: str, is_required: bool) -> bool:
     except Exception as e:
         print(f"[FAIL] Failed to update secrets.toml: {e}")
         return False
-
-
-def is_ci() -> bool:
-    """Detect if running in a CI environment.
-
-    Checks for common CI environment variables.
-    """
-    ci_vars = [
-        "CI",
-        "GITHUB_ACTIONS",
-        "GITLAB_CI",
-        "TF_BUILD",  # Azure DevOps
-        "JENKINS_URL",
-        "CIRCLECI",
-        "TRAVIS",
-        "BUILDKITE",
-        "DRONE",
-        "CODEBUILD_BUILD_ID",  # AWS CodeBuild
-    ]
-    return any(os.environ.get(var) for var in ci_vars)
-
-
-def is_container() -> bool:
-    """Detect if running inside a container.
-
-    Checks for Docker, Podman, and Kubernetes indicators.
-    """
-    # Docker
-    if Path("/.dockerenv").exists():
-        return True
-
-    # Podman
-    if Path("/run/.containerenv").exists():
-        return True
-
-    # Check cgroup for container indicators
-    cgroup_path = Path("/proc/1/cgroup")
-    if cgroup_path.exists():
-        try:
-            content = cgroup_path.read_text()
-            if "docker" in content or "kubepods" in content or "containerd" in content:
-                return True
-        except (OSError, PermissionError):
-            # Cannot read cgroup info (e.g., due to permissions), assume not in container
-            pass
-
-    return False
 
 
 def get_secret(service: str, name: str) -> str | None:
@@ -351,7 +311,7 @@ def interactive_setup(config: dict) -> int:
         print("[OK] All secrets configured successfully")
         print()
         print("You can now run commands with secrets:")
-        print("  uv run scripts/run.py <command>")
+        print("  uv run scripts/secrets_run.py <command>")
         return 0
 
 

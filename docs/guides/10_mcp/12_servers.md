@@ -2,10 +2,10 @@
 title: MCP Server Configurations
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./11_setup.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
   - ./15_troubleshooting.md
 changelog:
   - 4.0: BREAKING CHANGE - Enhanced with resource-based credential sharing, production security patterns, and MCP tool ecosystem integration
@@ -26,7 +26,7 @@ Choose servers based on your project needs and development phase:
 - **Tier 4**: Specialized domain-specific tools
 
 **Prerequisites**: Many servers require API tokens. Configure credentials first:
-→ [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+→ [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 
 ## MCP Hybrid Architecture
 
@@ -336,9 +336,9 @@ mcp_monitoring:
 **Health Dashboard Integration:**
 ```bash
 # Health monitoring commands
-gemini mcp health-check --all-servers --detailed
-gemini mcp monitor --dashboard --real-time
-gemini mcp alerts configure --webhook https://monitoring.company.com/alerts
+claude mcp health-check --all-servers --detailed
+claude mcp monitor --dashboard --real-time
+claude mcp alerts configure --webhook https://monitoring.company.com/alerts
 ```
 
 ## Tier 1: Essential Core Development Servers
@@ -357,8 +357,8 @@ Repository management, PR analysis, and CI/CD workflow monitoring.
 
 **Installation:**
 ```bash
-gemini mcp add --transport http github https://api.githubcopilot.com/mcp/
-# Or: gemini mcp add github npx @modelcontextprotocol/server-github  # Requires GITHUB_TOKEN
+claude mcp add --transport http github https://api.githubcopilot.com/mcp/
+# Or: claude mcp add github npx @modelcontextprotocol/server-github  # Requires GITHUB_TOKEN
 ```
 
 #### Git MCP Server
@@ -378,7 +378,7 @@ Secure file operations with configurable access controls.
 
 **Installation:**
 ```bash
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
 ```
 
 ### Development & Testing Infrastructure
@@ -392,7 +392,7 @@ Methodical problem-solving through structured thinking processes.
 
 **Installation:**
 ```bash
-gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
 ```
 
 #### Playwright MCP Server
@@ -404,7 +404,7 @@ Web automation and cross-browser testing.
 
 **Installation:**
 ```bash
-gemini mcp add playwright npx -- @playwright/mcp@latest
+claude mcp add playwright npx -- @playwright/mcp@latest
 ```
 
 #### Context7 MCP Server
@@ -416,7 +416,7 @@ Real-time documentation fetching from source repositories.
 
 **Installation:**
 ```bash
-gemini mcp add --transport http context7 https://mcp.context7.com/mcp
+claude mcp add --transport http context7 https://mcp.context7.com/mcp
 ```
 
 ### Database & Data Management
@@ -439,7 +439,7 @@ Lightweight database operations for development and testing.
 
 **Installation:**
 ```bash
-gemini mcp add sqlite npx @modelcontextprotocol/server-sqlite /path/to/db
+claude mcp add sqlite npx @modelcontextprotocol/server-sqlite /path/to/db
 ```
 
 #### Memory MCP Server
@@ -447,7 +447,7 @@ Session context retention across coding sessions.
 
 **Installation:**
 ```bash
-gemini mcp add memory npx @modelcontextprotocol/server-memory
+claude mcp add memory npx @modelcontextprotocol/server-memory
 ```
 
 ## Tier 2: High-Impact Productivity Servers
@@ -481,7 +481,7 @@ Error tracking and performance monitoring integration.
 
 **Installation:**
 ```bash
-gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
 ```
 
 ### CI/CD & DevOps
@@ -495,7 +495,7 @@ Comprehensive project management and build pipeline integration.
 
 **Installation:**
 ```bash
-gemini mcp add azure npx @azure-devops/mcp org-name  # Requires AZURE_DEVOPS_PAT
+claude mcp add azure npx @azure-devops/mcp org-name  # Requires AZURE_DEVOPS_PAT
 ```
 
 #### Buildkite MCP Server
@@ -550,7 +550,7 @@ npx @composio/mcp@latest setup slack
 Documentation management and project requirement tracking.
 
 **Features:**
-- Task updates directly from Gemini Code
+- Task updates directly from Claude Code
 - Project requirement tracking
 
 #### Atlassian MCP Server (Jira & Confluence)
@@ -571,7 +571,7 @@ Product analytics and user behavior insights.
 
 **Installation:**
 ```bash
-gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
+claude mcp add --transport sse posthog https://mcp.posthog.com/sse
 ```
 
 #### Memory Bank MCP Server
@@ -653,7 +653,7 @@ Scheduling and booking management automation.
 
 Different MCP clients use slightly different configuration schemas:
 
-### Gemini Code CLI (`~/.gemini.json`)
+### Claude Code CLI (`~/.claude.json`)
 ```json
 {
   "mcpServers": {
@@ -700,7 +700,7 @@ Different MCP clients use slightly different configuration schemas:
 
 ### Key Differences
 
-| Feature | Gemini Code CLI | VS Code Extension | Gemini Desktop |
+| Feature | Claude Code CLI | VS Code Extension | Gemini Desktop |
 |---------|----------------|-------------------|----------------|
 | Root key | `mcpServers` | `servers` | `mcpServers` |
 | Type field | Optional | Optional | Optional |
@@ -738,26 +738,26 @@ Cross-platform management of all MCP configurations:
 /usr/bin/python3 mcp_manager.py --backup-only
 ```
 
-### Using Gemini Code CLI
+### Using Claude Code CLI
 
 ```bash
-# Add servers to Gemini Code specifically
-gemini mcp add github npx @modelcontextprotocol/server-github
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
+# Add servers to Claude Code specifically
+claude mcp add github npx @modelcontextprotocol/server-github
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /path
 
-# List Gemini Code servers
-gemini mcp list
+# List Claude Code servers
+claude mcp list
 
 # Remove servers
-gemini mcp remove github
+claude mcp remove github
 ```
 
 ### Complete Setup Example
 
 ```bash
 # 1. Setup credentials (choose your platform)
-# macOS: Follow ../20_credentials/GEMINI.md keychain setup
-# Windows: Follow ../20_credentials/GEMINI.md credential manager setup
+# macOS: Follow ../20_credentials/CLAUDE.md keychain setup
+# Windows: Follow ../20_credentials/CLAUDE.md credential manager setup
 
 # 2. Add GitHub server using mcp_manager.py
 /usr/bin/python3 mcp_manager.py --add
@@ -769,7 +769,7 @@ gemini mcp remove github
 /usr/bin/python3 mcp_manager.py --check-credentials
 /usr/bin/python3 mcp_manager.py --list
 
-# 4. Test in Gemini Code
+# 4. Test in Claude Code
 # Type: /mcp
 # Should see: github server with tools available
 ```
@@ -802,16 +802,16 @@ gemini mcp remove github
 **Development Environment:**
 ```bash
 # Essential development servers
-gemini mcp add filesystem npx @modelcontextprotocol/server-filesystem ./
-gemini mcp add memory npx @modelcontextprotocol/server-memory
-gemini mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem ./
+claude mcp add memory npx @modelcontextprotocol/server-memory
+claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking
 ```
 
 **Production Environment:**
 ```bash
 # Production monitoring and management
-gemini mcp add --transport sse sentry https://mcp.sentry.dev/mcp
-gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
+claude mcp add --transport sse sentry https://mcp.sentry.dev/mcp
+claude mcp add --transport sse posthog https://mcp.posthog.com/sse
 ```
 
 ## Next Steps
@@ -822,4 +822,4 @@ gemini mcp add --transport sse posthog https://mcp.posthog.com/sse
 
 ---
 
-*Server configurations are synchronized across all Gemini Code platforms via the auto-sync setup from [11_setup.md](./11_setup.md).*
+*Server configurations are synchronized across all Claude Code platforms via the auto-sync setup from [11_setup.md](./11_setup.md).*

@@ -2,7 +2,7 @@
 title: Performance Metrics & Optimization
 version: 4.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -102,7 +102,7 @@ const ExpensiveComponent = React.memo(({ data }) => {
 
 ### Comprehensive Monitoring Architecture
 
-**OpenTelemetry Integration for Gemini Code:**
+**OpenTelemetry Integration for Claude Code:**
 ```yaml
 # podman-compose.yml for observability stack
 version: '3.8'
@@ -155,7 +155,7 @@ scrape_configs:
 ```json
 {
   "dashboard": {
-    "title": "Gemini Code Performance Metrics",
+    "title": "Claude Code Performance Metrics",
     "panels": [
       {
         "title": "Response Time",
@@ -239,8 +239,8 @@ groups:
 
 #### Critical Operational Limitations
 
-**Gemini Code Usage Challenges:**
-Usage limits represent Gemini Code's most significant operational challenge, affecting even Max plan subscribers ($200/month) with substantial constraints that can interrupt critical development work.
+**Claude Code Usage Challenges:**
+Usage limits represent Claude Code's most significant operational challenge, affecting even Max plan subscribers ($200/month) with substantial constraints that can interrupt critical development work.
 
 **Specific Limitation Impact:**
 - **5-hour session limits** that can interrupt complex development tasks
@@ -278,9 +278,9 @@ gemini /compact  # At natural breakpoints in related work
 ```yaml
 # Optimal context organization for efficiency
 context_architecture:
-  global_config: ~/.gemini/GEMINI.md        # Universal preferences
-  project_config: ./GEMINI.md               # Project-specific context
-  feature_config: ./features/GEMINI.md      # Feature-specific patterns
+  global_config: ~/.claude/CLAUDE.md        # Universal preferences
+  project_config: ./CLAUDE.md               # Project-specific context
+  feature_config: ./features/CLAUDE.md      # Feature-specific patterns
 
 context_loading_strategy:
   inheritance: "parent_to_child"
@@ -290,10 +290,10 @@ context_loading_strategy:
 ```
 
 **Context Optimization Techniques:**
-- **Front-load context** in GEMINI.md files for reuse across sessions
+- **Front-load context** in CLAUDE.md files for reuse across sessions
 - **Break large projects** into focused sessions with clear objectives and bounded scope
 - **Maintain 5-10 message conversations** followed by strategic context reset
-- **Use hierarchical GEMINI.md system** to minimize context duplication
+- **Use hierarchical CLAUDE.md system** to minimize context duplication
 
 #### Cost-Effective Workflow Patterns
 
@@ -433,7 +433,7 @@ gemini analytics satisfaction-survey \
 
 **Integrated Performance Benchmarks:**
 ```yaml
-# Enhanced performance targets in GEMINI.md
+# Enhanced performance targets in CLAUDE.md
 performance_targets:
   page_load: "<2s LCP for dashboard interfaces"
   api_response: "<200ms p95 for database queries"
@@ -443,7 +443,7 @@ performance_targets:
 
 mcp_specific_targets:
   server_response: "<3s for complex queries"
-  context_loading: "<5s for large GEMINI.md files"
+  context_loading: "<5s for large CLAUDE.md files"
   token_efficiency: ">30% reduction through optimization"
   error_rates: "<2% for standard operations"
 ```

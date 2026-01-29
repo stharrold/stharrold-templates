@@ -54,7 +54,7 @@ git pull    # Get latest changes
 
 ```bash
 # For new repository in Gemini_Sessions
-python D:\Projects\stharrold-templates\.gemini\skills\initialize-repository\scripts\initialize_repository.py \
+python D:\Projects\stharrold-templates\.claude\skills\initialize-repository\scripts\initialize_repository.py \
   D:\Projects\stharrold-templates \
   D:\Projects\Gemini_Sessions\my-new-project
 ```
@@ -128,7 +128,7 @@ Script will report:
 ```
 ✅ Created repository structure
 ✅ Copied 9 workflow skills
-✅ Generated README.md, GEMINI.md, pyproject.toml
+✅ Generated README.md, CLAUDE.md, pyproject.toml
 ✅ Initialized git with 3-branch structure
 ✅ Pushed to remote
 
@@ -147,7 +147,7 @@ uv sync
 uv run pytest
 
 # Verify quality gates
-python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
+python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 ---
@@ -170,8 +170,8 @@ cp -r existing-repo existing-repo-test
 ```bash
 cd D:\Projects\existing-repo-test
 
-# Copy .gemini directory
-cp -r D:\Projects\stharrold-templates\.gemini .
+# Copy .claude directory
+cp -r D:\Projects\stharrold-templates\.claude .
 
 # Copy workflow documentation
 cp D:\Projects\stharrold-templates\WORKFLOW.md .
@@ -182,17 +182,17 @@ cp D:\Projects\stharrold-templates\Containerfile .
 cp D:\Projects\stharrold-templates\podman-compose.yml .
 ```
 
-### Step 3: Merge GEMINI.md
+### Step 3: Merge CLAUDE.md
 
 ```bash
-# Option A: Append workflow section to existing GEMINI.md
-cat >> GEMINI.md << 'EOF'
+# Option A: Append workflow section to existing CLAUDE.md
+cat >> CLAUDE.md << 'EOF'
 
 ## Standard Workflow System
 
 This repository uses **Standard Workflow v1.15.1** with 9 specialized skills.
 
-### Workflow Skills (Located in `.gemini/skills/`)
+### Workflow Skills (Located in `.claude/skills/`)
 
 1. **workflow-orchestrator** - Main coordinator for workflow phases
 2. **tech-stack-adapter** - Detects Python/uv project configuration
@@ -214,7 +214,7 @@ This repository uses **Standard Workflow v1.15.1** with 9 specialized skills.
 
 **Run quality gates:**
 ```bash
-python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
+python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 ### Workflow Documentation
@@ -225,7 +225,7 @@ python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
 EOF
 
 # Option B: Manual edit with preferred editor
-vim GEMINI.md  # Or: code GEMINI.md, nano GEMINI.md, etc.
+vim CLAUDE.md  # Or: code CLAUDE.md, nano CLAUDE.md, etc.
 ```
 
 ### Step 4: Review Changes
@@ -240,7 +240,7 @@ git status
 git diff
 
 # Verify skills were copied
-ls .gemini/skills/
+ls .claude/skills/
 
 # Should show 9 directories:
 #   agentdb-state-manager/
@@ -263,7 +263,7 @@ cd D:\Projects\existing-repo-test
 uv sync
 
 # Run quality gates
-python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
+python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 
 # Expected output:
 # [1/5] Test Coverage...
@@ -279,11 +279,11 @@ If satisfied with test copy:
 
 ```bash
 # Copy to production
-cp -r D:\Projects\existing-repo-test\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\existing-repo-test\.claude D:\Projects\existing-repo\
 cp D:\Projects\existing-repo-test\WORKFLOW.md D:\Projects\existing-repo\
 cp D:\Projects\existing-repo-test\WORKFLOW-INIT-PROMPT.md D:\Projects\existing-repo\
 
-# Merge GEMINI.md changes (manual)
+# Merge CLAUDE.md changes (manual)
 # (Open both files and copy workflow section)
 ```
 
@@ -301,9 +301,9 @@ git commit -m "feat: integrate Standard Workflow v1.15.1 system
 Applied stharrold-templates workflow to existing repository:
 
 ✅ Added workflow system:
-- .gemini/ directory with 9 specialized skills
+- .claude/ directory with 9 specialized skills
 - WORKFLOW.md and WORKFLOW-INIT-PROMPT.md
-- Updated GEMINI.md with workflow section
+- Updated CLAUDE.md with workflow section
 
 ✅ Quality gates configured:
 - Test coverage ≥ 80%
@@ -312,7 +312,7 @@ Applied stharrold-templates workflow to existing repository:
 
 Source: D:\Projects\stharrold-templates (v1.15.1)
 
-🤖 Generated with [Gemini Code](https://gemini.com/gemini-code)
+🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Gemini <noreply@anthropic.com>"
 ```
@@ -337,14 +337,14 @@ code D:\Projects\apply-workflow-batch.sh
 
 **Current:**
 ```bash
-SOURCE_GEMINI="D:/Projects/sql/.gemini"
+SOURCE_CLAUDE="D:/Projects/sql/.claude"
 SOURCE_WORKFLOW="D:/Projects/sql/WORKFLOW.md"
 SOURCE_WORKFLOW_INIT="D:/Projects/sql/WORKFLOW-INIT-PROMPT.md"
 ```
 
 **Updated to use stharrold-templates:**
 ```bash
-SOURCE_GEMINI="D:/Projects/stharrold-templates/.gemini"
+SOURCE_CLAUDE="D:/Projects/stharrold-templates/.claude"
 SOURCE_WORKFLOW="D:/Projects/stharrold-templates/WORKFLOW.md"
 SOURCE_WORKFLOW_INIT="D:/Projects/stharrold-templates/docs/reference/WORKFLOW-INIT-PROMPT.md"
 ```
@@ -418,16 +418,16 @@ bash apply-workflow-batch.sh
 ```
 ================================================
 Applying Standard Workflow v1.15.1 to 15 projects
-Source: D:/Projects/stharrold-templates/.gemini
+Source: D:/Projects/stharrold-templates/.claude
 ================================================
 
 ========================================
 Processing: app_geocode
 ========================================
   [1/5] Creating checkpoint commit...
-  [2/5] Copying .gemini/ directory...
+  [2/5] Copying .claude/ directory...
   [3/5] Copying WORKFLOW documentation...
-  [4/5] Adding Standard Workflow section to GEMINI.md...
+  [4/5] Adding Standard Workflow section to CLAUDE.md...
   [5/5] Committing workflow integration...
   ✅ app_geocode complete!
 
@@ -497,11 +497,11 @@ bash verify-workflow.sh
 cd D:\Projects\<project>
 
 # Count skills
-ls .gemini/skills/ | wc -l
+ls .claude/skills/ | wc -l
 # Should output: 9
 
 # List skills
-ls .gemini/skills/
+ls .claude/skills/
 ```
 
 ### 3. Test Quality Gates
@@ -513,16 +513,16 @@ cd D:\Projects\<project>
 uv sync
 
 # Run quality gates
-python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py
+python .claude/skills/quality-enforcer/scripts/run_quality_gates.py
 ```
 
 ### 4. Verify Documentation
 
 Check that these files exist:
-- [ ] `.gemini/skills/` (9 subdirectories)
+- [ ] `.claude/skills/` (9 subdirectories)
 - [ ] `WORKFLOW.md`
 - [ ] `WORKFLOW-INIT-PROMPT.md` (optional)
-- [ ] `GEMINI.md` (with Standard Workflow section)
+- [ ] `CLAUDE.md` (with Standard Workflow section)
 
 ---
 
@@ -535,20 +535,20 @@ Check that these files exist:
 ```bash
 # On Windows, run as administrator
 # Or check file permissions:
-icacls D:\Projects\stharrold-templates\.gemini
+icacls D:\Projects\stharrold-templates\.claude
 ```
 
-### Issue 2: Script skips all projects with "Already has .gemini directory"
+### Issue 2: Script skips all projects with "Already has .claude directory"
 
-**Cause:** Projects already have `.gemini/` (batch script skips by default)
+**Cause:** Projects already have `.claude/` (batch script skips by default)
 **Solution:**
 ```bash
-# Option A: Remove existing .gemini/ first (backup first!)
-mv .gemini .gemini-backup-$(date +%Y%m%d)
+# Option A: Remove existing .claude/ first (backup first!)
+mv .claude .claude-backup-$(date +%Y%m%d)
 bash apply-workflow-batch.sh
 
 # Option B: Manual copy to update
-cp -r D:\Projects\stharrold-templates\.gemini\skills\* D:\Projects\<project>\.gemini\skills\
+cp -r D:\Projects\stharrold-templates\.claude\skills\* D:\Projects\<project>\.claude\skills\
 ```
 
 ### Issue 3: Git commit fails with "nothing to commit"
@@ -570,10 +570,10 @@ uv run ruff check --fix .
 # Add tests to meet 80% coverage
 ```
 
-### Issue 5: GEMINI.md workflow section duplicated
+### Issue 5: CLAUDE.md workflow section duplicated
 
 **Cause:** Script appended section multiple times
-**Solution:** Manually edit GEMINI.md to remove duplicate
+**Solution:** Manually edit CLAUDE.md to remove duplicate
 
 ### Issue 6: Wrong branch after application
 
@@ -608,7 +608,7 @@ After applying workflow to any repository:
 - [ ] Reviewed `git diff` - no unexpected changes
 - [ ] Updated `.vcs_config.yaml` if using Azure DevOps
 - [ ] Tested slash commands (`/workflow/all --help`)
-- [ ] Verified GEMINI.md has workflow section
+- [ ] Verified CLAUDE.md has workflow section
 - [ ] Committed all changes with descriptive message
 - [ ] Pushed to remote (if applicable)
 - [ ] Updated [Project Inventory](project-inventory.md) status
@@ -619,8 +619,8 @@ After applying workflow to any repository:
 
 1. **Learn the workflow:** Read `WORKFLOW.md` in your repository
 2. **Try a feature:** Run `/workflow/all new "test feature"`
-3. **Understand quality gates:** Review `.gemini/skills/quality-enforcer/SKILL.md`
-4. **Customize:** Edit GEMINI.md for project-specific instructions
+3. **Understand quality gates:** Review `.claude/skills/quality-enforcer/SKILL.md`
+4. **Customize:** Edit CLAUDE.md for project-specific instructions
 5. **Get help:** See workflow documentation in `docs/reference/`
 
 ---
@@ -631,4 +631,4 @@ After applying workflow to any repository:
 - [Version Mapping](version-mapping.md) - Understanding version numbers
 - [Project Inventory](project-inventory.md) - Current deployment status
 - `stharrold-templates/WORKFLOW.md` - Complete workflow guide
-- `.gemini/skills/initialize-repository/SKILL.md` - Detailed script documentation
+- `.claude/skills/initialize-repository/SKILL.md` - Detailed script documentation

@@ -2,7 +2,7 @@
 title: Team Collaboration & Communication Patterns
 version: 1.0
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./32_workflow-patterns.md
   - ./36_ai-task-management.md
@@ -11,7 +11,7 @@ related:
 
 # Team Collaboration & Communication Patterns
 
-Advanced collaboration strategies for multi-developer teams using Gemini Code, including communication platform integration, workflow automation, and team coordination patterns.
+Advanced collaboration strategies for multi-developer teams using Claude Code, including communication platform integration, workflow automation, and team coordination patterns.
 
 ## Phase 3: Collaboration Integration (Weeks 5-6)
 
@@ -53,7 +53,7 @@ gemini /compact
 ```bash
 # Slack integration via Composio
 npx @composio/mcp@latest setup slack
-gemini mcp add slack npx @composio/slack-mcp
+claude mcp add slack npx @composio/slack-mcp
 ```
 **Capabilities:**
 - Automated team notifications and updates
@@ -63,7 +63,7 @@ gemini mcp add slack npx @composio/slack-mcp
 
 **Notion MCP Server** - Documentation management
 ```bash
-gemini mcp add notion npx @modelcontextprotocol/server-notion
+claude mcp add notion npx @modelcontextprotocol/server-notion
 ```
 **Capabilities:**
 - Automated documentation generation and updates
@@ -73,7 +73,7 @@ gemini mcp add notion npx @modelcontextprotocol/server-notion
 
 **Atlassian MCP Server** - Jira and Confluence integration (if applicable)
 ```bash
-gemini mcp add atlassian npx @modelcontextprotocol/server-atlassian
+claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
 ```
 **Capabilities:**
 - Automated ticket creation and updates
@@ -84,7 +84,7 @@ gemini mcp add atlassian npx @modelcontextprotocol/server-atlassian
 #### Workflow Automation
 **Zapier MCP Server** - Cross-platform automation
 ```bash
-gemini mcp add zapier npx @modelcontextprotocol/server-zapier
+claude mcp add zapier npx @modelcontextprotocol/server-zapier
 ```
 **Capabilities:**
 - Multi-platform workflow automation
@@ -94,7 +94,7 @@ gemini mcp add zapier npx @modelcontextprotocol/server-zapier
 
 **Memory Bank MCP Server** - Session continuity
 ```bash
-gemini mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
+claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
 ```
 **Capabilities:**
 - Persistent context and knowledge retention
@@ -111,22 +111,22 @@ npx @composio/mcp@latest setup slack
 # Follow OAuth flow for team integration
 
 # Notion workspace connection
-gemini mcp add notion npx @modelcontextprotocol/server-notion
+claude mcp add notion npx @modelcontextprotocol/server-notion
 # Configure with workspace integration token
 
 # Atlassian integration (if using Jira/Confluence)
-gemini mcp add atlassian npx @modelcontextprotocol/server-atlassian
+claude mcp add atlassian npx @modelcontextprotocol/server-atlassian
 # Configure with API tokens and workspace URLs
 ```
 
 #### 2. Automation and Memory Setup
 ```bash
 # Zapier for cross-platform automation
-gemini mcp add zapier npx @modelcontextprotocol/server-zapier
+claude mcp add zapier npx @modelcontextprotocol/server-zapier
 # Configure with Zapier API key and automation rules
 
 # Memory Bank for persistent context
-gemini mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
+claude mcp add memory-bank npx @modelcontextprotocol/server-memory-bank
 # Configure with team-specific knowledge persistence settings
 ```
 

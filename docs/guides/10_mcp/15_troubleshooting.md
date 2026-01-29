@@ -2,10 +2,10 @@
 title: MCP Troubleshooting & Maintenance
 version: 3.1
 updated: 2025-09-12
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 related:
   - ./11_setup.md
-  - ../20_credentials/GEMINI.md
+  - ../20_credentials/CLAUDE.md
   - ./13_context-management.md
 ---
 
@@ -15,11 +15,11 @@ Comprehensive troubleshooting guide for MCP server issues, security consideratio
 
 ## Common Issues & Solutions
 
-### MCP Not Found in Gemini Code
+### MCP Not Found in Claude Code
 
 **Symptoms:**
 - `/mcp` command shows no servers
-- Gemini Code appears to ignore MCP configurations
+- Claude Code appears to ignore MCP configurations
 - "No MCP servers available" messages
 
 **Diagnosis:**
@@ -28,10 +28,10 @@ Comprehensive troubleshooting guide for MCP server issues, security consideratio
 /usr/bin/python3 mcp_manager.py --list
 
 # Check specific config file
-cat ~/.gemini.json | jq .mcpServers
+cat ~/.claude.json | jq .mcpServers
 
-# Verify Gemini Code can access config
-gemini mcp list
+# Verify Claude Code can access config
+claude mcp list
 ```
 
 **Solutions:**
@@ -40,9 +40,9 @@ gemini mcp list
 /usr/bin/python3 mcp_manager.py --add
 
 # Or add using Gemini CLI directly
-gemini mcp add test npx @modelcontextprotocol/server-filesystem /tmp
+claude mcp add test npx @modelcontextprotocol/server-filesystem /tmp
 
-# Restart Gemini Code completely
+# Restart Claude Code completely
 # Command Palette → "Developer: Reload Window"
 ```
 
@@ -66,14 +66,14 @@ tail -f /tmp/sync-mcp.error.log
 ```
 
 **Common Causes & Solutions:**
-1. **Missing API tokens** → Follow [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md)
+1. **Missing API tokens** → Follow [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md)
 2. **Incorrect server paths or commands** → Verify installation with `npx` command
 3. **Network connectivity issues** → Test with `curl` or `ping`
 4. **Permission issues** → Check file/directory access permissions
 
 ### View MCP Tools
 
-**In Gemini Code:**
+**In Claude Code:**
 1. Type `/mcp`
 2. Press Enter on server name
 3. See available tools and their descriptions
@@ -81,7 +81,7 @@ tail -f /tmp/sync-mcp.error.log
 **Command Line Verification:**
 ```bash
 # List configured servers
-gemini mcp list
+claude mcp list
 
 # Test specific server
 gemini /mcp
@@ -117,22 +117,22 @@ plutil -lint ~/Library/LaunchAgents/com.user.sync-mcp.plist
 **Automated Import:**
 ```bash
 # If desktop config exists at standard location
-gemini mcp add-from-gemini-desktop
+claude mcp add-from-gemini-desktop
 ```
 
 **Manual Import by Platform:**
 ```bash
 # macOS
 jq '.mcpServers' "$HOME/Library/Application Support/Gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 
 # Windows
 jq '.mcpServers' "$HOME/AppData/Roaming/Gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 
 # Linux
 jq '.mcpServers' "$HOME/.config/gemini/config.json" | \
-  jq -r 'to_entries[] | "gemini mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
+  jq -r 'to_entries[] | "claude mcp add \(.key) \(.value.command) \(.value.args | join(" "))"'
 ```
 
 ## Cross-System Compatibility
@@ -171,8 +171,8 @@ esac
 
 ### Universal (All Platforms)
 ```bash
-~/.gemini.json                        # Gemini Code CLI user config
-./.mcp.json                          # Gemini Code CLI project config
+~/.claude.json                        # Claude Code CLI user config
+./.mcp.json                          # Claude Code CLI project config
 ~/bin/sync-mcp.sh                    # Sync script
 ```
 
@@ -207,11 +207,11 @@ esac
 
 ### Recent Vulnerabilities
 
-**CVE-2025-52882 (Gemini Code Extension)**
+**CVE-2025-52882 (Claude Code Extension)**
 - **Severity**: High (CVSS 8.8)
 - **Impact**: WebSocket authentication bypass allowing unauthorized MCP server access
 - **Status**: Fully resolved in versions 1.0.24+
-- **Action Required**: Update Gemini Code extensions to latest versions
+- **Action Required**: Update Claude Code extensions to latest versions
 
 **PostgreSQL MCP Server SQL Injection**
 - **Impact**: Bypassing read-only restrictions and arbitrary SQL execution
@@ -238,7 +238,7 @@ esac
 - Regular security vulnerability scanning
 - Automated alerting for suspicious activity patterns
 
-For detailed credential security setup, see [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md).
+For detailed credential security setup, see [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md).
 
 ## Monitoring & Maintenance
 
@@ -252,7 +252,7 @@ cat > ~/bin/mcp-health-check.sh << 'EOF'
 echo "=== MCP Health Check $(date) ==="
 
 # Check server availability
-gemini mcp list | grep -q "filesystem" || echo "WARNING: filesystem server missing"
+claude mcp list | grep -q "filesystem" || echo "WARNING: filesystem server missing"
 
 # Check credentials
 /usr/bin/python3 mcp_manager.py --check-credentials
@@ -301,7 +301,7 @@ npm update -g @modelcontextprotocol/server-filesystem
 **Rollback Procedures:**
 ```bash
 # Restore from backup if needed
-cp ~/.gemini.json.backup ~/.gemini.json
+cp ~/.claude.json.backup ~/.claude.json
 
 # Restart services
 ~/bin/sync-mcp.sh
@@ -315,10 +315,10 @@ cp ~/.gemini.json.backup ~/.gemini.json
 find /tmp -name "*mcp*" -type f -mtime +7 -delete
 
 # Review server usage patterns
-grep "server usage" ~/.gemini/logs/* | sort | uniq -c
+grep "server usage" ~/.claude/logs/* | sort | uniq -c
 
 # Remove unused servers
-gemini mcp remove unused-server-name
+claude mcp remove unused-server-name
 ```
 
 **Optimization Strategies:**
@@ -343,7 +343,7 @@ gemini mcp remove unused-server-name
 
 **Performance Issues:**
 - Too many concurrent MCP servers can cause resource exhaustion
-- Large MCP responses can exceed Gemini Code token limits
+- Large MCP responses can exceed Claude Code token limits
 - Network latency affects remote MCP server performance
 
 **Integration Issues:**
@@ -355,7 +355,7 @@ gemini mcp remove unused-server-name
 
 ### Daily Tasks
 - Check error logs: `tail -f /tmp/sync-mcp.error.log`
-- Monitor MCP server performance in Gemini Code
+- Monitor MCP server performance in Claude Code
 - Verify credential expiration status
 
 ### Weekly Tasks
@@ -371,9 +371,9 @@ gemini mcp remove unused-server-name
 
 ## Best Practices Summary
 
-1. **Secure Credentials**: Follow [../20_credentials/GEMINI.md](../20_credentials/GEMINI.md) for secure token storage
+1. **Secure Credentials**: Follow [../20_credentials/CLAUDE.md](../20_credentials/CLAUDE.md) for secure token storage
 2. **Least Privilege**: Limit filesystem and network access to minimum required
-3. **Regular Testing**: Use `/mcp` in Gemini Code to verify server functionality
+3. **Regular Testing**: Use `/mcp` in Claude Code to verify server functionality
 4. **Automated Backups**: Sync script creates timestamped configuration backups
 5. **Credential Validation**: Use `mcp_manager.py --check-credentials` regularly
 6. **Staged Rollouts**: Test configuration changes in development before production
@@ -384,17 +384,17 @@ gemini mcp remove unused-server-name
 
 ### Documentation
 - [MCP Documentation](https://modelcontextprotocol.io/docs)
-- [Gemini Code Docs](https://docs.anthropic.com/en/docs/gemini-code/mcp)
+- [Claude Code Docs](https://docs.anthropic.com/en/docs/gemini-code/mcp)
 - [MCP Community Servers](https://github.com/modelcontextprotocol/servers)
 
 ### Internal Resources
-- [Implementation Strategy](../30_implementation/GEMINI.md)
-- [Credential Security](../20_credentials/GEMINI.md)
+- [Implementation Strategy](../30_implementation/CLAUDE.md)
+- [Credential Security](../20_credentials/CLAUDE.md)
 - [Context Management](./13_context-management.md)
 
 ### Community Support
 - [MCP GitHub Discussions](https://github.com/modelcontextprotocol/python-sdk/discussions)
-- [Gemini Code Community](https://community.anthropic.com/)
+- [Claude Code Community](https://community.anthropic.com/)
 - [Stack Overflow - MCP Tag](https://stackoverflow.com/questions/tagged/model-context-protocol)
 
 ---

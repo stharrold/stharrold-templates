@@ -61,7 +61,7 @@ This guide helps you select the appropriate method for applying stharrold-templa
 
 **Pros:**
 - Interactive Q&A (13-14 questions)
-- Auto-generates all files (README, GEMINI.md, pyproject.toml)
+- Auto-generates all files (README, CLAUDE.md, pyproject.toml)
 - Sets up git branches (main, develop, contrib/<user>)
 - Validates setup after completion
 - Token efficient (96% savings vs manual)
@@ -73,7 +73,7 @@ This guide helps you select the appropriate method for applying stharrold-templa
 
 **Command:**
 ```bash
-python stharrold-templates/.gemini/skills/initialize-repository/scripts/initialize_repository.py \
+python stharrold-templates/.claude/skills/initialize-repository/scripts/initialize_repository.py \
   D:\Projects\stharrold-templates D:\Projects\target-repo
 ```
 
@@ -113,7 +113,7 @@ python stharrold-templates/.gemini/skills/initialize-repository/scripts/initiali
 cp -r D:\Projects\existing-repo D:\Projects\existing-repo-test
 
 # 2. Copy workflow components
-cp -r D:\Projects\stharrold-templates\.gemini D:\Projects\existing-repo-test\
+cp -r D:\Projects\stharrold-templates\.claude D:\Projects\existing-repo-test\
 cp D:\Projects\stharrold-templates\WORKFLOW.md D:\Projects\existing-repo-test\
 
 # 3. Review changes
@@ -121,11 +121,11 @@ cd D:\Projects\existing-repo-test
 git status
 git diff
 
-# 4. Manually merge GEMINI.md sections
-# Open both files and copy workflow section from stharrold-templates/GEMINI.md
+# 4. Manually merge CLAUDE.md sections
+# Open both files and copy workflow section from stharrold-templates/CLAUDE.md
 
 # 5. Apply to production if satisfied
-cp -r D:\Projects\existing-repo-test\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\existing-repo-test\.claude D:\Projects\existing-repo\
 # ... (repeat for other files)
 
 # 6. Commit
@@ -147,12 +147,12 @@ git commit -m "feat: integrate Standard Workflow v1.15.1"
 **Pros:**
 - Processes multiple repos at once
 - Automatic checkpoint commits
-- Updates GEMINI.md automatically
+- Updates CLAUDE.md automatically
 - Consistent application across projects
 
 **Cons:**
 - Less control per repository
-- Skips repos that already have `.gemini/`
+- Skips repos that already have `.claude/`
 - Automated commits (review afterward)
 - May not suit all project structures
 
@@ -166,9 +166,9 @@ bash apply-workflow-batch.sh
 
 **What it does per project:**
 1. Creates checkpoint commit (before changes)
-2. Copies `.gemini/` directory
+2. Copies `.claude/` directory
 3. Copies `WORKFLOW.md` and `WORKFLOW-INIT-PROMPT.md`
-4. Adds Standard Workflow section to GEMINI.md (or creates it)
+4. Adds Standard Workflow section to CLAUDE.md (or creates it)
 5. Commits workflow integration
 
 ---
@@ -189,7 +189,7 @@ bash apply-workflow-batch.sh
 
 **Cons:**
 - Verification only (doesn't apply)
-- Current bug: counts top-level `.gemini/` dirs, not skills in `.gemini/skills/`
+- Current bug: counts top-level `.claude/` dirs, not skills in `.claude/skills/`
 
 **Command:**
 ```bash
@@ -225,7 +225,7 @@ bash verify-workflow.sh
 | **Speed** | Fast | Slow | Very Fast |
 | **Review** | After completion | During process | After completion |
 | **Git commits** | Auto-generated | Manual | Auto-generated |
-| **GEMINI.md** | Generated | Manual merge | Auto-updated |
+| **CLAUDE.md** | Generated | Manual merge | Auto-updated |
 | **Reversibility** | Via git reset | Full control | Via git reset |
 | **Skill** | Beginner | Intermediate | Intermediate |
 
@@ -269,13 +269,13 @@ bash verify-workflow.sh
 ### Existing Repository (Minimal Changes Needed)
 **Use:** Manual Copy (selective)
 
-**Why:** Can copy only `.gemini/` and `WORKFLOW.md`, skip other files
+**Why:** Can copy only `.claude/` and `WORKFLOW.md`, skip other files
 
 **Process:**
 ```bash
-cp -r D:\Projects\stharrold-templates\.gemini D:\Projects\existing-repo\
+cp -r D:\Projects\stharrold-templates\.claude D:\Projects\existing-repo\
 cp D:\Projects\stharrold-templates\WORKFLOW.md D:\Projects\existing-repo\
-# Manually add workflow section to GEMINI.md
+# Manually add workflow section to CLAUDE.md
 git commit -m "feat: add workflow system"
 ```
 
@@ -296,9 +296,9 @@ After application:
 
 - [ ] Run `git status` to see what changed
 - [ ] Review `git diff` for unexpected changes
-- [ ] Verify `.gemini/skills/` has 9 skills
+- [ ] Verify `.claude/skills/` has 9 skills
 - [ ] Run `verify-workflow.sh` for confirmation
-- [ ] Test quality gates: `python .gemini/skills/quality-enforcer/scripts/run_quality_gates.py`
+- [ ] Test quality gates: `python .claude/skills/quality-enforcer/scripts/run_quality_gates.py`
 
 ---
 
@@ -317,7 +317,7 @@ After application:
 **Solution:** Run `verify-workflow.sh`
 
 ### Scenario 5: "I want to update workflow in repos that already have it"
-**Solution:** Manual copy of updated `.gemini/skills/` dirs (preserves custom configs)
+**Solution:** Manual copy of updated `.claude/skills/` dirs (preserves custom configs)
 
 ---
 

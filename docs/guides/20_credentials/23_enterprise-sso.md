@@ -2,7 +2,7 @@
 title: Enterprise SSO & Authentication
 version: 3.2
 updated: 2025-09-13
-parent: ./GEMINI.md
+parent: ./CLAUDE.md
 template_version: 1.0
 project_template:
   enabled: true
@@ -27,7 +27,7 @@ changelog:
 
 # Enterprise SSO & Authentication
 
-Advanced authentication patterns for enterprise teams using Gemini Code with MCP servers, including SSO integration, multi-source credential management, and enterprise search security.
+Advanced authentication patterns for enterprise teams using Claude Code with MCP servers, including SSO integration, multi-source credential management, and enterprise search security.
 
 ## Enterprise Search Data Security
 
@@ -98,7 +98,7 @@ security add-generic-password \
 #### Implementation Pattern
 ```bash
 # Configure access control MCP server
-gemini mcp add access-control "python -m enterprise_acl" \
+claude mcp add access-control "python -m enterprise_acl" \
   --env USER_DIRECTORY="ldap://company.ldap" \
   --env CLASSIFICATION_SERVICE="./data_classification.json" \
   --env COMPLIANCE_MODE="GDPR,HIPAA"
@@ -142,7 +142,7 @@ Prevent sensitive information leakage when using external enrichment sources or 
 **Example Configuration:**
 ```bash
 # Data Loss Prevention MCP Server
-gemini mcp add dlp-monitor "python -m data_loss_prevention" \
+claude mcp add dlp-monitor "python -m data_loss_prevention" \
   --env SCAN_PATTERNS="./pii_patterns.json" \
   --env ALERT_WEBHOOK="https://security-alerts.company.com/webhook" \
   --env COMPLIANCE_OFFICER="security@company.com"
@@ -391,7 +391,7 @@ const server = tls.createServer(options, (socket) => {
 Enterprise teams can leverage centralized authentication through SSO and domain capture, ensuring consistent access management across development teams.
 
 #### SSO Integration Benefits
-- **Single sign-on** across all Gemini Code instances
+- **Single sign-on** across all Claude Code instances
 - **Centralized user provisioning** and deprovisioning
 - **compliance with enterprise identity management** policies
 - **Audit trail integration** with existing security systems
@@ -452,7 +452,7 @@ gemini config set-session-timeout 480  # 8 hours in minutes
 
 ### API Billing & Cost Management
 
-Strategic cost optimization for enterprise Gemini Code deployments with intelligent model selection and usage optimization.
+Strategic cost optimization for enterprise Claude Code deployments with intelligent model selection and usage optimization.
 
 #### Pay-Per-Use API Billing Options
 
@@ -548,7 +548,7 @@ Set-MCPUserContext -Permissions $mcpPermissions
 ### LDAP Integration
 ```bash
 # LDAP user context for Unix/Linux environments
-gemini mcp add ldap-auth "python -m enterprise_ldap" \
+claude mcp add ldap-auth "python -m enterprise_ldap" \
   --env LDAP_SERVER="ldap://company.ldap:389" \
   --env BIND_DN="cn=mcp-service,ou=services,dc=company,dc=com" \
   --env USER_BASE_DN="ou=users,dc=company,dc=com"

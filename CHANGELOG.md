@@ -7,15 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.0.0] - 2026-01-29
+
+### Changed
+- **Gemini → Claude migration** (#166) - Renamed `.gemini/` to `.claude/`, all `GEMINI.md` files to `CLAUDE.md`, updated ~1,577 internal references across ~178 files.
+- **Secrets alignment** (#168, #169, #170, #171) - Updated `secrets.toml`, renamed `scripts/run.py` to `scripts/secrets_run.py`, updated `secrets-example.yml` and `secrets_setup.py` to match `library` repo conventions.
+
+### Added
+- **Claude Code review workflow** (#167) - Added `.github/workflows/claude-code-review.yml` GitHub Actions workflow.
+- **Pre-commit hook tests** (#181) - Added integration tests for 4 custom pre-commit hooks.
+- **AgentDB test coverage** (#174) - Added 25 tests for `init_database.py`, `record_sync.py`, and `checkpoint_manager.py`.
+- **Environment utilities** (#173) - Extracted shared `is_ci()`/`is_container()` into `scripts/environment_utils.py`.
+
+### Fixed
+- **Version mismatch** (#178) - Aligned `pyproject.toml` version with CHANGELOG.
+- **Dead references** (#172) - Removed stale `ARCHITECTURE.md` references across documentation.
+- **Linting enforcement** (#177) - Resolved all ruff linting violations; removed `continue-on-error: true` from CI.
+- **analyze_metrics.py stub** (#175) - Replaced non-functional stub with `NotImplementedError`.
+- **Copilot review comments** (#145) - Broadened exception handling in `apply_workflow.py`, fixed force flag consistency.
+
 ### Removed
-- **feature-dev command** - Replaced by built-in Gemini CLI tools for autonomous implementation.
+- **Azure DevOps adapter** (#179) - Removed unimplemented `azure_adapter.py` and all Azure references from VCS module.
+- **feature-dev command** - Replaced by built-in CLI tools for autonomous implementation.
+
+### Documentation
+- **TODO conversion** (#176) - Converted inline TODOs to tracked GitHub issues.
+- **ARCHIVED/ index** (#180) - Added `ARCHIVED/README.md` documenting 27 archived zip files.
 
 ## [7.3.0] - 2026-01-18
 
 ### Changed
+- **Workflow** - Archived and removed legacy Gemini GitHub Actions workflows and command configurations.
+
+## [7.2.0] - 2026-01-04
+
+### Changed
 - **Dependencies** - Added `tomlkit` as a development dependency.
 - **Testing** - Updated `test_secrets.py` to use `tmp_path` fixture for better isolation.
-- **Workflow** - Archived and removed legacy Gemini GitHub Actions workflows and command configurations.
+- **Workflow** - Disabled `gemini-dispatch.yml` workflow.
 - **Workflow** - Slash commands and scripts updated to output manual instructions instead of automatic deletion/merging for critical steps.
 - **Documentation** - Updated `GEMINI.md` references.
 - **Documentation** - Updated `WORKFLOW.md`, `GEMINI.md`, and skill docs to reflect manual cleanup workflow.
@@ -773,7 +802,8 @@ Earlier versions (< 5.0.0) used a different workflow architecture. See `ARCHIVED
 
 | Version | Date       | Type  | Description |
 |---------|------------|-------|-------------|
-| 7.3.0   | 2026-01-18 | MINOR | Manual workflow transition + removal of legacy Gemini configs |
+| 7.3.0   | 2026-01-18 | MINOR | Removal of legacy Gemini configs |
+| 7.2.0   | 2026-01-04 | MINOR | Manual workflow transition + disabled dispatch workflow |
 | 7.0.0   | 2026-01-01 | MAJOR | Streamlined for Gemini-only development + removed legacy tools |
 | 1.10.0  | 2025-11-16 | MINOR | MIT Agent Synchronization Pattern (Phase 1) + DuckDB compatibility fixes |
 | 1.9.0   | 2025-11-09 | MINOR | Work-item generation workflow + VCS adapter enhancements |
