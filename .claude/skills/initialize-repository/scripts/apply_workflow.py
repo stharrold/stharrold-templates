@@ -197,14 +197,14 @@ def copy_skills(source_path: Path, target_path: Path, force: bool) -> int:
                     # Restore from backup if move failed
                     backup_skills.rename(target_skills)
                     raise
-            except PermissionError as e:
-                raise PermissionError(f"Permission denied copying skills: {e}") from e
+            except OSError as e:
+                raise OSError(f"Failed copying skills: {e}") from e
     else:
         # No existing directory or not force, just copy
         try:
             shutil.copytree(source_skills, target_skills, dirs_exist_ok=True)
-        except PermissionError as e:
-            raise PermissionError(f"Permission denied copying skills: {e}") from e
+        except OSError as e:
+            raise OSError(f"Failed copying skills: {e}") from e
 
     # Count and report skills
     skills = [d.name for d in target_skills.iterdir() if d.is_dir()]
@@ -260,14 +260,14 @@ def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
                     # Restore from backup if move failed
                     backup_commands.rename(target_commands)
                     raise
-            except PermissionError as e:
-                raise PermissionError(f"Permission denied copying commands: {e}") from e
+            except OSError as e:
+                raise OSError(f"Failed copying commands: {e}") from e
     else:
         # No existing directory or not force, just copy
         try:
             shutil.copytree(source_commands, target_commands, dirs_exist_ok=True)
-        except PermissionError as e:
-            raise PermissionError(f"Permission denied copying commands: {e}") from e
+        except OSError as e:
+            raise OSError(f"Failed copying commands: {e}") from e
 
     # Count command files (*.md in workflow/)
     workflow_dir = target_commands / "workflow"
@@ -286,12 +286,16 @@ def copy_commands(source_path: Path, target_path: Path, force: bool) -> int:
     return len(commands)
 
 
-def copy_documentation(source_path: Path, target_path: Path) -> list[str]:
+def copy_documentation(source_path: Path, target_path: Path, force: bool) -> list[str]:
     """Copy workflow documentation files.
+
+    When force=False, existing files are skipped to avoid data loss.
+    When force=True, existing files are overwritten.
 
     Args:
         source_path: Path to source repository
         target_path: Path to target repository
+        force: If True, overwrite existing documentation files
 
     Returns:
         List of copied file names
@@ -305,6 +309,10 @@ def copy_documentation(source_path: Path, target_path: Path) -> list[str]:
         source_file = source_path / doc
         if source_file.exists():
             target_file = target_path / doc
+            if target_file.exists() and not force:
+                print_success(f"{doc} already exists (preserved)")
+                copied.append(doc)
+                continue
             shutil.copy2(source_file, target_file)
             print_success(f"Copied {doc}")
             copied.append(doc)
@@ -646,7 +654,7 @@ Example:
     # Copy operations
     skills_count = copy_skills(source_path, target_path, args.force)
     commands_count = copy_commands(source_path, target_path, args.force)
-    docs_copied = copy_documentation(source_path, target_path)
+    docs_copied = copy_documentation(source_path, target_path, args.force)
 
     # Merge operations (always merge, never overwrite)
     merge_pyproject_toml(source_path, target_path)
