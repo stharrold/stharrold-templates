@@ -32,7 +32,6 @@ This repository uses **Standard Workflow v1.15.1** system...
 **Source:** External repository (D:\Temp\standard\ or upstream)
 **Found in:**
 - `stharrold-templates/WORKFLOW.md` line 3: `Version: 5.3.0`
-- `stharrold-templates/ARCHITECTURE.md`
 - `stharrold-templates/docs/reference/german-workflow-v5.3.0.md`
 - `stharrold-templates/docs/reference/WORKFLOW-INIT-PROMPT.md`
 

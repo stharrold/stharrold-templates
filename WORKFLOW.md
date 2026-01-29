@@ -190,5 +190,4 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 ## Related Documentation
 
 - **[GEMINI.md](GEMINI.md)** - Main AI context file
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history

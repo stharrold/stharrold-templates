@@ -460,7 +460,6 @@ python stharrold-templates/.gemini/skills/initialize-repository/scripts/initiali
 
 - `WORKFLOW.md` - Workflow overview (14KB) with phase index
 - `docs/reference/workflow-*.md` - Phase-specific workflow docs (≤20KB each)
-- `ARCHITECTURE.md` - System architecture analysis
 - `CHANGELOG.md` - Version history
 - `ARCHIVED/` - Archived specs, planning docs, and deprecated skills (zipped)
 

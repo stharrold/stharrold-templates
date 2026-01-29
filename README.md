@@ -129,7 +129,6 @@ See `secrets.toml` for secret definitions.
 |----------|---------|
 | [GEMINI.md](GEMINI.md) | AI agent instructions |
 | [WORKFLOW.md](WORKFLOW.md) | Complete workflow guide |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 
