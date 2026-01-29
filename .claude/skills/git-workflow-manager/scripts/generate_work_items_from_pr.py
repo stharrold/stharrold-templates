@@ -4,13 +4,13 @@
 """Generate work-items from unresolved PR conversations.
 
 This script fetches unresolved PR review conversations and automatically creates
-work-items (GitHub issues or Azure DevOps work-items) for each conversation.
+GitHub issues for each conversation.
 
 The workflow pattern is:
-1. Gemini fetches unresolved PR conversations
-2. Gemini creates one work-item per conversation in the tracker
-3. User approves PR in web portal (conversations remain as work-items)
-4. Gemini creates feature worktrees to fix each work-item
+1. Claude fetches unresolved PR conversations
+2. Claude creates one GitHub issue per conversation
+3. User approves PR in web portal (conversations remain as issues)
+4. Claude creates feature worktrees to fix each issue
 5. Repeat until no unresolved conversations
 
 Constants:
@@ -28,7 +28,6 @@ from pathlib import Path
 # Add VCS module to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
 from vcs import get_vcs_adapter
-from vcs.azure_adapter import AzureDevOpsAdapter
 from vcs.github_adapter import GitHubAdapter
 
 # Constants with documented rationale
@@ -75,7 +74,7 @@ class PRFeedbackWorkItemGenerator:
         """Initialize generator with VCS adapter.
 
         Args:
-            adapter: VCS adapter instance (GitHub or Azure DevOps)
+            adapter: VCS adapter instance (currently GitHub only)
         """
         self.adapter = adapter
         self.provider_name = adapter.get_provider_name()
@@ -88,11 +87,11 @@ class PRFeedbackWorkItemGenerator:
 
         Returns:
             List of conversation dictionaries with keys:
-                - id: Conversation ID (str for GitHub, int for Azure)
+                - id: Conversation ID
                 - url: Direct link to conversation
                 - file: File path (if file comment, None otherwise)
                 - line: Line number (if line comment, None otherwise)
-                - author: Comment author username/display name
+                - author: Comment author username
                 - body: First comment body text
                 - created_at: Timestamp string
 
@@ -101,8 +100,6 @@ class PRFeedbackWorkItemGenerator:
         """
         if isinstance(self.adapter, GitHubAdapter):
             return self._fetch_github_conversations(pr_number)
-        elif isinstance(self.adapter, AzureDevOpsAdapter):
-            return self._fetch_azure_conversations(pr_number)
         else:
             raise RuntimeError(f"Unsupported VCS adapter: {type(self.adapter)}")
 
@@ -193,75 +190,6 @@ class PRFeedbackWorkItemGenerator:
         except (KeyError, TypeError) as e:
             raise RuntimeError(f"Failed to parse GitHub review threads: {e}")
 
-    def _fetch_azure_conversations(self, pr_number: int) -> list[dict]:
-        """Fetch unresolved Azure DevOps PR threads.
-
-        Uses Azure CLI to fetch PR threads with status "active" or "pending".
-
-        Args:
-            pr_number: Pull request ID
-
-        Returns:
-            List of conversation dictionaries
-
-        Raises:
-            RuntimeError: If Azure CLI query fails
-        """
-        try:
-            result = subprocess.check_output(
-                ["az", "repos", "pr", "show", "--id", str(pr_number), "--organization", self.adapter.organization, "--query", "threads", "--output", "json"],
-                text=True,
-                stderr=subprocess.PIPE,
-                timeout=30,
-            )
-            threads = json.loads(result)
-
-        except FileNotFoundError:
-            raise RuntimeError("'az' CLI not found. Install from https://learn.microsoft.com/cli/azure/")
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to fetch Azure DevOps PR threads.\nError: {error_msg}")
-        except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while fetching Azure DevOps PR threads")
-        except json.JSONDecodeError as e:
-            raise RuntimeError(f"Failed to parse Azure DevOps response: {e}")
-
-        # Parse threads and extract unresolved ones
-        conversations = []
-        for thread in threads:
-            # Filter: only active or pending status (unresolved)
-            status = thread.get("status", "unknown").lower()
-            if status not in ["active", "pending"]:
-                continue
-
-            # Get first comment in thread
-            if not thread.get("comments"):
-                continue  # Skip empty threads
-
-            first_comment = thread["comments"][0]
-
-            # Extract file path and line number from threadContext
-            file_path = None
-            line_number = None
-            if thread.get("threadContext"):
-                file_path = thread["threadContext"].get("filePath")
-                if thread["threadContext"].get("rightFileStart"):
-                    line_number = thread["threadContext"]["rightFileStart"].get("line")
-
-            conversations.append(
-                {
-                    "id": thread["id"],
-                    "url": f"https://dev.azure.com/{self.adapter.organization}/{self.adapter.project}/_git/{self.adapter.repository}/pullrequest/{pr_number}?_a=files&discussionId={thread['id']}",
-                    "file": file_path,
-                    "line": line_number,
-                    "author": first_comment["author"]["displayName"] if first_comment.get("author") else "Unknown",
-                    "body": first_comment.get("content", ""),
-                    "created_at": first_comment.get("publishedDate", ""),
-                }
-            )
-
-        return conversations
-
     def create_work_item_from_conversation(self, pr_number: int, conversation: dict, sequence: int) -> tuple[str, str]:
         """Create work-item from conversation.
 
@@ -278,8 +206,6 @@ class PRFeedbackWorkItemGenerator:
         """
         if isinstance(self.adapter, GitHubAdapter):
             return self._create_github_issue(pr_number, conversation, sequence)
-        elif isinstance(self.adapter, AzureDevOpsAdapter):
-            return self._create_azure_work_item(pr_number, conversation, sequence)
         else:
             raise RuntimeError(f"Unsupported VCS adapter: {type(self.adapter)}")
 
@@ -360,92 +286,6 @@ class PRFeedbackWorkItemGenerator:
                 raise RuntimeError(f"Failed to create GitHub issue.\nError: {error_msg}")
         except subprocess.TimeoutExpired:
             raise RuntimeError("Timeout while creating GitHub issue")
-
-    def _create_azure_work_item(self, pr_number: int, conversation: dict, sequence: int) -> tuple[str, str]:
-        """Create Azure DevOps work-item from conversation.
-
-        Args:
-            pr_number: Pull request ID
-            conversation: Conversation dictionary
-            sequence: Work-item sequence number
-
-        Returns:
-            Tuple of (work_item_url, work_item_slug)
-
-        Raises:
-            RuntimeError: If work-item creation fails
-        """
-        # Generate slug
-        slug = WORK_ITEM_SLUG_PATTERN.format(pr_number=pr_number, sequence=sequence)
-
-        # Generate title (first 50 chars of comment body)
-        comment_preview = conversation["body"][:50]
-        if len(conversation["body"]) > 50:
-            comment_preview += "..."
-        title = f"PR #{pr_number} feedback: {comment_preview}"
-
-        # Generate description with conversation context
-        description_parts = [
-            f"<b>From PR:</b> #{pr_number}<br/>",
-            f"<b>Thread ID:</b> {conversation['id']}<br/>",
-        ]
-
-        if conversation.get("file"):
-            location = conversation["file"]
-            if conversation.get("line"):
-                location += f":{conversation['line']}"
-            description_parts.append(f"<b>Location:</b> {location}<br/>")
-
-        description_parts.append(f"<b>Author:</b> {conversation['author']}<br/>")
-        description_parts.append("<br/>")  # Blank line
-        description_parts.append(conversation["body"].replace("\n", "<br/>"))
-
-        description = "".join(description_parts)
-
-        # Create work-item
-        try:
-            result = subprocess.check_output(
-                [
-                    "az",
-                    "boards",
-                    "work-item",
-                    "create",
-                    "--title",
-                    title,
-                    "--type",
-                    "Task",
-                    "--description",
-                    description,
-                    "--assigned-to",
-                    "@me",
-                    "--organization",
-                    self.adapter.organization,
-                    "--project",
-                    self.adapter.project,
-                    "--fields",
-                    "System.Tags=pr-feedback",
-                    "--output",
-                    "json",
-                ],
-                text=True,
-                stderr=subprocess.PIPE,
-                timeout=30,
-            )
-
-            work_item = json.loads(result)
-            work_item_url = work_item["url"]
-
-            return (work_item_url, slug)
-
-        except FileNotFoundError:
-            raise RuntimeError("'az' CLI not found. Install from https://learn.microsoft.com/cli/azure/")
-        except subprocess.CalledProcessError as e:
-            error_msg = e.stderr.strip() if e.stderr else str(e)
-            raise RuntimeError(f"Failed to create Azure DevOps work-item.\nError: {error_msg}")
-        except subprocess.TimeoutExpired:
-            raise RuntimeError("Timeout while creating Azure DevOps work-item")
-        except (json.JSONDecodeError, KeyError) as e:
-            raise RuntimeError(f"Failed to parse Azure DevOps work-item response: {e}")
 
     def display_conversations(self, conversations: list[dict]) -> None:
         """Display unresolved conversations grouped by file.

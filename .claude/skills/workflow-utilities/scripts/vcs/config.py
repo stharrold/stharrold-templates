@@ -23,7 +23,7 @@ except ImportError:
 
 # Constants
 CONFIG_FILE_NAME = ".vcs_config.yaml"
-VALID_PROVIDERS = ["github", "azure_devops"]
+VALID_PROVIDERS = ["github"]
 
 
 def load_vcs_config(config_path: Path | None = None) -> dict[str, Any] | None:
@@ -39,12 +39,7 @@ def load_vcs_config(config_path: Path | None = None) -> dict[str, Any] | None:
         ImportError: If PyYAML is not installed
 
     Example config:
-        vcs_provider: azure_devops
-
-        azure_devops:
-          organization: "https://dev.azure.com/myorg"
-          project: "MyProject"
-          repository: "MyRepo"  # Optional: defaults to project name if not specified
+        vcs_provider: github
     """
     if yaml is None:
         raise ImportError("PyYAML is required to load VCS configuration. Install it with: pip install pyyaml")
@@ -88,40 +83,4 @@ def validate_config(config: dict[str, Any]) -> None:
     if provider not in VALID_PROVIDERS:
         raise ValueError(f"Invalid vcs_provider: {provider}. Must be one of: {VALID_PROVIDERS}")
 
-    # Validate provider-specific requirements
-    if provider == "azure_devops":
-        validate_azure_devops_config(config)
-
-
-def validate_azure_devops_config(config: dict[str, Any]) -> None:
-    """Validate Azure DevOps-specific configuration.
-
-    Args:
-        config: Configuration dictionary
-
-    Raises:
-        ValueError: If Azure DevOps configuration is invalid
-    """
-    if "azure_devops" not in config:
-        raise ValueError("azure_devops configuration required when vcs_provider is azure_devops")
-
-    azure_config = config["azure_devops"]
-
-    if not isinstance(azure_config, dict):
-        raise ValueError("azure_devops must be a dictionary")
-
-    if "organization" not in azure_config:
-        raise ValueError("azure_devops.organization is required")
-
-    if "project" not in azure_config:
-        raise ValueError("azure_devops.project is required")
-
-    # Validate organization URL format
-    org = azure_config["organization"]
-    if not isinstance(org, str) or not org.strip():
-        raise ValueError("azure_devops.organization must be a non-empty string")
-
-    # Validate project name
-    project = azure_config["project"]
-    if not isinstance(project, str) or not project.strip():
-        raise ValueError("azure_devops.project must be a non-empty string")
+    # No provider-specific validation needed for GitHub (uses gh CLI auth)

@@ -1,7 +1,7 @@
 ---
 type: claude-context
 directory: .claude/skills/workflow-utilities
-purpose: Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
+purpose: Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 parent: ../CLAUDE.md
 sibling_readme: README.md
 children:
@@ -18,7 +18,7 @@ related_skills:
 
 ## Purpose
 
-Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
+Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 
 > **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
 
@@ -42,10 +42,9 @@ Workflow Utilities provides **shared utilities** for all workflow skills. It inc
 │   ├── verify_workflow_context.py  # Workflow context validation + pending worktree detection
 │   ├── workflow_progress.py        # Workflow progress tracking
 │   ├── worktree_context.py         # Worktree state isolation
-│   ├── vcs/                        # VCS abstraction layer
+│   ├── vcs/                        # VCS abstraction layer (GitHub only)
 │   │   ├── provider.py             # VCS provider detection
 │   │   ├── github_adapter.py       # GitHub CLI adapter
-│   │   ├── azure_adapter.py        # Azure DevOps adapter
 │   │   └── ...
 │   └── __init__.py
 ├── SKILL.md                        # Complete skill documentation
@@ -340,44 +339,35 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 
 ### VCS Abstraction Layer (vcs/)
 
-**Purpose:** Provide unified interface for GitHub and Azure DevOps operations (PR creation, issue management)
+**Purpose:** Provide unified interface for GitHub operations (PR creation, issue management)
 
 **When to use:** When creating PRs, managing issues, or working with VCS providers
 
 **Key files:**
-- **provider.py** - Auto-detects VCS provider from git remote URL
+- **provider.py** - VCS provider detection
 - **base_adapter.py** - Defines base adapter interface
 - **github_adapter.py** - GitHub CLI (gh) adapter
-- **azure_adapter.py** - Azure DevOps CLI (az) adapter
 - **config.py** - VCS configuration
 
 **Example usage (from git-workflow-manager):**
 ```python
-from .vcs.provider import detect_from_remote
-from .vcs.github_adapter import GitHubAdapter
-from .vcs.azure_adapter import AzureDevOpsAdapter
+from vcs import get_vcs_adapter
+from vcs.github_adapter import GitHubAdapter
 
-# Auto-detect provider
-provider = detect_from_remote()
+adapter = get_vcs_adapter()
 
-if provider == VCSProvider.GITHUB:
-    adapter = GitHubAdapter()
-elif provider == VCSProvider.AZURE_DEVOPS:
-    adapter = AzureDevOpsAdapter()
-
-# Create PR (unified interface)
-pr_url = adapter.create_pr(
+# Create PR
+pr_url = adapter.create_pull_request(
+    source_branch="feature/20251103T143000Z_auth",
+    target_branch="contrib/stharrold",
     title="feat: auth system (v1.6.0)",
     body="PR body content",
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold"
 )
 ```
 
 **Key features:**
-- Auto-detection from git remote
-- Unified interface (GitHub/Azure DevOps)
-- CLI-based operations (gh/az)
+- GitHub CLI (gh) based operations
+- Abstract base class for future provider support
 - Error handling with helpful messages
 
 ---
@@ -473,7 +463,7 @@ subprocess.run([
 
 ### VCS Operations (PR Creation)
 
-**Context:** User wants to create PR, need to detect VCS provider
+**Context:** User wants to create PR
 
 **User says:**
 - "Create PR"
@@ -488,29 +478,15 @@ import sys
 vcs_path = Path('.claude/skills/workflow-utilities/scripts')
 sys.path.insert(0, str(vcs_path))
 
-from vcs.provider import detect_from_remote, VCSProvider
-from vcs.github_adapter import GitHubAdapter
-from vcs.azure_adapter import AzureDevOpsAdapter
+from vcs import get_vcs_adapter
 
-# Auto-detect provider
-provider = detect_from_remote()
-
-if provider == VCSProvider.GITHUB:
-    adapter = GitHubAdapter()
-    pr_url = adapter.create_pr(
-        title="feat: auth system (v1.6.0)",
-        body="PR body",
-        source_branch="feature/20251103T143000Z_auth",
-        target_branch="contrib/stharrold"
-    )
-elif provider == VCSProvider.AZURE_DEVOPS:
-    adapter = AzureDevOpsAdapter()
-    pr_url = adapter.create_pr(
-        title="feat: auth system (v1.6.0)",
-        body="PR body",
-        source_branch="feature/20251103T143000Z_auth",
-        target_branch="contrib/stharrold"
-    )
+adapter = get_vcs_adapter()
+pr_url = adapter.create_pull_request(
+    source_branch="feature/20251103T143000Z_auth",
+    target_branch="contrib/stharrold",
+    title="feat: auth system (v1.6.0)",
+    body="PR body",
+)
 
 print(f"✓ PR created: {pr_url}")
 ```
@@ -586,8 +562,7 @@ directory/
 - ✅ Use sync_skill_docs.py after skill changes
 
 **VCS operations:**
-- ❌ Don't hardcode GitHub-specific commands
-- ✅ Use VCS abstraction layer for portability
+- ✅ Use VCS abstraction layer via `get_vcs_adapter()`
 
 ---
 
@@ -602,8 +577,8 @@ directory/
 **CLAUDE.md hierarchy:** Every directory has CLAUDE.md with parent/child refs
 - **Rationale:** AI navigation, context inheritance, documentation consistency
 
-**VCS abstraction:** Unified interface for GitHub/Azure DevOps
-- **Rationale:** Portability, maintainability, future-proof
+**VCS abstraction:** Unified interface for GitHub (currently GitHub only)
+- **Rationale:** Abstract base class enables future provider support
 
 **Semantic versioning:** `MAJOR.MINOR.PATCH`
 - **Rationale:** Industry standard, clear upgrade paths

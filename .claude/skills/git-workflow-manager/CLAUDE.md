@@ -1,7 +1,7 @@
 ---
 type: claude-context
 directory: .claude/skills/git-workflow-manager
-purpose: Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub/Azure DevOps).
+purpose: Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub).
 parent: ../CLAUDE.md
 sibling_readme: README.md
 children:
@@ -17,7 +17,7 @@ related_skills:
 
 ## Purpose
 
-Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub/Azure DevOps).
+Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub).
 
 > **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
 
@@ -532,7 +532,7 @@ for slug in work_items:
 import subprocess
 
 # Step 1: Feature branch merged to contrib via PR
-# (User merges PR #94 in GitHub/Azure DevOps UI)
+# (User merges PR #94 in GitHub UI)
 
 # Step 2: Generate work-items from unresolved conversations
 result = subprocess.run([
@@ -588,36 +588,6 @@ issues = subprocess.run([
 
 issue_list = json.loads(issues.stdout)
 # [{'number': 123, 'title': 'PR #94 feedback: ...', 'url': '...'}, ...]
-```
-
-**Integration with Azure DevOps:**
-```python
-import subprocess
-import json
-
-# For Azure DevOps repositories
-result = subprocess.run([
-    'python',
-    '.claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.py',
-    '94'
-], capture_output=True, text=True, check=True)
-
-# Creates Azure DevOps tasks with:
-# - Type: Task
-# - Tags: "pr-feedback", "pr-94"
-# - Title: "PR #94 feedback: {thread subject}"
-# - Description: Full thread content with file context
-# - Relations: Links to PR URL
-
-# Check created work-items
-work_items = subprocess.run([
-    'az', 'boards', 'work-item', 'list',
-    '--query', "[?fields.'System.Tags' contains 'pr-94']",
-    '--output', 'json'
-], capture_output=True, text=True, check=True)
-
-item_list = json.loads(work_items.stdout)
-# [{'id': 456, 'fields': {'System.Title': 'PR #94 feedback: ...'}, ...}, ...]
 ```
 
 ---
