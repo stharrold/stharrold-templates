@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.1.0] - 2026-01-30
+
+### Documentation
+- **CLAUDE.md Gotchas section** — Added operational notes for release workflow, ruff auto-fixes, historical Gemini references, and AgentDB initialization behavior.
+- **PR review fixes** — Corrected stale `gemini mcp` CLI commands, `~/.gemini.json` config paths, and product URLs across 10+ documentation files.
+
 ## [8.0.0] - 2026-01-29
 
 ### Changed

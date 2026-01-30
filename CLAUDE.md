@@ -17,14 +17,14 @@ children:
 Gemini Code to Claude Code migration complete (v8.0.0).
 - `.gemini/` → `.claude/`, `GEMINI.md` → `CLAUDE.md` — done
 - Secrets management aligned with `library` repo conventions
-- pyproject.toml version: 8.0.0
+- pyproject.toml version: 8.1.0
 
 ## Gotchas
 
 - `release_workflow.py create-release` auto-calculates version from last git tag — override manually for major bumps
 - Ruff auto-fixes import ordering on commit — re-stage if pre-commit hook modifies files
 - `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
-- `record_sync.py` auto-initializes AgentDB on first use — failures are non-blocking
+- `record_sync.py` auto-initializes AgentDB on first use — initialization failures cause a non-zero exit unless the caller ignores the exit code or handles exceptions
 
 ## Branch Structure
 
