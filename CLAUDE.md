@@ -19,6 +19,13 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - Secrets management aligned with `library` repo conventions
 - pyproject.toml version: 8.0.0
 
+## Gotchas
+
+- `release_workflow.py create-release` auto-calculates version from last git tag — override manually for major bumps
+- Ruff auto-fixes import ordering on commit — re-stage if pre-commit hook modifies files
+- `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
+- `record_sync.py` auto-initializes AgentDB on first use — failures are non-blocking
+
 ## Branch Structure
 
 `main` ← `develop` ← `contrib/stharrold` ← `feature/*`
