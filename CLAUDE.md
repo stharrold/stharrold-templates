@@ -26,7 +26,10 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - Ruff auto-fixes import ordering on commit — re-stage if pre-commit hook modifies files
 - `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
 - `record_sync.py` auto-initializes AgentDB on first use — initialization failures cause a non-zero exit unless the caller ignores the exit code or handles exceptions
-- Slash commands use markdown format (not TOML): `!{cmd}` → `` !`cmd` ``, `{{args}}` → `$ARGUMENTS`, `description` → YAML frontmatter
+- Slash commands use Markdown format (not TOML):
+  - `description` → YAML frontmatter
+  - `!{cmd}` → `` !`cmd` ``
+  - `{{args}}` → `$ARGUMENTS`
 
 ## Branch Structure
 

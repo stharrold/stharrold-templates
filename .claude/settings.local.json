@@ -36,6 +36,7 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
       "Bash(gh pr diff:*)",
       "Bash(gh pr review:*)",
       "Bash(awk:*)",
