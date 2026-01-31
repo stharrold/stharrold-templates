@@ -11,12 +11,21 @@ prompt = """
 ## Step 1: Extract Feature Slug
 Parse "{{args}}" to create a kebab-case slug (lowercase, hyphens, limit 50 chars).
 
+## Step 1.5: Detect Contrib Branch
+Detect the contrib branch: run `git branch --list 'contrib/*'` and use the first result (trimmed). If none found, fall back to the current branch.
+
 ## Step 2: Create Feature Worktree
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature {slug} contrib/stharrold`
+Run: `uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature {slug} {contrib_branch}`
 
 ## Step 3: Record State in AgentDB
 Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x1_1_worktree --source "main_repo" --target "worktree"`
 
 ## Step 4: Display Next Steps
 Show worktree path and instructions for running `built-in tools "{{args}}"` in the worktree.
+
+## Error Recovery
+- **Context check fails**: Ensure you are on `contrib/*` branch in the main repo (not a worktree). Run `git checkout contrib/<user>`.
+- **Worktree already exists**: Run `git worktree list` to check. Remove with `git worktree remove <path>` then `git worktree prune`.
+- **Branch already exists**: Delete with `git branch -d <branch>` (or `-D` to force).
+- **AgentDB record fails**: Non-blocking. Worktree is still created. Re-run the record_sync command manually.
 """

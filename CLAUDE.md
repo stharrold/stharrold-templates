@@ -17,7 +17,7 @@ children:
 Gemini Code to Claude Code migration complete (v8.0.0).
 - `.gemini/` → `.claude/`, `GEMINI.md` → `CLAUDE.md` — done
 - Secrets management aligned with `library` repo conventions
-- pyproject.toml version: 8.1.0
+- pyproject.toml version: 8.2.0
 
 ## Gotchas
 

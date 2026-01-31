@@ -21,6 +21,15 @@ description: |
   is high, then /init to reset before continuing workflow.
 ---
 
+## Quick Reference
+
+No executable scripts. This skill provides algorithmic guidance for:
+- Context detection (main repo vs worktree)
+- Phase determination and skill loading
+- Context management (checkpoint at 100K tokens)
+
+See SKILL.md body for decision trees and algorithms.
+
 # Workflow Orchestrator
 
 ## Purpose

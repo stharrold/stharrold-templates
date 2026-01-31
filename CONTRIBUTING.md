@@ -77,7 +77,7 @@ feature/* (isolated worktrees)
 ### Workflow Steps
 
 1. **Create Worktree**: `/workflow:v7x1_1-worktree "feature description"`
-2. **Implement**: Perform implementation using built-in Gemini CLI tools (in worktree).
+2. **Implement**: Perform implementation using Claude Code (in worktree).
 3. **Integrate**: `/workflow:v7x1_2-integrate` (in main repo)
 4. **Release**: `/workflow:v7x1_3-release`
 5. **Backmerge**: `/workflow:v7x1_4-backmerge`

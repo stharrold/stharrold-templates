@@ -57,7 +57,7 @@ python .claude/skills/tech-stack-adapter/scripts/detect_stack.py
   "stack": "python",
   "package_manager": "uv",
   "project_name": "german",
-  "repo_root": "/Users/stharrold/Documents/GitHub/german",
+  "repo_root": "~/Documents/GitHub/german",
 
   "install_cmd": "uv sync",
   "test_cmd": "uv run pytest",

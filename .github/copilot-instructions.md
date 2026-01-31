@@ -76,7 +76,7 @@ uv run pytest -m "not integration and not benchmark"  # Exclude slow tests (defa
 
 ## v6 Workflow (feature-dev)
 
-Streamlined 4-phase workflow using Gemini's feature-dev plugin:
+Streamlined 4-phase workflow using Claude Code:
 
 ```
 /worktree "feature description"
