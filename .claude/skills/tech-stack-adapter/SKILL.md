@@ -12,6 +12,13 @@ description: |
   Outputs: TEST_CMD, BUILD_CMD, COVERAGE_CMD, COVERAGE_CHECK, MIGRATE_CMD
 ---
 
+## Quick Reference
+
+```bash
+# Detect project stack (run once per session)
+uv run python .claude/skills/tech-stack-adapter/scripts/detect_stack.py
+```
+
 # Tech Stack Adapter
 
 ## Purpose

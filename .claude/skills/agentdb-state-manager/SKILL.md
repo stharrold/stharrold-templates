@@ -15,6 +15,20 @@ description: |
   Triggers: "analyze workflow", "query state", "checkpoint", "workflow metrics"
 ---
 
+## Quick Reference
+
+```bash
+# Initialize database
+uv run python .claude/skills/agentdb-state-manager/scripts/init_database.py
+
+# Record workflow transition
+uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
+  --sync-type workflow_transition --pattern <phase_pattern>
+
+# Query current workflow phase
+uv run python .claude/skills/agentdb-state-manager/scripts/query_workflow_state.py
+```
+
 # AgentDB State Manager Skill
 
 ## Purpose

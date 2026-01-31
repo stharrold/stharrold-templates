@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.2.0] - 2026-01-31
+
+### Changed
+- **Gemini->Claude migration cleanup** (#194) — Replaced remaining Gemini references in WORKFLOW.md, CONTRIBUTING.md, copilot-instructions.md, .gitignore.
+- **Parameterized contrib branch** (#203) — Command .toml files now auto-detect contrib branch via `git branch --list 'contrib/*'` instead of hardcoding `contrib/stharrold`.
+- **Portable example paths** (#202) — Replaced hardcoded `/Users/stharrold` paths with `~/` in documentation examples.
+- **Removed tools/ ruff config** (#197) — Removed unused `tools/**/*.py` per-file-ignores from pyproject.toml.
+
+### Added
+- **Quick Reference sections** (#199) — Added Quick Reference to all 6 SKILL.md files for fast command lookup.
+- **Error recovery docs** (#200) — Added error recovery guidance to all 4 workflow command .toml files.
+- **Tech-stack-adapter tests** (#201) — Added 6 smoke tests for detect_stack.py.
+- **Workflow-orchestrator tests** (#201) — Added 7 structure and documentation tests.
+- **Critical assessment** — Added `ARCHIVED/20260131T161758Z_critical-assessment.md` covering 5 audit dimensions.
+
+### Removed
+- **Archived .gemini-state/** (#195) — Archived legacy Gemini state directory to `ARCHIVED/20260131T161758Z_gemini-state.zip`.
+- **Dead skill links** (#196) — Removed dead `bmad-planner/CLAUDE.md` link from `.claude/skills/CLAUDE.md`.
+
 ## [8.1.0] - 2026-01-30
 
 ### Documentation

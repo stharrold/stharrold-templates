@@ -2,13 +2,13 @@
 
 **Version:** 7.0.0
 **Date:** 2026-01-01
-**Architecture:** 4-phase workflow using built-in Gemini CLI tools
+**Architecture:** 4-phase workflow using Claude Code
 
 ## Overview
 
 This repository uses a streamlined 4-phase workflow for Python development:
 - **Git-flow hybrid** with worktrees for isolation
-- **Built-in Gemini CLI tools** for planning, architecture, and implementation
+- **Claude Code** for planning, architecture, and implementation
 - **No separate manual quality gates** (Claude Code Review automated via GitHub Actions)
 
 ## Prerequisites
@@ -78,15 +78,15 @@ Creates isolated git worktree for feature development.
 
 ### Step 2: Feature Implementation
 
-Run in the feature worktree (not main repo) using built-in Gemini CLI tools:
+Run in the feature worktree (not main repo) using Claude Code:
 
 ```bash
 cd <worktree-path>
-# Then just chat with Gemini:
+# Then just chat with Claude Code:
 "Implement user authentication with JWT tokens"
 ```
 
-**Gemini handles:**
+**Claude Code handles:**
 - Understanding the codebase
 - Planning the implementation
 - Writing code and tests
@@ -166,10 +166,10 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 
 | Aspect | v1-v7 | v7x1 |
 |--------|-------|-----|
-| Planning | BMAD documents + SpecKit specs | Built-in Gemini tools |
+| Planning | BMAD documents + SpecKit specs | Built-in Claude Code tools |
 | Quality gates | 5 separate gates | Claude Code Review |
 | Steps | 7 phases | 4 steps |
-| Artifacts | requirements.md, architecture.md, spec.md, plan.md | None (Gemini handles internally) |
+| Artifacts | requirements.md, architecture.md, spec.md, plan.md | None (Claude Code handles internally) |
 
 ## Skills System
 
