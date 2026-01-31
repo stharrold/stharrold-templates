@@ -18,6 +18,7 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - `.gemini/` → `.claude/`, `GEMINI.md` → `CLAUDE.md` — done
 - Secrets management aligned with `library` repo conventions
 - pyproject.toml version: 8.2.0
+- Workflow commands migrated from TOML to Markdown format (v8.2.0+)
 
 ## Gotchas
 
@@ -25,6 +26,10 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - Ruff auto-fixes import ordering on commit — re-stage if pre-commit hook modifies files
 - `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
 - `record_sync.py` auto-initializes AgentDB on first use — initialization failures cause a non-zero exit unless the caller ignores the exit code or handles exceptions
+- Slash commands use Markdown format (not TOML):
+  - `description` → YAML frontmatter
+  - `!{cmd}` → `` !`cmd` ``
+  - `{{args}}` → `$ARGUMENTS`
 
 ## Branch Structure
 

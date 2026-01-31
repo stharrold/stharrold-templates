@@ -1,8 +1,10 @@
-description = "Sync release to develop and contrib (Step 4 of 4)"
-prompt = """
+---
+description: Sync release to develop and contrib (Step 4 of 4)
+---
+
 # /workflow:v7x1_4-backmerge - Step 4 of 4
 
-**Context Check**: !{python3 .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7}
+**Context Check**: !`python3 .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7`
 
 ## Step 1: PR release -> develop
 Run: `uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop`
@@ -24,4 +26,3 @@ Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py 
 - **No release branch found**: Backmerge requires an active `release/*` branch. Run `/workflow:v7x1_3-release` first.
 - **Rebase conflicts**: Resolve manually with `git rebase --continue` or `git rebase --abort` to restart.
 - **Branch divergence**: If contrib diverged from remote, run `git fetch origin && git reset --hard origin/{contrib_branch}`.
-"""
