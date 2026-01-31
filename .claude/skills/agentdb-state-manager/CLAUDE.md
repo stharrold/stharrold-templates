@@ -112,7 +112,8 @@ uv run python .claude/skills/agentdb-state-manager/scripts/init_database.py
 # Record phase transition (called by each slash command)
 uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py \
   --sync-type workflow_transition \
-  --pattern phase_{N}_{name}
+  --pattern phase_v7x1_{N}_{name}
+# Legacy patterns (phase_1_specify..phase_7_backmerge) also supported
 ```
 
 **Complex Queries:**
@@ -161,7 +162,9 @@ python .claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 ## Best Practices
 
 1. **Initialize once per session:** Run init_database.py at session start
+1a. **Auto-init is safe:** record_sync.py checks for tables (not just file) and re-inits automatically
 2. **Record transitions:** Use record_sync.py after each phase completion
+2a. **Non-blocking:** record_sync never raises — failures print [WARN] to stderr and exit 0
 3. **Query before acting:** Use query_workflow_state.py to determine next step
 4. **Session awareness:** AgentDB lasts 24 hours, re-initialize if expired
 5. **specs/*/tasks.md is truth:** AgentDB caches specs data for efficiency

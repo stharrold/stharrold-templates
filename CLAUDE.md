@@ -22,10 +22,12 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 
 ## Gotchas
 
+- `.claude/settings.local.json` is gitignored — do not commit (restrictive Bash allowlists break CI `claude-code-action` which needs unrestricted `gh` access)
 - `release_workflow.py create-release` auto-calculates version from last git tag — override manually for major bumps
 - Ruff auto-fixes import ordering on commit — re-stage if pre-commit hook modifies files
 - `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
-- `record_sync.py` auto-initializes AgentDB on first use — initialization failures cause a non-zero exit unless the caller ignores the exit code or handles exceptions
+- `record_sync.py` auto-initializes AgentDB on first use — failures print `[WARN]` to stderr and exit 0 (non-blocking)
+- AgentDB `init_database_if_needed` checks for `agent_synchronizations` table, not just file existence — pass `--db-path` to `init_database.py` for custom paths
 - Slash commands use Markdown format (not TOML):
   - `description` → YAML frontmatter
   - `!{cmd}` → `` !`cmd` ``
@@ -46,6 +48,7 @@ uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
 
 ## Key Context
 
+- `claude-code-review.yml` prompt overrides macOS-only patterns (keyring, GITHUB_TOKEN) for Ubuntu CI — keep this prompt in sync if CLAUDE.md changes
 - `library` repo (`../library/`) is the reference for secrets management patterns
 - `synavistra` repo (`../synavistra/`) is the reference for `claude-code-review.yml` workflow
 - `scripts/secrets_run.py` runs commands with secrets from OS keyring (#169)

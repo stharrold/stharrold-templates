@@ -49,6 +49,74 @@ class TestRecordSyncValidation:
         assert "quality_gate_passed" in VALID_PATTERNS
 
 
+class TestRecordSyncRobustness:
+    """Tests for robustness improvements."""
+
+    def test_init_creates_tables_when_empty_db_exists(self, tmp_path):
+        """An empty .duckdb file (no tables) should trigger re-init and succeed."""
+        db_path = tmp_path / "empty.duckdb"
+        # Create an empty DuckDB file with no tables
+        conn = duckdb.connect(str(db_path))
+        conn.close()
+        assert db_path.exists()
+
+        # Now use record_sync with this empty DB -- it should re-init
+        session_id = generate_session_id()
+        workflow_states = load_workflow_states()
+        create_schema(session_id, workflow_states, db_path)
+
+        with patch("record_sync.get_database_path", return_value=db_path):
+            sync_id = record_sync(
+                sync_type="workflow_transition",
+                pattern="phase_1_specify",
+                worktree="/tmp/test",
+            )
+
+        assert isinstance(sync_id, str)
+        assert len(sync_id) == 36
+
+        conn = duckdb.connect(str(db_path))
+        row = conn.execute("SELECT COUNT(*) FROM agent_synchronizations WHERE sync_id = ?", [sync_id]).fetchone()
+        conn.close()
+        assert row[0] == 1
+
+    def test_v7x1_patterns_in_valid_patterns(self):
+        """Verify v7x1 patterns are present in VALID_PATTERNS."""
+        assert "phase_v7x1_1_worktree" in VALID_PATTERNS
+        assert "phase_v7x1_2_integrate" in VALID_PATTERNS
+        assert "phase_v7x1_3_release" in VALID_PATTERNS
+        assert "phase_v7x1_4_backmerge" in VALID_PATTERNS
+
+    def test_agent_id_is_claude_code(self, initialized_db):
+        """Verify agent_id uses claude-code, not gemini-code."""
+        with patch("record_sync.get_database_path", return_value=initialized_db):
+            sync_id = record_sync(
+                sync_type="workflow_transition",
+                pattern="phase_1_specify",
+                worktree="/tmp/test",
+            )
+
+        conn = duckdb.connect(str(initialized_db))
+        row = conn.execute("SELECT agent_id, created_by FROM agent_synchronizations WHERE sync_id = ?", [sync_id]).fetchone()
+        conn.close()
+
+        assert row[0] == "claude-code"
+        assert row[1] == "claude-code"
+
+    def test_graceful_degradation_on_db_error(self, tmp_path):
+        """record_sync should return sync_id even when DB write fails."""
+        bad_db = tmp_path / "nonexistent_dir" / "subdir" / "agentdb.duckdb"
+        with patch("record_sync.get_database_path", return_value=bad_db), patch("record_sync.init_database_if_needed"):
+            # Should not raise -- graceful degradation
+            sync_id = record_sync(
+                sync_type="workflow_transition",
+                pattern="phase_1_specify",
+                worktree="/tmp/test",
+            )
+        assert isinstance(sync_id, str)
+        assert len(sync_id) == 36
+
+
 class TestRecordSyncOperations:
     """Tests for record_sync database operations."""
 

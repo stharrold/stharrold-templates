@@ -36,6 +36,10 @@ VALID_PATTERNS = [
     "phase_5_integrate",
     "phase_6_release",
     "phase_7_backmerge",
+    "phase_v7x1_1_worktree",
+    "phase_v7x1_2_integrate",
+    "phase_v7x1_3_release",
+    "phase_v7x1_4_backmerge",
     "quality_gate_passed",
     "quality_gate_failed",
 ]
@@ -90,12 +94,33 @@ def get_database_path() -> Path:
 
 
 def init_database_if_needed(db_path: Path) -> None:
-    """Initialize AgentDB if it doesn't exist.
+    """Initialize AgentDB if it doesn't exist or is missing required tables.
+
+    Checks for the agent_synchronizations table rather than just file existence,
+    so empty or corrupt databases trigger re-initialization.
 
     Args:
         db_path: Path to database file
     """
-    if db_path.exists():
+    needs_init = False
+
+    if not db_path.exists():
+        needs_init = True
+    else:
+        # File exists -- verify the required table is present
+        try:
+            import duckdb
+
+            conn = duckdb.connect(str(db_path))
+            result = conn.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'agent_synchronizations'").fetchone()
+            conn.close()
+            if result[0] == 0:
+                needs_init = True
+        except Exception:
+            # Corrupt DB or import error -- re-init
+            needs_init = True
+
+    if not needs_init:
         return
 
     # Find and run init script
@@ -103,7 +128,7 @@ def init_database_if_needed(db_path: Path) -> None:
     init_script = script_dir / "init_database.py"
 
     if init_script.exists():
-        subprocess.run([sys.executable, str(init_script)], check=True, capture_output=True)
+        subprocess.run([sys.executable, str(init_script), "--db-path", str(db_path)], check=True, capture_output=True)
 
 
 def record_sync(sync_type: str, pattern: str, source: str = "", target: str = "", worktree: str | None = None, metadata: dict | None = None) -> str:
@@ -121,8 +146,7 @@ def record_sync(sync_type: str, pattern: str, source: str = "", target: str = ""
         sync_id of the created record
 
     Raises:
-        ValueError: If sync_type or pattern is invalid
-        RuntimeError: If database operation fails
+        ValueError: If sync_type is invalid
     """
     # Validate inputs
     if sync_type not in VALID_SYNC_TYPES:
@@ -164,7 +188,7 @@ def record_sync(sync_type: str, pattern: str, source: str = "", target: str = ""
     # Parameters tuple - use None for NULL values
     params = (
         sync_id,
-        "gemini-code",
+        "claude-code",
         worktree,  # Will be NULL if None
         sync_type,
         source,
@@ -173,11 +197,11 @@ def record_sync(sync_type: str, pattern: str, source: str = "", target: str = ""
         "completed",
         timestamp,
         timestamp,
-        "gemini-code",
+        "claude-code",
         metadata_json,
     )
 
-    # Execute using DuckDB Python module
+    # Execute using DuckDB Python module -- graceful degradation
     try:
         import duckdb
 
@@ -185,12 +209,9 @@ def record_sync(sync_type: str, pattern: str, source: str = "", target: str = ""
         conn.execute(sql, params)
         conn.close()
     except ImportError:
-        # DuckDB not installed - provide clear error message
-        print(
-            "Error: DuckDB Python module not installed.\nInstall with: uv add duckdb  OR  uv sync\n\nAgentDB state tracking requires the duckdb package.",
-            file=sys.stderr,
-        )
-        raise RuntimeError("DuckDB not available. Run 'uv sync' to install dependencies.")
+        print("[WARN] DuckDB not installed. State tracking skipped. Install with: uv sync", file=sys.stderr)
+    except Exception as e:
+        print(f"[WARN] AgentDB write failed (non-blocking): {e}", file=sys.stderr)
 
     return sync_id
 
@@ -246,9 +267,9 @@ Examples:
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
-    except RuntimeError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+    except Exception as e:
+        print(f"[WARN] State recording failed (non-blocking): {e}", file=sys.stderr)
+        sys.exit(0)
 
 
 if __name__ == "__main__":
