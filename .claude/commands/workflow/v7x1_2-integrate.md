@@ -12,7 +12,7 @@ argument-hint: "[feature-branch]"
 - If $ARGUMENTS has branch: Full mode (feature -> contrib PR, cleanup, contrib -> develop PR)
 
 ## Step 0: Detect Contrib Branch
-Detect the contrib branch: run `git branch --list 'contrib/*'` and use the first result (trimmed). If none found, fall back to the current branch.
+Detect the contrib branch: first check if the current branch (`git branch --show-current`) matches `contrib/*` — if so, use it. Otherwise, run `git branch --list 'contrib/*' --sort=-committerdate` and use the first result (most recently updated). If no contrib branches exist, fail with instructions to create one.
 
 ## Step 1: feature -> contrib [FULL MODE]
 Push $ARGUMENTS and create PR to `{contrib_branch}` using `gh pr create`.

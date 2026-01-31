@@ -15,7 +15,7 @@ argument-hint: "[feature description]"
 Parse "$ARGUMENTS" to create a kebab-case slug (lowercase, hyphens, limit 50 chars).
 
 ## Step 1.5: Detect Contrib Branch
-Detect the contrib branch: run `git branch --list 'contrib/*'` and use the first result (trimmed). If none found, fall back to the current branch.
+Detect the contrib branch: first check if the current branch (`git branch --show-current`) matches `contrib/*` — if so, use it. Otherwise, run `git branch --list 'contrib/*' --sort=-committerdate` and use the first result (most recently updated). If no contrib branches exist, fail with instructions to create one.
 
 ## Step 2: Create Feature Worktree
 Run: `uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py feature {slug} {contrib_branch}`
