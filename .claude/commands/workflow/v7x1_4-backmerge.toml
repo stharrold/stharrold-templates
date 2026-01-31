@@ -23,5 +23,5 @@ Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py 
 - **Context check fails**: Ensure you are on `contrib/*` branch in the main repo.
 - **No release branch found**: Backmerge requires an active `release/*` branch. Run `/workflow:v7x1_3-release` first.
 - **Rebase conflicts**: Resolve manually with `git rebase --continue` or `git rebase --abort` to restart.
-- **Branch divergence**: If contrib diverged from remote, run `git fetch origin && git reset --hard origin/contrib/<user>`.
+- **Branch divergence**: If contrib diverged from remote, run `git fetch origin && git reset --hard origin/{contrib_branch}`.
 """

@@ -25,5 +25,5 @@ Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py 
 - **Context check fails**: Ensure you are on `contrib/*` branch in the main repo. Run `git checkout contrib/<user>`.
 - **Release branch exists**: A previous release may be in progress. Run `git branch -a | grep release` to check.
 - **Version conflict**: Pass explicit version via {{args}} (e.g., `/workflow:v7x1_3-release v8.2.0`).
-- **Tag already exists**: Delete with `git tag -d <tag> && git push origin :refs/tags/<tag>`, then re-run.
+- **Tag already exists**: Delete with `git tag -d <tag> && git push origin --delete <tag>`, then re-run.
 """
