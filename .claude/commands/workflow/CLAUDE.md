@@ -16,11 +16,11 @@ children:
 
 ## Contents
 
-- `v7x1_1-worktree.toml` - Command definition
-- `v7x1_2-integrate.toml` - Command definition
-- `v7x1_3-release.toml` - Command definition
-- `v7x1_4-backmerge.toml` - Command definition
-- `status.toml` - Command definition
+- `v7x1_1-worktree.md` - Command definition
+- `v7x1_2-integrate.md` - Command definition
+- `v7x1_3-release.md` - Command definition
+- `v7x1_4-backmerge.md` - Command definition
+- `status.md` - Command definition
 
 ## Related
 
