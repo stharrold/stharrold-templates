@@ -10,6 +10,23 @@ description: |
   Triggers: create worktree, commit, push, rebase, version, PR, PR feedback
 ---
 
+## Quick Reference
+
+```bash
+# Create feature worktree
+uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
+  feature <slug> contrib/<user>
+
+# Daily rebase
+uv run python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/<user>
+
+# Semantic version
+uv run python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop <current-version>
+
+# Release workflow
+uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
+```
+
 # Git Workflow Manager
 
 ## Purpose

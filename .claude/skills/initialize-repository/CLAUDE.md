@@ -63,8 +63,8 @@ python .claude/skills/initialize-repository/scripts/initialize_repository.py \
 
 # From absolute paths
 python .claude/skills/initialize-repository/scripts/initialize_repository.py \
-  /Users/stharrold/Documents/GitHub/german \
-  /Users/stharrold/Documents/GitHub/my-cli-tool
+  ~/Documents/GitHub/german \
+  ~/Documents/GitHub/my-cli-tool
 
 # From relative paths
 python .claude/skills/initialize-repository/scripts/initialize_repository.py \
@@ -801,8 +801,8 @@ $ python .claude/skills/initialize-repository/scripts/initialize_repository.py \
 
 === Repository Initialization ===
 
-Source repository: /Users/stharrold/Code/german
-Target repository: /Users/stharrold/Code/fastapi-backend
+Source repository: ~/Code/german
+Target repository: ~/Code/fastapi-backend
 
 ✓ Source repository validated (9 skills found)
 ✓ Target path is valid

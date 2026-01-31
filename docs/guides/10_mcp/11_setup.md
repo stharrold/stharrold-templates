@@ -121,7 +121,7 @@ gemini /init
 
 ```bash
 # Add servers via CLI
-claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /Users/stharrold
+claude mcp add filesystem npx @modelcontextprotocol/server-filesystem ~/
 claude mcp add github npx @modelcontextprotocol/server-github
 claude mcp add memory npx @modelcontextprotocol/server-memory
 
@@ -137,7 +137,7 @@ claude mcp list
 **Testing:**
 - Open Claude Code: Command Palette → "Run Claude Code"
 - Type `/mcp` to see configured servers
-- Test: "List files in /Users/stharrold"
+- Test: "List files in ~/"
 
 ### VS Code MCP Extension
 

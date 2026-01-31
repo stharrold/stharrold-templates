@@ -15,6 +15,20 @@ description: |
   archive workflow, sync manifest, VCS operations, PR feedback
 ---
 
+## Quick Reference
+
+```bash
+# Archive deprecated files
+uv run python .claude/skills/workflow-utilities/scripts/deprecate_files.py <desc> <files...>
+
+# List/extract archives
+uv run python .claude/skills/workflow-utilities/scripts/archive_manager.py list
+uv run python .claude/skills/workflow-utilities/scripts/archive_manager.py extract <archive>
+
+# Validate versions
+uv run python .claude/skills/workflow-utilities/scripts/validate_versions.py
+```
+
 # Workflow Utilities
 
 ## Purpose

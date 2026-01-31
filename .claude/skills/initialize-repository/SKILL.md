@@ -12,6 +12,18 @@ description: |
   "replicate workflow system"
 ---
 
+## Quick Reference
+
+```bash
+# Bootstrap new repo from source
+uv run python .claude/skills/initialize-repository/scripts/initialize_repository.py \
+  <source-repo> <target-repo>
+
+# Apply workflow to existing repo
+uv run python .claude/skills/initialize-repository/scripts/apply_workflow.py \
+  <source-repo> <target-repo>
+```
+
 # Initialize-Repository Meta-Skill
 
 ## Purpose

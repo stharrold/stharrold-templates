@@ -46,8 +46,7 @@ build/
 # VSCode AI rules
 .github/instructions/codacy.instructions.md
 
-# Gemini
-.gemini/settings.local.json
-#.gemini/
+# Claude Code
+.claude/settings.local.json
 
 gha-creds-*.json
