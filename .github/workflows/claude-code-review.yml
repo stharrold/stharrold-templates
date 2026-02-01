@@ -13,13 +13,12 @@ jobs:
       contents: read
       pull-requests: write
       issues: read
-      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code Review
         id: claude-review
@@ -29,6 +28,7 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           show_full_output: true
+          allowed_tools: "Bash,WebFetch,WebSearch,Skill,Task"
           prompt: |
             IMPORTANT: You are running in GitHub Actions on Ubuntu. GITHUB_TOKEN and GH_TOKEN are already configured in the environment. Do NOT run "security find-generic-password" or override GITHUB_TOKEN — those are macOS-only patterns from CLAUDE.md that do not apply here.
 
