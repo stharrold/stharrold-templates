@@ -30,8 +30,8 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - `record_sync.py` auto-initializes AgentDB on first use — failures print `[WARN]` to stderr and exit 0 (non-blocking)
 - AgentDB `init_database_if_needed` checks for `agent_synchronizations` table, not just file existence — pass `--db-path` to `init_database.py` for custom paths
 - `backmerge_workflow.py cleanup-release` only prints instructions — run `git branch -d release/vX.Y.Z && git push origin --delete release/vX.Y.Z` manually
-- `backmerge_workflow.py pr-develop` may surface a GitHub CLI error "No commits between develop and release" when `gh pr create` finds no diff — create PR `main` → `develop` instead (merge commits live on `main` after release PR merge)
-- `claude-code-review.yml` requires `allowed_tools: "Bash,WebFetch,WebSearch,Skill,Task"` and `fetch-depth: 0` — without these, Claude's tool calls are denied in CI and git diff can't reach the base branch
+- Backmerge: always try `backmerge_workflow.py pr-develop` (release → develop) first so review comments can be fixed on the release branch — only fall back to PR `main` → `develop` if `gh pr create` returns "No commits between develop and release"
+- `claude-code-review.yml` requires `claude_args: "--allowedTools Bash,WebFetch,WebSearch,Skill,Task"` (not `allowed_tools`), `id-token: write` (for OIDC auth), and `fetch-depth: 0` — without these, tool calls are denied and git diff can't reach the base branch
 - Git worktrees use a `.git` file (not directory) — use `.exists()` not `.is_dir()` when checking for git repos
 - Slash commands use Markdown format (not TOML):
   - `description` → YAML frontmatter
