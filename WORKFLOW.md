@@ -14,7 +14,7 @@ This repository uses a streamlined 4-phase workflow for Python development:
 ## Prerequisites
 
 Required tools:
-- **VCS CLI** - GitHub (`gh`) OR Azure DevOps (`az`) for PR operations
+- **VCS CLI** - GitHub (`gh`) for PR operations
 - **uv** - Python package manager
 - **git** - Version control with worktree support
 - **Python 3.11+** - Language runtime
@@ -22,10 +22,8 @@ Required tools:
 
 Verify prerequisites:
 ```bash
-# VCS Provider (one of):
-gh auth status          # GitHub: Must be authenticated
-# OR
-az account show         # Azure DevOps: Must be logged in
+# GitHub CLI:
+gh auth status          # Must be authenticated
 
 uv --version            # Must be installed
 python3 --version       # Must be 3.11+
@@ -106,7 +104,7 @@ From main repo, after implementation is complete:
 - **Full mode** (with branch arg): PR feature->contrib, manual worktree cleanup, manual branch cleanup, PR contrib->develop
 - **Contrib-only mode** (no arg): PR contrib->develop only
 
-**Manual gates:** PRs require approval in GitHub/Azure DevOps UI.
+**Manual gates:** PRs require approval in GitHub UI.
 
 ### Step 4: Release (`/workflow:v7x1_3-release`)
 

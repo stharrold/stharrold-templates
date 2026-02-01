@@ -18,10 +18,8 @@ podman --version          # 4.0+
 podman-compose --version
 git --version
 
-# VCS Provider CLI (one of):
-gh --version              # GitHub CLI (for GitHub repos)
-# OR
-az --version              # Azure CLI (for Azure DevOps repos)
+# GitHub CLI:
+gh --version              # GitHub CLI (for PR operations)
 ```
 
 ## Quick Start
@@ -105,7 +103,7 @@ uv run scripts/secrets_run.py python main.py
 ### How It Works
 
 1. **Environment variable set** -> uses it (allows external injection)
-2. **CI detected** -> requires env vars (GitHub Actions, Azure DevOps, etc.)
+2. **CI detected** -> requires env vars (GitHub Actions, etc.)
 3. **Container detected** -> requires env vars (Docker, Podman)
 4. **Local development** -> fetches from OS keyring
 
@@ -124,13 +122,6 @@ uv run scripts/secrets_run.py python main.py
 env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   API_KEY: ${{ secrets.API_KEY }}
-```
-
-**Azure DevOps** - Use variable groups or pipeline variables:
-```yaml
-env:
-  DB_PASSWORD: $(DB_PASSWORD)
-  API_KEY: $(API_KEY)
 ```
 
 **Containers** - Inject at runtime:

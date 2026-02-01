@@ -100,7 +100,7 @@ The script conducts a 4-phase interactive Q&A session:
 7. Copy domain-specific content (src/, resources/)? (yes/no)
 8. Copy sample tests (tests/)? (yes/no)
 9. Copy container configs (Containerfile, podman-compose.yml)? (yes/no)
-10. Copy CI/CD pipelines (.github/workflows/tests.yml, azure-pipelines.yml)? (yes/no)
+10. Copy CI/CD pipelines (.github/workflows/tests.yml, GitHub Actions workflows)? (yes/no)
 
 #### Phase 2: Git Setup
 
@@ -135,7 +135,7 @@ The script conducts a 4-phase interactive Q&A session:
 - `src/` and `resources/` (if copy_domain = yes)
 - `tests/` (if copy_tests = yes)
 - `Containerfile`, `podman-compose.yml` (if copy_containers = yes)
-- `.github/workflows/tests.yml`, `azure-pipelines.yml` (if copy_cicd = yes)
+- `.github/workflows/tests.yml`, `GitHub Actions workflows` (if copy_cicd = yes)
 
 #### Phase 4: Git Initialization (Conditional)
 
@@ -188,7 +188,7 @@ Copy sample tests (tests/)? (y/N)
 Copy container configs (Containerfile, podman-compose.yml)? (y/N)
 > n
 
-Copy CI/CD pipelines (.github/workflows/tests.yml, azure-pipelines.yml)? (Y/n)
+Copy CI/CD pipelines (.github/workflows/tests.yml, GitHub Actions workflows)? (Y/n)
 > y
 
 ✓ Configuration complete
@@ -270,7 +270,7 @@ Proceed with initialization? (Y/n)
 
 ℹ Copying CI/CD pipelines...
 ✓ Copied: .github/workflows/tests.yml
-✓ Copied: azure-pipelines.yml
+✓ Copied: GitHub Actions workflows
 
 ✓ File operations complete
 
@@ -316,7 +316,7 @@ Created:
   ✓ Quality configs (pyproject.toml, .gitignore)
   ✓ Directory structure (ARCHIVED/, planning/, specs/)
   ✓ Tests (tests/)
-  ✓ CI/CD pipelines (GitHub Actions + Azure Pipelines)
+  ✓ CI/CD pipelines (GitHub Actions)
 
 Git:
   ✓ Initialized repository
@@ -1065,23 +1065,6 @@ git push origin main  # Hook blocks this
 # Please create a pull request instead.
 ```
 
-### Azure DevOps Branch Policies (Alternative to GitHub)
-
-If using Azure DevOps instead of GitHub:
-
-1. **Navigate to repository branch policies:**
-   ```
-   Your Project → Repos → Branches → main → Branch policies
-   ```
-
-2. **Configure main branch policies:**
-   - ✅ Require a minimum number of reviewers: 1
-   - ✅ Check for linked work items: Enabled (optional)
-   - ✅ Check for comment resolution: All
-   - ✅ Limit merge types: Squash merge or Merge commit
-
-3. **Repeat for develop branch**
-
 ### Verification
 
 After setup, verify protection is active:
@@ -1092,7 +1075,7 @@ git checkout main
 git commit --allow-empty -m "test protection"
 git push origin main
 
-# Expected: GitHub/Azure DevOps rejects the push
+# Expected: GitHub rejects the push
 # Success message: "remote: error: GH006: Protected branch update failed"
 ```
 

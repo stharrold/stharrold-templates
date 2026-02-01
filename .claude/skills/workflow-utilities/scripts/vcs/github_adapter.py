@@ -17,13 +17,11 @@ Constants:
 import json
 import subprocess
 
-from .base_adapter import BaseVCSAdapter
-
 # Constants
 GITHUB_CLI = "gh"
 
 
-class GitHubAdapter(BaseVCSAdapter):
+class GitHubAdapter:
     """GitHub VCS adapter using gh CLI.
 
     Implements VCS operations for GitHub repositories.

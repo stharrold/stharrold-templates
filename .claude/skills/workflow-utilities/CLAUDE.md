@@ -344,10 +344,8 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 **When to use:** When creating PRs, managing issues, or working with VCS providers
 
 **Key files:**
-- **provider.py** - VCS provider detection
-- **base_adapter.py** - Defines base adapter interface
+- **provider.py** - VCS provider enum
 - **github_adapter.py** - GitHub CLI (gh) adapter
-- **config.py** - VCS configuration
 
 **Example usage (from git-workflow-manager):**
 ```python
@@ -367,7 +365,7 @@ pr_url = adapter.create_pull_request(
 
 **Key features:**
 - GitHub CLI (gh) based operations
-- Abstract base class for future provider support
+- GitHub-only (simplified from multi-provider abstraction)
 - Error handling with helpful messages
 
 ---
@@ -577,8 +575,8 @@ directory/
 **CLAUDE.md hierarchy:** Every directory has CLAUDE.md with parent/child refs
 - **Rationale:** AI navigation, context inheritance, documentation consistency
 
-**VCS abstraction:** Unified interface for GitHub (currently GitHub only)
-- **Rationale:** Abstract base class enables future provider support
+**VCS abstraction:** GitHub-only interface via GitHubAdapter
+- **Rationale:** Simplified from multi-provider abstraction; GitHub is the only supported provider
 
 **Semantic versioning:** `MAJOR.MINOR.PATCH`
 - **Rationale:** Industry standard, clear upgrade paths

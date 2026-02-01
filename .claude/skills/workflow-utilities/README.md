@@ -20,7 +20,7 @@ Workflow Utilities provides reusable utilities for common workflow tasks used ac
 - ✅ **Directory standards** - Create compliant directory structure
 - ✅ **TODO file updates** - Atomic YAML frontmatter updates
 - ✅ **Workflow lifecycle** - Register/archive workflows in TODO.md manifest
-- ✅ **VCS abstraction** - Unified interface for GitHub/Azure DevOps
+- ✅ **VCS abstraction** - GitHub interface via gh CLI
 - ✅ **Documentation tools** - Version validation, skill creation, doc sync
 - ✅ **Archive management** - List and extract archived files
 
@@ -92,36 +92,25 @@ python .claude/skills/workflow-utilities/scripts/sync_manifest.py
 | `create_skill.py` | Create new skill with official docs | When adding new skills (rare) |
 | `sync_skill_docs.py` | Semi-automated doc sync | After modifying a skill |
 
-## VCS Abstraction Layer
+## VCS Layer
 
-**Unified interface for GitHub and Azure DevOps:**
+**GitHub interface via gh CLI:**
 
 ```python
-from vcs.provider import detect_from_remote, VCSProvider
-from vcs.github_adapter import GitHubAdapter
-from vcs.azure_adapter import AzureDevOpsAdapter
+from vcs import get_vcs_adapter
 
-# Auto-detect provider
-provider = detect_from_remote()
+adapter = get_vcs_adapter()
 
-if provider == VCSProvider.GITHUB:
-    adapter = GitHubAdapter()
-elif provider == VCSProvider.AZURE_DEVOPS:
-    adapter = AzureDevOpsAdapter()
-
-# Create PR (unified interface)
-pr_url = adapter.create_pr(
+# Create PR
+pr_url = adapter.create_pull_request(
+    source_branch="feature/20251103T143000Z_auth",
+    target_branch="contrib/stharrold",
     title="feat: auth system (v1.6.0)",
     body="PR body",
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold"
 )
 ```
 
-**Supports:**
-- GitHub (via `gh` CLI)
-- Azure DevOps (via `az` CLI)
-- Auto-detection from git remote URL
+**Uses:** GitHub CLI (`gh`) for all VCS operations
 
 ## Directory Standards
 
@@ -162,8 +151,7 @@ directory/
 - ✅ Use `sync_skill_docs.py` after skill changes
 
 **VCS operations:**
-- ❌ Don't hardcode GitHub-specific commands
-- ✅ Use VCS abstraction layer for portability
+- ✅ Use VCS abstraction layer via `get_vcs_adapter()` for GitHub operations
 
 ## Integration with Other Skills
 

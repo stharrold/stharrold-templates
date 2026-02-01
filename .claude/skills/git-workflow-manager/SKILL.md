@@ -59,7 +59,7 @@ hotfix/vX.Y.Z-hotfix.N       ← Production hotfix (worktree)
 **All scripts in this skill comply with:**
 1. No direct commits to `main` (except tag operations)
 2. No direct commits to `develop`
-3. All merges via pull requests (user merges in GitHub/Azure DevOps UI)
+3. All merges via pull requests (user merges in GitHub UI)
 
 **Script validation:**
 - All scripts in `scripts/` directory are validated for compliance
@@ -245,7 +245,7 @@ python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.p
 
 **Purpose:**
 - Extracts unresolved PR review conversations
-- Creates separate work-items (GitHub issues or Azure DevOps tasks) for each conversation
+- Creates separate work-items (GitHub issues) for each conversation
 - Enables PR approval while tracking feedback as separate feature work
 
 **When to use:**
@@ -254,14 +254,11 @@ python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.p
 - When feedback is substantive enough to warrant separate features
 
 **What it does:**
-1. Detects VCS provider (GitHub or Azure DevOps)
-2. Fetches PR conversations/threads
-3. Filters for unresolved conversations:
-   - **GitHub**: `reviewThreads.isResolved == false`
-   - **Azure DevOps**: `threads.status == active|pending`
-4. For each unresolved conversation, creates work-item:
-   - **GitHub**: `gh issue create` with label "pr-feedback"
-   - **Azure DevOps**: `az boards work-item create --type Task`
+1. Fetches PR conversations/threads via GitHub API
+2. Filters for unresolved conversations:
+   - `reviewThreads.isResolved == false`
+3. For each unresolved conversation, creates work-item:
+   - `gh issue create` with label "pr-feedback"
 5. Work-item slug pattern: `pr-{pr_number}-issue-{sequence}`
    - Example: `pr-94-issue-1`, `pr-94-issue-2`
 6. Links work-item to original PR in title/body
@@ -276,17 +273,6 @@ python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.p
   - Body: Full conversation thread with file/line context
   - Labels: `pr-feedback`, `pr-94`
   - Metadata: Author, file path, line number, PR link
-
-**Azure DevOps Integration:**
-- Uses Azure CLI for thread enumeration
-- Query: `az repos pr show --id {pr} --query threads`
-- Filters: `status == "active" || status == "pending"`
-- Creates work-items with:
-  - Title: "PR #{pr} feedback: {thread subject}"
-  - Description: Full thread content with file context
-  - Type: Task
-  - Tags: `pr-feedback`, `pr-{pr_number}`
-  - Relations: Links to PR URL
 
 **Workflow Pattern:**
 ```bash
@@ -315,11 +301,10 @@ python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
 ```
 
 **Key Features:**
-- Compatible with all issue trackers (GitHub Issues, Azure DevOps Work Items)
+- Uses GitHub Issues for work-item tracking
 - Preserves conversation context (file, line, author, timestamps)
 - Enables PR approval without blocking on follow-up work
 - Creates traceable lineage: PR → work-items → feature branches → new PRs
-- Supports both GitHub and Azure DevOps workflows
 
 **Decision Tree:**
 ```
