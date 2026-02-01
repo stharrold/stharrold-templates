@@ -33,4 +33,10 @@ jobs:
           prompt: |
             IMPORTANT: You are running in GitHub Actions on Ubuntu. GITHUB_TOKEN and GH_TOKEN are already configured in the environment. Do NOT run "security find-generic-password" or override GITHUB_TOKEN — those are macOS-only patterns from CLAUDE.md that do not apply here.
 
-            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+            Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+
+            Steps:
+            1. Run `gh pr diff ${{ github.event.pull_request.number }}` to get the changes
+            2. Read relevant files for context
+            3. Analyze for bugs, security issues, code quality, and adherence to project conventions
+            4. Post your review as a PR comment using `gh pr comment ${{ github.event.pull_request.number }} --body "<your review>"`
