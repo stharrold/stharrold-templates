@@ -6,17 +6,17 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path("/Users/stharrold/Documents/GitHub/stharrold-templates")
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from apply_bundle import BUNDLE_DEFINITIONS, resolve_bundles
 
 
 def test_apply_bundle_help_exits_zero():
     result = subprocess.run(
-        ["python", "scripts/apply_bundle.py", "--help"],
+        ["python", str(REPO_ROOT / "scripts" / "apply_bundle.py"), "--help"],
         capture_output=True,
         text=True,
-        cwd="/Users/stharrold/Documents/GitHub/stharrold-templates",
+        cwd=REPO_ROOT,
     )
     assert result.returncode == 0
     assert "bundle" in result.stdout.lower()

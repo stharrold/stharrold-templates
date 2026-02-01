@@ -116,8 +116,9 @@ def init_database_if_needed(db_path: Path) -> None:
             conn.close()
             if result[0] == 0:
                 needs_init = True
-        except Exception:
+        except Exception as exc:
             # Corrupt DB or import error -- re-init
+            print(f"[WARN] AgentDB table check failed ({exc}), re-initializing", file=sys.stderr)
             needs_init = True
 
     if not needs_init:

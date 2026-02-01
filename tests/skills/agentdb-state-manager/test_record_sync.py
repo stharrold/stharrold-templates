@@ -60,11 +60,7 @@ class TestRecordSyncRobustness:
         conn.close()
         assert db_path.exists()
 
-        # Now use record_sync with this empty DB -- it should re-init
-        session_id = generate_session_id()
-        workflow_states = load_workflow_states()
-        create_schema(session_id, workflow_states, db_path)
-
+        # Now use record_sync with this empty DB -- it should re-init via init_database_if_needed
         with patch("record_sync.get_database_path", return_value=db_path):
             sync_id = record_sync(
                 sync_type="workflow_transition",
