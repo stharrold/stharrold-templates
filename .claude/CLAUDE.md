@@ -22,13 +22,13 @@ Claude Code configuration root containing commands, skills, and settings.
 Contents:
 - `commands/` - Claude Code slash commands
 - `skills/` - Modular skill implementations
-- `settings.local.json` - Local settings
+- `settings.local.json` - Local settings (gitignored, not committed)
 
 ## Contents
 
 - `commands/` - Subdirectory
 - `skills/` - Subdirectory
-- `settings.local.json` - Configuration
+- `settings.local.json` - Local configuration (gitignored)
 
 ## Related
 
