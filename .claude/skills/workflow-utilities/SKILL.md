@@ -4,7 +4,7 @@ version: 5.2.0
 description: |
   Shared utilities for file deprecation, directory structure creation,
   TODO file updates, workflow lifecycle management, archive management,
-  and VCS abstraction (GitHub PR operations).
+  and VCS abstraction (GitHub/Azure DevOps).
   Used by all other skills.
 
   Use when: Need shared utilities, deprecating files, updating TODO,

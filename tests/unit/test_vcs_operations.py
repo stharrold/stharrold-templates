@@ -15,6 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / ".claude/skills/wor
 
 from vcs import provider as provider_module
 from vcs.operations import (
+    _parse_github_remote,
+    _query_azure_review_threads,
+    _query_github_review_threads,
     _run,
     check_auth,
     create_issue,
@@ -22,6 +25,7 @@ from vcs.operations import (
     create_release,
     get_contrib_branch,
     get_username,
+    query_pr_review_threads,
 )
 from vcs.provider import VCSProvider
 
@@ -213,9 +217,10 @@ class TestCreateRelease:
 
     @patch("vcs.operations._run")
     def test_github_release_gh_not_available(self, mock_run):
+        """Should raise RuntimeError when gh CLI is not available."""
         mock_run.side_effect = RuntimeError("'gh' CLI not found")
-        result = create_release("v1.0.0", provider=VCSProvider.GITHUB)
-        assert result is None
+        with pytest.raises(RuntimeError, match="gh"):
+            create_release("v1.0.0", provider=VCSProvider.GITHUB)
 
     def test_azure_returns_none(self):
         result = create_release("v1.0.0", provider=VCSProvider.AZURE_DEVOPS)
@@ -258,6 +263,275 @@ class TestCreateIssue:
         mock_run.return_value = '{"id": 42}'
         result = create_issue(title="Task", body="details", provider=VCSProvider.AZURE_DEVOPS)
         assert "42" in result
+
+
+# ---------------------------------------------------------------------------
+# _parse_github_remote
+# ---------------------------------------------------------------------------
+
+
+class TestParseGithubRemote:
+    """Tests for _parse_github_remote helper."""
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_https_url(self, mock_output):
+        mock_output.return_value = "https://github.com/owner/repo.git"
+        owner, repo = _parse_github_remote()
+        assert owner == "owner"
+        assert repo == "repo"
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_ssh_url(self, mock_output):
+        mock_output.return_value = "git@github.com:owner/repo.git"
+        owner, repo = _parse_github_remote()
+        assert owner == "owner"
+        assert repo == "repo"
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_https_url_no_git_suffix(self, mock_output):
+        mock_output.return_value = "https://github.com/owner/repo"
+        owner, repo = _parse_github_remote()
+        assert owner == "owner"
+        assert repo == "repo"
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_unsupported_url_format(self, mock_output):
+        mock_output.return_value = "svn://example.com/owner/repo"
+        with pytest.raises(RuntimeError, match="Unsupported remote URL format"):
+            _parse_github_remote()
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_malformed_url_missing_repo(self, mock_output):
+        mock_output.return_value = "https://github.com/owner"
+        with pytest.raises(RuntimeError, match="Failed to parse owner/repo"):
+            _parse_github_remote()
+
+    @patch("vcs.operations.subprocess.check_output")
+    def test_git_not_found(self, mock_output):
+        mock_output.side_effect = FileNotFoundError("git not found")
+        with pytest.raises(RuntimeError, match="Failed to read git remote URL"):
+            _parse_github_remote()
+
+
+# ---------------------------------------------------------------------------
+# query_pr_review_threads (GitHub)
+# ---------------------------------------------------------------------------
+
+
+class TestQueryGithubReviewThreads:
+    """Tests for _query_github_review_threads."""
+
+    GRAPHQL_RESPONSE = {
+        "data": {
+            "repository": {
+                "pullRequest": {
+                    "url": "https://github.com/owner/repo/pull/42",
+                    "reviewThreads": {
+                        "nodes": [
+                            {
+                                "id": "thread-1",
+                                "isResolved": False,
+                                "comments": {
+                                    "nodes": [
+                                        {
+                                            "url": "https://github.com/owner/repo/pull/42#discussion_thread-1",
+                                            "path": "src/main.py",
+                                            "line": 10,
+                                            "author": {"login": "reviewer"},
+                                            "body": "Fix this bug",
+                                            "createdAt": "2025-01-15T12:00:00Z",
+                                        }
+                                    ]
+                                },
+                            },
+                            {
+                                "id": "thread-2",
+                                "isResolved": True,
+                                "comments": {
+                                    "nodes": [
+                                        {
+                                            "url": "https://github.com/owner/repo/pull/42#discussion_thread-2",
+                                            "path": "src/utils.py",
+                                            "line": 20,
+                                            "author": {"login": "reviewer"},
+                                            "body": "Already resolved",
+                                            "createdAt": "2025-01-14T12:00:00Z",
+                                        }
+                                    ]
+                                },
+                            },
+                            {
+                                "id": "thread-3",
+                                "isResolved": False,
+                                "comments": {"nodes": []},
+                            },
+                        ]
+                    },
+                }
+            }
+        }
+    }
+
+    @patch("vcs.operations._parse_github_remote", return_value=("owner", "repo"))
+    @patch("vcs.operations._run")
+    def test_filters_resolved_and_empty_threads(self, mock_run, _mock_remote):
+        """Should return only unresolved threads with comments."""
+        import json
+
+        mock_run.return_value = json.dumps(self.GRAPHQL_RESPONSE)
+
+        result = _query_github_review_threads(42)
+
+        assert len(result) == 1
+        assert result[0]["id"] == "thread-1"
+        assert result[0]["file"] == "src/main.py"
+        assert result[0]["line"] == 10
+        assert result[0]["author"] == "reviewer"
+        assert result[0]["body"] == "Fix this bug"
+
+    @patch("vcs.operations._parse_github_remote", return_value=("owner", "repo"))
+    @patch("vcs.operations._run")
+    def test_invalid_json_raises(self, mock_run, _mock_remote):
+        """Should raise RuntimeError on invalid JSON."""
+        mock_run.return_value = "not-json"
+
+        with pytest.raises(RuntimeError, match="Failed to parse GitHub GraphQL response"):
+            _query_github_review_threads(42)
+
+    @patch("vcs.operations._parse_github_remote", return_value=("owner", "repo"))
+    @patch("vcs.operations._run")
+    def test_missing_keys_raises(self, mock_run, _mock_remote):
+        """Should raise RuntimeError on unexpected response structure."""
+        import json
+
+        mock_run.return_value = json.dumps({"data": {}})
+
+        with pytest.raises(RuntimeError, match="Failed to parse GitHub review threads"):
+            _query_github_review_threads(42)
+
+    @patch("vcs.operations._parse_github_remote", return_value=("owner", "repo"))
+    @patch("vcs.operations._run")
+    def test_handles_missing_author(self, mock_run, _mock_remote):
+        """Should use 'Unknown' when comment has no author."""
+        import json
+
+        response = {
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "url": "https://github.com/owner/repo/pull/42",
+                        "reviewThreads": {
+                            "nodes": [
+                                {
+                                    "id": "thread-1",
+                                    "isResolved": False,
+                                    "comments": {
+                                        "nodes": [
+                                            {
+                                                "body": "comment",
+                                                "createdAt": "2025-01-15T12:00:00Z",
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                    }
+                }
+            }
+        }
+        mock_run.return_value = json.dumps(response)
+
+        result = _query_github_review_threads(42)
+
+        assert result[0]["author"] == "Unknown"
+
+
+# ---------------------------------------------------------------------------
+# query_pr_review_threads (Azure DevOps)
+# ---------------------------------------------------------------------------
+
+
+class TestQueryAzureReviewThreads:
+    """Tests for _query_azure_review_threads."""
+
+    @patch("vcs.operations._run")
+    def test_parses_azure_threads(self, mock_run):
+        """Should parse Azure DevOps thread response."""
+        import json
+
+        threads = [
+            {
+                "id": 1,
+                "comments": [
+                    {
+                        "author": {"uniqueName": "user@org.com"},
+                        "content": "Please fix",
+                        "publishedDate": "2025-01-15T12:00:00Z",
+                    }
+                ],
+            }
+        ]
+        mock_run.return_value = json.dumps(threads)
+
+        result = _query_azure_review_threads(42)
+
+        assert len(result) == 1
+        assert result[0]["id"] == "1"
+        assert result[0]["author"] == "user@org.com"
+        assert result[0]["body"] == "Please fix"
+
+    @patch("vcs.operations._run")
+    def test_skips_threads_without_comments(self, mock_run):
+        """Should skip threads that have no comments."""
+        import json
+
+        threads = [{"id": 1, "comments": []}, {"id": 2}]
+        mock_run.return_value = json.dumps(threads)
+
+        result = _query_azure_review_threads(42)
+
+        assert len(result) == 0
+
+    @patch("vcs.operations._run")
+    def test_handles_null_response(self, mock_run):
+        """Should handle null/empty response."""
+        mock_run.return_value = "null"
+
+        result = _query_azure_review_threads(42)
+
+        assert result == []
+
+    @patch("vcs.operations._run")
+    def test_invalid_json_raises(self, mock_run):
+        """Should raise RuntimeError on invalid JSON."""
+        mock_run.return_value = "not-json"
+
+        with pytest.raises(RuntimeError, match="Failed to parse Azure DevOps threads"):
+            _query_azure_review_threads(42)
+
+
+# ---------------------------------------------------------------------------
+# query_pr_review_threads (dispatch)
+# ---------------------------------------------------------------------------
+
+
+class TestQueryPrReviewThreads:
+    """Tests for the public query_pr_review_threads dispatch."""
+
+    @patch("vcs.operations._query_github_review_threads")
+    def test_dispatches_to_github(self, mock_github):
+        mock_github.return_value = [{"id": "1"}]
+        result = query_pr_review_threads(42, provider=VCSProvider.GITHUB)
+        assert result == [{"id": "1"}]
+        mock_github.assert_called_once_with(42)
+
+    @patch("vcs.operations._query_azure_review_threads")
+    def test_dispatches_to_azure(self, mock_azure):
+        mock_azure.return_value = []
+        result = query_pr_review_threads(42, provider=VCSProvider.AZURE_DEVOPS)
+        assert result == []
+        mock_azure.assert_called_once_with(42)
 
 
 # ---------------------------------------------------------------------------

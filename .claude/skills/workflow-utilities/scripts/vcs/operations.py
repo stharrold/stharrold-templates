@@ -232,11 +232,6 @@ def create_release(version: str, *, provider: VCSProvider | None = None) -> str 
         provider = detect_provider()
 
     if provider == VCSProvider.GITHUB:
-        # Check if gh CLI is available first
-        try:
-            _run([GITHUB_CLI, "--version"], timeout=5)
-        except RuntimeError:
-            return None
         return _run([GITHUB_CLI, "release", "create", version, "--generate-notes"], timeout=30)
 
     elif provider == VCSProvider.AZURE_DEVOPS:

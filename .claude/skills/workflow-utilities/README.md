@@ -20,7 +20,7 @@ Workflow Utilities provides reusable utilities for common workflow tasks used ac
 - ✅ **Directory standards** - Create compliant directory structure
 - ✅ **TODO file updates** - Atomic YAML frontmatter updates
 - ✅ **Workflow lifecycle** - Register/archive workflows in TODO.md manifest
-- ✅ **VCS abstraction** - GitHub interface via gh CLI
+- ✅ **VCS abstraction** - GitHub (`gh`) and Azure DevOps (`az`) CLI wrapper functions
 - ✅ **Documentation tools** - Version validation, skill creation, doc sync
 - ✅ **Archive management** - List and extract archived files
 
