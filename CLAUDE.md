@@ -31,7 +31,7 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - AgentDB `init_database_if_needed` checks for `agent_synchronizations` table, not just file existence — pass `--db-path` to `init_database.py` for custom paths
 - `backmerge_workflow.py cleanup-release` only prints instructions — run `git branch -d release/vX.Y.Z && git push origin --delete release/vX.Y.Z` manually
 - `backmerge_workflow.py pr-develop` may fail with "No commits between develop and release" — create PR `main → develop` instead (merge commits live on main after release PR merge)
-- `claude-code-review.yml` requires scoped `allowed_tools` (e.g. `Bash(gh pr *)`) so Claude's tool calls aren't denied in CI, and `fetch-depth: 0` so `git diff` can reach the base branch — keep Bash scoped to gh/git to limit CI secret exposure (see PR #215)
+- `claude-code-review.yml` requires `allowed_tools: "Bash,WebFetch,WebSearch,Skill,Task"` and `fetch-depth: 0` — without these, Claude's tool calls are denied in CI and git diff can't reach the base branch
 - Git worktrees use a `.git` file (not directory) — use `.exists()` not `.is_dir()` when checking for git repos
 - Slash commands use Markdown format (not TOML):
   - `description` → YAML frontmatter

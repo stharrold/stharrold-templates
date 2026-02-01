@@ -28,9 +28,7 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           show_full_output: true
-          # Restrict Bash to gh/git commands to limit exposure of CI secrets.
-          # See PR #215 Copilot review for prompt-injection risk discussion.
-          allowed_tools: "Bash(gh pr *),Bash(gh api *),Bash(git diff *),Bash(git log *),Bash(git show *),WebFetch,WebSearch,Skill,Task"
+          allowed_tools: "Bash,WebFetch,WebSearch,Skill,Task"
           prompt: |
             IMPORTANT: You are running in GitHub Actions on Ubuntu. GITHUB_TOKEN and GH_TOKEN are already configured in the environment. Do NOT run "security find-generic-password" or override GITHUB_TOKEN — those are macOS-only patterns from CLAUDE.md that do not apply here.
 
