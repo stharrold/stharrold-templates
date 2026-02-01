@@ -15,7 +15,6 @@ sys.path.insert(
 
 from backmerge_workflow import (
     find_release_branch,
-    get_contrib_branch,
     get_current_branch,
     get_latest_version,
     return_to_editable_branch,
@@ -43,28 +42,6 @@ class TestGetCurrentBranch:
         result = get_current_branch()
 
         assert result == "main"
-
-
-class TestGetContribBranch:
-    """Tests for get_contrib_branch function."""
-
-    @patch("backmerge_workflow.run_cmd")
-    def test_returns_contrib_with_username(self, mock_run):
-        """Should return contrib/<username> format."""
-        mock_run.return_value = MagicMock(stdout="testuser\n", returncode=0)
-
-        result = get_contrib_branch()
-
-        assert result == "contrib/testuser"
-
-    @patch("backmerge_workflow.run_cmd")
-    def test_defaults_to_stharrold_on_error(self, mock_run):
-        """Should default to stharrold when gh command fails."""
-        mock_run.return_value = MagicMock(stdout="", returncode=1)
-
-        result = get_contrib_branch()
-
-        assert result == "contrib/stharrold"
 
 
 class TestGetLatestVersion:
@@ -243,11 +220,12 @@ class TestBackmergeWorkflowEdgeCases:
 class TestStepPrDevelopNoCommitsFallback:
     """Tests for step_pr_develop fallback when release branch has no unique commits."""
 
+    @patch("backmerge_workflow.create_pr")
     @patch("backmerge_workflow.return_to_editable_branch")
     @patch("backmerge_workflow.find_release_branch")
     @patch("backmerge_workflow.get_latest_version")
     @patch("backmerge_workflow.run_cmd")
-    def test_pr_develop_no_commits_fallback_to_main(self, mock_run, mock_version, mock_find, mock_return):
+    def test_pr_develop_no_commits_fallback_to_main(self, mock_run, mock_version, mock_find, mock_return, mock_create_pr):
         """Should fall back to main -> develop PR when release has no unique commits."""
         mock_version.return_value = "v1.6.0"
         mock_find.return_value = "release/v1.6.0"
@@ -257,24 +235,28 @@ class TestStepPrDevelopNoCommitsFallback:
             MagicMock(returncode=0),  # git fetch origin
             MagicMock(stdout="2\n", returncode=0),  # git rev-list --count (behind)
             MagicMock(returncode=0),  # git checkout release branch
-            MagicMock(returncode=1, stderr="No commits between develop and release/v1.6.0"),  # gh pr create (fails)
-            MagicMock(returncode=0, stdout="https://github.com/org/repo/pull/99\n"),  # fallback gh pr create
+        ]
+
+        # First create_pr call raises "No commits between", second succeeds
+        mock_create_pr.side_effect = [
+            RuntimeError("No commits between develop and release/v1.6.0"),
+            "https://github.com/org/repo/pull/99",
         ]
 
         result = step_pr_develop()
 
         assert result is True
         # Verify fallback PR was created with main as head
-        fallback_call = mock_run.call_args_list[4]
-        assert "--head" in fallback_call[0][0]
-        head_idx = fallback_call[0][0].index("--head")
-        assert fallback_call[0][0][head_idx + 1] == "main"
+        assert mock_create_pr.call_count == 2
+        fallback_call = mock_create_pr.call_args_list[1]
+        assert fallback_call[1]["head"] == "main"
 
+    @patch("backmerge_workflow.create_pr")
     @patch("backmerge_workflow.return_to_editable_branch")
     @patch("backmerge_workflow.find_release_branch")
     @patch("backmerge_workflow.get_latest_version")
     @patch("backmerge_workflow.run_cmd")
-    def test_pr_develop_no_commits_fallback_already_exists(self, mock_run, mock_version, mock_find, mock_return):
+    def test_pr_develop_no_commits_fallback_already_exists(self, mock_run, mock_version, mock_find, mock_return, mock_create_pr):
         """Should return True when fallback PR already exists."""
         mock_version.return_value = "v1.6.0"
         mock_find.return_value = "release/v1.6.0"
@@ -284,19 +266,23 @@ class TestStepPrDevelopNoCommitsFallback:
             MagicMock(returncode=0),  # git fetch origin
             MagicMock(stdout="2\n", returncode=0),  # git rev-list --count (behind)
             MagicMock(returncode=0),  # git checkout release branch
-            MagicMock(returncode=1, stderr="No commits between develop and release/v1.6.0"),  # gh pr create (fails)
-            MagicMock(returncode=1, stderr="a]pull request already exists"),  # fallback already exists
+        ]
+
+        mock_create_pr.side_effect = [
+            RuntimeError("No commits between develop and release/v1.6.0"),
+            RuntimeError("a pull request already exists"),
         ]
 
         result = step_pr_develop()
 
         assert result is True
 
+    @patch("backmerge_workflow.create_pr")
     @patch("backmerge_workflow.return_to_editable_branch")
     @patch("backmerge_workflow.find_release_branch")
     @patch("backmerge_workflow.get_latest_version")
     @patch("backmerge_workflow.run_cmd")
-    def test_pr_develop_no_commits_fallback_fails(self, mock_run, mock_version, mock_find, mock_return):
+    def test_pr_develop_no_commits_fallback_fails(self, mock_run, mock_version, mock_find, mock_return, mock_create_pr):
         """Should return False when fallback PR creation fails."""
         mock_version.return_value = "v1.6.0"
         mock_find.return_value = "release/v1.6.0"
@@ -306,8 +292,11 @@ class TestStepPrDevelopNoCommitsFallback:
             MagicMock(returncode=0),  # git fetch origin
             MagicMock(stdout="2\n", returncode=0),  # git rev-list --count (behind)
             MagicMock(returncode=0),  # git checkout release branch
-            MagicMock(returncode=1, stderr="No commits between develop and release/v1.6.0"),  # gh pr create (fails)
-            MagicMock(returncode=1, stderr="some other error"),  # fallback fails
+        ]
+
+        mock_create_pr.side_effect = [
+            RuntimeError("No commits between develop and release/v1.6.0"),
+            RuntimeError("some other error"),
         ]
 
         result = step_pr_develop()

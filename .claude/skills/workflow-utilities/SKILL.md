@@ -180,43 +180,35 @@ python .claude/skills/workflow-utilities/scripts/sync_manifest.py
 
 ### VCS Abstraction Layer (vcs/)
 
-Provides interface for GitHub operations via the `gh` CLI.
+Wrapper functions for GitHub (`gh`) and Azure DevOps (`az`) CLI operations.
 
 **Location:** `.claude/skills/workflow-utilities/scripts/vcs/`
 
 **Key files:**
-- `provider.py` - VCS provider enum
-- `github_adapter.py` - GitHub CLI (gh) adapter implementation
+- `provider.py` - VCS provider enum + `detect_provider()` (auto-detects from git remote URL, cached)
+- `operations.py` - Wrapper functions: `get_username`, `get_contrib_branch`, `create_pr`, `create_release`, `create_issue`, `query_pr_review_threads`, `check_auth`
 
 **Usage:**
 ```python
-from vcs import get_vcs_adapter
-from vcs.github_adapter import GitHubAdapter
+from vcs import create_pr, get_contrib_branch, get_username
 
-adapter = get_vcs_adapter()
+branch = get_contrib_branch()  # auto-detects provider
+username = get_username()
 
 # Create PR
-pr_url = adapter.create_pull_request(
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold",
+pr_url = create_pr(
+    base=branch,
+    head="feature/20251103T143000Z_auth",
     title="feat: auth system (v1.6.0)",
     body="PR body content",
 )
-
-# Fetch PR comments
-comments = adapter.fetch_pr_comments(94)
-
-# Update PR
-adapter.update_pr(94, title="feat: auth system (v1.7.0)")
-
-# Get PR status
-status = adapter.get_pr_status(94)
 ```
 
 **Key features:**
-- GitHub CLI (`gh`) based operations
-- Error handling with helpful messages
-- PR creation, comment fetching, status checking
+- Auto-detects provider from `git remote.origin.url` (github.com / dev.azure.com)
+- Errors surfaced as `RuntimeError(stderr)` — callers inspect string contents
+- Module-level caching for provider detection
+- PR creation, issue creation, release management, auth checking
 
 ## Usage Examples
 

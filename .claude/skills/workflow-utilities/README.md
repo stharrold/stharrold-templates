@@ -94,23 +94,23 @@ python .claude/skills/workflow-utilities/scripts/sync_manifest.py
 
 ## VCS Layer
 
-**GitHub interface via gh CLI:**
+**Wrapper functions for GitHub (`gh`) and Azure DevOps (`az`) CLIs:**
 
 ```python
-from vcs import get_vcs_adapter
+from vcs import create_pr, get_contrib_branch
 
-adapter = get_vcs_adapter()
+branch = get_contrib_branch()  # auto-detects provider
 
 # Create PR
-pr_url = adapter.create_pull_request(
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold",
+pr_url = create_pr(
+    base=branch,
+    head="feature/20251103T143000Z_auth",
     title="feat: auth system (v1.6.0)",
     body="PR body",
 )
 ```
 
-**Uses:** GitHub CLI (`gh`) for all VCS operations
+**Uses:** Auto-detected VCS provider (GitHub or Azure DevOps) for all operations
 
 ## Directory Standards
 
@@ -151,7 +151,7 @@ directory/
 - ✅ Use `sync_skill_docs.py` after skill changes
 
 **VCS operations:**
-- ✅ Use VCS abstraction layer via `get_vcs_adapter()` for GitHub operations
+- ✅ Use VCS wrapper functions via `from vcs import create_pr, get_contrib_branch`
 
 ## Integration with Other Skills
 

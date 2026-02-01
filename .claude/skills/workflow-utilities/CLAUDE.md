@@ -1,7 +1,7 @@
 ---
 type: claude-context
 directory: .claude/skills/workflow-utilities
-purpose: Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
+purpose: Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 parent: ../CLAUDE.md
 sibling_readme: README.md
 children:
@@ -18,7 +18,7 @@ related_skills:
 
 ## Purpose
 
-Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
+Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
 
 > **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). See `agentdb-state-manager` for the new system. The TODO-related scripts (todo_updater.py, workflow_registrar.py, workflow_archiver.py, sync_manifest.py) have been moved to ARCHIVED/.
 
@@ -42,10 +42,10 @@ Workflow Utilities provides **shared utilities** for all workflow skills. It inc
 │   ├── verify_workflow_context.py  # Workflow context validation + pending worktree detection
 │   ├── workflow_progress.py        # Workflow progress tracking
 │   ├── worktree_context.py         # Worktree state isolation
-│   ├── vcs/                        # VCS abstraction layer (GitHub only)
-│   │   ├── provider.py             # VCS provider detection
-│   │   ├── github_adapter.py       # GitHub CLI adapter
-│   │   └── ...
+│   ├── vcs/                        # VCS abstraction layer (GitHub + Azure DevOps)
+│   │   ├── provider.py             # VCS provider detection (auto-detect from remote URL)
+│   │   ├── operations.py           # Wrapper functions (create_pr, get_username, etc.)
+│   │   └── __init__.py
 │   └── __init__.py
 ├── SKILL.md                        # Complete skill documentation
 ├── CLAUDE.md                       # This file
@@ -339,34 +339,33 @@ python .claude/skills/workflow-utilities/scripts/sync_skill_docs.py \
 
 ### VCS Abstraction Layer (vcs/)
 
-**Purpose:** Provide unified interface for GitHub operations (PR creation, issue management)
+**Purpose:** Wrapper functions for GitHub (`gh`) and Azure DevOps (`az`) CLI operations
 
-**When to use:** When creating PRs, managing issues, or working with VCS providers
+**When to use:** When creating PRs, managing issues, releasing, or querying PR review threads
 
 **Key files:**
-- **provider.py** - VCS provider enum
-- **github_adapter.py** - GitHub CLI (gh) adapter
+- **provider.py** - `VCSProvider` enum + `detect_provider()` (auto-detects from git remote URL, cached)
+- **operations.py** - 7 wrapper functions: `get_username`, `get_contrib_branch`, `create_pr`, `create_release`, `create_issue`, `query_pr_review_threads`, `check_auth`
 
 **Example usage (from git-workflow-manager):**
 ```python
-from vcs import get_vcs_adapter
-from vcs.github_adapter import GitHubAdapter
+from vcs import get_contrib_branch, create_pr
 
-adapter = get_vcs_adapter()
+branch = get_contrib_branch()  # auto-detects provider, returns "contrib/<username>"
 
-# Create PR
-pr_url = adapter.create_pull_request(
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold",
+pr_url = create_pr(
+    base="develop",
+    head=branch,
     title="feat: auth system (v1.6.0)",
     body="PR body content",
 )
 ```
 
 **Key features:**
-- GitHub CLI (gh) based operations
-- GitHub-only (simplified from multi-provider abstraction)
-- Error handling with helpful messages
+- Auto-detects provider from `git remote.origin.url` (github.com / dev.azure.com)
+- Errors surfaced as `RuntimeError(stderr)` — callers inspect string contents (e.g. "already exists")
+- Module-level caching for provider detection
+- `get_contrib_branch(fallback=...)` consolidates 3 previous duplicate implementations
 
 ---
 
@@ -476,17 +475,16 @@ import sys
 vcs_path = Path('.claude/skills/workflow-utilities/scripts')
 sys.path.insert(0, str(vcs_path))
 
-from vcs import get_vcs_adapter
+from vcs import create_pr
 
-adapter = get_vcs_adapter()
-pr_url = adapter.create_pull_request(
-    source_branch="feature/20251103T143000Z_auth",
-    target_branch="contrib/stharrold",
+pr_url = create_pr(
+    base="contrib/stharrold",
+    head="feature/20251103T143000Z_auth",
     title="feat: auth system (v1.6.0)",
     body="PR body",
 )
 
-print(f"✓ PR created: {pr_url}")
+print(f"PR created: {pr_url}")
 ```
 
 ---
@@ -560,7 +558,7 @@ directory/
 - ✅ Use sync_skill_docs.py after skill changes
 
 **VCS operations:**
-- ✅ Use VCS abstraction layer via `get_vcs_adapter()`
+- ✅ Use VCS wrapper functions via `from vcs import create_pr, get_contrib_branch`
 
 ---
 
@@ -575,8 +573,8 @@ directory/
 **CLAUDE.md hierarchy:** Every directory has CLAUDE.md with parent/child refs
 - **Rationale:** AI navigation, context inheritance, documentation consistency
 
-**VCS abstraction:** GitHub-only interface via GitHubAdapter
-- **Rationale:** Simplified from multi-provider abstraction; GitHub is the only supported provider
+**VCS abstraction:** Wrapper functions for GitHub (`gh`) and Azure DevOps (`az`) CLIs
+- **Rationale:** Plain functions with provider branching; auto-detects from git remote URL
 
 **Semantic versioning:** `MAJOR.MINOR.PATCH`
 - **Rationale:** Industry standard, clear upgrade paths

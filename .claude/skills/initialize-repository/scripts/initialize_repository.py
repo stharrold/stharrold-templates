@@ -45,7 +45,7 @@ from pathlib import Path
 
 # Add VCS module to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
-from vcs import get_vcs_adapter
+from vcs import get_username
 
 # Constants with documented rationale
 SKILL_NAMES = [
@@ -310,9 +310,11 @@ def phase1_configuration(source_path: Path, target_path: Path) -> RepositoryConf
 
     # GitHub username detection
     try:
-        vcs = get_vcs_adapter()
-        detected_user = vcs.get_current_user()
-        config.vcs_user = ask_question("GitHub username", default=detected_user)
+        detected_user = get_username(fallback="")
+        if detected_user:
+            config.vcs_user = ask_question("GitHub username", default=detected_user)
+        else:
+            config.vcs_user = ask_question("GitHub username:")
     except Exception:
         config.vcs_user = ask_question("GitHub username:")
 

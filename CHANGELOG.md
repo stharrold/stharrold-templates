@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **VCS thin wrapper functions** -- Replaced `GitHubAdapter` class with plain wrapper functions in `vcs/operations.py` supporting both GitHub (`gh`) and Azure DevOps (`az`) CLIs; auto-detect provider from git remote URL; deduplicated `get_contrib_branch()` from 3 copies into single function with `fallback` parameter
+- **Caller migrations** -- `backmerge_workflow.py`, `pr_workflow.py`, `release_workflow.py`, `tag_release.py`, `generate_work_items_from_pr.py`, and `initialize_repository.py` now use `vcs.create_pr()`, `vcs.get_contrib_branch()`, etc. instead of direct subprocess calls or adapter pattern
+
 ### Fixed
 - **Backmerge pr-develop fallback** (#221) -- `step_pr_develop()` now falls back to `main -> develop` PR when release branch has no unique commits ("No commits between" error)
 - **AgentDB robustness** -- `init_database_if_needed` now checks for the `agent_synchronizations` table, not just file existence; empty/corrupt DBs trigger re-init
@@ -14,12 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Stale agent_id** -- Replaced hardcoded `"gemini-code"` with `"claude-code"` in `record_sync.py`
 
 ### Added
+- **VCS provider detection** -- `vcs/provider.py` now has `AZURE_DEVOPS` enum value and `detect_provider()` with module-level caching
+- **VCS operations tests** -- `tests/unit/test_vcs_provider.py` and `tests/unit/test_vcs_operations.py` covering both GitHub and Azure DevOps paths
 - **MCP onboarding guide** (#6) -- Created `docs/guides/10_mcp/16_onboarding.md` quickstart guide linking to existing detailed docs
 - **Podman migration guide** (#7) -- Created `docs/guides/30_implementation/310_podman-migration.md` with Docker-to-Podman command mapping, rootless security, common pitfalls, and migration checklist
 - **v7x1 workflow patterns** -- Added `phase_v7x1_{1..4}_*` to `VALID_PATTERNS` and `PHASE_MAP` so state tracking works with v7x1 slash commands
 - **AgentDB robustness tests** -- Added tests for empty-DB init, v7x1 patterns, agent_id, graceful degradation, PHASE_MAP entries, and no-DB state query
 
 ### Removed
+- **GitHubAdapter class** -- Deleted `vcs/github_adapter.py`; all functionality moved to `vcs/operations.py` as plain functions
 - **Azure DevOps VCS abstraction** (#179, #222) -- Removed `BaseVCSAdapter`, `base_adapter.py`, `config.py`, Azure pipeline files, and all Azure DevOps references from active code and documentation; VCS module is now GitHub-only
 
 ## [8.2.0] - 2026-01-31
