@@ -164,7 +164,7 @@ python .claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 1. **Initialize once per session:** Run init_database.py at session start
 1a. **Auto-init is safe:** record_sync.py checks for tables (not just file) and re-inits automatically
 2. **Record transitions:** Use record_sync.py after each phase completion
-2a. **Non-blocking:** record_sync never raises — failures print [WARN] to stderr and exit 0
+2a. **Non-blocking for DB writes:** DuckDB write failures and init errors print [WARN] to stderr and exit 0; record_sync still raises for invalid inputs (e.g. invalid sync_type)
 3. **Query before acting:** Use query_workflow_state.py to determine next step
 4. **Session awareness:** AgentDB lasts 24 hours, re-initialize if expired
 5. **specs/*/tasks.md is truth:** AgentDB caches specs data for efficiency

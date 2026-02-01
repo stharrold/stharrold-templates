@@ -200,7 +200,7 @@ python .claude/skills/initialize-repository/scripts/initialize_repository.py \
 
 ### Applying to existing repos (bundle system)
 
-For applying workflow components to existing repos, use `scripts/apply_bundle.py` instead of this meta-skill. See [BUNDLES.md](../../../../BUNDLES.md) for details.
+For applying workflow components to existing repos, use `scripts/apply_bundle.py` instead of this meta-skill. See [BUNDLES.md](../../../BUNDLES.md) for details.
 
 ---
 

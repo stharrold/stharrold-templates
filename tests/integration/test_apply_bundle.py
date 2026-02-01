@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -23,7 +24,7 @@ def target_repo(tmp_path):
 def run_apply(target: Path, *extra_args: str) -> subprocess.CompletedProcess:
     """Run apply_bundle.py with REPO_ROOT as source."""
     return subprocess.run(
-        ["python", str(SCRIPT), str(REPO_ROOT), str(target), *extra_args],
+        [sys.executable, str(SCRIPT), str(REPO_ROOT), str(target), *extra_args],
         capture_output=True,
         text=True,
     )

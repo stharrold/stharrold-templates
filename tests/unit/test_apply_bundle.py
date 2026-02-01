@@ -13,7 +13,7 @@ from apply_bundle import BUNDLE_DEFINITIONS, resolve_bundles
 
 def test_apply_bundle_help_exits_zero():
     result = subprocess.run(
-        ["python", str(REPO_ROOT / "scripts" / "apply_bundle.py"), "--help"],
+        [sys.executable, str(REPO_ROOT / "scripts" / "apply_bundle.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO_ROOT,
@@ -91,7 +91,7 @@ def test_dry_run_makes_no_changes(tmp_path):
 
     result = subprocess.run(
         [
-            "python",
+            sys.executable,
             "scripts/apply_bundle.py",
             str(REPO_ROOT),
             str(tmp_path),

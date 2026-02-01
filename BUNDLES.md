@@ -132,13 +132,13 @@ Ownership determines what happens when a bundle is applied to a repo that alread
 | Ownership | Files | First Install | Update | `--force` |
 |---|---|---|---|---|
 | **Template-owned** | Skills, commands, scripts, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows | Copy | Replace | Replace |
-| **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Replace |
+| **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Merge |
 | **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml` | Copy from template | Skip + print warning | Replace |
-| **Override** | All of the above | -- | -- | Replace all files unconditionally |
+| **Override** | Template-owned + skip-on-update | -- | -- | Replace (merge files still merge) |
 
 ### Merge behavior details
 
 - **`.gitignore`**: Appends lines from the template that are not already present. Does not remove existing entries.
 - **`pyproject.toml`**: Adds missing packages to `[dependency-groups] dev`. Does not modify existing version pins or remove packages.
-- **Skip + warn**: Prints a message like `SKIP secrets.toml (already exists, use --force to overwrite)` to stderr.
-- **`--force`**: Creates timestamped backups (e.g. `pyproject.toml.bak.20260131T120000`) before replacing.
+- **Skip + warn**: Prints a message like `SKIP secrets.toml (already exists, use --force to overwrite)` to stdout.
+- **`--force`**: Overwrites skip-on-update files. Merge-type files (`pyproject.toml`, `.gitignore`) keep their merge behavior.

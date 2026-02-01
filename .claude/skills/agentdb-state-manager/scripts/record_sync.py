@@ -112,10 +112,12 @@ def init_database_if_needed(db_path: Path) -> None:
             import duckdb
 
             conn = duckdb.connect(str(db_path))
-            result = conn.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'agent_synchronizations'").fetchone()
-            conn.close()
-            if result[0] == 0:
-                needs_init = True
+            try:
+                result = conn.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'agent_synchronizations'").fetchone()
+                if result[0] == 0:
+                    needs_init = True
+            finally:
+                conn.close()
         except Exception as exc:
             # Corrupt DB or import error -- re-init
             print(f"[WARN] AgentDB table check failed ({exc}), re-initializing", file=sys.stderr)
@@ -129,7 +131,9 @@ def init_database_if_needed(db_path: Path) -> None:
     init_script = script_dir / "init_database.py"
 
     if init_script.exists():
-        subprocess.run([sys.executable, str(init_script), "--db-path", str(db_path)], check=True, capture_output=True)
+        result = subprocess.run([sys.executable, str(init_script), "--db-path", str(db_path)], check=False, capture_output=True)
+        if result.returncode != 0:
+            print(f"[WARN] AgentDB init script failed (exit {result.returncode})", file=sys.stderr)
 
 
 def record_sync(sync_type: str, pattern: str, source: str = "", target: str = "", worktree: str | None = None, metadata: dict | None = None) -> str:

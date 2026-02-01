@@ -224,9 +224,10 @@ def merge_pyproject_deps(target: Path, deps: list[str], *, dry_run: bool) -> int
     if not pyproject_path.exists():
         # Create a minimal pyproject.toml with the deps
         deps_str = ",\n".join(f'    "{d}"' for d in sorted(deps))
+        project_name = target.name or "project"
         content = textwrap.dedent(f"""\
             [project]
-            name = ""
+            name = "{project_name}"
             version = "0.0.0"
             requires-python = ">=3.11"
 
@@ -270,7 +271,7 @@ def merge_pyproject_deps(target: Path, deps: list[str], *, dry_run: bool) -> int
 
     if not missing:
         print("  MERGE pyproject.toml (0 deps added)")
-        return 1
+        return 0
 
     print(f"  MERGE pyproject.toml ({len(missing)} dep{'s' if len(missing) != 1 else ''} added)")
 
@@ -354,7 +355,7 @@ def merge_gitignore(target: Path, source: Path, *, dry_run: bool) -> int:
 
     if not missing:
         print("  MERGE .gitignore (0 patterns added)")
-        return 1
+        return 0
 
     print(f"  MERGE .gitignore ({len(missing)} pattern{'s' if len(missing) != 1 else ''} added)")
 
@@ -362,9 +363,12 @@ def merge_gitignore(target: Path, source: Path, *, dry_run: bool) -> int:
         return 1
 
     with open(target_gi, "a") as f:
-        if existing_lines and not target_gi.read_text().endswith("\n"):
-            f.write("\n")
-        f.write("\n# Added by apply_bundle\n")
+        if existing_lines:
+            if not target_gi.read_text().endswith("\n"):
+                f.write("\n")
+            f.write("\n# Added by apply_bundle\n")
+        else:
+            f.write("# Added by apply_bundle\n")
         for pat in missing:
             f.write(f"{pat}\n")
 
@@ -438,7 +442,7 @@ def main() -> int:
         choices=sorted(VALID_BUNDLE_NAMES),
         help="Bundle to apply (repeatable)",
     )
-    parser.add_argument("--force", action="store_true", help="Overwrite ALL files regardless of ownership")
+    parser.add_argument("--force", action="store_true", help="Overwrite files that would normally be skipped (e.g. skip_on_update entries)")
     parser.add_argument("--dry-run", action="store_true", help="Print what would change, make no modifications")
 
     args = parser.parse_args()

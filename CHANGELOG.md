@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **AgentDB robustness** -- `init_database_if_needed` now checks for the `agent_synchronizations` table, not just file existence; empty/corrupt DBs trigger re-init
-- **AgentDB graceful degradation** -- `record_sync` catches all DuckDB exceptions and prints `[WARN]` to stderr instead of propagating; `main()` always exits 0
+- **AgentDB graceful degradation** -- `record_sync` treats DuckDB write failures and init errors as non-blocking, printing `[WARN]` to stderr; `main()` exits 0 for DB errors (still fails for invalid inputs)
 - **Stale agent_id** -- Replaced hardcoded `"gemini-code"` with `"claude-code"` in `record_sync.py`
 
 ### Added
