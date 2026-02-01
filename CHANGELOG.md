@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Stale agent_id** -- Replaced hardcoded `"gemini-code"` with `"claude-code"` in `record_sync.py`
 
 ### Added
+- **`--get-to-stdout` mode for secrets_run.py** (#228) -- New `--get-to-stdout SECRET_NAME` flag prints a single secret value to stdout for pipe-friendly usage (e.g., `| pbcopy`, `$(...)` subshells); all diagnostics go to stderr; `load_secrets_config` errors also redirected to stderr
 - **VCS provider detection** -- `vcs/provider.py` now has `AZURE_DEVOPS` enum value and `detect_provider()` with module-level caching
 - **VCS operations tests** -- `tests/unit/test_vcs_provider.py` and `tests/unit/test_vcs_operations.py` covering both GitHub and Azure DevOps paths
 - **MCP onboarding guide** (#6) -- Created `docs/guides/10_mcp/16_onboarding.md` quickstart guide linking to existing detailed docs
