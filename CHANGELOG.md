@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **AgentDB robustness** -- `init_database_if_needed` now checks for the `agent_synchronizations` table, not just file existence; empty/corrupt DBs trigger re-init
+- **AgentDB graceful degradation** -- `record_sync` treats DuckDB write failures and init errors as non-blocking, printing `[WARN]` to stderr; `main()` exits 0 for DB errors (still fails for invalid inputs)
+- **Stale agent_id** -- Replaced hardcoded `"gemini-code"` with `"claude-code"` in `record_sync.py`
+
+### Added
+- **v7x1 workflow patterns** -- Added `phase_v7x1_{1..4}_*` to `VALID_PATTERNS` and `PHASE_MAP` so state tracking works with v7x1 slash commands
+- **AgentDB robustness tests** -- Added tests for empty-DB init, v7x1 patterns, agent_id, graceful degradation, PHASE_MAP entries, and no-DB state query
+
 ## [8.2.0] - 2026-01-31
 
 ### Changed

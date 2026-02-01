@@ -18,7 +18,6 @@ Executable Python scripts for this skill.
 
 - `__init__.py` - Python script
 - `initialize_repository.py` - Bootstrap NEW repos (interactive Q&A)
-- `apply_workflow.py` - Apply workflow to EXISTING repos (clone-and-apply)
 
 ## Related
 
