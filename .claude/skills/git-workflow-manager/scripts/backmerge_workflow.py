@@ -212,6 +212,38 @@ Keeps develop in sync with production.
             safe_print("[WARN]  PR already exists")
             return_to_editable_branch()
             return True
+        elif "No commits between" in result.stderr:
+            safe_print("[WARN]  No unique commits on release branch, falling back to main -> develop")
+            return_to_editable_branch()
+            fallback_body = (
+                f"## Summary\n\nBackmerge {version} to develop (fallback: main -> develop).\n\n"
+                "Release branch had no unique commits.\n\n"
+                "[BOT] Generated with [Claude Code](https://claude.ai/code)"
+            )
+            fallback_result = run_cmd(
+                [
+                    "gh",
+                    "pr",
+                    "create",
+                    "--base",
+                    "develop",
+                    "--head",
+                    "main",
+                    "--title",
+                    f"backmerge: {version} -> develop",
+                    "--body",
+                    fallback_body,
+                ],
+                check=False,
+            )
+            if fallback_result.returncode != 0:
+                if "already exists" in fallback_result.stderr:
+                    safe_print("[WARN]  Fallback PR already exists")
+                    return True
+                safe_print(f"[FAIL] Fallback PR creation failed: {fallback_result.stderr}")
+                return False
+            safe_print("[OK] Fallback PR created: main -> develop")
+            return True
         else:
             safe_print(f"[FAIL] PR creation failed: {result.stderr}")
             return_to_editable_branch()
