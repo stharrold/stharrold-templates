@@ -39,6 +39,9 @@ Gemini Code to Claude Code migration complete (v8.0.0).
   - `description` → YAML frontmatter
   - `!{cmd}` → `` !`cmd` ``
   - `{{args}}` → `$ARGUMENTS`
+- VCS wrapper functions: `from vcs import create_pr, get_contrib_branch, get_username` — NOT `get_vcs_adapter()` (removed in v8.5)
+- VCS supports GitHub (`gh`) and Azure DevOps (`az`) — auto-detected from `git remote.origin.url`
+- After deleting/renaming Python modules, grep all `*.md` files under `.claude/skills/` for stale references (CLAUDE.md, README.md, SKILL.md frontmatter)
 
 ## Branch Structure
 
