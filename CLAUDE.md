@@ -28,6 +28,7 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - `docs/archived/` and `docs/reference/` preserve historical Gemini references intentionally — do not update
 - `record_sync.py` auto-initializes AgentDB on first use — failures print `[WARN]` to stderr and exit 0 (non-blocking)
 - AgentDB `init_database_if_needed` checks for `agent_synchronizations` table, not just file existence — pass `--db-path` to `init_database.py` for custom paths
+- `backmerge_workflow.py cleanup-release` only prints instructions — run `git branch -d release/vX.Y.Z && git push origin --delete release/vX.Y.Z` manually
 - Slash commands use Markdown format (not TOML):
   - `description` → YAML frontmatter
   - `!{cmd}` → `` !`cmd` ``
@@ -45,6 +46,10 @@ uv run ruff check .                        # Lint
 uv run pre-commit run --all-files          # Pre-commit hooks
 uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
 ```
+
+## Bundles
+
+This repo provides installable workflow bundles. See [BUNDLES.md](BUNDLES.md) for available bundles (git, secrets, ci, full) and usage.
 
 ## Key Context
 

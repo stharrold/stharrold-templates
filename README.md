@@ -59,6 +59,24 @@ Common operations:
 | `pytest` | Run tests |
 | `ruff check .` | Lint code |
 
+## Apply to an Existing Repo
+
+```bash
+cd /path/to/myrepo
+git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
+
+# Apply specific bundles (git, secrets, ci, or full)
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle secrets
+
+# Or apply everything
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle full
+
+rm -rf .tmp/stharrold-templates
+```
+
+See [BUNDLES.md](BUNDLES.md) for bundle contents and update behavior.
+
 ## Secrets Management
 
 Cross-platform secrets management using environment variables with keyring fallback.
