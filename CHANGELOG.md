@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [8.7.0] - 2026-02-02
+
 ### Changed
 - **VCS thin wrapper functions** -- Replaced `GitHubAdapter` class with plain wrapper functions in `vcs/operations.py` supporting both GitHub (`gh`) and Azure DevOps (`az`) CLIs; auto-detect provider from git remote URL; deduplicated `get_contrib_branch()` from 3 copies into single function with `fallback` parameter
 - **Caller migrations** -- `backmerge_workflow.py`, `pr_workflow.py`, `release_workflow.py`, `tag_release.py`, `generate_work_items_from_pr.py`, and `initialize_repository.py` now use `vcs.create_pr()`, `vcs.get_contrib_branch()`, etc. instead of direct subprocess calls or adapter pattern

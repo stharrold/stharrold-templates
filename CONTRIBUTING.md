@@ -34,8 +34,9 @@ git --version             # Version control
 python3 --version         # Python 3.11+
 uv --version              # Python package manager
 
-# GitHub CLI:
+# GitHub CLI (or az CLI for Azure DevOps repos):
 gh --version              # GitHub CLI (for PR operations)
+# az --version            # Azure DevOps CLI (alternative, if using Azure DevOps)
 ```
 
 ### Initial Setup
