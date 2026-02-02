@@ -1,71 +1,63 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
-"""VCS provider detection and enumeration.
+"""VCS provider detection.
 
-This module provides VCS provider detection from git remotes and configuration.
+This module provides VCS provider enumeration and auto-detection from git remote URL.
 
 Constants:
-- VCS URL patterns for GitHub
-  Rationale: Enable automatic provider detection from git remote URLs
+- _cached_provider: Module-level cache for detected provider
+  Rationale: Avoid repeated subprocess calls within a single process
 """
 
-import re
 import subprocess
 from enum import Enum
+
+# Module-level cache for detected provider
+_cached_provider: "VCSProvider | None" = None
 
 
 class VCSProvider(Enum):
     """Supported VCS providers."""
 
     GITHUB = "github"
-
-
-# URL patterns for provider detection
-GITHUB_PATTERNS = [
-    r"github\.com[:/]",  # https://github.com/user/repo or git@github.com:user/repo
-]
-
-
-def detect_from_remote() -> VCSProvider | None:
-    """Detect VCS provider from git remote URL.
-
-    Returns:
-        VCSProvider if detected, None otherwise
-
-    Example URLs:
-        GitHub:
-        - https://github.com/user/repo.git
-        - git@github.com:user/repo.git
-    """
-    try:
-        result = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True, check=True, timeout=5)
-        remote_url = result.stdout.strip()
-
-        # Check GitHub patterns
-        for pattern in GITHUB_PATTERNS:
-            if re.search(pattern, remote_url):
-                return VCSProvider.GITHUB
-
-        return None
-
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
-        return None
+    AZURE_DEVOPS = "azure_devops"
 
 
 def detect_provider() -> VCSProvider:
-    """Detect VCS provider with fallback to GitHub.
+    """Auto-detect VCS provider from git remote URL.
 
-    Detection order:
-    1. Try detect from git remote
-    2. Default to GitHub
+    Parses ``git config --get remote.origin.url`` and matches against known hosts.
 
     Returns:
-        VCSProvider (defaults to GitHub for backward compatibility)
-    """
-    detected = detect_from_remote()
-    if detected:
-        return detected
+        VCSProvider.GITHUB or VCSProvider.AZURE_DEVOPS
 
-    # Default to GitHub for backward compatibility
-    return VCSProvider.GITHUB
+    Raises:
+        RuntimeError: If remote URL cannot be determined or provider is unrecognised
+    """
+    global _cached_provider
+    if _cached_provider is not None:
+        return _cached_provider
+
+    try:
+        url = subprocess.check_output(
+            ["git", "config", "--get", "remote.origin.url"],
+            text=True,
+            stderr=subprocess.PIPE,
+            timeout=10,
+        ).strip()
+    except FileNotFoundError:
+        raise RuntimeError("'git' CLI not found")
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to read git remote URL: {e.stderr.strip() if e.stderr else str(e)}")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("Timeout while reading git remote URL")
+
+    if "github.com" in url:
+        _cached_provider = VCSProvider.GITHUB
+    elif "dev.azure.com" in url or "visualstudio.com" in url:
+        _cached_provider = VCSProvider.AZURE_DEVOPS
+    else:
+        raise RuntimeError(f"Unrecognised VCS provider in remote URL: {url}")
+
+    return _cached_provider

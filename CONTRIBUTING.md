@@ -34,10 +34,8 @@ git --version             # Version control
 python3 --version         # Python 3.11+
 uv --version              # Python package manager
 
-# VCS Provider CLI (one of):
-gh --version              # GitHub CLI (for GitHub repos)
-# OR
-az --version              # Azure CLI (for Azure DevOps repos)
+# GitHub CLI:
+gh --version              # GitHub CLI (for PR operations)
 ```
 
 ### Initial Setup
