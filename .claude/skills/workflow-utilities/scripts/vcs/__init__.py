@@ -1,53 +1,41 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
-"""VCS provider abstraction for workflow scripts.
+"""VCS interface for workflow scripts (GitHub + Azure DevOps).
 
-This module provides a unified interface for interacting with GitHub
-through the gh CLI tool.
+This module provides wrapper functions for interacting with GitHub (gh)
+and Azure DevOps (az) CLIs.  The provider is auto-detected from the
+git remote URL.
 
 Usage:
-    from vcs import get_vcs_adapter
+    from vcs import get_username, get_contrib_branch, create_pr
 
-    vcs = get_vcs_adapter()
-    username = vcs.get_current_user()
-    vcs.create_pull_request(source, target, title, body)
+    username = get_username()
+    branch = get_contrib_branch()
+    pr_url = create_pr(base="develop", head="contrib/user", title="...", body="...")
 """
 
-from .base_adapter import BaseVCSAdapter
-from .config import load_vcs_config
-from .github_adapter import GitHubAdapter
-from .provider import VCSProvider
+from .operations import (
+    GITHUB_GRAPHQL_TEMPLATE,
+    check_auth,
+    create_issue,
+    create_pr,
+    create_release,
+    get_contrib_branch,
+    get_username,
+    query_pr_review_threads,
+)
+from .provider import VCSProvider, detect_provider
 
 __all__ = [
-    "BaseVCSAdapter",
-    "GitHubAdapter",
     "VCSProvider",
-    "get_vcs_adapter",
+    "check_auth",
+    "create_issue",
+    "create_pr",
+    "create_release",
+    "detect_provider",
+    "get_contrib_branch",
+    "get_username",
+    "query_pr_review_threads",
+    "GITHUB_GRAPHQL_TEMPLATE",
 ]
-
-
-def get_vcs_adapter() -> BaseVCSAdapter:
-    """Get appropriate VCS adapter based on configuration and context.
-
-    Detection order:
-    1. Load .vcs_config.yaml if exists -> use specified provider
-    2. Default to GitHub
-
-    Returns:
-        Configured VCS adapter instance
-
-    Raises:
-        ValueError: If provider configuration is invalid
-    """
-    # Try loading explicit configuration
-    config = load_vcs_config()
-    if config:
-        provider = config.get("vcs_provider")
-        if provider == "github":
-            return GitHubAdapter()
-        if provider is not None:
-            raise ValueError(f"Unknown VCS provider in config: {provider}")
-
-    # Default to GitHub
-    return GitHubAdapter()

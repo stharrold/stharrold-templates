@@ -17,7 +17,7 @@ children:
 Gemini Code to Claude Code migration complete (v8.0.0).
 - `.gemini/` → `.claude/`, `GEMINI.md` → `CLAUDE.md` — done
 - Secrets management aligned with `library` repo conventions
-- pyproject.toml version: 8.5.0
+- pyproject.toml version: 8.7.0
 - Workflow commands migrated from TOML to Markdown format (v8.2.0+)
 
 ## Gotchas
@@ -32,11 +32,16 @@ Gemini Code to Claude Code migration complete (v8.0.0).
 - `backmerge_workflow.py cleanup-release` only prints instructions — run `git branch -d release/vX.Y.Z && git push origin --delete release/vX.Y.Z` manually
 - Backmerge: always try `backmerge_workflow.py pr-develop` (release → develop) first so review comments can be fixed on the release branch — only fall back to PR `main` → `develop` if `gh pr create` returns "No commits between develop and release"
 - `claude-code-review.yml` requires `claude_args: "--allowedTools Bash,WebFetch,WebSearch,Skill,Task"` (not `allowed_tools`), `id-token: write` (for OIDC auth), and `fetch-depth: 0` — without these, tool calls are denied and git diff can't reach the base branch
+- `claude-code-review.yml` changes require reaching `main` before OIDC validates them — PRs with workflow edits will fail with "workflow file must have identical content to the version on the repository's default branch"
+- `uv run` modifies `uv.lock` when `pyproject.toml` version changes — commit `uv.lock` after version bumps or rebase-contrib will fail with "Uncommitted changes detected"
 - Git worktrees use a `.git` file (not directory) — use `.exists()` not `.is_dir()` when checking for git repos
 - Slash commands use Markdown format (not TOML):
   - `description` → YAML frontmatter
   - `!{cmd}` → `` !`cmd` ``
   - `{{args}}` → `$ARGUMENTS`
+- VCS wrapper functions: `from vcs import create_pr, get_contrib_branch, get_username` — NOT `get_vcs_adapter()` (removed in v8.5)
+- VCS supports GitHub (`gh`) and Azure DevOps (`az`) — auto-detected from `git remote.origin.url`
+- After deleting/renaming Python modules, grep all `*.md` files under `.claude/skills/` for stale references (CLAUDE.md, README.md, SKILL.md frontmatter)
 
 ## Branch Structure
 

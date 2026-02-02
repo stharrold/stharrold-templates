@@ -17,13 +17,17 @@ It supports multiple secret sources with the following precedence:
 
 Usage:
     uv run scripts/secrets_run.py [options] <command> [args...]
+    uv run scripts/secrets_run.py [options] --get-to-stdout SECRET_NAME
 
 Options:
-    --root PATH    Specify project root containing secrets.toml
+    --root PATH                Specify project root containing secrets.toml
+    --get-to-stdout SECRET_NAME  Print a single secret value to stdout (pipe-friendly)
 
 Example:
     uv run scripts/secrets_run.py uv run pytest
     uv run scripts/secrets_run.py --root ../project python main.py
+    uv run scripts/secrets_run.py --get-to-stdout API_KEY | pbcopy
+    export TOKEN=$(uv run scripts/secrets_run.py --get-to-stdout API_TOKEN)
 """
 
 from __future__ import annotations
@@ -80,16 +84,16 @@ def load_secrets_config(root_path: Path) -> dict:
     """
     config_path = root_path / "secrets.toml"
     if not config_path.exists():
-        print(f"[FAIL] secrets.toml not found at: {config_path}")
-        print()
-        print("Create a secrets.toml file at this location with a structure like:")
-        print()
-        print("[secrets]")
-        print('required = ["DB_PASSWORD", "API_KEY"]')
-        print('optional = ["ANALYTICS_TOKEN"]')
-        print()
-        print("[keyring]")
-        print('service = "your-service-name"')
+        print(f"[FAIL] secrets.toml not found at: {config_path}", file=sys.stderr)
+        print(file=sys.stderr)
+        print("Create a secrets.toml file at this location with a structure like:", file=sys.stderr)
+        print(file=sys.stderr)
+        print("[secrets]", file=sys.stderr)
+        print('required = ["DB_PASSWORD", "API_KEY"]', file=sys.stderr)
+        print('optional = ["ANALYTICS_TOKEN"]', file=sys.stderr)
+        print(file=sys.stderr)
+        print("[keyring]", file=sys.stderr)
+        print('service = "your-service-name"', file=sys.stderr)
         sys.exit(1)
 
     # Use Python 3.11+ stdlib tomllib for robust TOML parsing
@@ -197,18 +201,58 @@ def inject_secrets(config: dict) -> tuple[list[str], list[str]]:
     return missing_required, missing_optional
 
 
+def get_secret_to_stdout(secret_name: str, root_path: Path) -> int:
+    """Print a single secret value to stdout.
+
+    All diagnostics go to stderr. Stdout contains only the raw secret value.
+
+    Args:
+        secret_name: Name of the secret to retrieve.
+        root_path: Project root directory containing secrets.toml.
+
+    Returns:
+        0 on success, 1 on failure.
+    """
+    config = load_secrets_config(root_path)
+
+    all_secrets = list(config["required"]) + list(config["optional"])
+    if secret_name not in all_secrets:
+        print(f"[FAIL] Secret '{secret_name}' is not defined in secrets.toml", file=sys.stderr)
+        return 1
+
+    in_ci = is_ci()
+    in_container = is_container()
+    service = config["service"]
+
+    env_type = "CI" if in_ci else ("container" if in_container else "local")
+    print(f"[INFO] Environment: {env_type}", file=sys.stderr)
+
+    value, source = resolve_secret(secret_name, service, in_ci, in_container)
+    if value is None:
+        print(f"[FAIL] {secret_name}: {source} (service: {service})", file=sys.stderr)
+        return 1
+
+    print(f"[OK] {secret_name}: loaded from {source}", file=sys.stderr)
+    sys.stdout.write(value)
+    return 0
+
+
 def print_usage() -> None:
     """Print usage information."""
     print("Usage: uv run scripts/secrets_run.py [options] <command> [args...]")
+    print("       uv run scripts/secrets_run.py [options] --get-to-stdout SECRET_NAME")
     print()
     print("Injects secrets from keyring/environment, then runs the command.")
     print()
     print("Options:")
-    print("  --root PATH    Specify project root containing secrets.toml")
+    print("  --root PATH                  Specify project root containing secrets.toml")
+    print("  --get-to-stdout SECRET_NAME  Print a single secret to stdout (pipe-friendly)")
     print()
     print("Examples:")
     print("  uv run scripts/secrets_run.py uv run pytest")
     print("  uv run scripts/secrets_run.py --root ../my-project python main.py")
+    print("  uv run scripts/secrets_run.py --get-to-stdout API_KEY | pbcopy")
+    print("  export TOKEN=$(uv run scripts/secrets_run.py --get-to-stdout API_TOKEN)")
     print()
     print("Setup (local development):")
     print("  uv run scripts/secrets_setup.py")
@@ -235,6 +279,18 @@ def main() -> int:
                 return 1
         except IndexError:
             pass
+
+    # Check for --get-to-stdout mode
+    if len(args) > 0 and args[0] == "--get-to-stdout":
+        if len(args) < 2:
+            print("[FAIL] Usage: --get-to-stdout SECRET_NAME", file=sys.stderr)
+            return 1
+        secret_name = args[1]
+        remaining = args[2:]
+        if remaining:
+            print("[FAIL] --get-to-stdout is mutually exclusive with command mode", file=sys.stderr)
+            return 1
+        return get_secret_to_stdout(secret_name, get_repo_root(target_root))
 
     if len(args) < 1:
         print_usage()
