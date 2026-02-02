@@ -110,7 +110,7 @@ def get_username(*, fallback: str | None = "", provider: VCSProvider | None = No
             raise
         return fallback
 
-    return fallback  # unreachable, keeps mypy happy
+    raise RuntimeError(f"Unsupported VCS provider: {provider}")
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ def create_pr(
         head: Source branch.
         title: PR title.
         body: PR description.
-        fill: If True, add ``--fill`` (GitHub) to auto-fill from commits.
+        fill: If True, add ``--fill`` (GitHub only; ignored for Azure DevOps) to auto-fill title/body from commits.
         provider: Explicit provider; auto-detected if None.
 
     Returns:
@@ -185,9 +185,13 @@ def create_pr(
         provider = detect_provider()
 
     if provider == VCSProvider.GITHUB:
-        cmd = [GITHUB_CLI, "pr", "create", "--base", base, "--head", head, "--title", title, "--body", body]
+        cmd = [GITHUB_CLI, "pr", "create", "--base", base, "--head", head]
         if fill:
             cmd.append("--fill")
+        if title:
+            cmd.extend(["--title", title])
+        if body:
+            cmd.extend(["--body", body])
         return _run(cmd, timeout=30)
 
     elif provider == VCSProvider.AZURE_DEVOPS:

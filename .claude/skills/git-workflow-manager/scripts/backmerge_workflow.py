@@ -191,7 +191,6 @@ def step_pr_develop(version: str | None = None) -> bool:
             return True
         elif "No commits between" in error_msg:
             safe_print("[WARN]  No unique commits on release branch, falling back to main -> develop")
-            return_to_editable_branch()
             fallback_body = (
                 f"## Summary\n\nBackmerge {version} to develop (fallback: main -> develop).\n\n"
                 "Release branch had no unique commits.\n\n"
@@ -199,14 +198,17 @@ def step_pr_develop(version: str | None = None) -> bool:
             )
             try:
                 create_pr(base="develop", head="main", title=f"backmerge: {version} -> develop", body=fallback_body)
+                safe_print("[OK] Fallback PR created: main -> develop")
+                return_to_editable_branch()
+                return True
             except RuntimeError as fallback_e:
                 if "already exists" in str(fallback_e):
                     safe_print("[WARN]  Fallback PR already exists")
+                    return_to_editable_branch()
                     return True
                 safe_print(f"[FAIL] Fallback PR creation failed: {fallback_e}")
+                return_to_editable_branch()
                 return False
-            safe_print("[OK] Fallback PR created: main -> develop")
-            return True
         else:
             safe_print(f"[FAIL] PR creation failed: {error_msg}")
             return_to_editable_branch()

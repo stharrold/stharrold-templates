@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - **GitHubAdapter class** -- Deleted `vcs/github_adapter.py`; all functionality moved to `vcs/operations.py` as plain functions
-- **Azure DevOps VCS abstraction** (#179, #222) -- Removed `BaseVCSAdapter`, `base_adapter.py`, `config.py`, Azure pipeline files, and all Azure DevOps references from active code and documentation; VCS module is now GitHub-only
+- **Azure DevOps VCS abstraction classes** (#179, #222) -- Removed `BaseVCSAdapter`, `base_adapter.py`, `config.py`, and Azure pipeline files; Azure DevOps CLI support retained in `vcs/operations.py` wrapper functions but class-based adapter pattern eliminated
 
 ## [8.2.0] - 2026-01-31
 
