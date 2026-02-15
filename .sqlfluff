@@ -1,0 +1,18 @@
+[sqlfluff]
+dialect = tsql
+max_line_length = 200
+large_file_skip_byte_limit = 0
+
+# Exclude style-only rules to focus on structural/parse errors.
+# ST01: Redundant ELSE NULL in CASE (intentional explicitness)
+# RF02: References in FROM before SELECT (T-SQL SP style)
+# LT11: Set operator line break formatting
+# AL01: Implicit/explicit table aliasing
+# AL03: Column expression without alias (validation CTEs)
+# AL04: Column alias style
+# ST05: Unnecessary JOIN condition
+exclude_rules = ST01,RF02,LT11,AL01,AL03,AL04,ST05
+
+[sqlfluff:indentation]
+indent_unit = space
+tab_space_size = 4

@@ -58,7 +58,7 @@ uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
 
 ## Bundles
 
-This repo provides installable workflow bundles. See [BUNDLES.md](BUNDLES.md) for available bundles (git, secrets, ci, full) and usage.
+This repo provides installable workflow bundles. See [BUNDLES.md](BUNDLES.md) for available bundles (git, secrets, ci, pipeline, graphrag, full) and usage.
 - CLI: `python scripts/apply_bundle.py <source-repo> <target-repo> --bundle git [--bundle secrets] [--force] [--dry-run]`
 
 ## Key Context

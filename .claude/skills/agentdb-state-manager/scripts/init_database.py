@@ -34,7 +34,7 @@ sys.path.insert(
 )
 
 # Constants with documented rationale
-SCHEMA_VERSION = "1.0.0"  # Current schema version for migrations
+SCHEMA_VERSION = "2.0.0"  # Current schema version for migrations
 WORKFLOW_STATES_PATH = Path(__file__).parent.parent / "templates" / "workflow-states.json"
 
 
@@ -178,7 +178,7 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
         )
         ON CONFLICT (schema_name) DO NOTHING;
         """,
-        # Agent synchronizations table (main table for record_sync.py)
+        # Agent synchronizations table (main table for record_sync.py + sync_engine.py)
         """
         CREATE TABLE IF NOT EXISTS agent_synchronizations (
             sync_id VARCHAR PRIMARY KEY,
@@ -194,7 +194,15 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             completed_at TIMESTAMP,
             created_by VARCHAR NOT NULL,
-            metadata JSON
+            metadata JSON,
+            -- Phase 2 fields for SynchronizationEngine (issue #160)
+            trigger_agent_id VARCHAR,
+            trigger_action VARCHAR,
+            trigger_pattern JSON,
+            target_agent_id VARCHAR,
+            target_action VARCHAR,
+            priority INTEGER DEFAULT 100,
+            enabled BOOLEAN DEFAULT TRUE
         );
         """,
         # Indexes for agent_synchronizations
@@ -213,6 +221,89 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
         """
         CREATE INDEX IF NOT EXISTS idx_sync_worktree ON agent_synchronizations(worktree_path);
         """,
+        # Phase 2 indexes for SynchronizationEngine queries (issue #160)
+        """
+        CREATE INDEX IF NOT EXISTS idx_sync_trigger ON agent_synchronizations(trigger_agent_id, trigger_action);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_sync_target ON agent_synchronizations(target_agent_id);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_sync_enabled ON agent_synchronizations(enabled);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_sync_matching ON agent_synchronizations(
+            trigger_agent_id, trigger_action, enabled, priority DESC
+        );
+        """,
+        # Sync executions table (Phase 1 + Phase 2 columns)
+        """
+        CREATE TABLE IF NOT EXISTS sync_executions (
+            execution_id VARCHAR PRIMARY KEY,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
+            execution_order INTEGER NOT NULL,
+            operation_type VARCHAR NOT NULL,
+            file_path VARCHAR,
+            phi_accessed BOOLEAN NOT NULL DEFAULT FALSE,
+            phi_justification TEXT,
+            operation_result VARCHAR,
+            error_message TEXT,
+            started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP,
+            duration_ms INTEGER,
+            checksum_before VARCHAR,
+            checksum_after VARCHAR,
+            metadata JSON,
+            -- Phase 2 fields (issue #160)
+            provenance_hash VARCHAR(64),
+            trigger_state_snapshot JSON,
+            exec_status VARCHAR
+        );
+        """,
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_exec_provenance_unique ON sync_executions(provenance_hash);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_exec_status ON sync_executions(exec_status);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_exec_sync_status ON sync_executions(sync_id, exec_status);
+        """,
+        # Sync audit trail table (healthcare compliance, APPEND-ONLY)
+        """
+        CREATE TABLE IF NOT EXISTS sync_audit_trail (
+            audit_id VARCHAR PRIMARY KEY,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
+            execution_id VARCHAR REFERENCES sync_executions(execution_id) ON DELETE RESTRICT,
+            event_type VARCHAR NOT NULL,
+            actor VARCHAR NOT NULL,
+            actor_role VARCHAR NOT NULL,
+            timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            phi_involved BOOLEAN NOT NULL DEFAULT FALSE,
+            compliance_context JSON NOT NULL,
+            event_details JSON NOT NULL,
+            ip_address VARCHAR,
+            session_id VARCHAR
+        );
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_sync ON sync_audit_trail(sync_id, timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_execution ON sync_audit_trail(execution_id);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_event ON sync_audit_trail(event_type);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON sync_audit_trail(timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_phi ON sync_audit_trail(phi_involved);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_session ON sync_audit_trail(session_id);
+        """,
         # Session metadata table (for workflow state tracking)
         """
         CREATE TABLE IF NOT EXISTS session_metadata (
@@ -220,16 +311,7 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
             value VARCHAR
         );
         """,
-        # Insert session metadata
-        f"""
-        INSERT INTO session_metadata (key, value)
-        VALUES
-            ('session_id', '{session_id}'),
-            ('schema_version', '{SCHEMA_VERSION}'),
-            ('workflow_version', '{workflow_states.get("version", "unknown")}'),
-            ('initialized_at', current_timestamp)
-        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
-        """,
+        # Insert session metadata (parameterized - see _insert_session_metadata)
         # Workflow records table (for workflow state queries)
         """
         CREATE TABLE IF NOT EXISTS workflow_records (
@@ -300,6 +382,32 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
                 warning(f"Statement {i} warning: {e}")
                 # Continue - some statements may fail if already exists
 
+        # Insert session metadata using parameterized queries (prevent SQL injection)
+        workflow_version = workflow_states.get("version", "unknown")
+        session_rows = [
+            ("session_id", session_id),
+            ("schema_version", SCHEMA_VERSION),
+            ("workflow_version", workflow_version),
+        ]
+        for key, value in session_rows:
+            try:
+                conn.execute(
+                    "INSERT INTO session_metadata (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+                    [key, value],
+                )
+            except Exception as e:
+                warning(f"Session metadata '{key}' warning: {e}")
+        # initialized_at uses current_timestamp (no user input)
+        init_at_sql = (
+            "INSERT INTO session_metadata (key, value) "
+            "VALUES ('initialized_at', CAST(current_timestamp AS VARCHAR)) "
+            "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value"
+        )
+        try:
+            conn.execute(init_at_sql)
+        except Exception as e:
+            warning(f"Session metadata 'initialized_at' warning: {e}")
+
         conn.close()
         success(f"Schema created in {db_path}")
         return True
@@ -323,7 +431,7 @@ def validate_schema(db_path: Path) -> bool:
     """
     info("Validating schema...")
 
-    required_tables = ["agent_synchronizations", "session_metadata", "workflow_records", "schema_metadata"]
+    required_tables = ["agent_synchronizations", "session_metadata", "workflow_records", "schema_metadata", "sync_executions", "sync_audit_trail"]
 
     try:
         import duckdb

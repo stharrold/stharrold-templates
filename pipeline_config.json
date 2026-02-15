@@ -1,0 +1,28 @@
+{
+  "pipeline_name": "Example Pipeline v1",
+  "total_steps": 2,
+  "steps": [
+    {
+      "step_number": 1,
+      "step_name": "Example_Utils_v1",
+      "stored_procedure": "[dbo].[Example_Utils_v1_SP]",
+      "sql_file": "sql/v1/example_view.sql",
+      "type": "sql"
+    },
+    {
+      "step_number": 2,
+      "step_name": "Example_Report_v1",
+      "stored_procedure": "[dbo].[Example_Report_v1_SP]",
+      "sql_file": "sql/v1/example_view.sql",
+      "type": "sql"
+    }
+  ],
+  "smoke_tests": [
+    {
+      "name": "Example row count",
+      "table": "Example_Report_v1",
+      "schema": "dbo",
+      "min_rows": 1
+    }
+  ]
+}
