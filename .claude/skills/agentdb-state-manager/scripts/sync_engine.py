@@ -178,10 +178,14 @@ class SynchronizationEngine:
     def _resolve_params(self, action_spec: dict[str, Any], trigger_state: dict[str, Any]) -> dict[str, Any]:
         """Resolve ${trigger_state.path} placeholders in action spec.
 
+        Uses recursive dict traversal to preserve native types (int, dict, list)
+        rather than string-based JSON replacement which corrupts non-string values.
+
         Template Syntax:
         - Simple path: ${trigger_state.field} -> extract top-level field
         - Nested path: ${trigger_state.coverage.percentage} -> nested access
-        - Missing path: ${trigger_state.nonexistent} -> null + warning log
+        - Missing path: ${trigger_state.nonexistent} -> None + warning log
+        - Embedded in string: "Coverage: ${trigger_state.pct}%" -> string interpolation
 
         Args:
             action_spec: Action specification with ${...} placeholders
@@ -200,30 +204,39 @@ class SynchronizationEngine:
             result = _resolve_params(action_spec, trigger_state)
             # Returns: {"action": "notify", "message": "Coverage: 85%"}
         """
-        # Convert to JSON string for regex replacement
-        spec_json = json.dumps(action_spec)
+        pattern = re.compile(r"\$\{trigger_state\.([^}]+)\}")
 
-        # Pattern: ${trigger_state.path.to.value}
-        pattern = r"\$\{trigger_state\.([^}]+)\}"
-
-        def replacer(match):
-            path = match.group(1)
-            value = self._get_nested_value(trigger_state, path)
-
-            if value is None:
-                logger.warning(f"Missing path in trigger_state: {path}")
-                return "null"
-
-            # Always use json.dumps for proper escaping; strip outer quotes
-            # for strings since the placeholder is already inside a JSON string
+        def _resolve_value(value: Any) -> Any:
             if isinstance(value, str):
-                return json.dumps(value)[1:-1]
-            return json.dumps(value)
+                # Check if the entire string is a single placeholder
+                match = pattern.fullmatch(value)
+                if match:
+                    # Whole value is a placeholder -- return native type
+                    resolved = self._get_nested_value(trigger_state, match.group(1))
+                    if resolved is None:
+                        logger.warning(f"Missing path in trigger_state: {match.group(1)}")
+                    return resolved
 
-        # Replace all ${...} patterns
-        resolved_json = re.sub(pattern, replacer, spec_json)
+                # Otherwise do string interpolation for embedded placeholders
+                def _str_replacer(m):
+                    path = m.group(1)
+                    v = self._get_nested_value(trigger_state, path)
+                    if v is None:
+                        logger.warning(f"Missing path in trigger_state: {path}")
+                        return ""
+                    return str(v)
 
-        return json.loads(resolved_json)
+                return pattern.sub(_str_replacer, value)
+
+            if isinstance(value, dict):
+                return {k: _resolve_value(v) for k, v in value.items()}
+
+            if isinstance(value, list):
+                return [_resolve_value(item) for item in value]
+
+            return value
+
+        return _resolve_value(action_spec)
 
     def _pattern_matches(self, pattern: dict[str, Any], state: dict[str, Any]) -> bool:
         """Check if state contains pattern (partial match).

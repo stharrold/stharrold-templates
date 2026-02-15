@@ -34,7 +34,7 @@ sys.path.insert(
 )
 
 # Constants with documented rationale
-SCHEMA_VERSION = "1.0.0"  # Current schema version for migrations
+SCHEMA_VERSION = "2.0.0"  # Current schema version for migrations
 WORKFLOW_STATES_PATH = Path(__file__).parent.parent / "templates" / "workflow-states.json"
 
 
@@ -143,8 +143,120 @@ def load_workflow_states() -> dict[str, Any]:
         error_exit(f"Failed to load workflow-states.json: {e}")
 
 
+def _get_current_schema_version(conn: Any) -> str | None:
+    """Read the current schema version from an existing database.
+
+    Args:
+        conn: Active DuckDB connection
+
+    Returns:
+        Version string (e.g. "1.0.0") or None if no version found.
+    """
+    try:
+        result = conn.execute("SELECT schema_version FROM schema_metadata WHERE schema_name = 'agentdb_sync_schema'").fetchone()
+        return result[0] if result else None
+    except Exception:
+        return None
+
+
+def _migrate_v1_to_v2(conn: Any) -> None:
+    """Migrate schema from v1.0.0 to v2.0.0 using ALTER TABLE.
+
+    Applies Phase 2 columns to existing v1.0.0 tables. All statements use
+    IF NOT EXISTS so this is safe to run multiple times (idempotent).
+
+    Args:
+        conn: Active DuckDB connection
+    """
+    info("Migrating schema from v1.0.0 to v2.0.0...")
+
+    migration_statements = [
+        # agent_synchronizations: Phase 2 fields
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS trigger_agent_id VARCHAR",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS trigger_action VARCHAR",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS trigger_pattern JSON",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS target_agent_id VARCHAR",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS target_action VARCHAR",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 100",
+        "ALTER TABLE agent_synchronizations ADD COLUMN IF NOT EXISTS enabled BOOLEAN DEFAULT TRUE",
+        # sync_executions: Phase 2 fields
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS file_path VARCHAR",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS phi_justification TEXT",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS error_message TEXT",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS started_at TIMESTAMP",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS checksum_before VARCHAR",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS checksum_after VARCHAR",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS metadata JSON",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS provenance_hash VARCHAR(64)",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS trigger_state_snapshot JSON",
+        "ALTER TABLE sync_executions ADD COLUMN IF NOT EXISTS exec_status VARCHAR",
+        # sync_audit_trail: Phase 2 fields
+        "ALTER TABLE sync_audit_trail ADD COLUMN IF NOT EXISTS timestamp TIMESTAMP",
+        "ALTER TABLE sync_audit_trail ADD COLUMN IF NOT EXISTS ip_address VARCHAR",
+        "ALTER TABLE sync_audit_trail ADD COLUMN IF NOT EXISTS session_id VARCHAR",
+        # Phase 2 indexes (IF NOT EXISTS is idempotent)
+        "CREATE INDEX IF NOT EXISTS idx_sync_trigger ON agent_synchronizations(trigger_agent_id, trigger_action)",
+        "CREATE INDEX IF NOT EXISTS idx_sync_target ON agent_synchronizations(target_agent_id)",
+        "CREATE INDEX IF NOT EXISTS idx_sync_enabled ON agent_synchronizations(enabled)",
+        ("CREATE INDEX IF NOT EXISTS idx_sync_matching ON agent_synchronizations(trigger_agent_id, trigger_action, enabled, priority DESC)"),
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_exec_provenance_unique ON sync_executions(provenance_hash)",
+        "CREATE INDEX IF NOT EXISTS idx_exec_status ON sync_executions(exec_status)",
+        "CREATE INDEX IF NOT EXISTS idx_exec_sync_status ON sync_executions(sync_id, exec_status)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_execution ON sync_audit_trail(execution_id)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON sync_audit_trail(timestamp DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_phi ON sync_audit_trail(phi_involved)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_session ON sync_audit_trail(session_id)",
+    ]
+
+    applied = 0
+    for stmt in migration_statements:
+        try:
+            conn.execute(stmt)
+            applied += 1
+        except Exception as e:
+            warning(f"Migration statement warning: {e}")
+
+    # Update schema version to 2.0.0
+    conn.execute(
+        "UPDATE schema_metadata SET schema_version = ?, applied_at = CURRENT_TIMESTAMP WHERE schema_name = 'agentdb_sync_schema'",
+        [SCHEMA_VERSION],
+    )
+
+    success(f"Migration complete: applied {applied}/{len(migration_statements)} statements")
+
+
+def migrate_if_needed(conn: Any) -> None:
+    """Check current schema version and apply migrations if needed.
+
+    Supports incremental migration from v1.0.0 -> v2.0.0.
+    Safe to call on fresh databases (no-op if already at target version).
+
+    Args:
+        conn: Active DuckDB connection
+    """
+    current_version = _get_current_schema_version(conn)
+
+    if current_version is None:
+        # Fresh database or no schema_metadata yet -- create_schema handles this
+        return
+
+    if current_version == SCHEMA_VERSION:
+        info(f"Schema already at v{SCHEMA_VERSION}, no migration needed")
+        return
+
+    if current_version == "1.0.0":
+        _migrate_v1_to_v2(conn)
+        return
+
+    warning(f"Unknown schema version '{current_version}', skipping migration")
+
+
 def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Path) -> bool:
     """Create AgentDB schema with tables and indexes.
+
+    For fresh databases, creates all tables with the v2.0.0 schema.
+    For existing v1.0.0 databases, applies incremental ALTER TABLE migrations.
 
     Args:
         session_id: AgentDB session identifier
@@ -236,21 +348,28 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
             trigger_agent_id, trigger_action, enabled, priority DESC
         );
         """,
-        # Sync executions table (Phase 2 - used by sync_engine.py)
+        # Sync executions table (Phase 1 + Phase 2 columns)
         """
         CREATE TABLE IF NOT EXISTS sync_executions (
             execution_id VARCHAR PRIMARY KEY,
-            sync_id VARCHAR NOT NULL,
-            provenance_hash VARCHAR(64),
-            trigger_state_snapshot JSON,
-            exec_status VARCHAR,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
             execution_order INTEGER NOT NULL,
             operation_type VARCHAR NOT NULL,
+            file_path VARCHAR,
+            phi_accessed BOOLEAN NOT NULL DEFAULT FALSE,
+            phi_justification TEXT,
             operation_result VARCHAR,
-            phi_accessed BOOLEAN DEFAULT FALSE,
+            error_message TEXT,
+            started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP,
             duration_ms INTEGER,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (sync_id) REFERENCES agent_synchronizations(sync_id)
+            checksum_before VARCHAR,
+            checksum_after VARCHAR,
+            metadata JSON,
+            -- Phase 2 fields (issue #160)
+            provenance_hash VARCHAR(64),
+            trigger_state_snapshot JSON,
+            exec_status VARCHAR
         );
         """,
         """
@@ -262,26 +381,40 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
         """
         CREATE INDEX IF NOT EXISTS idx_exec_sync_status ON sync_executions(sync_id, exec_status);
         """,
-        # Sync audit trail table (Phase 2 - healthcare compliance, APPEND-ONLY)
+        # Sync audit trail table (healthcare compliance, APPEND-ONLY)
         """
         CREATE TABLE IF NOT EXISTS sync_audit_trail (
             audit_id VARCHAR PRIMARY KEY,
-            sync_id VARCHAR NOT NULL,
-            execution_id VARCHAR,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
+            execution_id VARCHAR REFERENCES sync_executions(execution_id) ON DELETE RESTRICT,
             event_type VARCHAR NOT NULL,
             actor VARCHAR NOT NULL,
             actor_role VARCHAR NOT NULL,
-            phi_involved BOOLEAN DEFAULT FALSE,
-            compliance_context JSON,
-            event_details JSON,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            phi_involved BOOLEAN NOT NULL DEFAULT FALSE,
+            compliance_context JSON NOT NULL,
+            event_details JSON NOT NULL,
+            ip_address VARCHAR,
+            session_id VARCHAR
         );
         """,
         """
-        CREATE INDEX IF NOT EXISTS idx_audit_sync ON sync_audit_trail(sync_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_sync ON sync_audit_trail(sync_id, timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_execution ON sync_audit_trail(execution_id);
         """,
         """
         CREATE INDEX IF NOT EXISTS idx_audit_event ON sync_audit_trail(event_type);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON sync_audit_trail(timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_phi ON sync_audit_trail(phi_involved);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_session ON sync_audit_trail(session_id);
         """,
         # Session metadata table (for workflow state tracking)
         """
@@ -360,6 +493,9 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
             except Exception as e:
                 warning(f"Statement {i} warning: {e}")
                 # Continue - some statements may fail if already exists
+
+        # Migrate existing databases from older schema versions
+        migrate_if_needed(conn)
 
         # Insert session metadata using parameterized queries (prevent SQL injection)
         workflow_version = workflow_states.get("version", "unknown")
