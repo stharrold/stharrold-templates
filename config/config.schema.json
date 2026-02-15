@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SQL Pipeline Environment Config",
+  "description": "Schema for config.{env}.json files used by the SQL pipeline.",
+  "type": "object",
+  "required": [
+    "environment",
+    "connection_template",
+    "server",
+    "database",
+    "username"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "environment": {
+      "type": "string",
+      "enum": ["dev", "qa", "prod"],
+      "description": "Target environment identifier."
+    },
+    "connection_template": {
+      "type": "string",
+      "minLength": 10,
+      "description": "ODBC connection string template with {server}, {database}, {username}, {password}, {timeout} placeholders."
+    },
+    "server": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SQL Server hostname."
+    },
+    "database": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Database name."
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535,
+      "description": "TCP port (default 1433)."
+    },
+    "timeout": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 86400,
+      "description": "Connection timeout in seconds."
+    },
+    "username": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Username for authentication."
+    }
+  }
+}

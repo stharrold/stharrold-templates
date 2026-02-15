@@ -1,0 +1,171 @@
+# Azure Pipelines CI/CD for SQL Server ETL Pipeline
+#
+# This pipeline runs automated tests on PRs and commits to develop/master branches.
+# Quality gates enforce >=80% code coverage before merging.
+#
+# TODO: Customize -- update deployment mapping for your environments:
+#   - develop    -> DEV (auto-deploy)
+#   - release/*  -> QA (auto-deploy)
+#   - master     -> PROD (auto-deploy)
+#
+# Editable branches (no direct deploys): contrib/*, feature/*
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - develop
+      - master
+      - release/*
+      - contrib/*
+      - feature/*
+  paths:
+    exclude:
+      - 'docs/**'
+      - '*.md'
+
+pr:
+  branches:
+    include:
+      - develop
+      - master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  - name: PYTHON_VERSION
+    value: '3.11'
+  - name: COVERAGE_THRESHOLD
+    value: 80
+
+stages:
+- stage: Test
+  displayName: 'Test and Quality Gates'
+  jobs:
+  - job: DetectChanges
+    displayName: 'Detect file changes'
+    steps:
+    - checkout: self
+      fetchDepth: 2
+
+    - powershell: |
+        # Fallback: if HEAD~1 doesn't exist (new branch), run everything
+        $diff = git diff --name-only HEAD~1 2>$null
+        if (-not $diff) {
+            Write-Host "No diff available (new branch?) - running all jobs"
+            $hasPython = $true
+            $hasSQL = $true
+            $hasPipeline = $true
+        } else {
+            Write-Host "Changed files:"
+            $diff | ForEach-Object { Write-Host "  $_" }
+
+            $hasPython = ($diff | Where-Object { $_ -match '^(src/|tests/|pyproject\.toml|uv\.lock)' }).Count -gt 0
+            $hasSQL = ($diff | Where-Object { $_ -match '^(sql/v1/.*\.sql|\.sqlfluff)' }).Count -gt 0
+            $hasPipeline = ($diff | Where-Object { $_ -match '^azure-pipelines\.yml$' }).Count -gt 0
+        }
+
+        Write-Host ""
+        Write-Host "=== Change Detection ==="
+        Write-Host "HAS_PYTHON_CHANGES=$hasPython   (src/, tests/, pyproject.toml, uv.lock)"
+        Write-Host "HAS_SQL_CHANGES=$hasSQL   (sql/v1/*.sql, .sqlfluff)"
+        Write-Host "HAS_PIPELINE_CHANGES=$hasPipeline   (azure-pipelines.yml)"
+
+        Write-Host "##vso[task.setvariable variable=HAS_PYTHON_CHANGES;isOutput=true]$hasPython"
+        Write-Host "##vso[task.setvariable variable=HAS_SQL_CHANGES;isOutput=true]$hasSQL"
+        Write-Host "##vso[task.setvariable variable=HAS_PIPELINE_CHANGES;isOutput=true]$hasPipeline"
+      name: changes
+      displayName: 'Detect changed file groups'
+
+  - job: TestCode
+    displayName: 'test-code: Lint, Type Check, Unit Tests'
+    dependsOn: DetectChanges
+    condition: |
+      or(
+        eq(dependencies.DetectChanges.outputs['changes.HAS_PYTHON_CHANGES'], 'True'),
+        eq(dependencies.DetectChanges.outputs['changes.HAS_SQL_CHANGES'], 'True'),
+        eq(dependencies.DetectChanges.outputs['changes.HAS_PIPELINE_CHANGES'], 'True')
+      )
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(PYTHON_VERSION)'
+      displayName: 'Use Python $(PYTHON_VERSION)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install uv
+      displayName: 'Install uv package manager'
+
+    - script: |
+        uv sync
+        uv sync --group dev
+      displayName: 'Install dependencies'
+
+    - script: |
+        uv run ruff check src/ tests/
+      displayName: 'Lint Python files (ruff)'
+
+    - script: |
+        uv run sqlfluff lint sql/v1/ --dialect tsql
+      displayName: 'Lint SQL files (sqlfluff)'
+      continueOnError: true
+
+    - script: |
+        uv run mypy src/ --ignore-missing-imports
+      displayName: 'Type check (mypy)'
+      continueOnError: true
+
+    - script: |
+        uv run pytest tests/unit/ --cov=src --cov-report=xml --cov-report=html --cov-report=term --cov-config=pyproject.toml --junitxml=test-results-unit.xml -v
+      displayName: 'Run unit tests with coverage'
+
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'test-results-unit.xml'
+        testRunTitle: 'Unit Tests'
+        failTaskOnFailedTests: true
+      displayName: 'Publish unit test results'
+
+    - task: PublishCodeCoverageResults@2
+      condition: succeededOrFailed()
+      inputs:
+        summaryFileLocation: 'coverage.xml'
+        pathToSources: 'src/'
+        failIfCoverageEmpty: true
+      displayName: 'Publish code coverage'
+
+    - script: |
+        uv run python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); coverage = float(root.attrib['line-rate']) * 100; print(f'Coverage: {coverage:.1f}%%'); exit(0 if coverage >= $(COVERAGE_THRESHOLD) else 1)"
+      displayName: 'Enforce coverage threshold (>=$(COVERAGE_THRESHOLD)%%)'
+
+# TODO: Customize -- uncomment and update deploy stages for your environments.
+# - stage: DeployDev
+#   displayName: 'Deploy to DEV'
+#   dependsOn: Test
+#   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+#   jobs:
+#   - deployment: DeployDev
+#     displayName: 'Deploy to DEV'
+#     environment: 'DEV'
+#     pool:
+#       vmImage: 'windows-latest'
+#     strategy:
+#       runOnce:
+#         deploy:
+#           steps:
+#           - checkout: self
+#           - task: UsePythonVersion@0
+#             inputs:
+#               versionSpec: '$(PYTHON_VERSION)'
+#           - script: |
+#               python -m pip install --upgrade pip && pip install uv && uv sync
+#             displayName: 'Install dependencies'
+#           - script: |
+#               uv run python -m src.execute_pipeline --environment dev
+#             displayName: 'Execute pipeline'
+#             env:
+#               EDW_PASSWORD: $(edw-service-account-password)

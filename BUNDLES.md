@@ -147,6 +147,41 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 
 ---
 
+### `sql-pipeline` -- SQL Server ETL Pipeline
+
+Python-orchestrated SQL Server ETL pipeline. Executes stored procedures in dependency order via `pipeline_config.json`, produces auditable JSONL logs with YAML frontmatter, and includes ad-hoc query runner and SQL deployer tools. Uses pyodbc, retry-on-transient-error, and atomic file writes.
+
+**Core infrastructure (template-owned):**
+- `src/__init__.py` -- Package init with version
+- `src/config_validator.py` -- Lightweight JSON schema validator (no jsonschema dependency)
+- `src/deployer.py` -- SQL file deployment with GO-batch splitting
+- `src/environment_utils.py` -- CI/WSL environment detection
+- `src/execute_pipeline.py` -- Pipeline orchestrator (load_config, get_connection_string, PipelineRunner)
+- `src/file_writer.py` -- YAML frontmatter + atomic writes (4-file output)
+- `src/logger.py` -- JSONL logging with batch and time-based progress tracking
+- `src/query_runner.py` -- Paginated query execution with 4-file output
+- `src/query_types.py` -- TypedDict, dataclass, and Literal type definitions
+- `src/resumption.py` -- Row-level (WHERE clause) and step-level pipeline resumption
+- `src/retry.py` -- Retry decorator for transient pyodbc errors
+- `src/slug_generator.py` -- Filename slug generation from SQL or description
+- `src/sql_utils.py` -- GO-batch splitter
+- `docs/sharepoint/build.py` -- Assemble source .md files into single SharePoint page
+
+**Project-specific (user-owned, skip on update):**
+- `config/config.schema.json` -- JSON schema for config.{env}.json
+- `config/config.dev.json` -- Dev environment connection config
+- `pipeline_config.json` -- Pipeline step definitions and smoke tests
+- `.sqlfluff` -- SQLFluff linter config (tsql dialect)
+- `azure-pipelines.yml` -- Azure Pipelines CI/CD template
+- `sql/v1/example_view.sql` -- Example SP + EXEC + VIEW pattern
+- `docs/sharepoint/src/10_overview.md` -- Documentation overview page
+
+**Merge files (user-owned):**
+- `pyproject.toml` -- adds `pyodbc`, `polars`, `pyyaml`, `sqlfluff`, `mypy`
+- `.gitignore` -- appends `outputs/`, `*.log.jsonl`, `.claude-state/`, `.tmp/`
+
+---
+
 ### `graphrag` -- Graph RAG Retrieval
 
 Graph-based retrieval-augmented generation. Embeds queries, searches the knowledge graph via Hamming distance, reranks with cosine similarity, expands context via N-hop graph walks, then generates answers with source citations. Requires `pipeline` bundle (auto-included).
@@ -165,7 +200,7 @@ Graph-based retrieval-augmented generation. Embeds queries, searches the knowled
 
 ### `full` -- Everything
 
-All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`), plus additional skills and documentation.
+All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline`, plus additional skills and documentation.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`
@@ -184,9 +219,9 @@ Ownership determines what happens when a bundle is applied to a repo that alread
 
 | Ownership | Files | First Install | Update | `--force` |
 |---|---|---|---|---|
-| **Template-owned** | Skills, commands, scripts, core `utils/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows | Copy | Replace | Replace |
+| **Template-owned** | Skills, commands, scripts, core `utils/`, core `src/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows, `docs/sharepoint/build.py` | Copy | Replace | Replace |
 | **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Merge |
-| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py` | Copy from template | Skip + print warning | Replace |
+| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `config/config.*.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py`, `.sqlfluff`, `azure-pipelines.yml`, `sql/v1/example_view.sql`, `docs/sharepoint/src/*.md` | Copy from template | Skip + print warning | Replace |
 | **Override** | Template-owned + skip-on-update | -- | -- | Replace (merge files still merge) |
 
 ### Merge behavior details

@@ -6,7 +6,7 @@
 Usage:
     python scripts/apply_bundle.py <source-repo> <target-repo> --bundle <name> [--bundle <name>] [--force] [--dry-run]
 
-Bundles: git, secrets, ci, pipeline, graphrag, full
+Bundles: git, secrets, ci, pipeline, graphrag, sql-pipeline, full
 """
 
 from __future__ import annotations
@@ -95,6 +95,45 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "json-repair>=0.39.0",
         ],
     },
+    "sql-pipeline": {
+        "skills": [],
+        "commands": [],
+        "copy_files": [
+            # Core infrastructure (template-owned, always replaced)
+            "src/__init__.py",
+            "src/config_validator.py",
+            "src/deployer.py",
+            "src/environment_utils.py",
+            "src/execute_pipeline.py",
+            "src/file_writer.py",
+            "src/logger.py",
+            "src/query_runner.py",
+            "src/query_types.py",
+            "src/resumption.py",
+            "src/retry.py",
+            "src/slug_generator.py",
+            "src/sql_utils.py",
+            "docs/sharepoint/build.py",
+        ],
+        "skip_on_update": [
+            # Project-specific (user customizes)
+            "config/config.schema.json",
+            "config/config.dev.json",
+            "pipeline_config.json",
+            ".sqlfluff",
+            "azure-pipelines.yml",
+            "sql/v1/example_view.sql",
+            "docs/sharepoint/src/10_overview.md",
+        ],
+        "merge_gitignore": True,
+        "merge_pyproject_deps": [
+            "pyodbc>=5.1.0",
+            "polars>=1.0.0",
+            "pyyaml>=6.0.0",
+            "sqlfluff>=3.0.0",
+            "mypy>=1.10.0",
+        ],
+    },
     "graphrag": {
         "includes": ["pipeline"],
         "skills": [],
@@ -113,7 +152,7 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_pyproject_deps": [],
     },
     "full": {
-        "includes": ["git", "secrets", "ci", "graphrag"],
+        "includes": ["git", "secrets", "ci", "graphrag", "sql-pipeline"],
         "skills": ["tech-stack-adapter", "agentdb-state-manager", "initialize-repository"],
         "commands": [],
         "copy_files": [],

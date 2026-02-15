@@ -40,6 +40,10 @@ build/
 *.egg-info/
 .tmp/
 
+# Pipeline outputs
+outputs/
+*.log.jsonl
+
 # Worktree state (per-worktree mutable state)
 .claude-state/
 
