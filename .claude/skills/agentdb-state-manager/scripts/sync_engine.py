@@ -214,8 +214,11 @@ class SynchronizationEngine:
                 logger.warning(f"Missing path in trigger_state: {path}")
                 return "null"
 
-            # Return JSON-encoded value (handles strings, numbers, objects)
-            return json.dumps(value) if not isinstance(value, str) else value
+            # Always use json.dumps for proper escaping; strip outer quotes
+            # for strings since the placeholder is already inside a JSON string
+            if isinstance(value, str):
+                return json.dumps(value)[1:-1]
+            return json.dumps(value)
 
         # Replace all ${...} patterns
         resolved_json = re.sub(pattern, replacer, spec_json)
@@ -332,9 +335,8 @@ class SynchronizationEngine:
     def _detect_phi(self, state: dict[str, Any]) -> bool:
         """Detect if state contains PHI (Protected Health Information).
 
-        Heuristics:
-        - Check for common PHI field names
-        - Check for patterns (SSN, MRN, email, phone)
+        Delegates to PHIDetector from worktree_agent_integration.py (Phase 3)
+        for field name heuristics, SSN pattern matching, and PHI path detection.
 
         Note: This is a conservative heuristic. False positives are acceptable
         (better to over-log than under-log for compliance).
@@ -345,9 +347,13 @@ class SynchronizationEngine:
         Returns:
             True if PHI detected, False otherwise
         """
-        # See #184: Implement sophisticated PHI detection (Phase 3)
-        # For Phase 2, return False (defer to Phase 3)
-        return False
+        try:
+            from worktree_agent_integration import PHIDetector
+
+            return PHIDetector.detect_phi(state)
+        except ImportError:
+            logger.warning("PHIDetector not available, falling back to no-detection")
+            return False
 
     def _log_audit_trail(self, sync_id: str, execution_id: str, event_type: str, phi_involved: bool, event_details: dict[str, Any]):
         """Log event to sync_audit_trail (APPEND-ONLY compliance log).
