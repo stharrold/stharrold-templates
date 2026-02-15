@@ -110,9 +110,62 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 
 ---
 
+### `pipeline` -- Document Processing Pipeline
+
+6-stage ETL pipeline for building knowledge graphs from documents. Uses DuckDB, ONNX embeddings (MiniLM-L6-v2), and Ollama LLM for entity extraction. Domain-agnostic core with email examples as skip-on-update customization points.
+
+**Core infrastructure (template-owned):**
+- `utils/__init__.py`
+- `utils/core_db.py` -- DuckDB singleton (`raw_documents`, `knowledge_graphs`, `graph_nodes`, `semantic_edges`)
+- `utils/core_embedder.py` -- ONNX MiniLM-L6-v2 (384-dim → 384-bit quantized)
+- `utils/core_llm.py` -- Ollama HTTP API wrapper
+- `utils/json_repair.py` -- JSON repair for LLM output
+- `utils/pipe_04_vectorize.py` -- ONNX embed + 1-bit quantize
+- `utils/pipe_06_optimize.py` -- PageRank, HITS, community detection, embedding clustering
+- `utils/pipe_parallel.py` -- 2-phase batch pipeline (DB released during LLM inference)
+- `utils/pipe_runner.py` -- Sequential pipeline orchestrator
+- `utils/bench_log.py` -- Per-document JSONL bench logging
+- `utils/bench_compare.py` -- Cross-model bench comparison
+- `utils/tool_maintenance.py` -- DB stats and integrity checks
+- `models/Modelfile.qwen3-0.6b` -- Default Ollama model definition
+- `scripts/ollama_start.ps1`, `scripts/ollama_stop.ps1` -- Ollama lifecycle
+- `scripts/run_pipeline.ps1` -- Orchestrated pipeline run
+- `scripts/run_pipeline_incremental.py` -- Incremental import + process
+
+**Domain-specific (user-owned, skip on update):**
+- `utils/pipe_01_ingest.py` -- Document ingestion (email example)
+- `utils/pipe_02_verify.py` -- Verification heuristics (email example)
+- `utils/pipe_02b_strip.py` -- Content preprocessing (email example)
+- `utils/pipe_02c_threads.py` -- Thread/relationship analysis (email example)
+- `utils/pipe_03_decompose.py` -- Entity types and LLM prompts (email example)
+- `utils/pipe_05_link.py` -- Edge types and linking rules (email example)
+- `config/pipeline_config.json` -- Model, LLM options, chunk tiers
+
+**Merge files (user-owned):**
+- `pyproject.toml` -- adds `duckdb`, `onnxruntime`, `numpy`, `httpx`, `scikit-learn`, `json-repair`
+- `.gitignore` -- appends `*.duckdb`, `*.duckdb.wal`, `.claude-state/`, `.tmp/`
+
+---
+
+### `graphrag` -- Graph RAG Retrieval
+
+Graph-based retrieval-augmented generation. Embeds queries, searches the knowledge graph via Hamming distance, reranks with cosine similarity, expands context via N-hop graph walks, then generates answers with source citations. Requires `pipeline` bundle (auto-included).
+
+**Retrieval infrastructure (template-owned):**
+- `utils/core_reranker.py` -- Cosine reranking of Hamming-retrieved candidates
+- `utils/rag_generate.py` -- Full RAG pipeline: embed → search → rerank → expand → generate
+
+**Domain-specific (user-owned, skip on update):**
+- `utils/core_formatter.py` -- Citation formatting (email example)
+- `utils/rag_directives.py` -- RAG prompt templates (email example)
+
+**Includes:** `pipeline` (all pipeline files + deps are auto-included)
+
+---
+
 ### `full` -- Everything
 
-All files from `git` + `secrets` + `ci`, plus additional skills and documentation.
+All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`), plus additional skills and documentation.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`
@@ -131,9 +184,9 @@ Ownership determines what happens when a bundle is applied to a repo that alread
 
 | Ownership | Files | First Install | Update | `--force` |
 |---|---|---|---|---|
-| **Template-owned** | Skills, commands, scripts, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows | Copy | Replace | Replace |
+| **Template-owned** | Skills, commands, scripts, core `utils/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows | Copy | Replace | Replace |
 | **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Merge |
-| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml` | Copy from template | Skip + print warning | Replace |
+| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py` | Copy from template | Skip + print warning | Replace |
 | **Override** | Template-owned + skip-on-update | -- | -- | Replace (merge files still merge) |
 
 ### Merge behavior details

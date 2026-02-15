@@ -6,7 +6,7 @@
 Usage:
     python scripts/apply_bundle.py <source-repo> <target-repo> --bundle <name> [--bundle <name>] [--force] [--dry-run]
 
-Bundles: git, secrets, ci, full
+Bundles: git, secrets, ci, pipeline, graphrag, full
 """
 
 from __future__ import annotations
@@ -52,8 +52,68 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_gitignore": False,
         "merge_pyproject_deps": ["ruff>=0.14.1", "pytest>=8.4.2", "pytest-cov>=7.0.0", "pre-commit>=4.5.0"],
     },
+    "pipeline": {
+        "skills": [],
+        "commands": [],
+        "copy_files": [
+            # Core infrastructure (template-owned, always replaced)
+            "utils/__init__.py",
+            "utils/core_db.py",
+            "utils/core_embedder.py",
+            "utils/core_llm.py",
+            "utils/json_repair.py",
+            "utils/pipe_04_vectorize.py",
+            "utils/pipe_06_optimize.py",
+            "utils/pipe_parallel.py",
+            "utils/pipe_runner.py",
+            "utils/bench_log.py",
+            "utils/bench_compare.py",
+            "utils/tool_maintenance.py",
+            "models/Modelfile.qwen3-0.6b",
+            "scripts/ollama_start.ps1",
+            "scripts/ollama_stop.ps1",
+            "scripts/run_pipeline.ps1",
+            "scripts/run_pipeline_incremental.py",
+        ],
+        "skip_on_update": [
+            # Domain-specific (email examples, user customizes)
+            "utils/pipe_01_ingest.py",
+            "utils/pipe_02_verify.py",
+            "utils/pipe_02b_strip.py",
+            "utils/pipe_02c_threads.py",
+            "utils/pipe_03_decompose.py",
+            "utils/pipe_05_link.py",
+            "config/pipeline_config.json",
+        ],
+        "merge_gitignore": True,
+        "merge_pyproject_deps": [
+            "duckdb>=1.2.0",
+            "onnxruntime>=1.21.0",
+            "numpy>=2.2.0",
+            "httpx>=0.28.0",
+            "scikit-learn>=1.6.0",
+            "json-repair>=0.39.0",
+        ],
+    },
+    "graphrag": {
+        "includes": ["pipeline"],
+        "skills": [],
+        "commands": [],
+        "copy_files": [
+            # Retrieval infrastructure (template-owned)
+            "utils/core_reranker.py",
+            "utils/rag_generate.py",
+        ],
+        "skip_on_update": [
+            # Domain-specific formatting and prompts
+            "utils/core_formatter.py",
+            "utils/rag_directives.py",
+        ],
+        "merge_gitignore": False,
+        "merge_pyproject_deps": [],
+    },
     "full": {
-        "includes": ["git", "secrets", "ci"],
+        "includes": ["git", "secrets", "ci", "graphrag"],
         "skills": ["tech-stack-adapter", "agentdb-state-manager", "initialize-repository"],
         "commands": [],
         "copy_files": [],
@@ -105,25 +165,30 @@ def validate_target(target: Path) -> tuple[bool, str]:
 def resolve_bundles(names: list[str]) -> list[str]:
     """Expand composite bundles (e.g. ``full``) into constituents.
 
+    Recursively expands ``includes`` so nested composites (e.g.
+    ``full`` → ``graphrag`` → ``pipeline``) are fully flattened.
     Returns a flat, deduplicated list preserving first-seen order.
     """
     seen: set[str] = set()
     result: list[str] = []
 
-    for name in names:
+    def _expand(name: str) -> None:
         if name not in VALID_BUNDLE_NAMES:
             raise ValueError(f"Unknown bundle: {name!r} (valid: {sorted(VALID_BUNDLE_NAMES)})")
+        if name in seen:
+            return
         defn = BUNDLE_DEFINITIONS[name]
+        # Recursively expand includes first
         if "includes" in defn:
             for sub in defn["includes"]:
-                if sub not in seen:
-                    seen.add(sub)
-                    result.append(sub)
-        # The composite bundle itself is always included (it may have its own
-        # skills/copy_dirs on top of the included sub-bundles).
+                _expand(sub)
+        # Then add the bundle itself
         if name not in seen:
             seen.add(name)
             result.append(name)
+
+    for name in names:
+        _expand(name)
 
     return result
 
