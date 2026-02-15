@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Reranking layer: refine Hamming-based retrieval with cosine similarity."""
 
 import logging

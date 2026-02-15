@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 import argparse
 import json
 import logging
@@ -30,7 +32,7 @@ def main():
     ollama_cfg = config.get("ollama", {})
     pipeline_cfg = config.get("pipeline", {})
 
-    # Resolve Stage 03 params from args → config → defaults
+    # Resolve Stage 03 params from args -> config -> defaults
     workers = args.workers if args.workers > 0 else pipeline_cfg.get("workers", 4)
     model = args.model if args.model else ollama_cfg.get("model", "qwen2.5:0.5b-q2_K")
 

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """DuckDB maintenance: stats, vacuum, and integrity checks for document graph."""
 
 import argparse

@@ -1,12 +1,14 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Incremental pipeline: import new documents, verify, and process.
 
 Designed to run periodically via Task Scheduler after an external export
 writes new documents into the source database.
 
 Three phases, all idempotent:
-  1. Import  — Source DB → DuckDB (skip existing document_ids)
-  2. Verify  — pipe_02.run_all() on status='new' documents
-  3. Process — pipe_parallel.run_batches(batch_size=25) on verified documents
+  1. Import  --Source DB -> DuckDB (skip existing document_ids)
+  2. Verify  --pipe_02.run_all() on status='new' documents
+  3. Process --pipe_parallel.run_batches(batch_size=25) on verified documents
 """
 
 import datetime
@@ -18,8 +20,8 @@ from pathlib import Path
 # Allow imports from project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from utils.core_db import CoreDB
 from utils import pipe_02_verify
+from utils.core_db import CoreDB
 from utils.pipe_parallel import run_batches
 
 
@@ -46,7 +48,7 @@ def main():
     logger.debug("Log file: %s", log_path)
 
     # --- Phase 1: Import from source database ---
-    logger.info("--- Phase 1: Import (source DB → DuckDB) ---")
+    logger.info("--- Phase 1: Import (source DB -> DuckDB) ---")
     t0 = time.perf_counter()
     with CoreDB() as db:
         before = db.query("SELECT count(*) FROM raw_documents")[0][0]
@@ -55,15 +57,13 @@ def main():
         # db.migrate_from_source()
         after = db.query("SELECT count(*) FROM raw_documents")[0][0]
     new_imported = after - before
-    logger.info("Imported %d new documents (%d → %d total) [%.1fs]", new_imported, before, after, time.perf_counter() - t0)
+    logger.info("Imported %d new documents (%d -> %d total) [%.1fs]", new_imported, before, after, time.perf_counter() - t0)
 
     # --- Phase 2: Verify + Strip + Threads ---
     logger.info("--- Phase 2: Verify + Strip + Threads ---")
     t0 = time.perf_counter()
     with CoreDB() as db:
-        new_count = db.query(
-            "SELECT count(*) FROM raw_documents WHERE processed_status = 'new'"
-        )[0][0]
+        new_count = db.query("SELECT count(*) FROM raw_documents WHERE processed_status = 'new'")[0][0]
     if new_count == 0:
         logger.info("No new documents to verify. Skipping Phase 2.")
     else:

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Compare two JSONL bench log files side-by-side.
 
 Usage:

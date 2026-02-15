@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """JSONL bench logger for per-document extraction results and cross-model comparison."""
 
 import json

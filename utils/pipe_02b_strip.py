@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Pipeline stage 02b: Strip quoted content and sanitize document text.
 
 Preserves original body in raw_documents.body, writes stripped version to body_stripped.

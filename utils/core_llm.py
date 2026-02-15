@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Thin wrapper over Ollama HTTP API for local LLM inference."""
 
 import json

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """JSON repair utilities for handling malformed LLM outputs.
 
 Uses the `json-repair` package (PyPI) for robust repair, plus custom cleanup

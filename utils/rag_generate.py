@@ -1,4 +1,6 @@
-"""RAG Generation: query → embed → search → rerank → format → generate → answer with citations."""
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
+"""RAG Generation: query -> embed -> search -> rerank -> format -> generate -> answer with citations."""
 
 import argparse
 import hashlib

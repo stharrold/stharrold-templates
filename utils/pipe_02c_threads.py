@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Pipeline stage 02c: Thread analysis and position tagging.
 
 Identifies document threads using conversation_id and marks each document's position:

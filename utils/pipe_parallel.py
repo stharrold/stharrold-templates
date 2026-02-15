@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """2-phase parallel pipeline: LLM inference with DB released, then brief DB writes.
 
 Architecture:
@@ -6,13 +8,13 @@ Architecture:
   Phase 3 (Persist): Open DB briefly to batch-write results (~30-60s)
 
 Stages per document (in phase 2):
-  03  Decompose  — LLM entity extraction with adaptive chunking
-  04  Vectorize  — ONNX embed summary + entities, quantize to 1-bit
-  05a Link-local — Build sender/recipient/alias nodes + edges in memory
+  03  Decompose  --LLM entity extraction with adaptive chunking
+  04  Vectorize  --ONNX embed summary + entities, quantize to 1-bit
+  05a Link-local --Build sender/recipient/alias nodes + edges in memory
 
 After DB writes (in phase 3):
-  06i Incremental — Approximate PageRank/HITS/community for new nodes
-  06m Milestone   — Full optimization at geometric milestones (10, 30, 100, 300, ...)
+  06i Incremental --Approximate PageRank/HITS/community for new nodes
+  06m Milestone   --Full optimization at geometric milestones (10, 30, 100, 300, ...)
 """
 
 import json
@@ -55,7 +57,7 @@ MIDDLE_SUBSTANTIVE_THRESHOLD = 200
 
 
 def _decompose_document(llm, embedder, did, subject, body, from_name, from_email, to_emails, cc_emails):
-    """Run stages 03 → 04 → 05a for a single document. No DB access.
+    """Run stages 03 -> 04 -> 05a for a single document. No DB access.
 
     Returns a result dict with all data needed for _persist_results().
     """
@@ -319,9 +321,9 @@ def _fetch_query(threshold):
                    AND LENGTH(COALESCE(r.body_stripped, r.body, '')) > {threshold}))
         ORDER BY
           (EXISTS (SELECT 1 FROM semantic_edges e WHERE e.target_id = r.document_id AND e.edge_type = 'reply_to')) DESC,
-          (LOWER(r.from_email) = 'sharrold@iuhealth.org') DESC,
-          (LOWER(r.to_emails) LIKE '%sharrold@iuhealth.org%') DESC,
-          (LOWER(r.cc_emails) LIKE '%sharrold@iuhealth.org%') DESC,
+          (LOWER(r.from_email) = 'stharrold') DESC,
+          (LOWER(r.to_emails) LIKE '%stharrold%') DESC,
+          (LOWER(r.cc_emails) LIKE '%stharrold%') DESC,
           r.received_time_utc DESC NULLS LAST
         LIMIT ?
     """
@@ -339,9 +341,9 @@ def _middle_query(threshold):
           AND LENGTH(COALESCE(r.body_stripped, r.body, '')) <= {threshold}
         ORDER BY
           (EXISTS (SELECT 1 FROM semantic_edges e WHERE e.target_id = r.document_id AND e.edge_type = 'reply_to')) DESC,
-          (LOWER(r.from_email) = 'sharrold@iuhealth.org') DESC,
-          (LOWER(r.to_emails) LIKE '%sharrold@iuhealth.org%') DESC,
-          (LOWER(r.cc_emails) LIKE '%sharrold@iuhealth.org%') DESC,
+          (LOWER(r.from_email) = 'stharrold') DESC,
+          (LOWER(r.to_emails) LIKE '%stharrold%') DESC,
+          (LOWER(r.cc_emails) LIKE '%stharrold%') DESC,
           r.received_time_utc DESC NULLS LAST
         LIMIT ?
     """
@@ -424,7 +426,7 @@ def run(batch_size=10, workers=1, model=None, bench=False):
 
     # --- Report ---
     print(f"\n{'=' * 90}")
-    print(f"PARALLEL PIPELINE RESULTS — {len(docs)} documents, wall time: {wall_elapsed:.1f}s")
+    print(f"PARALLEL PIPELINE RESULTS --{len(docs)} documents, wall time: {wall_elapsed:.1f}s")
     print(f"{'=' * 90}")
 
     print(f"\n{'#':>2}  {'OK':>3}  {'03_decomp':>10}  {'04_vector':>10}  {'05a_link':>10}  Subject")
@@ -432,9 +434,9 @@ def run(batch_size=10, workers=1, model=None, bench=False):
     for i, r in enumerate(results, 1):
         t = r.get("timings", {})
         ok = "Y" if r.get("ok") else "N"
-        d03 = f"{t.get('03_decompose', 0):.1f}s" if "03_decompose" in t else "—"
-        d04 = f"{t.get('04_vectorize', 0):.3f}s" if "04_vectorize" in t else "—"
-        d05 = f"{t.get('05a_link_local', 0):.3f}s" if "05a_link_local" in t else "—"
+        d03 = f"{t.get('03_decompose', 0):.1f}s" if "03_decompose" in t else "--"
+        d04 = f"{t.get('04_vectorize', 0):.3f}s" if "04_vectorize" in t else "--"
+        d05 = f"{t.get('05a_link_local', 0):.3f}s" if "05a_link_local" in t else "--"
         subj = r.get("subject", "")
         if not r.get("ok"):
             subj = f"[ERR: {r.get('error', '?')[:40]}]"

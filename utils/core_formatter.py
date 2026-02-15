@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """Format graph nodes and search results for display and LLM context (document domain)."""
 
 import logging
@@ -56,7 +58,7 @@ def format_search_results_as_context(results, citation_lookup=None):
             meta = citation_lookup[node_id]
             label = _extract_document_label(meta)
             if label:
-                header += f" — {label}"
+                header += f" --{label}"
 
         context_parts.append(f"{header}\n{content}")
 
@@ -82,4 +84,4 @@ def _extract_document_label(meta):
     if folder:
         parts.append(folder)
 
-    return " — ".join(parts) if parts else None
+    return " --".join(parts) if parts else None

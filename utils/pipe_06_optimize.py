@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 import logging
 import time
 
@@ -211,7 +213,7 @@ def run_community_detection(db, rounds=COMMUNITY_ROUNDS):
 def run_embedding_clusters(db, k=EMBEDDING_CLUSTERS_K):
     """K-means clustering on node embeddings for semantic community detection.
 
-    Converts 1-bit embeddings to ±1 float vectors, runs MiniBatchKMeans,
+    Converts 1-bit embeddings to +/-1 float vectors, runs MiniBatchKMeans,
     and stores cluster assignments in embedding_cluster_id.
     """
     logger.info("Running embedding clustering (k=%d)...", k)
@@ -230,7 +232,7 @@ def run_embedding_clusters(db, k=EMBEDDING_CLUSTERS_K):
     logger.info("  Loading %d email embeddings...", len(rows))
     node_ids = [r[0] for r in rows]
 
-    # Convert 6 UBIGINTs to ±1 float vectors for meaningful Euclidean distance
+    # Convert 6 UBIGINTs to +/-1 float vectors for meaningful Euclidean distance
     vectors = np.zeros((len(rows), 384), dtype=np.float32)
     for i, (_, *ubigints) in enumerate(rows):
         for u_idx, val in enumerate(ubigints):

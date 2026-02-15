@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 import json
 import logging
 import time
@@ -97,7 +99,7 @@ class CoreDB:
         """)
 
         # 1b. Attachments table
-        # No FK constraint — DuckDB blocks UPDATE on parent rows with FK children
+        # No FK constraint --DuckDB blocks UPDATE on parent rows with FK children
         self.conn.execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table("attachments")} (
                 id INTEGER PRIMARY KEY,
@@ -108,7 +110,7 @@ class CoreDB:
         """)
 
         # 2. Knowledge Graph (JSON-LD Storage)
-        # No FK constraint — DuckDB blocks UPDATE on parent rows with FK children
+        # No FK constraint --DuckDB blocks UPDATE on parent rows with FK children
         self.conn.execute(f"""
             CREATE TABLE IF NOT EXISTS {self.table("knowledge_graphs")} (
                 document_id TEXT PRIMARY KEY,

@@ -205,7 +205,7 @@ def resolve_bundles(names: list[str]) -> list[str]:
     """Expand composite bundles (e.g. ``full``) into constituents.
 
     Recursively expands ``includes`` so nested composites (e.g.
-    ``full`` → ``graphrag`` → ``pipeline``) are fully flattened.
+    ``full`` -> ``graphrag`` -> ``pipeline``) are fully flattened.
     Returns a flat, deduplicated list preserving first-seen order.
     """
     seen: set[str] = set()

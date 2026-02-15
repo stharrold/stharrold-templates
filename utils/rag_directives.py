@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2025 stharrold
+# SPDX-License-Identifier: Apache-2.0
 """RAG query directives: preset prompt templates for different analysis modes."""
 
 # ---------------------------------------------------------------------------

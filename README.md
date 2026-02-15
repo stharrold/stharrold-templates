@@ -80,6 +80,7 @@ Replace `--bundle git` with whichever bundles you need:
 | `secrets` | Keyring-backed secrets management |
 | `ci` | GitHub Actions, containers, pre-commit |
 | `pipeline` | 6-stage document processing ETL |
+| `sql-pipeline` | SQL Server ETL with pyodbc, retry, resumption |
 | `graphrag` | Graph RAG retrieval (includes `pipeline`) |
 | `full` | Everything above + extra skills and docs |
 
