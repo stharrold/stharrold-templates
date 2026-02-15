@@ -47,9 +47,7 @@ class QueryRunner:
 
     def extract_sort_columns(self, sql: str) -> list[str]:
         """Extract ORDER BY columns from SQL query."""
-        match = re.search(
-            r"\bORDER\s+BY\s+(.+?)(?:\s+OFFSET|\s+FETCH|;|$)", sql, re.IGNORECASE | re.DOTALL
-        )
+        match = re.search(r"\bORDER\s+BY\s+(.+?)(?:\s+OFFSET|\s+FETCH|;|$)", sql, re.IGNORECASE | re.DOTALL)
 
         if not match:
             return []
@@ -65,9 +63,7 @@ class QueryRunner:
 
         return columns
 
-    def get_row_count_estimate(
-        self, conn: pyodbc.Connection, sql: str, table_name: str | None = None
-    ) -> int:
+    def get_row_count_estimate(self, conn: pyodbc.Connection, sql: str, table_name: str | None = None) -> int:
         """Get row count estimate from sys.dm_db_partition_stats (fast).
 
         Falls back to COUNT(*) if DMV query fails.
@@ -75,9 +71,7 @@ class QueryRunner:
         cursor = conn.cursor()
 
         if not table_name:
-            table_match = re.search(
-                r"\bFROM\s+(?:\[?(\w+)\]?\.)?(?:\[?(\w+)\]?)", sql, re.IGNORECASE
-            )
+            table_match = re.search(r"\bFROM\s+(?:\[?(\w+)\]?\.)?(?:\[?(\w+)\]?)", sql, re.IGNORECASE)
             if table_match:
                 table_name = table_match.group(2) or table_match.group(1)
 
@@ -98,9 +92,7 @@ class QueryRunner:
                     print(f"  Row count estimate (DMV): {result[0]:,}", file=sys.stderr)
                     return int(result[0])
             except Exception as e:
-                print(
-                    f"  Warning: DMV query failed ({e}), falling back to COUNT(*)", file=sys.stderr
-                )
+                print(f"  Warning: DMV query failed ({e}), falling back to COUNT(*)", file=sys.stderr)
 
         try:
             clean_sql = sql.strip().rstrip(";")
@@ -167,9 +159,7 @@ class QueryRunner:
 
             print("[2/5] Estimating row count...", file=sys.stderr)
             estimated_rows = self.get_row_count_estimate(conn, sql)
-            expected_batches = (
-                math.ceil(estimated_rows / self.BATCH_SIZE) if estimated_rows > 0 else 0
-            )
+            expected_batches = math.ceil(estimated_rows / self.BATCH_SIZE) if estimated_rows > 0 else 0
 
             logger.log_start(estimated_rows, expected_batches)
 
@@ -207,22 +197,16 @@ class QueryRunner:
                     batch_rows = []
 
                     for row in batch:
-                        row_dict = {col: val for col, val in zip(column_names, row)}
+                        row_dict = {col: val for col, val in zip(column_names, row, strict=False)}
                         batch_rows.append(row_dict)
                         row_count += 1
 
                         if sort_columns:
-                            last_processed_value = {
-                                col: str(row_dict.get(col, "")) for col in sort_columns
-                            }
+                            last_processed_value = {col: str(row_dict.get(col, "")) for col in sort_columns}
 
                     all_rows.extend(batch_rows)
 
-                    batch_bytes = sum(
-                        len(str(val)) if val is not None else 0
-                        for row in batch_rows
-                        for val in row.values()
-                    )
+                    batch_bytes = sum(len(str(val)) if val is not None else 0 for row in batch_rows for val in row.values())
                     mb_batch = batch_bytes / (1024 * 1024)
                     mb_total += mb_batch
 
@@ -231,9 +215,7 @@ class QueryRunner:
 
                     resumption_template = None
                     if sort_columns and last_processed_value:
-                        resumption_template = generate_resumption_template(
-                            sql, sort_columns, last_processed_value
-                        )
+                        resumption_template = generate_resumption_template(sql, sort_columns, last_processed_value)
 
                     logger.log_batch(
                         batch=batch_num,
@@ -246,9 +228,7 @@ class QueryRunner:
                     )
 
                     print(
-                        f"  Batch {batch_num}: {row_count:,} rows, "
-                        f"{progress_pct:.1f}% complete, "
-                        f"{mb_total:.2f} MB",
+                        f"  Batch {batch_num}: {row_count:,} rows, {progress_pct:.1f}% complete, {mb_total:.2f} MB",
                         file=sys.stderr,
                     )
 
@@ -276,9 +256,7 @@ class QueryRunner:
             logger.log_end(exit_status)
             log_entries = logger.get_log_entries()
 
-            python_version = (
-                f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-            )
+            python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
             pyodbc_version = pyodbc.version
             driver_version = "ODBC Driver 18"
 
@@ -339,9 +317,7 @@ def main() -> None:
     """CLI entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Execute SQL query against database with paginated output"
-    )
+    parser = argparse.ArgumentParser(description="Execute SQL query against database with paginated output")
     parser.add_argument("--sql", help="SQL query text")
     parser.add_argument("--sql-file", help="Path to SQL file")
     parser.add_argument(
@@ -352,7 +328,8 @@ def main() -> None:
     )
     parser.add_argument("--slug", help="Filename slug (auto-generated if omitted)")
     parser.add_argument(
-        "--environment", "-e",
+        "--environment",
+        "-e",
         default="dev",
         choices=("dev", "qa", "prod"),
         help="Target environment (default: dev)",

@@ -63,7 +63,7 @@ class Deployer:
         timestamp_iso = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             batches = self.parse_batches(content)
@@ -85,7 +85,7 @@ class Deployer:
                 return messages
 
             for i, batch in enumerate(batches, 1):
-                print(f"  Executing batch {i}/{batch_count}...", end='', flush=True)
+                print(f"  Executing batch {i}/{batch_count}...", end="", flush=True)
                 batch_start = time.time()
                 try:
                     cursor.execute(batch)
@@ -98,23 +98,15 @@ class Deployer:
                     duration = time.time() - batch_start
                     print(" Done.")
 
-                    log_entries.append({
-                        "batch": i,
-                        "status": "success",
-                        "duration_seconds": round(duration, 3),
-                        "sql_snippet": batch[:100] + "..." if len(batch) > 100 else batch
-                    })
+                    log_entries.append(
+                        {"batch": i, "status": "success", "duration_seconds": round(duration, 3), "sql_snippet": batch[:100] + "..." if len(batch) > 100 else batch}
+                    )
                     batches_processed += 1
 
                 except pyodbc.Error as e:
                     print(f"\nError in batch {i}:")
                     print(e)
-                    log_entries.append({
-                        "batch": i,
-                        "status": "error",
-                        "error": str(e),
-                        "sql_snippet": batch[:100]
-                    })
+                    log_entries.append({"batch": i, "status": "error", "error": str(e), "sql_snippet": batch[:100]})
                     exit_status = "error"
                     raise
 
@@ -169,7 +161,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Deploy SQL scripts with GO separators")
     parser.add_argument("file", help="Path to SQL file to deploy")
     parser.add_argument(
-        "--environment", "-e",
+        "--environment",
+        "-e",
         default="dev",
         choices=("dev", "qa", "prod"),
         help="Target environment (default: dev)",

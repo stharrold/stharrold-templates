@@ -25,7 +25,7 @@ def load_schema() -> dict[str, Any]:
     schema_path = Path(__file__).parent.parent / "config" / "config.schema.json"
     if not schema_path.exists():
         raise FileNotFoundError(f"Schema file not found: {schema_path}")
-    with open(schema_path, "r") as f:
+    with open(schema_path) as f:
         result: dict[str, Any] = json.load(f)
         return result
 
@@ -101,6 +101,4 @@ def validate_config_file(config: dict[str, Any] | Any) -> None:
     schema = load_schema()
     errors = validate_config(config, schema)
     if errors:
-        raise ValueError(
-            "Config validation failed:\n  - " + "\n  - ".join(errors)
-        )
+        raise ValueError("Config validation failed:\n  - " + "\n  - ".join(errors))

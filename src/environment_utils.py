@@ -81,12 +81,16 @@ def get_wsl_win_project_root() -> str | None:
         # Find repo root
         repo_root = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
         # Convert to Windows path
         win_path = subprocess.run(
             ["wslpath", "-w", repo_root],
-            capture_output=True, text=True, check=True,
+            capture_output=True,
+            text=True,
+            check=True,
         ).stdout.strip()
         return win_path
     except (subprocess.CalledProcessError, FileNotFoundError):

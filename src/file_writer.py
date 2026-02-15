@@ -92,11 +92,7 @@ def write_config_json(path: Path, metadata: BaseMetadata, config: Mapping[str, A
     }
 
     if "connection_template" in output:
-        output["connection_template"] = (
-            output["connection_template"]
-            .replace("{username}", "[REDACTED]")
-            .replace("{password}", "[REDACTED]")
-        )
+        output["connection_template"] = output["connection_template"].replace("{username}", "[REDACTED]").replace("{password}", "[REDACTED]")
 
     def writer(f: Any) -> None:
         json.dump(output, f, indent=2, ensure_ascii=False, default=json_serial)

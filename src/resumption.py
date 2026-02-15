@@ -20,9 +20,7 @@ VALID_COLUMN_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 # ---------------------------------------------------------------------------
 
 
-def generate_resumption_template(
-    sql: str, sort_columns: list[str], last_values: dict[str, Any]
-) -> str:
+def generate_resumption_template(sql: str, sort_columns: list[str], last_values: dict[str, Any]) -> str:
     """Generate resumption SQL template with WHERE clause.
 
     Creates a new SQL query that will resume from where the previous query
@@ -75,10 +73,7 @@ def generate_resumption_template(
 def _validate_column_name(name: str) -> None:
     """Validate that a column name is safe for SQL interpolation."""
     if not VALID_COLUMN_PATTERN.match(name):
-        raise ValueError(
-            f"Invalid column name '{name}': must contain only letters, digits, and underscores, "
-            f"and must start with a letter or underscore"
-        )
+        raise ValueError(f"Invalid column name '{name}': must contain only letters, digits, and underscores, and must start with a letter or underscore")
 
 
 def _quote_value(value: Any) -> str:
@@ -136,9 +131,7 @@ def extract_resumption_info(log_entries: list[dict[str, Any]]) -> dict[str, Any]
 # ---------------------------------------------------------------------------
 
 
-def filter_steps_for_resumption(
-    steps: list[dict[str, Any]], resume_from_step: int
-) -> list[dict[str, Any]]:
+def filter_steps_for_resumption(steps: list[dict[str, Any]], resume_from_step: int) -> list[dict[str, Any]]:
     """Filter pipeline steps to resume from a given step number.
 
     Args:
@@ -153,10 +146,7 @@ def filter_steps_for_resumption(
     """
     step_numbers = [s["step_number"] for s in steps]
     if resume_from_step not in step_numbers:
-        raise ValueError(
-            f"Invalid resume step {resume_from_step}. "
-            f"Valid steps: {step_numbers}"
-        )
+        raise ValueError(f"Invalid resume step {resume_from_step}. Valid steps: {step_numbers}")
 
     return [s for s in steps if s["step_number"] >= resume_from_step]
 
@@ -170,10 +160,7 @@ def get_last_completed_step(log_entries: list[dict[str, Any]]) -> int | None:
     last_step: int | None = None
 
     for entry in log_entries:
-        if (
-            entry.get("event_type") == "step_complete"
-            and entry.get("status") == "success"
-        ):
+        if entry.get("event_type") == "step_complete" and entry.get("status") == "success":
             step_num = entry.get("step_number")
             if step_num is not None:
                 if last_step is None or step_num > last_step:

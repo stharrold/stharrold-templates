@@ -11,7 +11,8 @@ from __future__ import annotations
 import functools
 import logging
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pyodbc
 
@@ -82,11 +83,10 @@ def retry_on_transient_error(
                     if attempt >= max_retries or not is_retryable_error(e):
                         raise
 
-                    delay = base_delay * (backoff_factor ** attempt)
+                    delay = base_delay * (backoff_factor**attempt)
                     func_name = getattr(func, "__name__", repr(func))
                     logger.warning(
-                        "Transient error on attempt %d/%d for %s: %s. "
-                        "Retrying in %.1fs...",
+                        "Transient error on attempt %d/%d for %s: %s. Retrying in %.1fs...",
                         attempt + 1,
                         max_retries + 1,
                         func_name,

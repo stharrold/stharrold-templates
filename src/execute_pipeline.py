@@ -18,9 +18,9 @@ import os
 import sys
 import tempfile
 import traceback
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pyodbc
 import yaml
@@ -51,18 +51,13 @@ def load_config(environment: str = "dev") -> ConfigDict:
         FileNotFoundError: If config file does not exist.
     """
     if environment not in VALID_ENVIRONMENTS:
-        raise ValueError(
-            f"Invalid environment '{environment}'. Must be one of: {', '.join(VALID_ENVIRONMENTS)}"
-        )
+        raise ValueError(f"Invalid environment '{environment}'. Must be one of: {', '.join(VALID_ENVIRONMENTS)}")
 
     config_path = Path(__file__).parent.parent / "config" / f"config.{environment}.json"
     if not config_path.exists():
-        raise FileNotFoundError(
-            f"Config file not found: {config_path}. "
-            f"Expected one of: config/config.dev.json, config/config.qa.json, config/config.prod.json"
-        )
+        raise FileNotFoundError(f"Config file not found: {config_path}. Expected one of: config/config.dev.json, config/config.qa.json, config/config.prod.json")
 
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         config: ConfigDict = json.load(f)
 
     validate_config_file(config)
@@ -103,16 +98,16 @@ class PipelineRunner:
     """Encapsulates mutable pipeline state for a single execution run."""
 
     def __init__(self) -> None:
-        self.current_step_number: Optional[int] = None
-        self.current_step_name: Optional[str] = None
-        self.log_entries: List[Dict[str, Any]] = []
+        self.current_step_number: int | None = None
+        self.current_step_name: str | None = None
+        self.log_entries: list[dict[str, Any]] = []
 
     def capture_cursor_messages(self, cursor: pyodbc.Cursor) -> None:
         """Capture SQL Server PRINT statements from cursor.messages."""
         if not cursor.messages:
             return
 
-        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
         for _message_class, message_text in cursor.messages:
             text = message_text.strip() if message_text else ""
@@ -123,7 +118,7 @@ class PipelineRunner:
             marker = "[SQL Server]"
             idx = text.find(marker)
             if idx >= 0:
-                text = text[idx + len(marker):].strip()
+                text = text[idx + len(marker) :].strip()
 
             if not text:
                 continue
@@ -157,13 +152,13 @@ class PipelineRunner:
         step_number: int,
         step_name: str,
         stored_procedure: str,
-        sql_file: Optional[Path] = None,
-    ) -> Dict[str, Any]:
+        sql_file: Path | None = None,
+    ) -> dict[str, Any]:
         """Execute SQL file directly (not as stored procedure)."""
         self.current_step_number = step_number
         self.current_step_name = step_name
 
-        start_time = datetime.now(timezone.utc)
+        start_time = datetime.now(UTC)
 
         # Log step start
         log_entry = {
@@ -178,7 +173,7 @@ class PipelineRunner:
         try:
             # Read SQL file and execute
             if sql_file and sql_file.exists():
-                with open(sql_file, "r", encoding="utf-8") as f:
+                with open(sql_file, encoding="utf-8") as f:
                     sql_script = f.read()
 
                 batches = split_sql_batches(sql_script)
@@ -204,7 +199,7 @@ class PipelineRunner:
             else:
                 raise FileNotFoundError(f"SQL file not found: {sql_file}")
 
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
             duration = (end_time - start_time).total_seconds()
 
             # Log step complete
@@ -223,7 +218,7 @@ class PipelineRunner:
             return {"status": "success", "duration_seconds": duration}
 
         except pyodbc.Error as e:
-            end_time = datetime.now(timezone.utc)
+            end_time = datetime.now(UTC)
             duration = (end_time - start_time).total_seconds()
 
             # Log error (only catch database errors; let code bugs propagate)
@@ -243,9 +238,9 @@ class PipelineRunner:
 
             return {"status": "failed", "error": str(e)}
 
-    def run(self, environment: str, resume_from_step: Optional[int] = None) -> None:
+    def run(self, environment: str, resume_from_step: int | None = None) -> None:
         """Execute full pipeline."""
-        execution_start = datetime.now(timezone.utc)
+        execution_start = datetime.now(UTC)
         timestamp_iso8601 = execution_start.strftime("%Y%m%dT%H%M%SZ")
 
         execution_mode = "resumed" if resume_from_step else "full_pipeline"
@@ -284,7 +279,7 @@ class PipelineRunner:
 
         successful_steps = 0
         failed_steps = 0
-        step_durations: List[float] = []
+        step_durations: list[float] = []
 
         try:
             # Load pipeline steps from config
@@ -309,9 +304,7 @@ class PipelineRunner:
                 if step_type == "sql":
                     stored_procedure = step_config["stored_procedure"]
                     sql_file_path = project_root / step_config["sql_file"]
-                    result = self.execute_stored_procedure(
-                        connection, step_number, step_name, stored_procedure, sql_file_path
-                    )
+                    result = self.execute_stored_procedure(connection, step_number, step_name, stored_procedure, sql_file_path)
                 else:
                     raise ValueError(f"Unknown step type: {step_type}")
 
@@ -347,12 +340,14 @@ class PipelineRunner:
                     failed_steps += len(smoke_failures)
                     print(f"[SMOKE] {len(smoke_failures)} smoke test(s) failed", file=sys.stderr)
 
-                self.log_entries.append({
-                    "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-                    "event_type": "smoke_tests",
-                    "results": smoke_results,
-                    "passed": len(smoke_failures) == 0,
-                })
+                self.log_entries.append(
+                    {
+                        "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+                        "event_type": "smoke_tests",
+                        "results": smoke_results,
+                        "passed": len(smoke_failures) == 0,
+                    }
+                )
 
         except Exception as e:
             print(f"Pipeline error: {e}", file=sys.stderr)
@@ -362,7 +357,7 @@ class PipelineRunner:
         finally:
             connection.close()
 
-            execution_end = datetime.now(timezone.utc)
+            execution_end = datetime.now(UTC)
             total_duration = (execution_end - execution_start).total_seconds()
 
             print(f"\n[TIME] Total elapsed: {total_duration / 60.0:.1f}min", file=sys.stderr)
@@ -423,7 +418,7 @@ class PipelineRunner:
                 sys.exit(1)
 
 
-def write_log_file(metadata: Dict[str, Any], output_path: Path, log_entries: List[Dict[str, Any]]) -> None:
+def write_log_file(metadata: dict[str, Any], output_path: Path, log_entries: list[dict[str, Any]]) -> None:
     """Write JSONL log file with YAML frontmatter."""
     # Write to temp file first (atomic write pattern)
     temp_fd, temp_path = tempfile.mkstemp(dir=output_path.parent, suffix=".tmp")
@@ -448,9 +443,7 @@ def write_log_file(metadata: Dict[str, Any], output_path: Path, log_entries: Lis
         raise
 
 
-def execute_smoke_tests(
-    connection: pyodbc.Connection, smoke_tests: List[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
+def execute_smoke_tests(connection: pyodbc.Connection, smoke_tests: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Run smoke tests (row count checks) against pipeline views.
 
     Args:
@@ -460,7 +453,7 @@ def execute_smoke_tests(
     Returns:
         List of result dicts with name, expected, actual, passed.
     """
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
 
     for test in smoke_tests:
         name = test["name"]
@@ -476,13 +469,15 @@ def execute_smoke_tests(
             actual = row[0] if row else 0
 
             passed = actual >= min_rows
-            results.append({
-                "name": name,
-                "table": f"[{schema}].[{table}]",
-                "min_rows": min_rows,
-                "actual_rows": actual,
-                "passed": passed,
-            })
+            results.append(
+                {
+                    "name": name,
+                    "table": f"[{schema}].[{table}]",
+                    "min_rows": min_rows,
+                    "actual_rows": actual,
+                    "passed": passed,
+                }
+            )
 
             status = "[OK]" if passed else "[FAIL]"
             print(
@@ -491,50 +486,39 @@ def execute_smoke_tests(
             )
 
         except Exception as e:
-            results.append({
-                "name": name,
-                "table": f"[{schema}].[{table}]",
-                "min_rows": min_rows,
-                "actual_rows": -1,
-                "passed": False,
-                "error": str(e),
-                "sql": sql,
-            })
+            results.append(
+                {
+                    "name": name,
+                    "table": f"[{schema}].[{table}]",
+                    "min_rows": min_rows,
+                    "actual_rows": -1,
+                    "passed": False,
+                    "error": str(e),
+                    "sql": sql,
+                }
+            )
             print(f"  [FAIL] {name}: {e} (sql: {sql})", file=sys.stderr)
 
     return results
 
 
-def load_pipeline_config() -> Dict[str, Any]:
+def load_pipeline_config() -> dict[str, Any]:
     """Load pipeline configuration from pipeline_config.json.
 
     Returns:
         Dictionary containing pipeline_name, total_steps, and list of step configs.
     """
     config_path = Path(__file__).parent.parent / "pipeline_config.json"
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         result: dict[str, Any] = json.load(f)
         return result
 
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Execute pipeline against specified environment."
-    )
-    parser.add_argument(
-        "--environment", "-e",
-        type=str,
-        choices=VALID_ENVIRONMENTS,
-        default="dev",
-        help="Target environment: dev (default), qa, or prod"
-    )
-    parser.add_argument(
-        "--resume-from-step",
-        type=int,
-        default=None,
-        help="Resume pipeline from this step number (inclusive)"
-    )
+    parser = argparse.ArgumentParser(description="Execute pipeline against specified environment.")
+    parser.add_argument("--environment", "-e", type=str, choices=VALID_ENVIRONMENTS, default="dev", help="Target environment: dev (default), qa, or prod")
+    parser.add_argument("--resume-from-step", type=int, default=None, help="Resume pipeline from this step number (inclusive)")
     return parser.parse_args()
 
 

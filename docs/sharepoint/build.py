@@ -9,6 +9,7 @@ optionally rendering Mermaid diagrams to SVG/PNG/PDF via mmdc.
 Usage:
     uv run python docs/sharepoint/build.py [--skip-diagrams] [--output PATH]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,7 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -56,10 +57,7 @@ def render_diagrams() -> list[str]:
     # Resolve mmdc executable (handles .cmd on Windows)
     mmdc = shutil.which("mmdc")
     if mmdc is None:
-        print(
-            "  WARNING: mmdc not found on PATH. "
-            "Install with: npm install -g @mermaid-js/mermaid-cli"
-        )
+        print("  WARNING: mmdc not found on PATH. Install with: npm install -g @mermaid-js/mermaid-cli")
         return []
 
     rendered = []
@@ -78,10 +76,7 @@ def render_diagrams() -> list[str]:
                 rendered.append(out_name)
                 print(f"  Rendered {out_name}")
             except FileNotFoundError:
-                print(
-                    f"  WARNING: mmdc not found, skipping {out_name}. "
-                    "Install with: npm install -g @mermaid-js/mermaid-cli"
-                )
+                print(f"  WARNING: mmdc not found, skipping {out_name}. Install with: npm install -g @mermaid-js/mermaid-cli")
                 break
             except subprocess.CalledProcessError as exc:
                 print(f"  ERROR rendering {out_name}: {exc.stderr}")
@@ -139,7 +134,7 @@ def main() -> None:
     content = "\n\n".join(sections)
 
     # Step 4: Inject sync metadata
-    now_utc = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_utc = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     commit = get_git_short_hash()
     content = content.replace(
         "<!-- last_built_utc: PLACEHOLDER -->",
@@ -175,10 +170,7 @@ def main() -> None:
     print(f"  Timestamp: {now_utc}")
     if rendered:
         print(f"  Diagrams rendered: {len(rendered)}")
-    print(
-        "\nReminder: Upload SVG/PNG files from diagrams/ to SharePoint "
-        "if images need to display inline."
-    )
+    print("\nReminder: Upload SVG/PNG files from diagrams/ to SharePoint if images need to display inline.")
 
 
 if __name__ == "__main__":

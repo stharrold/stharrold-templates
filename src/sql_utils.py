@@ -14,10 +14,4 @@ def split_sql_batches(sql_content: str) -> list[str]:
     Returns:
         List of non-empty, stripped SQL batches.
     """
-    return [
-        batch.strip()
-        for batch in re.split(
-            r"^\s*GO\s*$", sql_content, flags=re.MULTILINE | re.IGNORECASE
-        )
-        if batch.strip()
-    ]
+    return [batch.strip() for batch in re.split(r"^\s*GO\s*$", sql_content, flags=re.MULTILINE | re.IGNORECASE) if batch.strip()]
