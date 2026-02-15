@@ -34,7 +34,7 @@ sys.path.insert(
 )
 
 # Constants with documented rationale
-SCHEMA_VERSION = "1.0.0"  # Current schema version for migrations
+SCHEMA_VERSION = "2.0.0"  # Current schema version for migrations
 WORKFLOW_STATES_PATH = Path(__file__).parent.parent / "templates" / "workflow-states.json"
 
 
@@ -236,21 +236,28 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
             trigger_agent_id, trigger_action, enabled, priority DESC
         );
         """,
-        # Sync executions table (Phase 2 - used by sync_engine.py)
+        # Sync executions table (Phase 1 + Phase 2 columns)
         """
         CREATE TABLE IF NOT EXISTS sync_executions (
             execution_id VARCHAR PRIMARY KEY,
-            sync_id VARCHAR NOT NULL,
-            provenance_hash VARCHAR(64),
-            trigger_state_snapshot JSON,
-            exec_status VARCHAR,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
             execution_order INTEGER NOT NULL,
             operation_type VARCHAR NOT NULL,
+            file_path VARCHAR,
+            phi_accessed BOOLEAN NOT NULL DEFAULT FALSE,
+            phi_justification TEXT,
             operation_result VARCHAR,
-            phi_accessed BOOLEAN DEFAULT FALSE,
+            error_message TEXT,
+            started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP,
             duration_ms INTEGER,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (sync_id) REFERENCES agent_synchronizations(sync_id)
+            checksum_before VARCHAR,
+            checksum_after VARCHAR,
+            metadata JSON,
+            -- Phase 2 fields (issue #160)
+            provenance_hash VARCHAR(64),
+            trigger_state_snapshot JSON,
+            exec_status VARCHAR
         );
         """,
         """
@@ -262,26 +269,40 @@ def create_schema(session_id: str, workflow_states: dict[str, Any], db_path: Pat
         """
         CREATE INDEX IF NOT EXISTS idx_exec_sync_status ON sync_executions(sync_id, exec_status);
         """,
-        # Sync audit trail table (Phase 2 - healthcare compliance, APPEND-ONLY)
+        # Sync audit trail table (healthcare compliance, APPEND-ONLY)
         """
         CREATE TABLE IF NOT EXISTS sync_audit_trail (
             audit_id VARCHAR PRIMARY KEY,
-            sync_id VARCHAR NOT NULL,
-            execution_id VARCHAR,
+            sync_id VARCHAR NOT NULL REFERENCES agent_synchronizations(sync_id) ON DELETE RESTRICT,
+            execution_id VARCHAR REFERENCES sync_executions(execution_id) ON DELETE RESTRICT,
             event_type VARCHAR NOT NULL,
             actor VARCHAR NOT NULL,
             actor_role VARCHAR NOT NULL,
-            phi_involved BOOLEAN DEFAULT FALSE,
-            compliance_context JSON,
-            event_details JSON,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            phi_involved BOOLEAN NOT NULL DEFAULT FALSE,
+            compliance_context JSON NOT NULL,
+            event_details JSON NOT NULL,
+            ip_address VARCHAR,
+            session_id VARCHAR
         );
         """,
         """
-        CREATE INDEX IF NOT EXISTS idx_audit_sync ON sync_audit_trail(sync_id);
+        CREATE INDEX IF NOT EXISTS idx_audit_sync ON sync_audit_trail(sync_id, timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_execution ON sync_audit_trail(execution_id);
         """,
         """
         CREATE INDEX IF NOT EXISTS idx_audit_event ON sync_audit_trail(event_type);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON sync_audit_trail(timestamp DESC);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_phi ON sync_audit_trail(phi_involved);
+        """,
+        """
+        CREATE INDEX IF NOT EXISTS idx_audit_session ON sync_audit_trail(session_id);
         """,
         # Session metadata table (for workflow state tracking)
         """
