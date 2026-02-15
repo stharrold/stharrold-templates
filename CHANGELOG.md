@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`sql-pipeline` bundle** -- SQL Server ETL pipeline template with 13 Python modules (`src/`), SharePoint doc builder, Azure Pipelines CI, and project scaffolding files. Captures the shared pattern from OracleERP/CPSC repos: pyodbc orchestrator, GO-batch deployer, paginated query runner, retry-on-transient-error, YAML-frontmatter JSONL outputs, and config-per-environment validation.
+
 ## [8.7.0] - 2026-02-02
 
 ### Changed

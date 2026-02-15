@@ -1,0 +1,9 @@
+{
+  "environment": "dev",
+  "connection_template": "Driver={ODBC Driver 18 for SQL Server};Server={server};Database={database};UID={username};PWD={password};Authentication=ActiveDirectoryPassword;Encrypt=yes;TrustServerCertificate=yes;Connection Timeout={timeout};",
+  "server": "your-server-dev.database.windows.net",
+  "database": "YourDatabase",
+  "port": 1433,
+  "timeout": 7200,
+  "username": "your-service-account@example.com"
+}

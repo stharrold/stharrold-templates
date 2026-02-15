@@ -36,8 +36,8 @@ def test_bundle_definitions_have_required_keys():
 
 
 def test_full_bundle_includes_all_others():
-    """The 'full' bundle's 'includes' list contains exactly ['git', 'secrets', 'ci']."""
-    assert BUNDLE_DEFINITIONS["full"]["includes"] == ["git", "secrets", "ci"]
+    """The 'full' bundle's 'includes' list contains exactly ['git', 'secrets', 'ci', 'graphrag', 'sql-pipeline']."""
+    assert BUNDLE_DEFINITIONS["full"]["includes"] == ["git", "secrets", "ci", "graphrag", "sql-pipeline"]
 
 
 def test_all_referenced_paths_exist():
@@ -108,9 +108,9 @@ def test_dry_run_makes_no_changes(tmp_path):
 
 
 def test_resolve_bundles_expands_full():
-    """resolve_bundles(['full']) returns ['git', 'secrets', 'ci', 'full']."""
+    """resolve_bundles(['full']) returns all included bundles then 'full'."""
     resolved = resolve_bundles(["full"])
-    assert resolved == ["git", "secrets", "ci", "full"]
+    assert resolved == ["git", "secrets", "ci", "pipeline", "graphrag", "sql-pipeline", "full"]
 
 
 def test_resolve_bundles_deduplicates():
@@ -118,4 +118,4 @@ def test_resolve_bundles_deduplicates():
     resolved = resolve_bundles(["git", "full"])
     assert resolved.count("git") == 1
     # Should still contain all expected bundles
-    assert set(resolved) == {"git", "secrets", "ci", "full"}
+    assert set(resolved) == {"git", "secrets", "ci", "pipeline", "graphrag", "sql-pipeline", "full"}

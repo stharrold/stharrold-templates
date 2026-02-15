@@ -1,0 +1,41 @@
+{
+  "_comment": "Qwen3-0.6B Q4_K_S: better summaries than Q2_K. num_thread=8 on 16-vCPU VM.",
+  "ollama": {
+    "model": "qwen3:0.6b-q4_K_S",
+    "num_parallel": 1,
+    "port": 11434,
+    "timeout_seconds": 120,
+    "flash_attention": true,
+    "kv_cache_type": "q8_0",
+    "num_thread": 8
+  },
+  "pipeline": {
+    "batch_size": 10,
+    "workers": 1
+  },
+  "chunking": {
+    "tiers": [
+      {"max_words": 300, "overlap_words": 100, "timeout_seconds": 90},
+      {"max_words": 100, "overlap_words": 30, "timeout_seconds": 60},
+      {"max_words": 30, "overlap_words": 10, "timeout_seconds": 45}
+    ]
+  },
+  "llm": {
+    "num_ctx": 1024,
+    "num_predict": 300,
+    "temperature": 0.3,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "repeat_penalty": 1.1
+  },
+  "optimization": {
+    "incremental_enabled": true,
+    "milestone_enabled": false,
+    "milestone_node_cap": 10000
+  },
+  "paths": {
+    "temp_dir": "temp/pipeline",
+    "bench_logs": "bench_logs"
+  }
+}

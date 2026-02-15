@@ -9,7 +9,7 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 - **AgentDB Tracking** - Persistent state and metrics using DuckDB
 - **Containerized development** - Podman + uv + Python 3.11 for consistency
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
-- **Gemini-first design** - Optimized for Claude Code and MCP (Model Context Protocol)
+- **AI-agent native** - Optimized for Claude Code and MCP (Model Context Protocol)
 
 ## Prerequisites
 
@@ -59,21 +59,48 @@ Common operations:
 
 ## Apply to an Existing Repo
 
+### Step 1: Clone templates into your repo
+
 ```bash
 cd /path/to/myrepo
 git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
+```
 
-# Apply specific bundles (git, secrets, ci, or full)
+### Step 2: Apply bundles
+
+**With an AI coding assistant** — paste this prompt into Claude Code, Cursor, etc.:
+
+> I cloned stharrold-templates into `.tmp/stharrold-templates/`. Read `.tmp/stharrold-templates/BUNDLES.md` for the available bundles and their contents. Then apply the `git` bundle to this repo using `python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git`. Start with `--dry-run` so I can review before applying. After applying, clean up with `rm -rf .tmp/stharrold-templates`.
+
+Replace `--bundle git` with whichever bundles you need:
+
+| Bundle | What you get |
+|--------|-------------|
+| `git` | Branch workflow, slash commands, skills |
+| `secrets` | Keyring-backed secrets management |
+| `ci` | GitHub Actions, containers, pre-commit |
+| `pipeline` | 6-stage document processing ETL |
+| `sql-pipeline` | SQL Server ETL with pyodbc, retry, resumption |
+| `graphrag` | Graph RAG retrieval (includes `pipeline`) |
+| `full` | Everything above + extra skills and docs |
+
+**Or run manually:**
+
+```bash
+# Dry run first
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git --dry-run
+
+# Apply
 python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git
-python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle secrets
 
-# Or apply everything
-python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle full
+# Multiple bundles
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git --bundle secrets --bundle ci
 
+# Clean up
 rm -rf .tmp/stharrold-templates
 ```
 
-See [BUNDLES.md](BUNDLES.md) for bundle contents and update behavior.
+See [BUNDLES.md](BUNDLES.md) for bundle contents, file ownership, and update behavior.
 
 ## Secrets Management
 
