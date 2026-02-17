@@ -1,0 +1,15 @@
+{
+    "_comment": "CUSTOMIZE: Add your source database schemas and tables here.",
+    "batches": {
+        "example_schema": {
+            "schema": "dbo",
+            "tables": [
+                "Customers",
+                "Orders",
+                "Products",
+                "OrderItems",
+                "Categories"
+            ]
+        }
+    }
+}

@@ -203,9 +203,80 @@ Graph-based retrieval-augmented generation. Embeds queries, searches the knowled
 
 ---
 
+### `data-catalog` -- Data Catalog Pipeline
+
+Full data catalog pipeline with PK/FK discovery, semantic vectors, RAG search, and graph analysis. Uses DuckDB + SQLAlchemy for the catalog database, ONNX embeddings (MiniLM-L6-v2, 384-dim), HDBSCAN clustering, and NetworkX graph metrics. Includes an 11-phase pipeline: PK discovery, cardinality scan, value frequencies, semantic vectors, FK discovery, column populate, column prepare, column describe, column import, column embed, and graph analysis.
+
+**Core infrastructure (template-owned):**
+- `data_catalog/__init__.py` -- Package init
+- `data_catalog/exceptions.py` -- Exception hierarchy (CatalogError base)
+- `data_catalog/db/__init__.py` -- DB package init
+- `data_catalog/db/models.py` -- SQLAlchemy ORM models (Asset, Relationship, ColumnVector, etc.)
+- `data_catalog/db/connection.py` -- DuckDB engine with vss/json extensions
+- `data_catalog/db/repositories.py` -- Repository pattern (AssetRepository, RelationshipRepository)
+- `data_catalog/models/__init__.py` -- Models package init
+- `data_catalog/models/data_model.py` -- Data model classes (GrainResult, FKCandidate, etc.)
+- `data_catalog/utils/__init__.py` -- Utils package init
+- `data_catalog/utils/sql_safety.py` -- SQL injection guards for dynamic identifiers
+- `data_catalog/services/__init__.py` -- Services package init
+- `data_catalog/services/sql_dialect.py` -- SQL dialect abstraction
+- `data_catalog/services/embedding.py` -- ONNX all-MiniLM-L6-v2 (384-dim), binarization
+- `data_catalog/services/vector_similarity.py` -- Semantic vector computation + FK candidate similarity
+- `data_catalog/services/graph_metrics.py` -- Community detection, PageRank, HDBSCAN clustering
+- `data_catalog/services/rag_search.py` -- 6-stage RAG retrieval (embed, hamming prefilter, cosine rerank, merge, enrich, graph expand)
+- `data_catalog/services/grain_discovery.py` -- PK discovery (pattern-based + iterative accumulation)
+- `data_catalog/services/pk_discovery/__init__.py` -- PK discovery package init
+- `data_catalog/services/pk_discovery/models.py` -- PK discovery data models
+- `data_catalog/services/pk_discovery/scanner.py` -- Progressive 7-step PK scanner with early termination
+- `data_catalog/services/pk_discovery/decision.py` -- Decision engine (escalation thresholds, composites)
+- `data_catalog/services/fk_discovery.py` -- FK discovery (cardinality + pattern matching)
+- `data_catalog/services/fk_validator.py` -- FK validation with progressive sampling
+- `data_catalog/services/sample_pool.py` -- Shared temp table pool for source DB sampling
+- `data_catalog/services/cardinality_scanner.py` -- Value frequency scan (UNPIVOT + sampling)
+- `data_catalog/services/pipeline_orchestrator.py` -- Pipeline orchestrator
+- `data_catalog/services/column_descriptions.py` -- Column description pipeline
+- `data_catalog/cli.py` -- Click CLI commands
+- `tests/__init__.py` -- Test package init
+- `tests/conftest.py` -- Shared DuckDB in-memory fixtures
+- `tests/test_models.py` -- ORM model tests
+- `tests/test_grain_discovery.py` -- Grain/PK discovery tests
+- `tests/test_fk_discovery.py` -- FK discovery and pattern tests
+- `tests/test_graph_metrics.py` -- Graph metrics tests
+- `tests/test_rag_search.py` -- RAG search tests
+- `tests/test_pipeline_orchestrator.py` -- Pipeline orchestrator tests
+- `tests/test_repositories.py` -- Repository pattern tests
+
+**Domain-specific (user-owned, skip on update):**
+- `data_catalog/services/dialects/__init__.py` -- SQL dialect registry (CUSTOMIZE: register source DB dialects)
+- `data_catalog/services/dialects/sqlserver.py` -- SQL Server dialect (CUSTOMIZE: add dialects for your source DB)
+- `data_catalog/services/fk_patterns.py` -- FK pattern classes (CUSTOMIZE: add patterns for your naming conventions)
+- `config/catalog_config.json` -- Catalog configuration (CUSTOMIZE: connection strings, schema filters)
+- `config/primary_keys_config.json` -- PK definitions (CUSTOMIZE: known PKs, no_natural_pk overrides)
+- `config/foreign_keys_config.json` -- FK definitions (CUSTOMIZE: known relationships)
+- `scripts/run_catalog_pipeline.py` -- Pipeline runner script (CUSTOMIZE: batch definitions, phase selection)
+- `scripts/generate_column_descriptions.py` -- Column description generator (CUSTOMIZE: LLM prompts, output paths)
+
+**Merge files (user-owned):**
+- `pyproject.toml` -- adds `duckdb`, `duckdb-engine`, `sqlalchemy`, `onnxruntime`, `numpy`, `scikit-learn`, `click`, `rich`, `networkx`, `tokenizers`
+- `.gitignore` -- appends `*.duckdb`, `*.duckdb.wal`, `.claude-state/`, `.tmp/`
+
+**Usage:**
+```bash
+# Apply data-catalog bundle
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog
+
+# Dry run first
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog --dry-run
+
+# Force overwrite skip-on-update files
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog --force
+```
+
+---
+
 ### `full` -- Everything
 
-All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline`, plus additional skills and documentation.
+All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline` + `data-catalog`, plus additional skills and documentation.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`
@@ -224,9 +295,9 @@ Ownership determines what happens when a bundle is applied to a repo that alread
 
 | Ownership | Files | First Install | Update | `--force` |
 |---|---|---|---|---|
-| **Template-owned** | Skills, commands, scripts, core `utils/`, core `src/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows, `docs/sharepoint/build.py` | Copy | Replace | Replace |
+| **Template-owned** | Skills, commands, scripts, core `utils/`, core `src/`, core `data_catalog/`, core `tests/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows, `docs/sharepoint/build.py` | Copy | Replace | Replace |
 | **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Merge |
-| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `config/config.*.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py`, `.sqlfluff`, `azure-pipelines.yml`, `sql/v1/example_view.sql`, `docs/sharepoint/src/*.md` | Copy from template | Skip + print warning | Replace |
+| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `config/config.*.json`, `config/catalog_config.json`, `config/*_keys_config.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py`, `fk_patterns.py`, `dialects/*.py`, `.sqlfluff`, `azure-pipelines.yml`, `sql/v1/example_view.sql`, `docs/sharepoint/src/*.md`, `scripts/run_catalog_pipeline.py`, `scripts/generate_column_descriptions.py` | Copy from template | Skip + print warning | Replace |
 | **Override** | Template-owned + skip-on-update | -- | -- | Replace (merge files still merge) |
 
 ### Merge behavior details
