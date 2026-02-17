@@ -63,6 +63,8 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "utils/core_llm.py",
             "utils/json_repair.py",
             "utils/pipe_04_vectorize.py",
+            "utils/pipe_04b_consolidate.py",
+            "utils/pipe_05b_cooccurrence.py",
             "utils/pipe_06_optimize.py",
             "utils/pipe_parallel.py",
             "utils/pipe_runner.py",
@@ -74,6 +76,8 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "scripts/ollama_stop.ps1",
             "scripts/run_pipeline.ps1",
             "scripts/run_pipeline_incremental.py",
+            "scripts/run_entity_quality.py",
+            "scripts/backfill_normalize_entities.py",
         ],
         "skip_on_update": [
             # Domain-specific (email examples, user customizes)
@@ -82,6 +86,7 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "utils/pipe_02b_strip.py",
             "utils/pipe_02c_threads.py",
             "utils/pipe_03_decompose.py",
+            "utils/pipe_03b_normalize.py",
             "utils/pipe_05_link.py",
             "config/pipeline_config.json",
         ],

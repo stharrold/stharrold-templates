@@ -121,6 +121,8 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `utils/core_llm.py` -- Ollama HTTP API wrapper
 - `utils/json_repair.py` -- JSON repair for LLM output
 - `utils/pipe_04_vectorize.py` -- ONNX embed + 1-bit quantize
+- `utils/pipe_04b_consolidate.py` -- Entity deduplication via fuzzy name matching + community clustering (token-based blocking for large groups)
+- `utils/pipe_05b_cooccurrence.py` -- Co-occurrence edges (related_to/part_of) between entities mentioned in same documents
 - `utils/pipe_06_optimize.py` -- PageRank, HITS, community detection, embedding clustering
 - `utils/pipe_parallel.py` -- 2-phase batch pipeline (DB released during LLM inference)
 - `utils/pipe_runner.py` -- Sequential pipeline orchestrator
@@ -131,6 +133,8 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `scripts/ollama_start.ps1`, `scripts/ollama_stop.ps1` -- Ollama lifecycle
 - `scripts/run_pipeline.ps1` -- Orchestrated pipeline run
 - `scripts/run_pipeline_incremental.py` -- Incremental import + process
+- `scripts/run_entity_quality.py` -- Run all entity quality stages (strip, normalize, consolidate, co-occurrence)
+- `scripts/backfill_normalize_entities.py` -- Backfill entity type normalization on existing data
 
 **Domain-specific (user-owned, skip on update):**
 - `utils/pipe_01_ingest.py` -- Document ingestion (email example)
@@ -138,6 +142,7 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `utils/pipe_02b_strip.py` -- Content preprocessing (email example)
 - `utils/pipe_02c_threads.py` -- Thread/relationship analysis (email example)
 - `utils/pipe_03_decompose.py` -- Entity types and LLM prompts (email example)
+- `utils/pipe_03b_normalize.py` -- Entity type normalization and blocklist (email example)
 - `utils/pipe_05_link.py` -- Edge types and linking rules (email example)
 - `config/pipeline_config.json` -- Model, LLM options, chunk tiers
 
