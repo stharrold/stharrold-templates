@@ -222,9 +222,25 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_gitignore": False,
         "merge_pyproject_deps": [],
     },
+    # Opt-in AgentDB state tracking. As of v8.9, NOT included in `full`.
+    # Git branches and PR state are the authoritative source of workflow
+    # state for new projects; this bundle ships the scripts + schema for
+    # teams that want persistent DuckDB-backed analytics over historical
+    # workflow transitions (complex release processes, cross-team metrics).
+    # Downstream reference: synavistra explicitly removed AgentDB in early
+    # 2026 and documented the decision in its own CLAUDE.md.
+    "agentdb": {
+        "skills": ["agentdb-state-manager"],
+        "commands": [],
+        "copy_files": [],
+        "merge_gitignore": False,
+        "merge_pyproject_deps": ["duckdb>=1.2.0"],
+    },
     "full": {
+        # agentdb-state-manager was removed from `full` in v8.9. Users who
+        # want AgentDB tracking must apply --bundle agentdb explicitly.
         "includes": ["git", "secrets", "ci", "graphrag", "sql-pipeline", "data-catalog"],
-        "skills": ["tech-stack-adapter", "agentdb-state-manager", "initialize-repository"],
+        "skills": ["tech-stack-adapter", "initialize-repository"],
         "commands": [],
         "copy_files": [],
         "copy_dirs": ["docs/"],
