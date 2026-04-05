@@ -31,8 +31,14 @@ def _on_connect(dbapi_connection, connection_record):
     """Load extensions and register macros on each new DuckDB connection."""
     cursor = dbapi_connection.cursor()
     try:
-        cursor.execute("INSTALL vss; LOAD vss;")
-        cursor.execute("INSTALL json; LOAD json;")
+        # Execute one statement per call. Raw duckdb-python cursors accept
+        # multi-statement strings on some versions but not others, and
+        # duckdb-engine / SQLAlchemy text() definitely does not. Matches
+        # the pattern used in tests/conftest.py.
+        cursor.execute("INSTALL vss")
+        cursor.execute("LOAD vss")
+        cursor.execute("INSTALL json")
+        cursor.execute("LOAD json")
 
         # Hamming distance macro for BIT-packed vectors
         cursor.execute("CREATE OR REPLACE MACRO hamming_dist(a, b) AS (bit_count(xor(a, b)));")

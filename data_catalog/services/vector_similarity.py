@@ -228,22 +228,22 @@ class VectorSimilarityService:
     ) -> list[ColumnVector]:
         """Pre-filter using Hamming distance on UBIGINT decomposition.
 
-        TODO: implement the actual Hamming prefilter using the hamming_dist
-        macro (tests/conftest.py registers it) or the XOR+bit_count pattern
-        over bit_u0..bit_u5, ORDER BY distance, then LIMIT to a small
-        candidate set for cosine rerank. The current body is a scaffold that
-        returns an arbitrary `limit` rows regardless of `query_ubigints` and
-        `threshold`, which defeats the two-stage search contract described
-        in the module docstring. Tracked for follow-up; no caller currently
-        exercises this path in tests.
+        NOT YET IMPLEMENTED. The real implementation should use the
+        hamming_u6 macro registered in data_catalog/db/connection.py
+        (or the equivalent XOR + bit_count pattern over bit_u0..bit_u5),
+        ORDER BY distance, then LIMIT to a small candidate set before
+        the cosine rerank in find_similar_columns().
+
+        This method previously returned an arbitrary `limit` rows while
+        ignoring `query_ubigints` and `threshold`, which caused
+        find_similar_columns() to cosine-rerank a garbage candidate set
+        and silently return incorrect results (not just slow ones). The
+        stub is replaced with NotImplementedError so callers fail loudly
+        until the prefilter ships. No tests currently exercise this path.
         """
-        _ = (query_ubigints, threshold)  # parameters reserved for real impl
-        return (
-            self.db.query(ColumnVector)
-            .filter(
-                ColumnVector.vector_type == vector_type,
-                ColumnVector.bit_u0.isnot(None),
-            )
-            .limit(limit)
-            .all()
+        raise NotImplementedError(
+            "VectorSimilarityService._hamming_prefilter is not yet "
+            "implemented. find_similar_columns() depends on this to "
+            "produce correct results -- do not use it until the prefilter "
+            "ships. See the method docstring for the intended design."
         )
