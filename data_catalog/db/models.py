@@ -12,6 +12,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import (
+    JSON,
     BigInteger,
     Boolean,
     Column,
@@ -22,10 +23,9 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
-    JSON,
     TypeDecorator,
 )
-from sqlalchemy.orm import declarative_base, relationship, backref
+from sqlalchemy.orm import backref, declarative_base, relationship
 
 Base = declarative_base()
 
@@ -77,9 +77,7 @@ class Asset(Base):
     business_metadata = Column(JSON)
 
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_discovered_at = Column(DateTime)
 
     # Relationships
@@ -134,12 +132,8 @@ class Relationship(Base):
     __tablename__ = "relationships"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    parent_asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
-    referenced_asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    parent_asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
+    referenced_asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     constraint_name = Column(String(255))
     relationship_type = Column(String(50), nullable=False, index=True)
 
@@ -173,10 +167,7 @@ class Relationship(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<Relationship(id={self.id}, type='{self.relationship_type}', "
-            f"cardinality='{self.cardinality}')>"
-        )
+        return f"<Relationship(id={self.id}, type='{self.relationship_type}', cardinality='{self.cardinality}')>"
 
 
 class Lineage(Base):
@@ -185,12 +176,8 @@ class Lineage(Base):
     __tablename__ = "lineage"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    upstream_asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
-    downstream_asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    upstream_asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
+    downstream_asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     relationship_type = Column(String(50), nullable=False)
     transformation_logic = Column(Text)
     confidence_score = Column(Numeric(3, 2))
@@ -221,12 +208,8 @@ class ColumnCardinalityHistory(Base):
 
     __tablename__ = "column_cardinality_history"
 
-    cardinality_id = Column(
-        String(36), primary_key=True, default=lambda: str(uuid4())
-    )
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    cardinality_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     table_schema = Column(String(255), nullable=False, index=True)
     table_name = Column(String(255), nullable=False, index=True)
     column_name = Column(String(255), nullable=False, index=True)
@@ -251,9 +234,7 @@ class ColumnCardinalityHistory(Base):
     selectivity_at_100pct = Column(Numeric(precision=12, scale=2))
 
     # Metadata
-    discovered_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, index=True
-    )
+    discovered_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     discovery_method = Column(String(50), nullable=False)
     data_type = Column(String(100))
     total_rows = Column(BigInteger)
@@ -264,10 +245,7 @@ class ColumnCardinalityHistory(Base):
     asset = relationship("Asset", backref="cardinality_history")
 
     def __repr__(self):
-        return (
-            f"<ColumnCardinalityHistory(column='{self.column_name}', "
-            f"card_100pct={self.cardinality_at_100pct})>"
-        )
+        return f"<ColumnCardinalityHistory(column='{self.column_name}', card_100pct={self.cardinality_at_100pct})>"
 
 
 class ColumnValueFrequency(Base):
@@ -280,9 +258,7 @@ class ColumnValueFrequency(Base):
     __tablename__ = "column_value_frequencies"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     table_schema = Column(String(255), nullable=False, index=True)
     table_name = Column(String(255), nullable=False, index=True)
     column_name = Column(String(255), nullable=False, index=True)
@@ -294,9 +270,7 @@ class ColumnValueFrequency(Base):
 
     sample_pct = Column(Numeric(precision=5, scale=2))
     total_rows = Column(BigInteger)
-    discovered_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, index=True
-    )
+    discovered_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
 
     asset = relationship("Asset", backref="value_frequencies")
 
@@ -311,10 +285,7 @@ class ColumnValueFrequency(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<ColumnValueFrequency(column='{self.column_name}', "
-            f"rank={self.rank}, value='{self.value}')>"
-        )
+        return f"<ColumnValueFrequency(column='{self.column_name}', rank={self.rank}, value='{self.value}')>"
 
 
 class AuditLog(Base):
@@ -335,10 +306,7 @@ class AuditLog(Base):
     additional_context = Column(JSON)
 
     def __repr__(self):
-        return (
-            f"<AuditLog(id={self.id}, user='{self.user_email}', "
-            f"action='{self.action}')>"
-        )
+        return f"<AuditLog(id={self.id}, user='{self.user_email}', action='{self.action}')>"
 
 
 class ColumnVector(Base):
@@ -351,9 +319,7 @@ class ColumnVector(Base):
     __tablename__ = "column_vectors"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     table_schema = Column(String(255), nullable=False, index=True)
     table_name = Column(String(255), nullable=False, index=True)
     column_name = Column(String(255), nullable=False, index=True)
@@ -381,9 +347,7 @@ class ColumnVector(Base):
     num_values = Column(Integer)
     total_frequency = Column(BigInteger)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     asset = relationship("Asset", backref="column_vectors")
 
@@ -399,10 +363,7 @@ class ColumnVector(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<ColumnVector(column='{self.column_name}', "
-            f"bits_len={len(self.vector_bits) if self.vector_bits else 0})>"
-        )
+        return f"<ColumnVector(column='{self.column_name}', bits_len={len(self.vector_bits) if self.vector_bits else 0})>"
 
 
 class PipelinePhaseLog(Base):
@@ -426,10 +387,7 @@ class PipelinePhaseLog(Base):
     error_detail = Column(JSON)
 
     def __repr__(self):
-        return (
-            f"<PipelinePhaseLog(run_id='{self.run_id}', "
-            f"phase='{self.phase_name}', status='{self.status}')>"
-        )
+        return f"<PipelinePhaseLog(run_id='{self.run_id}', phase='{self.phase_name}', status='{self.status}')>"
 
 
 class AssetGlossaryTerm(Base):
@@ -452,13 +410,9 @@ class GlossaryTerm(Base):
     definition = Column(Text, nullable=False)
     domain = Column(String(100), index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    assets = relationship(
-        "Asset", secondary="asset_glossary_terms", back_populates="glossary_terms"
-    )
+    assets = relationship("Asset", secondary="asset_glossary_terms", back_populates="glossary_terms")
 
     def __repr__(self):
         return f"<GlossaryTerm(term='{self.term}', domain='{self.domain}')>"
@@ -470,28 +424,19 @@ class DataQualityRule(Base):
     __tablename__ = "dq_rules"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     column_name = Column(String(255), nullable=True)
     rule_type = Column(String(50), nullable=False)
     rule_definition = Column(JSON, nullable=False)
     severity = Column(String(20), default="warning")
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     asset = relationship("Asset", back_populates="dq_rules")
-    results = relationship(
-        "DataQualityResult", backref="rule", cascade="all, delete-orphan"
-    )
+    results = relationship("DataQualityResult", backref="rule", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return (
-            f"<DataQualityRule(type='{self.rule_type}', "
-            f"asset_id='{self.asset_id}')>"
-        )
+        return f"<DataQualityRule(type='{self.rule_type}', asset_id='{self.asset_id}')>"
 
 
 class DataQualityResult(Base):
@@ -500,12 +445,8 @@ class DataQualityResult(Base):
     __tablename__ = "dq_results"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    rule_id = Column(
-        String(36), ForeignKey("dq_rules.id"), nullable=False, index=True
-    )
-    execution_date = Column(
-        DateTime, nullable=False, default=datetime.utcnow, index=True
-    )
+    rule_id = Column(String(36), ForeignKey("dq_rules.id"), nullable=False, index=True)
+    execution_date = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     status = Column(String(20), nullable=False)
     actual_value = Column(Numeric)
     expected_value = Column(Numeric)
@@ -513,10 +454,7 @@ class DataQualityResult(Base):
     error_message = Column(Text)
 
     def __repr__(self):
-        return (
-            f"<DataQualityResult(rule_id='{self.rule_id}', "
-            f"status='{self.status}')>"
-        )
+        return f"<DataQualityResult(rule_id='{self.rule_id}', status='{self.status}')>"
 
 
 class UserInteraction(Base):
@@ -525,9 +463,7 @@ class UserInteraction(Base):
     __tablename__ = "user_interactions"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     user_id = Column(String(255), nullable=False, index=True)
     interaction_type = Column(String(50), nullable=False)
     content = Column(Text)
@@ -537,10 +473,7 @@ class UserInteraction(Base):
     asset = relationship("Asset", back_populates="interactions")
 
     def __repr__(self):
-        return (
-            f"<UserInteraction(type='{self.interaction_type}', "
-            f"user='{self.user_id}')>"
-        )
+        return f"<UserInteraction(type='{self.interaction_type}', user='{self.user_id}')>"
 
 
 class SearchIndexColumn(Base):
@@ -552,9 +485,7 @@ class SearchIndexColumn(Base):
     __tablename__ = "search_columns"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    asset_id = Column(
-        String(36), ForeignKey("assets.id"), nullable=False, index=True
-    )
+    asset_id = Column(String(36), ForeignKey("assets.id"), nullable=False, index=True)
     table_schema = Column(String(255), nullable=False, index=True)
     table_name = Column(String(255), nullable=False, index=True)
     column_name = Column(String(255), nullable=False, index=True)
@@ -568,7 +499,4 @@ class SearchIndexColumn(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<SearchIndexColumn(column='{self.column_name}', "
-            f"asset_id='{self.asset_id}')>"
-        )
+        return f"<SearchIndexColumn(column='{self.column_name}', asset_id='{self.asset_id}')>"

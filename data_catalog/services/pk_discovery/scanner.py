@@ -22,7 +22,6 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
-from data_catalog.services.sql_dialect import SQLDialect
 from data_catalog.services.pk_discovery.decision import DecisionEngine
 from data_catalog.services.pk_discovery.models import (
     ColumnCandidate,
@@ -31,6 +30,7 @@ from data_catalog.services.pk_discovery.models import (
     ScanStep,
     StepResult,
 )
+from data_catalog.services.sql_dialect import SQLDialect
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,16 @@ PK_PATTERNS = [
 
 # Data types that cannot be PK candidates
 EXCLUDED_TYPES = {
-    "text", "ntext", "image", "xml", "geography", "geometry",
-    "hierarchyid", "sql_variant", "timestamp", "rowversion",
+    "text",
+    "ntext",
+    "image",
+    "xml",
+    "geography",
+    "geometry",
+    "hierarchyid",
+    "sql_variant",
+    "timestamp",
+    "rowversion",
 }
 
 # Maximum COUNT DISTINCT expressions per query (prevents nesting-depth errors)
@@ -170,9 +178,7 @@ class ProgressiveScanner:
             # Generate composites at Step 3+
             if step.step_number >= 3:
                 max_cols = 3 if step.step_number >= 4 else 2
-                new_composites = self.decision_engine.generate_composites(
-                    active_candidates, step, max_cols
-                )
+                new_composites = self.decision_engine.generate_composites(active_candidates, step, max_cols)
                 composites.extend(new_composites)
 
             # Create sample temp table
@@ -192,8 +198,18 @@ class ProgressiveScanner:
                 self._logger.error(f"Step {step.step_number} query failed: {e}")
                 self._cleanup_temp(temp_table)
                 return self._create_result(
-                    view_name, total_rows, total_cols, "error",
-                    None, 0.0, start_time, 0, 0, 0, {}, [],
+                    view_name,
+                    total_rows,
+                    total_cols,
+                    "error",
+                    None,
+                    0.0,
+                    start_time,
+                    0,
+                    0,
+                    0,
+                    {},
+                    [],
                     escalation_reason=str(e),
                 )
             finally:
@@ -201,16 +217,10 @@ class ProgressiveScanner:
 
             # Parse results
             row_count = results.get("_row_count", 0)
-            selectivities = {
-                k: v / row_count if row_count else 0.0
-                for k, v in results.items()
-                if k != "_row_count"
-            }
+            selectivities = {k: v / row_count if row_count else 0.0 for k, v in results.items() if k != "_row_count"}
 
             # Make decision
-            decision = self.decision_engine.decide(
-                step, candidates, composites, selectivities, row_count
-            )
+            decision = self.decision_engine.decide(step, candidates, composites, selectivities, row_count)
 
             step_duration = time.time() - step_start
             step_timings[step.step_number] = step_duration
@@ -222,9 +232,7 @@ class ProgressiveScanner:
                 sample_rows=row_count,
                 cardinalities={k: v for k, v in results.items() if k != "_row_count"},
                 selectivities=selectivities,
-                candidates_promoted=[
-                    c.column_name for c in decision.promoted_candidates
-                ],
+                candidates_promoted=[c.column_name for c in decision.promoted_candidates],
                 candidates_eliminated=decision.eliminated_candidates,
                 best_candidate=decision.best_candidate,
                 best_selectivity=decision.best_selectivity,
@@ -234,19 +242,11 @@ class ProgressiveScanner:
             if progress_callback:
                 progress_callback(step_result)
 
-            self._logger.info(
-                f"Step {step.step_number}: {row_count:,} rows, "
-                f"best={decision.best_candidate} "
-                f"({decision.best_selectivity:.1%} sel), "
-                f"{step_duration:.1f}s"
-            )
+            self._logger.info(f"Step {step.step_number}: {row_count:,} rows, best={decision.best_candidate} ({decision.best_selectivity:.1%} sel), {step_duration:.1f}s")
 
             # Early termination: stable high selectivity
             if len(step_history) >= 2 and decision.best_selectivity is not None:
-                recent = [
-                    s.best_selectivity for s in step_history[-3:]
-                    if s.best_selectivity is not None
-                ]
+                recent = [s.best_selectivity for s in step_history[-3:] if s.best_selectivity is not None]
                 if len(recent) >= 2:
                     current, prev = recent[-1], recent[-2]
                     stability = max(recent) - min(recent)
@@ -254,52 +254,88 @@ class ProgressiveScanner:
                     if current >= 0.95 and stability <= 0.02 and step.step_number >= 4:
                         pk_cols = self._parse_candidate(decision.best_candidate)
                         return self._create_result(
-                            view_name, total_rows, total_cols, "confirmed",
-                            pk_cols, current, start_time,
-                            step.step_number, len(candidates), len(composites),
-                            step_timings, step_history,
+                            view_name,
+                            total_rows,
+                            total_cols,
+                            "confirmed",
+                            pk_cols,
+                            current,
+                            start_time,
+                            step.step_number,
+                            len(candidates),
+                            len(composites),
+                            step_timings,
+                            step_history,
                         )
 
                     if step.step_number >= 4 and current < 0.85 and current <= prev:
                         return self._create_result(
-                            view_name, total_rows, total_cols, "escalated",
-                            None, 0.0, start_time,
-                            step.step_number, len(candidates), len(composites),
-                            step_timings, step_history,
-                            escalation_reason=(
-                                f"Selectivity {current:.1%} declining below 85%"
-                            ),
+                            view_name,
+                            total_rows,
+                            total_cols,
+                            "escalated",
+                            None,
+                            0.0,
+                            start_time,
+                            step.step_number,
+                            len(candidates),
+                            len(composites),
+                            step_timings,
+                            step_history,
+                            escalation_reason=(f"Selectivity {current:.1%} declining below 85%"),
                         )
 
             if decision.pk_found:
                 return self._create_result(
-                    view_name, total_rows, total_cols, "confirmed",
-                    decision.pk_columns, 1.0, start_time,
-                    step.step_number, len(candidates), len(composites),
-                    step_timings, step_history,
+                    view_name,
+                    total_rows,
+                    total_cols,
+                    "confirmed",
+                    decision.pk_columns,
+                    1.0,
+                    start_time,
+                    step.step_number,
+                    len(candidates),
+                    len(composites),
+                    step_timings,
+                    step_history,
                 )
 
             if decision.skip_to_validation and step.step_number >= 3:
                 pk_cols = self._parse_candidate(decision.best_candidate)
                 return self._create_result(
-                    view_name, total_rows, total_cols, "confirmed",
-                    pk_cols, decision.best_selectivity or 0.99, start_time,
-                    step.step_number, len(candidates), len(composites),
-                    step_timings, step_history,
+                    view_name,
+                    total_rows,
+                    total_cols,
+                    "confirmed",
+                    pk_cols,
+                    decision.best_selectivity or 0.99,
+                    start_time,
+                    step.step_number,
+                    len(candidates),
+                    len(composites),
+                    step_timings,
+                    step_history,
                 )
 
             if decision.escalate:
                 return self._create_result(
-                    view_name, total_rows, total_cols, "escalated",
-                    None, 0.0, start_time,
-                    step.step_number, len(candidates), len(composites),
-                    step_timings, step_history,
+                    view_name,
+                    total_rows,
+                    total_cols,
+                    "escalated",
+                    None,
+                    0.0,
+                    start_time,
+                    step.step_number,
+                    len(candidates),
+                    len(composites),
+                    step_timings,
+                    step_history,
                     escalation_reason=decision.escalation_reason,
                 )
 
-            candidates = decision.promoted_candidates + [
-                c for c in candidates if c.is_eliminated()
-            ]
+            candidates = decision.promoted_candidates + [c for c in candidates if c.is_eliminated()]
             composites = decision.promoted_composites
 
         # Use best from last step
@@ -307,17 +343,33 @@ class ProgressiveScanner:
         if best:
             pk_cols = self._parse_candidate(best)
             return self._create_result(
-                view_name, total_rows, total_cols, "confirmed",
-                pk_cols, step_history[-1].best_selectivity or 0.0, start_time,
-                len(self.steps), len(candidates), len(composites),
-                step_timings, step_history,
+                view_name,
+                total_rows,
+                total_cols,
+                "confirmed",
+                pk_cols,
+                step_history[-1].best_selectivity or 0.0,
+                start_time,
+                len(self.steps),
+                len(candidates),
+                len(composites),
+                step_timings,
+                step_history,
             )
 
         return self._create_result(
-            view_name, total_rows, total_cols, "escalated",
-            None, 0.0, start_time,
-            len(self.steps), len(candidates), len(composites),
-            step_timings, step_history,
+            view_name,
+            total_rows,
+            total_cols,
+            "escalated",
+            None,
+            0.0,
+            start_time,
+            len(self.steps),
+            len(candidates),
+            len(composites),
+            step_timings,
+            step_history,
             escalation_reason="No viable candidate after all steps",
         )
 
@@ -349,10 +401,7 @@ class ProgressiveScanner:
     def _get_column_inventory(self, schema: str, table: str) -> list[dict]:
         sql = self.dialect.column_metadata_query(schema, table)
         self.cursor.execute(sql)
-        return [
-            {"name": r[0], "type": r[1], "ordinal": r[2]}
-            for r in self.cursor.fetchall()
-        ]
+        return [{"name": r[0], "type": r[1], "ordinal": r[2]} for r in self.cursor.fetchall()]
 
     def _get_pk_priority(self, column_name: str) -> int:
         for pattern, priority in PK_PATTERNS:
@@ -360,9 +409,7 @@ class ProgressiveScanner:
                 return priority
         return 5
 
-    def _select_seed_column(
-        self, schema: str, table: str, columns: list[str]
-    ) -> str:
+    def _select_seed_column(self, schema: str, table: str, columns: list[str]) -> str:
         try:
             test_cols = columns[:30]
             sql = self.dialect.seed_column_query(schema, table, test_cols)
@@ -386,7 +433,11 @@ class ProgressiveScanner:
             return columns[0]
 
     def _create_step_sample(
-        self, schema: str, table: str, step: ScanStep, seed_col: str,
+        self,
+        schema: str,
+        table: str,
+        step: ScanStep,
+        seed_col: str,
     ) -> str | None:
         """Create or reuse a sample temp table. Returns name or None."""
         if self._sample_pool is not None:
@@ -394,7 +445,11 @@ class ProgressiveScanner:
         # No pool -- create ad-hoc temp
         temp_name = f"#scan_{step.step_number}_{int(time.time())}"
         sql = self.dialect.create_sample_table(
-            temp_name, schema, table, seed_col, step.row_sample_pct,
+            temp_name,
+            schema,
+            table,
+            seed_col,
+            step.row_sample_pct,
         )
         try:
             old_timeout = self.dialect.set_timeout(self.cursor, 600)
@@ -430,11 +485,9 @@ class ProgressiveScanner:
 
         results: dict[str, int] = {}
         for batch_start in range(0, len(columns), CARDINALITY_BATCH_SIZE):
-            batch_cols = columns[batch_start:batch_start + CARDINALITY_BATCH_SIZE]
+            batch_cols = columns[batch_start : batch_start + CARDINALITY_BATCH_SIZE]
             batch_comps = composites if batch_start == 0 else []
-            batch_results = self._execute_single_query(
-                source, batch_cols, batch_comps
-            )
+            batch_results = self._execute_single_query(source, batch_cols, batch_comps)
             if not results:
                 results = batch_results
             else:

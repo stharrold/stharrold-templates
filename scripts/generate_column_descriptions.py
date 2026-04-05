@@ -19,6 +19,7 @@ Usage:
     python scripts/generate_column_descriptions.py --phase import
     python scripts/generate_column_descriptions.py --phase embed [--batch-size 64]
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,9 +53,7 @@ SCHEMA_DOMAINS = {
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Column Description Pipeline"
-    )
+    parser = argparse.ArgumentParser(description="Column Description Pipeline")
     parser.add_argument(
         "--phase",
         required=True,

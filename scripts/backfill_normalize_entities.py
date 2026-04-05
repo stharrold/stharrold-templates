@@ -40,10 +40,7 @@ def run():
             old_entities = data.get("entities", [])
             new_entities = normalize_entities(old_entities)
 
-            if len(old_entities) != len(new_entities) or any(
-                o.get("type") != n.get("type")
-                for o, n in zip(old_entities, new_entities)
-            ):
+            if len(old_entities) != len(new_entities) or any(o.get("type") != n.get("type") for o, n in zip(old_entities, new_entities)):
                 data["entities"] = new_entities
                 updates.append((json.dumps(data), mid))
 

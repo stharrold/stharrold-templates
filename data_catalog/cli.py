@@ -7,11 +7,10 @@ operate against the local DuckDB catalog database.
 
 CUSTOMIZE: Add domain-specific commands for your use case.
 """
+
 from __future__ import annotations
 
 import json
-import sys
-from pathlib import Path
 
 import click
 from rich.console import Console
@@ -49,11 +48,7 @@ def search(search_term: str, limit: int):
         repo = AssetRepository(db)
         assets = repo.find_all(limit=500)
 
-        matching = [
-            a for a in assets
-            if search_term.lower() in a.qualified_name.lower()
-            or (a.description and search_term.lower() in a.description.lower())
-        ]
+        matching = [a for a in assets if search_term.lower() in a.qualified_name.lower() or (a.description and search_term.lower() in a.description.lower())]
 
         if not matching:
             console.print(f"[yellow]No assets matching '{search_term}'[/yellow]")
@@ -189,10 +184,7 @@ def relationships(qualified_name: str):
                 direction = "<-"
 
             ref_name = other.qualified_name if other else "Unknown"
-            cols = ", ".join(
-                f"{m['parent']}->{m['referenced']}"
-                for m in rel.column_mappings[:2]
-            )
+            cols = ", ".join(f"{m['parent']}->{m['referenced']}" for m in rel.column_mappings[:2])
             if len(rel.column_mappings) > 2:
                 cols += f" (+{len(rel.column_mappings) - 2})"
 
@@ -222,10 +214,7 @@ def discover_grain_cmd(asset: str | None, schema: str | None, discover_all: bool
         catalog-cli discover-grain --schema "dbo"
     """
     # CUSTOMIZE: Replace with your source database connection logic.
-    console.print(
-        "[yellow]Source database connection required. "
-        "Customize _get_source_cursor() in cli.py.[/yellow]"
-    )
+    console.print("[yellow]Source database connection required. Customize _get_source_cursor() in cli.py.[/yellow]")
 
 
 @cli.command("discover-fk")
@@ -240,10 +229,7 @@ def discover_fk_cmd(asset: str | None, schema: str | None):
 
         catalog-cli discover-fk "[dbo].[Orders]"
     """
-    console.print(
-        "[yellow]Source database connection required. "
-        "Customize _get_source_cursor() in cli.py.[/yellow]"
-    )
+    console.print("[yellow]Source database connection required. Customize _get_source_cursor() in cli.py.[/yellow]")
 
 
 # ------------------------------------------------------------------
@@ -302,8 +288,7 @@ def rag_search_cmd(query: str, top_k: int, expand: bool):
 
 
 @cli.command()
-@click.option("--by", "group_by", default="schema",
-              type=click.Choice(["schema", "schema-table"]))
+@click.option("--by", "group_by", default="schema", type=click.Choice(["schema", "schema-table"]))
 def coverage(group_by: str):
     """Show pipeline coverage status.
 
@@ -312,11 +297,6 @@ def coverage(group_by: str):
         catalog-cli coverage
         catalog-cli coverage --by schema-table
     """
-    from data_catalog.db.models import (
-        ColumnValueFrequency,
-        ColumnVector,
-        SearchIndexColumn,
-    )
 
     with get_db() as db:
         repo = AssetRepository(db)
@@ -381,20 +361,18 @@ def stats():
         assets = repo.find_all(limit=10000)
 
         total = len(assets)
-        confirmed = sum(
-            1 for a in assets
-            if (a.schema_metadata or {}).get("grain_status") == "confirmed"
-        )
-        no_pk = sum(
-            1 for a in assets
-            if (a.schema_metadata or {}).get("grain_status") == "no_natural_pk"
-        )
+        confirmed = sum(1 for a in assets if (a.schema_metadata or {}).get("grain_status") == "confirmed")
+        no_pk = sum(1 for a in assets if (a.schema_metadata or {}).get("grain_status") == "no_natural_pk")
         unknown = total - confirmed - no_pk
 
         rels = db.query(Relationship).count()
-        validated = db.query(Relationship).filter(
-            Relationship.is_validated == True  # noqa: E712
-        ).count()
+        validated = (
+            db.query(Relationship)
+            .filter(
+                Relationship.is_validated == True  # noqa: E712
+            )
+            .count()
+        )
 
         vectors = db.query(ColumnVector).count()
 
@@ -416,8 +394,7 @@ def stats():
 
 @cli.command("graph-analyze")
 @click.option("--schema", "-s", help="Schema pattern filter")
-@click.option("--output", "-o", "output_format", default="text",
-              type=click.Choice(["text", "json"]))
+@click.option("--output", "-o", "output_format", default="text", type=click.Choice(["text", "json"]))
 def graph_analyze_cmd(schema: str | None, output_format: str):
     """Run graph analysis on FK relationships.
 
@@ -445,9 +422,7 @@ def graph_analyze_cmd(schema: str | None, output_format: str):
             if "top_pagerank" in results:
                 console.print("\n[bold]Top PageRank:[/bold]")
                 for item in results["top_pagerank"][:10]:
-                    console.print(
-                        f"  {item['name']}: {item['score']:.4f}"
-                    )
+                    console.print(f"  {item['name']}: {item['score']:.4f}")
 
 
 # ------------------------------------------------------------------

@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Shared test fixtures for the data catalog test suite."""
+
 from __future__ import annotations
 
 import pytest
@@ -20,10 +21,12 @@ def db_engine():
         conn.execute(text("INSTALL vss; LOAD vss;"))
         conn.execute(text("INSTALL json; LOAD json;"))
         # Register hamming_dist macro (xor() function, not # operator)
-        conn.execute(text("""
+        conn.execute(
+            text("""
             CREATE OR REPLACE MACRO hamming_dist(a, b) AS
             bit_count(xor(a::BIT, b::BIT))
-        """))
+        """)
+        )
         conn.commit()
 
     Base.metadata.create_all(engine)

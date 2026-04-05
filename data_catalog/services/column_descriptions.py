@@ -12,18 +12,15 @@ Each phase is idempotent and checkpoint-resumable. The LLM generation
 step (between prepare and import) is intentionally external -- users
 configure their own LLM integration.
 """
+
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import text
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.attributes import flag_modified
 
 from data_catalog.db.models import (
     Asset,
@@ -48,9 +45,7 @@ def load_checkpoint(path: Path = DEFAULT_CHECKPOINT_PATH) -> dict:
     return {"populated": [], "described": [], "embedded": []}
 
 
-def save_checkpoint(
-    checkpoint: dict, path: Path = DEFAULT_CHECKPOINT_PATH
-) -> None:
+def save_checkpoint(checkpoint: dict, path: Path = DEFAULT_CHECKPOINT_PATH) -> None:
     """Persist checkpoint to disk."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
@@ -138,7 +133,7 @@ def phase_prepare(
             f"# Column Descriptions for {asset.qualified_name}",
             "",
             "Generate a concise business description for each column.",
-            "Return JSON: {\"column_name\": \"description\", ...}",
+            'Return JSON: {"column_name": "description", ...}',
             "",
             "## Columns",
             "",
@@ -251,11 +246,7 @@ def phase_embed(
     embedding_svc = EmbeddingService()
 
     # Find columns with descriptions but no semantic_description vector
-    columns = (
-        db.query(SearchIndexColumn)
-        .filter(SearchIndexColumn.description.isnot(None))
-        .all()
-    )
+    columns = db.query(SearchIndexColumn).filter(SearchIndexColumn.description.isnot(None)).all()
 
     embedded = 0
     batch_texts = []

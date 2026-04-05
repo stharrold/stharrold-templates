@@ -13,7 +13,8 @@ import time
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine, event, text as sa_text
+from sqlalchemy import create_engine, event
+from sqlalchemy import text as sa_text
 from sqlalchemy.orm import Session, sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -34,10 +35,7 @@ def _on_connect(dbapi_connection, connection_record):
         cursor.execute("INSTALL json; LOAD json;")
 
         # Hamming distance macro for BIT-packed vectors
-        cursor.execute(
-            "CREATE OR REPLACE MACRO hamming_dist(a, b) AS "
-            "(bit_count(xor(a, b)));"
-        )
+        cursor.execute("CREATE OR REPLACE MACRO hamming_dist(a, b) AS (bit_count(xor(a, b)));")
 
         # UBIGINT decomposition macro: 6 x 64-bit POPCNT for SIMD-friendly Hamming
         cursor.execute(
@@ -70,8 +68,7 @@ def _create_engine_with_retry():
             if "IOException" in str(type(e).__name__) or "IOException" in str(e):
                 delay = RETRY_BASE_DELAY * (2**attempt)
                 logger.warning(
-                    "DuckDB IOException on connect (attempt %d/%d), "
-                    "retrying in %.1fs: %s",
+                    "DuckDB IOException on connect (attempt %d/%d), retrying in %.1fs: %s",
                     attempt + 1,
                     MAX_RETRIES,
                     delay,

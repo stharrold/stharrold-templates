@@ -172,6 +172,17 @@ def check_claude_md() -> CheckResult:
 
 
 def check_changelog() -> CheckResult:
+    """Verify CHANGELOG.md has a non-empty [Unreleased] section, UNLESS
+    the last release was cut today (empty [Unreleased] is expected
+    immediately after a release until the next work begins).
+
+    The "last release cut today" heuristic: the most recent dated
+    release header matches today's ISO date. Both
+    `## [X.Y.Z] - YYYY-MM-DD` and `## [YYYY-MM-DD]` forms are
+    accepted.
+    """
+    import datetime
+
     changelog = REPO_ROOT / "CHANGELOG.md"
     if not changelog.exists():
         return CheckResult("changelog", True, "no CHANGELOG.md (skipped)")
@@ -182,6 +193,7 @@ def check_changelog() -> CheckResult:
             False,
             "CHANGELOG.md has no [Unreleased] section",
         )
+
     # Count non-empty lines after [Unreleased] until the next ## header
     lines = content.splitlines()
     in_unreleased = False
@@ -194,13 +206,26 @@ def check_changelog() -> CheckResult:
             break
         if in_unreleased and line.strip() and not line.startswith("###"):
             body_lines += 1
-    if body_lines < 2:
+
+    if body_lines >= 2:
+        return CheckResult("changelog", True, f"[Unreleased] has {body_lines} content lines")
+
+    # [Unreleased] is empty -- acceptable only if the most recent release
+    # was cut today. Grace period: immediately after cutting a release,
+    # there's nothing to ship until the next work begins.
+    today = datetime.date.today().isoformat()
+    if f"- {today}" in content or f"[{today}]" in content:
         return CheckResult(
             "changelog",
-            False,
-            "CHANGELOG.md [Unreleased] section is empty -- nothing to ship",
+            True,
+            f"[Unreleased] empty but a release was cut today ({today}); grace period active",
         )
-    return CheckResult("changelog", True, f"[Unreleased] has {body_lines} content lines")
+
+    return CheckResult(
+        "changelog",
+        False,
+        "CHANGELOG.md [Unreleased] section is empty -- nothing to ship",
+    )
 
 
 CHECKS = {

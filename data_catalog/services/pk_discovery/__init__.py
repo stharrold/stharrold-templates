@@ -25,6 +25,7 @@ Example::
     print(result.primary_key)  # ['OrderID']
 """
 
+from data_catalog.services.pk_discovery.decision import DecisionEngine
 from data_catalog.services.pk_discovery.models import (
     ColumnCandidate,
     CompositeCandidate,
@@ -33,7 +34,6 @@ from data_catalog.services.pk_discovery.models import (
     ScanStep,
     StepResult,
 )
-from data_catalog.services.pk_discovery.decision import DecisionEngine
 from data_catalog.services.pk_discovery.scanner import ProgressiveScanner
 
 __all__ = [

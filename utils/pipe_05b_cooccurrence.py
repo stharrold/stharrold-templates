@@ -114,8 +114,7 @@ def run(db: CoreDB = None):
 
     if edges:
         db.conn.executemany(
-            f"INSERT OR IGNORE INTO {db.table('semantic_edges')}"
-            " (source_id, target_id, edge_type, weight) VALUES (?, ?, ?, ?)",
+            f"INSERT OR IGNORE INTO {db.table('semantic_edges')} (source_id, target_id, edge_type, weight) VALUES (?, ?, ?, ?)",
             edges,
         )
 

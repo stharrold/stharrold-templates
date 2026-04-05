@@ -1,21 +1,18 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for FK discovery service and patterns."""
+
 from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
 from data_catalog.db.models import Asset
-from data_catalog.services.fk_discovery import FKCandidate, FKDiscoveryService
+from data_catalog.services.fk_discovery import FKDiscoveryService
 from data_catalog.services.fk_patterns import (
     CompositePattern,
     EntityNamePattern,
     FKPatternRegistry,
-    PrefixPattern,
     SameNamePattern,
-    SuffixPattern,
 )
 
 

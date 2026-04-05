@@ -99,10 +99,7 @@ class SamplePool:
         key = 100.0 if pct >= 100 else pct
 
         if key in self._pool:
-            logger.info(
-                f"  Reusing temp {self._pool[key]} for {key}% "
-                f"({self._row_counts.get(key, '?'):,} rows)"
-            )
+            logger.info(f"  Reusing temp {self._pool[key]} for {key}% ({self._row_counts.get(key, '?'):,} rows)")
             return self._pool[key]
 
         # Materialize
@@ -110,7 +107,11 @@ class SamplePool:
         temp_name = f"#pool_{pct_tag}_{self._ts}"
 
         sql = self._dialect.create_sample_table(
-            temp_name, self._schema, self._table, self._seed_col, key,
+            temp_name,
+            self._schema,
+            self._table,
+            self._seed_col,
+            key,
         )
 
         old_timeout = self._dialect.set_timeout(self._cursor, 600)
@@ -132,10 +133,7 @@ class SamplePool:
 
         self._dialect.drain_cursor(self._cursor)
 
-        logger.info(
-            f"  Pool temp {temp_name} ready: "
-            f"{row_count:,} rows in {ctas_elapsed:.1f}s"
-        )
+        logger.info(f"  Pool temp {temp_name} ready: {row_count:,} rows in {ctas_elapsed:.1f}s")
 
         self._pool[key] = temp_name
         self._row_counts[key] = row_count
@@ -147,7 +145,7 @@ class SamplePool:
 
     def drop_all(self) -> None:
         """Drop all temp tables owned by this pool."""
-        for pct, temp_name in list(self._pool.items()):
+        for _pct, temp_name in list(self._pool.items()):
             try:
                 self._cursor.execute(self._dialect.drop_temp_table(temp_name))
                 self._dialect.drain_cursor(self._cursor)

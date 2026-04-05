@@ -58,69 +58,40 @@ class DecisionEngine:
     ) -> Decision:
         decision = Decision()
 
-        perfect_candidates = self._find_perfect_candidates(
-            candidates, composites, selectivities
-        )
+        perfect_candidates = self._find_perfect_candidates(candidates, composites, selectivities)
         if perfect_candidates:
-            self._logger.info(
-                f"Step {step.step_number}: Found perfect candidate(s): "
-                f"{perfect_candidates}"
-            )
+            self._logger.info(f"Step {step.step_number}: Found perfect candidate(s): {perfect_candidates}")
             decision.pk_found = True
             decision.pk_columns = perfect_candidates
-            decision.best_candidate = (
-                perfect_candidates[0]
-                if len(perfect_candidates) == 1
-                else " + ".join(perfect_candidates)
-            )
+            decision.best_candidate = perfect_candidates[0] if len(perfect_candidates) == 1 else " + ".join(perfect_candidates)
             decision.best_selectivity = 1.0
             return decision
 
         if step.step_number >= self.ESCALATION_STEP:
-            best_selectivity = self._get_best_selectivity(
-                candidates, composites, selectivities
-            )
+            best_selectivity = self._get_best_selectivity(candidates, composites, selectivities)
             if best_selectivity < self.ESCALATION_THRESHOLD:
-                self._logger.warning(
-                    f"Step {step.step_number}: Best selectivity "
-                    f"{best_selectivity:.1%} < {self.ESCALATION_THRESHOLD:.0%} "
-                    f"threshold - escalating"
-                )
+                self._logger.warning(f"Step {step.step_number}: Best selectivity {best_selectivity:.1%} < {self.ESCALATION_THRESHOLD:.0%} threshold - escalating")
                 decision.escalate = True
-                decision.escalation_reason = (
-                    f"Best selectivity {best_selectivity:.1%} < "
-                    f"{self.ESCALATION_THRESHOLD:.0%} at Step {step.step_number}"
-                )
+                decision.escalation_reason = f"Best selectivity {best_selectivity:.1%} < {self.ESCALATION_THRESHOLD:.0%} at Step {step.step_number}"
                 decision.best_selectivity = best_selectivity
                 return decision
 
         threshold = self._get_threshold(step.step_number)
-        promoted, eliminated = self._partition_candidates(
-            candidates, selectivities, threshold, step.step_number
-        )
+        promoted, eliminated = self._partition_candidates(candidates, selectivities, threshold, step.step_number)
 
         decision.promoted_candidates = promoted
-        decision.eliminated_candidates = [
-            c.column_name for c in candidates if c.is_eliminated()
-        ]
+        decision.eliminated_candidates = [c.column_name for c in candidates if c.is_eliminated()]
 
-        promoted_composites = self._filter_composites(
-            composites, selectivities, threshold, step.step_number
-        )
+        promoted_composites = self._filter_composites(composites, selectivities, threshold, step.step_number)
         decision.promoted_composites = promoted_composites
 
-        best_name, best_sel = self._get_best_candidate(
-            promoted, promoted_composites, selectivities
-        )
+        best_name, best_sel = self._get_best_candidate(promoted, promoted_composites, selectivities)
         decision.best_candidate = best_name
         decision.best_selectivity = best_sel if best_sel is not None else 0.0
 
         if best_sel and best_sel >= 0.99:
             decision.skip_to_validation = True
-            self._logger.info(
-                f"Step {step.step_number}: High selectivity {best_sel:.1%} "
-                f"- skipping to validation"
-            )
+            self._logger.info(f"Step {step.step_number}: High selectivity {best_sel:.1%} - skipping to validation")
 
         return decision
 
@@ -150,10 +121,7 @@ class DecisionEngine:
             if len(composites) >= self.MAX_COMPOSITES_PER_STEP:
                 break
 
-        self._logger.debug(
-            f"Step {step.step_number}: Generated {len(composites)} "
-            f"composite candidates"
-        )
+        self._logger.debug(f"Step {step.step_number}: Generated {len(composites)} composite candidates")
         return composites
 
     def calculate_selectivity(self, distinct_count: int, total_rows: int) -> float:
@@ -221,9 +189,7 @@ class DecisionEngine:
             candidate.selectivity[step_number] = sel
             if sel < threshold:
                 candidate.eliminated_at_step = step_number
-                candidate.elimination_reason = (
-                    f"Selectivity {sel:.1%} < {threshold:.0%} threshold"
-                )
+                candidate.elimination_reason = f"Selectivity {sel:.1%} < {threshold:.0%} threshold"
                 eliminated.append(candidate)
             else:
                 promoted.append(candidate)

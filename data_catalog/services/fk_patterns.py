@@ -37,8 +37,7 @@ class FKPattern(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
     @abstractmethod
     def match(
@@ -103,8 +102,7 @@ class SameNamePattern(FKPattern):
 
 
 class EntityNamePattern(FKPattern):
-    """FK column = EntityName + suffix (e.g. Patient_ID -> Patient.PatientID).
-    """
+    """FK column = EntityName + suffix (e.g. Patient_ID -> Patient.PatientID)."""
 
     _SUFFIXES = ["_ID", "_KEY", "_SK", "_SID", "ID", "Key"]
 
@@ -116,9 +114,7 @@ class EntityNamePattern(FKPattern):
         matches = []
         norm_col = _normalize_col(col_name)
         # Extract entity name from target (last part after '.')
-        entity = (
-            target_name.split(".")[-1].replace("[", "").replace("]", "")
-        )
+        entity = target_name.split(".")[-1].replace("[", "").replace("]", "")
         norm_entity = _normalize_col(entity)
 
         for suffix in self._SUFFIXES:
@@ -157,9 +153,7 @@ class PrefixPattern(FKPattern):
         norm_col = _normalize_col(col_name)
         for pk_col in pk_cols:
             norm_pk = _normalize_col(pk_col)
-            if norm_col.endswith("_" + norm_pk) or norm_col.endswith(
-                norm_pk
-            ):
+            if norm_col.endswith("_" + norm_pk) or norm_col.endswith(norm_pk):
                 if norm_col != norm_pk:  # Avoid SameNamePattern overlap
                     matches.append(
                         FKCandidate(
@@ -192,9 +186,7 @@ class SuffixPattern(FKPattern):
             return matches
 
         stem = _normalize_col(m.group(1))
-        entity = (
-            target_name.split(".")[-1].replace("[", "").replace("]", "")
-        )
+        entity = target_name.split(".")[-1].replace("[", "").replace("]", "")
         norm_entity = _normalize_col(entity)
 
         if stem == norm_entity or norm_entity.startswith(stem):
@@ -290,14 +282,10 @@ class DomainSpecificPattern(FKPattern):
     def match(self, col_name, target_name, pk_cols, source_name):
         matches = []
         norm_col = _normalize_col(col_name)
-        entity = (
-            target_name.split(".")[-1].replace("[", "").replace("]", "")
-        )
+        entity = target_name.split(".")[-1].replace("[", "").replace("]", "")
 
         expected_table = self.DOMAIN_MAPPINGS.get(norm_col)
-        if expected_table and _normalize_col(entity) == _normalize_col(
-            expected_table
-        ):
+        if expected_table and _normalize_col(entity) == _normalize_col(expected_table):
             if pk_cols:
                 matches.append(
                     FKCandidate(

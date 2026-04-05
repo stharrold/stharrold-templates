@@ -19,8 +19,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from data_catalog.db.models import Asset, ColumnVector, Relationship
-from data_catalog.utils.sql_safety import validate_identifier
+from data_catalog.db.models import Asset
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +28,11 @@ logger = logging.getLogger(__name__)
 class FKCandidate:
     """A candidate foreign key relationship."""
 
-    parent_view: str          # FK table (child)
+    parent_view: str  # FK table (child)
     parent_columns: list[str]
-    referenced_view: str      # PK table (parent)
+    referenced_view: str  # PK table (parent)
     referenced_columns: list[str]
-    pattern_name: str         # Which pattern discovered this
+    pattern_name: str  # Which pattern discovered this
     priority: int = 5
     confidence: float = 0.0
     relationship_type: str = "implicit"
@@ -102,11 +101,7 @@ class FKDiscoveryService:
             List of FK candidates ranked by priority.
         """
         if all_assets is None:
-            all_assets = (
-                self.db.query(Asset)
-                .filter(Asset.asset_type.in_(["view", "table"]))
-                .all()
-            )
+            all_assets = self.db.query(Asset).filter(Asset.asset_type.in_(["view", "table"])).all()
 
         # Get PK columns for target assets
         pk_map = self._build_pk_map(all_assets)
@@ -134,14 +129,9 @@ class FKDiscoveryService:
                     if target_name == asset.qualified_name:
                         continue  # Skip self
 
-                    matches = pattern.match(
-                        col_name, target_name, pk_cols, asset.qualified_name
-                    )
+                    matches = pattern.match(col_name, target_name, pk_cols, asset.qualified_name)
                     for match in matches:
-                        key = (
-                            f"{match.parent_view}:{match.parent_columns}->"
-                            f"{match.referenced_view}:{match.referenced_columns}"
-                        )
+                        key = f"{match.parent_view}:{match.parent_columns}->{match.referenced_view}:{match.referenced_columns}"
                         if key not in seen:
                             seen.add(key)
                             candidates.append(match)
@@ -161,10 +151,7 @@ class FKDiscoveryService:
                     col_counts[col_key] = count + 1
             candidates = filtered
 
-        self._logger.info(
-            f"Discovered {len(candidates)} FK candidates for "
-            f"{asset.qualified_name}"
-        )
+        self._logger.info(f"Discovered {len(candidates)} FK candidates for {asset.qualified_name}")
         return candidates
 
     def _build_pk_map(self, assets: list[Asset]) -> dict[str, list[str]]:
@@ -173,11 +160,7 @@ class FKDiscoveryService:
         for asset in assets:
             meta = asset.schema_metadata or {}
             # Check pk_minimal first, then primary_key, then pk_columns
-            pk = (
-                meta.get("pk_minimal")
-                or meta.get("primary_key")
-                or meta.get("pk_columns")
-            )
+            pk = meta.get("pk_minimal") or meta.get("primary_key") or meta.get("pk_columns")
             if pk and meta.get("grain_status") == "confirmed":
                 pk_map[asset.qualified_name] = pk
         return pk_map
@@ -186,9 +169,7 @@ class FKDiscoveryService:
         """Get column names from asset metadata."""
         meta = asset.schema_metadata or {}
         columns = meta.get("columns", [])
-        return [
-            c["name"] for c in columns if isinstance(c, dict) and "name" in c
-        ]
+        return [c["name"] for c in columns if isinstance(c, dict) and "name" in c]
 
 
 class ExtendedFKDiscoveryService(FKDiscoveryService):
@@ -203,9 +184,7 @@ class ExtendedFKDiscoveryService(FKDiscoveryService):
         dialect: SQL dialect for query generation.
     """
 
-    def __init__(
-        self, db: Session, source_cursor: Any, dialect: Any = None
-    ) -> None:
+    def __init__(self, db: Session, source_cursor: Any, dialect: Any = None) -> None:
         super().__init__(db)
         self.source_cursor = source_cursor
         self.dialect = dialect
@@ -228,9 +207,7 @@ class ExtendedFKDiscoveryService(FKDiscoveryService):
         if not candidates or not self.source_cursor:
             return results
 
-        validator = ProgressiveFKValidator(
-            self.source_cursor, dialect=self.dialect
-        )
+        validator = ProgressiveFKValidator(self.source_cursor, dialect=self.dialect)
 
         for candidate in candidates:
             try:
@@ -244,10 +221,7 @@ class ExtendedFKDiscoveryService(FKDiscoveryService):
                 )
                 results.append(result)
             except Exception as e:
-                self._logger.warning(
-                    f"Validation failed for {candidate.parent_view} -> "
-                    f"{candidate.referenced_view}: {e}"
-                )
+                self._logger.warning(f"Validation failed for {candidate.parent_view} -> {candidate.referenced_view}: {e}")
                 result = FKDiscoveryResult(
                     parent_asset=candidate.parent_view,
                     referenced_asset=candidate.referenced_view,

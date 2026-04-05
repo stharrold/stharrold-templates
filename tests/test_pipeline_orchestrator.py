@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for pipeline orchestrator."""
+
 from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
-from data_catalog.db.models import Asset, PipelinePhaseLog
+from data_catalog.db.models import PipelinePhaseLog
 from data_catalog.services.pipeline_orchestrator import (
     PhaseResult,
     PipelineConfig,

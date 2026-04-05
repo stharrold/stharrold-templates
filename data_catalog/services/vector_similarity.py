@@ -13,12 +13,11 @@ Two vector types:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 import numpy as np
 from sqlalchemy.orm import Session
 
-from data_catalog.db.models import Asset, ColumnVector, ColumnValueFrequency
+from data_catalog.db.models import Asset, ColumnValueFrequency, ColumnVector
 from data_catalog.services.embedding import EmbeddingService
 
 logger = logging.getLogger(__name__)
@@ -114,10 +113,7 @@ class VectorSimilarityService:
             List of dicts with column info and similarity scores.
         """
         # Binarize query
-        query_bits = EmbeddingService.binarize_single(query_vector)
-        query_ubigints, query_popcnt = EmbeddingService.quantize_ubigint(
-            query_vector
-        )
+        query_ubigints, query_popcnt = EmbeddingService.quantize_ubigint(query_vector)
 
         # Stage 1: Hamming pre-filter via SQL
         candidates = self._hamming_prefilter(
@@ -134,26 +130,22 @@ class VectorSimilarityService:
         results = []
         for cv in candidates:
             if cv.value_vector:
-                cos_sim = float(
-                    np.dot(query_vector, np.array(cv.value_vector))
+                cos_sim = float(np.dot(query_vector, np.array(cv.value_vector)))
+                results.append(
+                    {
+                        "table_schema": cv.table_schema,
+                        "table_name": cv.table_name,
+                        "column_name": cv.column_name,
+                        "cosine_similarity": cos_sim,
+                        "vector_type": cv.vector_type,
+                        "asset_id": cv.asset_id,
+                    }
                 )
-                results.append({
-                    "table_schema": cv.table_schema,
-                    "table_name": cv.table_name,
-                    "column_name": cv.column_name,
-                    "cosine_similarity": cos_sim,
-                    "vector_type": cv.vector_type,
-                    "asset_id": cv.asset_id,
-                })
 
-        results.sort(
-            key=lambda x: x["cosine_similarity"], reverse=True
-        )
+        results.sort(key=lambda x: x["cosine_similarity"], reverse=True)
         return results[:top_k]
 
-    def _get_top_values(
-        self, asset: Asset, col_name: str
-    ) -> list[str]:
+    def _get_top_values(self, asset: Asset, col_name: str) -> list[str]:
         """Get top frequency values for a column."""
         freqs = (
             self.db.query(ColumnValueFrequency)

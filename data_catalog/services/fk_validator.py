@@ -24,8 +24,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from data_catalog.services.sql_dialect import SQLDialect
 from data_catalog.services.fk_discovery import FKCandidate, FKValidationResult
+from data_catalog.services.sql_dialect import SQLDialect
 
 logger = logging.getLogger(__name__)
 
@@ -70,9 +70,7 @@ class ProgressiveFKValidator:
     ) -> None:
         self.cursor = cursor
         self.dialect = dialect
-        self._logger = logging.getLogger(
-            f"{__name__}.ProgressiveFKValidator"
-        )
+        self._logger = logging.getLogger(f"{__name__}.ProgressiveFKValidator")
 
     def validate(
         self,
@@ -88,10 +86,7 @@ class ProgressiveFKValidator:
         Returns:
             FKValidationResult with integrity metrics.
         """
-        self._logger.info(
-            f"Validating FK: {candidate.parent_view} -> "
-            f"{candidate.referenced_view}"
-        )
+        self._logger.info(f"Validating FK: {candidate.parent_view} -> {candidate.referenced_view}")
 
         fk_row_count = self._get_row_count(candidate.parent_view)
         pk_row_count = self._get_row_count(candidate.referenced_view)
@@ -116,9 +111,7 @@ class ProgressiveFKValidator:
             pk_row_count,
         )
 
-    def validate_bidirectional(
-        self, candidate: FKCandidate
-    ) -> tuple[FKValidationResult, FKValidationResult]:
+    def validate_bidirectional(self, candidate: FKCandidate) -> tuple[FKValidationResult, FKValidationResult]:
         """Validate FK in both directions to determine cardinality."""
         forward = self.validate(candidate)
 
@@ -160,30 +153,19 @@ class ProgressiveFKValidator:
                 last_result = result
                 match_history.append(result.match_pct)
 
-                self._logger.info(
-                    f"Step {step.step_number}: "
-                    f"match={result.match_pct:.1f}%"
-                )
+                self._logger.info(f"Step {step.step_number}: match={result.match_pct:.1f}%")
 
                 # Early termination: 0% disjoint
                 if step.step_number >= 2 and result.match_pct == 0.0:
-                    self._logger.info(
-                        "Early termination: 0% match - disjoint"
-                    )
+                    self._logger.info("Early termination: 0% match - disjoint")
                     return result
 
                 # Early confirmation: stable >= 99%
                 if step.step_number >= 2 and result.match_pct >= 99.0:
                     if len(match_history) >= 2:
                         prev = match_history[-2]
-                        if (
-                            prev >= 99.0
-                            and abs(result.match_pct - prev) <= 2.0
-                        ):
-                            self._logger.info(
-                                f"Early confirmation: "
-                                f"{result.match_pct:.1f}% stable"
-                            )
+                        if prev >= 99.0 and abs(result.match_pct - prev) <= 2.0:
+                            self._logger.info(f"Early confirmation: {result.match_pct:.1f}% stable")
                             return result
 
                 # Early termination: stable low
@@ -191,16 +173,11 @@ class ProgressiveFKValidator:
                     if len(match_history) >= 3:
                         recent = match_history[-3:]
                         if max(recent) - min(recent) <= 5.0:
-                            self._logger.info(
-                                f"Early termination: "
-                                f"{result.match_pct:.1f}% stable low"
-                            )
+                            self._logger.info(f"Early termination: {result.match_pct:.1f}% stable low")
                             return result
 
             except Exception as e:
-                self._logger.warning(
-                    f"Step {step.step_number} failed: {e}"
-                )
+                self._logger.warning(f"Step {step.step_number} failed: {e}")
                 if last_result:
                     return last_result
                 return FKValidationResult(
@@ -225,16 +202,10 @@ class ProgressiveFKValidator:
             )
 
         # Build column mappings
-        mappings = list(
-            zip(candidate.parent_columns, candidate.referenced_columns)
-        )
+        mappings = list(zip(candidate.parent_columns, candidate.referenced_columns, strict=True))
 
         # Determine seed column for sampling
-        seed_col = (
-            candidate.parent_columns[0]
-            if candidate.parent_columns
-            else None
-        )
+        seed_col = candidate.parent_columns[0] if candidate.parent_columns else None
 
         sql = self.dialect.fk_validation_query(
             fk_table=candidate.parent_view,
@@ -244,9 +215,7 @@ class ProgressiveFKValidator:
             seed_col=seed_col if step.row_pct < 100 else None,
         )
 
-        old_timeout = self.dialect.set_timeout(
-            self.cursor, step.timeout_seconds
-        )
+        old_timeout = self.dialect.set_timeout(self.cursor, step.timeout_seconds)
         try:
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
@@ -279,9 +248,7 @@ class ProgressiveFKValidator:
         """Get row count for a qualified table name."""
         if not self.dialect:
             return 0
-        parts = (
-            qualified_name.replace("[", "").replace("]", "").split(".")
-        )
+        parts = qualified_name.replace("[", "").replace("]", "").split(".")
         if len(parts) != 2:
             return 0
         sql = self.dialect.row_count_query(parts[0], parts[1])

@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for repository pattern implementations."""
+
 from __future__ import annotations
 
 from uuid import uuid4
-
-import pytest
 
 from data_catalog.db.models import Asset, Relationship
 from data_catalog.db.repositories import (
@@ -45,11 +44,13 @@ class TestAssetRepository:
 
     def test_find_by_schema_pattern(self, db):
         repo = AssetRepository(db)
-        db.add_all([
-            self._make_asset("dbo", "A"),
-            self._make_asset("dbo", "B"),
-            self._make_asset("staging", "C"),
-        ])
+        db.add_all(
+            [
+                self._make_asset("dbo", "A"),
+                self._make_asset("dbo", "B"),
+                self._make_asset("staging", "C"),
+            ]
+        )
         db.commit()
 
         results = repo.find_by_schema_pattern("dbo")
@@ -57,10 +58,12 @@ class TestAssetRepository:
 
     def test_find_all(self, db):
         repo = AssetRepository(db)
-        db.add_all([
-            self._make_asset("dbo", "X"),
-            self._make_asset("dbo", "Y"),
-        ])
+        db.add_all(
+            [
+                self._make_asset("dbo", "X"),
+                self._make_asset("dbo", "Y"),
+            ]
+        )
         db.commit()
 
         results = repo.find_all()
@@ -93,14 +96,20 @@ class TestRelationshipRepository:
         repo = RelationshipRepository(db)
 
         a1 = Asset(
-            id=str(uuid4()), qualified_name="[dbo].[A]",
-            table_schema="dbo", table_name="A",
-            asset_type="table", source_system="test",
+            id=str(uuid4()),
+            qualified_name="[dbo].[A]",
+            table_schema="dbo",
+            table_name="A",
+            asset_type="table",
+            source_system="test",
         )
         a2 = Asset(
-            id=str(uuid4()), qualified_name="[dbo].[B]",
-            table_schema="dbo", table_name="B",
-            asset_type="table", source_system="test",
+            id=str(uuid4()),
+            qualified_name="[dbo].[B]",
+            table_schema="dbo",
+            table_name="B",
+            asset_type="table",
+            source_system="test",
         )
         db.add_all([a1, a2])
         db.commit()

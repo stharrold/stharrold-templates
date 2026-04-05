@@ -70,9 +70,7 @@ class RAGSearchService:
         # Stage 2-3: Search each vector type
         all_results: list[dict] = []
         for vtype in vector_types:
-            results = self._search_vectors(
-                query_vector, vtype, top_k * 3
-            )
+            results = self._search_vectors(query_vector, vtype, top_k * 3)
             all_results.extend(results)
 
         # Stage 4: Merge and deduplicate
@@ -107,21 +105,19 @@ class RAGSearchService:
         for cv in vectors:
             if not cv.value_vector:
                 continue
-            cos_sim = float(
-                np.dot(query_vector, np.array(cv.value_vector))
+            cos_sim = float(np.dot(query_vector, np.array(cv.value_vector)))
+            results.append(
+                {
+                    "asset_id": cv.asset_id,
+                    "table_schema": cv.table_schema,
+                    "table_name": cv.table_name,
+                    "column_name": cv.column_name,
+                    "vector_type": cv.vector_type,
+                    "cosine_similarity": cos_sim,
+                }
             )
-            results.append({
-                "asset_id": cv.asset_id,
-                "table_schema": cv.table_schema,
-                "table_name": cv.table_name,
-                "column_name": cv.column_name,
-                "vector_type": cv.vector_type,
-                "cosine_similarity": cos_sim,
-            })
 
-        results.sort(
-            key=lambda x: x["cosine_similarity"], reverse=True
-        )
+        results.sort(key=lambda x: x["cosine_similarity"], reverse=True)
         return results[:limit]
 
     def _merge_results(self, results: list[dict]) -> list[dict]:
@@ -129,11 +125,7 @@ class RAGSearchService:
         seen: dict[str, dict] = {}
         for r in results:
             key = f"{r['asset_id']}:{r['column_name']}"
-            if (
-                key not in seen
-                or r["cosine_similarity"]
-                > seen[key]["cosine_similarity"]
-            ):
+            if key not in seen or r["cosine_similarity"] > seen[key]["cosine_similarity"]:
                 seen[key] = r
         merged = sorted(
             seen.values(),
@@ -145,11 +137,7 @@ class RAGSearchService:
     def _enrich_results(self, results: list[dict]) -> list[dict]:
         """Enrich results with asset metadata."""
         asset_ids = {r["asset_id"] for r in results}
-        assets = (
-            self.db.query(Asset)
-            .filter(Asset.id.in_(asset_ids))
-            .all()
-        )
+        assets = self.db.query(Asset).filter(Asset.id.in_(asset_ids)).all()
         asset_map = {a.id: a for a in assets}
 
         for r in results:
@@ -159,15 +147,11 @@ class RAGSearchService:
                 r["display_name"] = asset.display_name
                 r["description"] = asset.description
                 meta = asset.schema_metadata or {}
-                r["grain_status"] = meta.get(
-                    "grain_status", "unknown"
-                )
+                r["grain_status"] = meta.get("grain_status", "unknown")
 
         return results
 
-    def _graph_expand(
-        self, results: list[dict], hops: int
-    ) -> list[dict]:
+    def _graph_expand(self, results: list[dict], hops: int) -> list[dict]:
         """Expand results via BFS on FK relationships."""
         if not results:
             return results
@@ -181,12 +165,7 @@ class RAGSearchService:
                 self.db.query(Relationship)
                 .filter(
                     Relationship.is_validated.is_(True),
-                    (
-                        Relationship.parent_asset_id.in_(expanded_ids)
-                        | Relationship.referenced_asset_id.in_(
-                            expanded_ids
-                        )
-                    ),
+                    (Relationship.parent_asset_id.in_(expanded_ids) | Relationship.referenced_asset_id.in_(expanded_ids)),
                 )
                 .all()
             )
@@ -198,19 +177,17 @@ class RAGSearchService:
         # Add expanded assets as context
         new_asset_ids = expanded_ids - asset_ids
         if new_asset_ids:
-            new_assets = (
-                self.db.query(Asset)
-                .filter(Asset.id.in_(new_asset_ids))
-                .all()
-            )
+            new_assets = self.db.query(Asset).filter(Asset.id.in_(new_asset_ids)).all()
             for asset in new_assets:
-                results.append({
-                    "asset_id": asset.id,
-                    "qualified_name": asset.qualified_name,
-                    "display_name": asset.display_name,
-                    "description": asset.description,
-                    "cosine_similarity": 0.0,
-                    "source": "graph_expansion",
-                })
+                results.append(
+                    {
+                        "asset_id": asset.id,
+                        "qualified_name": asset.qualified_name,
+                        "display_name": asset.display_name,
+                        "description": asset.description,
+                        "cosine_similarity": 0.0,
+                        "source": "graph_expansion",
+                    }
+                )
 
         return results

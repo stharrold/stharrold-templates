@@ -123,7 +123,9 @@ def find_consolidation_clusters(entities: list[dict]) -> list[list[dict]]:
         if len(group) > MAX_GROUP_SIZE:
             logger.info(
                 "Token-blocking large group (type=%s, community=%s, size=%d)",
-                _key[0], _key[1], len(group),
+                _key[0],
+                _key[1],
+                len(group),
             )
             clusters.extend(_cluster_with_blocking(group))
             continue
@@ -215,10 +217,10 @@ def run(db: CoreDB = None):
     for old_target, new_target in mention_redirects:
         # Delete alias mention edges where canonical already has a mention from same source
         result = db.conn.execute(
-            f"""DELETE FROM {db.table('semantic_edges')}
+            f"""DELETE FROM {db.table("semantic_edges")}
                 WHERE target_id = ? AND edge_type = 'mention'
                 AND source_id IN (
-                    SELECT source_id FROM {db.table('semantic_edges')}
+                    SELECT source_id FROM {db.table("semantic_edges")}
                     WHERE target_id = ? AND edge_type = 'mention'
                 )""",
             (old_target, new_target),
@@ -234,7 +236,8 @@ def run(db: CoreDB = None):
     if redirected or dropped_dupes:
         logger.info(
             "Redirected %d mention edges to canonical nodes (%d duplicate edges dropped).",
-            redirected, dropped_dupes,
+            redirected,
+            dropped_dupes,
         )
 
     logger.info(

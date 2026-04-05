@@ -1,19 +1,16 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for SQLAlchemy ORM models."""
+
 from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
 from data_catalog.db.models import (
     Asset,
-    AuditLog,
     ColumnCardinalityHistory,
     ColumnValueFrequency,
     ColumnVector,
-    GlossaryTerm,
     Relationship,
     SearchIndexColumn,
 )
@@ -34,9 +31,7 @@ class TestAssetModel:
         db.add(asset)
         db.commit()
 
-        loaded = db.query(Asset).filter(
-            Asset.qualified_name == "[dbo].[Customers]"
-        ).first()
+        loaded = db.query(Asset).filter(Asset.qualified_name == "[dbo].[Customers]").first()
         assert loaded is not None
         assert loaded.table_schema == "dbo"
         assert loaded.table_name == "Customers"
@@ -112,9 +107,7 @@ class TestRelationshipModel:
             parent_asset_id=parent.id,
             referenced_asset_id=child.id,
             relationship_type="foreign_key",
-            column_mappings=[
-                {"parent": "CustomerID", "referenced": "CustomerID"}
-            ],
+            column_mappings=[{"parent": "CustomerID", "referenced": "CustomerID"}],
             is_validated=True,
         )
         db.add(rel)

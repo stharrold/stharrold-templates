@@ -13,6 +13,7 @@ Phases:
 5. FK Discovery - Pattern-based + vector similarity candidates
 6. FK Validation - Progressive FULL OUTER JOIN (7 steps)
 """
+
 from __future__ import annotations
 
 import logging
@@ -172,9 +173,8 @@ class PipelineOrchestrator:
         """Lazy-init shared sample pool."""
         if self._sample_pool is None:
             from data_catalog.services.sample_pool import SamplePool
-            self._sample_pool = SamplePool(
-                self.source_cursor, self.dialect
-            )
+
+            self._sample_pool = SamplePool(self.source_cursor, self.dialect)
         return self._sample_pool
 
     def _log_phase(
@@ -262,11 +262,14 @@ class PipelineOrchestrator:
 
         for i, asset in enumerate(assets, 1):
             if callback:
-                callback("pk_discovery", {
-                    "asset": asset.qualified_name,
-                    "current": i,
-                    "total": len(assets),
-                })
+                callback(
+                    "pk_discovery",
+                    {
+                        "asset": asset.qualified_name,
+                        "current": i,
+                        "total": len(assets),
+                    },
+                )
 
             try:
                 result = service.discover_grain(asset.qualified_name)
@@ -278,46 +281,54 @@ class PipelineOrchestrator:
             except Exception as e:
                 logger.warning(f"  PK discovery failed for {asset.qualified_name}: {e}")
 
-        return {"items": discovered + no_pk, "total": len(assets),
-                "discovered": discovered, "no_pk": no_pk}
+        return {"items": discovered + no_pk, "total": len(assets), "discovered": discovered, "no_pk": no_pk}
 
     def _phase_cardinality(self, config, callback=None) -> dict:
         """Phase 2: Scan column cardinality."""
         from data_catalog.services.cardinality_scanner import CardinalityScanner
 
         scanner = CardinalityScanner(
-            self.db, self.source_cursor, self.dialect,
+            self.db,
+            self.source_cursor,
+            self.dialect,
             sample_pool=self._get_sample_pool(),
         )
         result = scanner.scan_schema(config.schema_pattern, callback)
-        return {"items": result.get("assets_scanned", 0),
-                "total_columns": result.get("total_columns", 0)}
+        return {"items": result.get("assets_scanned", 0), "total_columns": result.get("total_columns", 0)}
 
     def _phase_frequencies(self, config, callback=None) -> dict:
         """Phase 3: Scan value frequencies."""
         from data_catalog.services.cardinality_scanner import CardinalityScanner
 
         scanner = CardinalityScanner(
-            self.db, self.source_cursor, self.dialect,
+            self.db,
+            self.source_cursor,
+            self.dialect,
             sample_pool=self._get_sample_pool(),
         )
 
         assets = self.repo.find_by_schema_pattern(config.schema_pattern)
         import re
+
         total_cols = 0
         for i, asset in enumerate(assets, 1):
             if callback:
-                callback("frequencies", {
-                    "asset": asset.qualified_name,
-                    "current": i,
-                    "total": len(assets),
-                })
+                callback(
+                    "frequencies",
+                    {
+                        "asset": asset.qualified_name,
+                        "current": i,
+                        "total": len(assets),
+                    },
+                )
             match = re.match(r"\[([^\]]+)\]\.\[([^\]]+)\]", asset.qualified_name)
             if not match:
                 continue
             schema, table = match.group(1), match.group(2)
             result = scanner.scan_frequencies(
-                asset, schema, table,
+                asset,
+                schema,
+                table,
                 sample_pct=config.sample_pct,
                 top_n=config.top_n_values,
             )
@@ -349,24 +360,22 @@ class PipelineOrchestrator:
         """Phase 6: Validate FK candidates against source database."""
         from data_catalog.services.fk_discovery import ExtendedFKDiscoveryService
 
-        service = ExtendedFKDiscoveryService(
-            self.db, self.source_cursor, self.dialect
-        )
+        service = ExtendedFKDiscoveryService(self.db, self.source_cursor, self.dialect)
         assets = self.repo.find_by_schema_pattern(config.schema_pattern)
         confirmed = 0
         for i, asset in enumerate(assets, 1):
             if callback:
-                callback("fk_validation", {
-                    "asset": asset.qualified_name,
-                    "current": i,
-                    "total": len(assets),
-                })
+                callback(
+                    "fk_validation",
+                    {
+                        "asset": asset.qualified_name,
+                        "current": i,
+                        "total": len(assets),
+                    },
+                )
             try:
                 results = service.discover_with_patterns(asset.qualified_name)
-                confirmed += sum(
-                    1 for r in results
-                    if r.validation and r.validation.match_pct >= 99.0
-                )
+                confirmed += sum(1 for r in results if r.validation and r.validation.match_pct >= 99.0)
             except Exception as e:
                 logger.warning(f"  FK validation failed for {asset.qualified_name}: {e}")
 
@@ -394,43 +403,31 @@ class PipelineOrchestrator:
 
         # Phase 1: PK Discovery
         if not config.skip_pk_discovery:
-            phase = self._run_phase(
-                "pk_discovery", self._phase_pk_discovery, config, progress_callback
-            )
+            phase = self._run_phase("pk_discovery", self._phase_pk_discovery, config, progress_callback)
             phases.append(phase)
 
         # Phase 2: Cardinality
         if not config.skip_cardinality:
-            phase = self._run_phase(
-                "cardinality", self._phase_cardinality, config, progress_callback
-            )
+            phase = self._run_phase("cardinality", self._phase_cardinality, config, progress_callback)
             phases.append(phase)
 
         # Phase 3: Frequencies
         if not config.skip_frequencies:
-            phase = self._run_phase(
-                "frequencies", self._phase_frequencies, config, progress_callback
-            )
+            phase = self._run_phase("frequencies", self._phase_frequencies, config, progress_callback)
             phases.append(phase)
 
         # Phase 4: Semantic Vectors
         if not config.skip_semantic_vectors:
-            phase = self._run_phase(
-                "vectors", self._phase_vectors, config, progress_callback
-            )
+            phase = self._run_phase("vectors", self._phase_vectors, config, progress_callback)
             phases.append(phase)
 
         # Phase 5: FK Discovery
-        phase = self._run_phase(
-            "fk_discovery", self._phase_fk_discovery, config, progress_callback
-        )
+        phase = self._run_phase("fk_discovery", self._phase_fk_discovery, config, progress_callback)
         phases.append(phase)
 
         # Phase 6: FK Validation
         if config.validate_fks:
-            phase = self._run_phase(
-                "fk_validation", self._phase_fk_validation, config, progress_callback
-            )
+            phase = self._run_phase("fk_validation", self._phase_fk_validation, config, progress_callback)
             phases.append(phase)
 
         # Aggregate results
@@ -449,9 +446,6 @@ class PipelineOrchestrator:
             errors=[e for p in phases for e in p.errors],
         )
 
-        logger.info(
-            f"Pipeline complete: {result.status} in {elapsed:.1f}s "
-            f"({len(phases)} phases)"
-        )
+        logger.info(f"Pipeline complete: {result.status} in {elapsed:.1f}s ({len(phases)} phases)")
 
         return result

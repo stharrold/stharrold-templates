@@ -8,7 +8,6 @@ Model: all-MiniLM-L6-v2 (384 dimensions)
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import onnxruntime as ort
@@ -20,7 +19,7 @@ MODEL_DIR = Path("models")
 class EmbeddingService:
     """Generates semantic embeddings using a local ONNX model."""
 
-    def __init__(self, model_dir: Optional[Path] = None):
+    def __init__(self, model_dir: Path | None = None):
         self.model_dir = model_dir or MODEL_DIR
         self.model_path = self.model_dir / "model.onnx"
         self.tokenizer_path = self.model_dir / "tokenizer.json"
@@ -31,10 +30,7 @@ class EmbeddingService:
     def session(self):
         if self._session is None:
             if not self.model_path.exists():
-                raise FileNotFoundError(
-                    f"ONNX model not found at {self.model_path}. "
-                    f"Download all-MiniLM-L6-v2 ONNX model first."
-                )
+                raise FileNotFoundError(f"ONNX model not found at {self.model_path}. Download all-MiniLM-L6-v2 ONNX model first.")
             self._session = ort.InferenceSession(
                 str(self.model_path),
                 providers=["CPUExecutionProvider"],
@@ -45,15 +41,9 @@ class EmbeddingService:
     def tokenizer(self):
         if self._tokenizer is None:
             if not self.tokenizer_path.exists():
-                raise FileNotFoundError(
-                    f"Tokenizer not found at {self.tokenizer_path}."
-                )
-            self._tokenizer = Tokenizer.from_file(
-                str(self.tokenizer_path)
-            )
-            self._tokenizer.enable_padding(
-                pad_id=0, pad_token="[PAD]", length=128
-            )
+                raise FileNotFoundError(f"Tokenizer not found at {self.tokenizer_path}.")
+            self._tokenizer = Tokenizer.from_file(str(self.tokenizer_path))
+            self._tokenizer.enable_padding(pad_id=0, pad_token="[PAD]", length=128)
             self._tokenizer.enable_truncation(max_length=128)
         return self._tokenizer
 
@@ -67,15 +57,9 @@ class EmbeddingService:
             return np.array([])
 
         encoded = self.tokenizer.encode_batch(texts)
-        input_ids = np.array(
-            [e.ids for e in encoded], dtype=np.int64
-        )
-        attention_mask = np.array(
-            [e.attention_mask for e in encoded], dtype=np.int64
-        )
-        token_type_ids = np.array(
-            [e.type_ids for e in encoded], dtype=np.int64
-        )
+        input_ids = np.array([e.ids for e in encoded], dtype=np.int64)
+        attention_mask = np.array([e.attention_mask for e in encoded], dtype=np.int64)
+        token_type_ids = np.array([e.type_ids for e in encoded], dtype=np.int64)
 
         inputs = {
             "input_ids": input_ids,
@@ -90,19 +74,13 @@ class EmbeddingService:
 
         # Mean pooling (exclude padding)
         mask_expanded = np.expand_dims(attention_mask, -1).astype(float)
-        sum_embeddings = np.sum(
-            last_hidden_state * mask_expanded, axis=1
-        )
-        sum_mask = np.clip(
-            mask_expanded.sum(axis=1), a_min=1e-9, a_max=None
-        )
+        sum_embeddings = np.sum(last_hidden_state * mask_expanded, axis=1)
+        sum_mask = np.clip(mask_expanded.sum(axis=1), a_min=1e-9, a_max=None)
         embeddings = sum_embeddings / sum_mask
 
         # L2 normalize
         norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-        embeddings = embeddings / np.clip(
-            norms, a_min=1e-9, a_max=None
-        )
+        embeddings = embeddings / np.clip(norms, a_min=1e-9, a_max=None)
 
         return embeddings
 
@@ -116,9 +94,7 @@ class EmbeddingService:
         if embeddings.size == 0:
             return []
         binary = embeddings > 0
-        return [
-            "".join("1" if b else "0" for b in row) for row in binary
-        ]
+        return ["".join("1" if b else "0" for b in row) for row in binary]
 
     def embed_query(self, text: str) -> np.ndarray:
         """Embed a single query string."""
@@ -141,13 +117,8 @@ class EmbeddingService:
         return ubigints, popcount
 
     def create_value_profile(self, values: list[str]) -> np.ndarray:
-        """Create a semantic vector representing a list of values (centroid).
-        """
-        clean = [
-            str(v).strip()
-            for v in values
-            if v is not None and str(v).strip()
-        ]
+        """Create a semantic vector representing a list of values (centroid)."""
+        clean = [str(v).strip() for v in values if v is not None and str(v).strip()]
         if not clean:
             return np.zeros(384, dtype=np.float32)
         embeddings = self.embed(clean)

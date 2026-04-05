@@ -43,7 +43,13 @@ ignore = ["E402"]
 [tool.ruff.lint.per-file-ignores]
 ".agents/**/*.py" = ["N999", "B007", "B904", "B905"]
 ".claude/**/*.py" = ["N999", "B007", "B904", "B905"]
-"tests/**/*.py" = ["N999"]
+"tests/**/*.py" = ["N999", "F841"]
+# NetworkX / NumPy / scikit-learn convention: G for graph, X for feature matrix.
+# These are domain-standard identifiers, not lint violations.
+"data_catalog/services/graph_metrics.py" = ["N803", "N806"]
+# B905 strict= param: backfill/migration scripts zip pre-validated lists of
+# equal length (contract with the caller), adding strict= is noise.
+"scripts/backfill_normalize_entities.py" = ["B905"]
 
 [tool.uv]
 dev-dependencies = [

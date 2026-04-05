@@ -13,7 +13,6 @@ Builds a NetworkX graph from FK relationships and runs:
 from __future__ import annotations
 
 import logging
-from collections import Counter
 from typing import Any
 
 import networkx as nx
@@ -50,11 +49,7 @@ class GraphMetricsService:
                 grain_status=meta.get("grain_status", "unknown"),
             )
 
-        relationships = (
-            self.db.query(Relationship)
-            .filter(Relationship.is_validated.is_(True))
-            .all()
-        )
+        relationships = self.db.query(Relationship).filter(Relationship.is_validated.is_(True)).all()
         for rel in relationships:
             G.add_edge(
                 rel.parent_asset.qualified_name,
@@ -64,10 +59,7 @@ class GraphMetricsService:
                 constraint_name=rel.constraint_name,
             )
 
-        logger.info(
-            f"Built graph: {G.number_of_nodes()} nodes, "
-            f"{G.number_of_edges()} edges"
-        )
+        logger.info(f"Built graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
         return G
 
     def compute_pagerank(self, G: nx.DiGraph) -> dict[str, float]:
@@ -96,9 +88,7 @@ class GraphMetricsService:
             logger.warning(f"Community detection failed: {e}")
             return {}
 
-    def cluster_by_description(
-        self, min_cluster_size: int = 3
-    ) -> dict[str, int]:
+    def cluster_by_description(self, min_cluster_size: int = 3) -> dict[str, int]:
         """Cluster assets using HDBSCAN on semantic_description vectors.
 
         Returns:
@@ -107,19 +97,11 @@ class GraphMetricsService:
         try:
             from sklearn.cluster import HDBSCAN
         except ImportError:
-            logger.warning(
-                "scikit-learn not available for HDBSCAN"
-            )
+            logger.warning("scikit-learn not available for HDBSCAN")
             return {}
 
         # Load description vectors
-        vectors = (
-            self.db.query(ColumnVector)
-            .filter(
-                ColumnVector.vector_type == "semantic_description"
-            )
-            .all()
-        )
+        vectors = self.db.query(ColumnVector).filter(ColumnVector.vector_type == "semantic_description").all()
         if len(vectors) < min_cluster_size:
             return {}
 
@@ -128,22 +110,17 @@ class GraphMetricsService:
         matrix = []
         for v in vectors:
             if v.value_vector:
-                names.append(
-                    f"[{v.table_schema}].[{v.table_name}]"
-                    f".{v.column_name}"
-                )
+                names.append(f"[{v.table_schema}].[{v.table_name}].{v.column_name}")
                 matrix.append(v.value_vector)
 
         if not matrix:
             return {}
 
         X = np.array(matrix)
-        clusterer = HDBSCAN(
-            min_cluster_size=min_cluster_size, metric="cosine"
-        )
+        clusterer = HDBSCAN(min_cluster_size=min_cluster_size, metric="cosine")
         labels = clusterer.fit_predict(X)
 
-        return dict(zip(names, [int(l) for l in labels]))
+        return dict(zip(names, [int(label) for label in labels], strict=True))
 
     def analyze(self) -> dict[str, Any]:
         """Run full graph analysis and return summary metrics."""
@@ -152,22 +129,13 @@ class GraphMetricsService:
         communities = self.detect_communities(G)
 
         # Summary
-        n_communities = (
-            len(set(communities.values())) if communities else 0
-        )
-        top_pagerank = sorted(
-            pagerank.items(), key=lambda x: x[1], reverse=True
-        )[:10]
+        n_communities = len(set(communities.values())) if communities else 0
+        top_pagerank = sorted(pagerank.items(), key=lambda x: x[1], reverse=True)[:10]
 
         return {
             "nodes": G.number_of_nodes(),
             "edges": G.number_of_edges(),
             "communities": n_communities,
-            "top_pagerank": [
-                {"asset": name, "score": round(score, 4)}
-                for name, score in top_pagerank
-            ],
-            "density": (
-                nx.density(G) if G.number_of_nodes() > 1 else 0.0
-            ),
+            "top_pagerank": [{"asset": name, "score": round(score, 4)} for name, score in top_pagerank],
+            "density": (nx.density(G) if G.number_of_nodes() > 1 else 0.0),
         }

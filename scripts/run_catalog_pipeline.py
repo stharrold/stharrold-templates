@@ -27,6 +27,7 @@ Usage:
     python scripts/run_catalog_pipeline.py --phase seed,enrich
     python scripts/run_catalog_pipeline.py --resume
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,7 +35,6 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -56,9 +56,17 @@ DEFAULT_CONFIG = Path("config/catalog_config.json")
 CHECKPOINT_PATH = Path("data/output/pipeline_state.json")
 
 ALL_PHASES = [
-    "seed", "enrich", "pipeline", "vectors", "fk",
-    "col_populate", "col_prepare", "col_describe",
-    "col_import", "col_embed", "graph_analyze",
+    "seed",
+    "enrich",
+    "pipeline",
+    "vectors",
+    "fk",
+    "col_populate",
+    "col_prepare",
+    "col_describe",
+    "col_import",
+    "col_embed",
+    "graph_analyze",
 ]
 
 
@@ -71,10 +79,7 @@ def get_source_connection():
     Returns:
         (connection, cursor) tuple.
     """
-    raise NotImplementedError(
-        "CUSTOMIZE: Implement get_source_connection() for your database. "
-        "See the SQL Server example in the docstring."
-    )
+    raise NotImplementedError("CUSTOMIZE: Implement get_source_connection() for your database. See the SQL Server example in the docstring.")
     # Example for SQL Server:
     # import pyodbc
     # conn_str = (
@@ -129,9 +134,7 @@ def phase_seed(batch_config: dict, db_session) -> dict:
 
     for table_name in tables:
         qualified = f"[{schema}].[{table_name}]"
-        existing = db_session.query(Asset).filter(
-            Asset.qualified_name == qualified
-        ).first()
+        existing = db_session.query(Asset).filter(Asset.qualified_name == qualified).first()
 
         if existing:
             continue
@@ -165,9 +168,7 @@ def phase_enrich(batch_config: dict, db_session, cursor) -> dict:
     dialect = SQLServerDialect()
     schema = batch_config.get("schema", "dbo")
 
-    assets = db_session.query(Asset).filter(
-        Asset.table_schema == schema
-    ).all()
+    assets = db_session.query(Asset).filter(Asset.table_schema == schema).all()
 
     enriched = 0
     for asset in assets:
@@ -176,16 +177,19 @@ def phase_enrich(batch_config: dict, db_session, cursor) -> dict:
             cursor.execute(sql)
             columns = []
             for row in cursor.fetchall():
-                columns.append({
-                    "name": row[0],
-                    "data_type": row[1],
-                    "ordinal_position": row[2],
-                })
+                columns.append(
+                    {
+                        "name": row[0],
+                        "data_type": row[1],
+                        "ordinal_position": row[2],
+                    }
+                )
 
             if columns:
                 asset.schema_metadata = asset.schema_metadata or {}
                 asset.schema_metadata["columns"] = columns
                 from sqlalchemy.orm.attributes import flag_modified
+
                 flag_modified(asset, "schema_metadata")
                 enriched += 1
 
@@ -232,17 +236,14 @@ def run_pipeline(args: argparse.Namespace) -> None:
         try:
             _, cursor = get_source_connection()
         except NotImplementedError:
-            logger.warning(
-                "Source DB connection not configured. "
-                "Skipping phases that require it."
-            )
+            logger.warning("Source DB connection not configured. Skipping phases that require it.")
             phases = [p for p in phases if p not in needs_source]
 
     try:
         for batch_name, batch_config in batches.items():
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(f"Batch: {batch_name}")
-            logger.info(f"{'='*60}")
+            logger.info(f"{'=' * 60}")
 
             for phase_name in phases:
                 if phase_name in state.get("phases", {}).get(batch_name, []):
@@ -268,9 +269,7 @@ def run_pipeline(args: argparse.Namespace) -> None:
                     logger.info(f"  Phase {phase_name}: done in {elapsed:.1f}s")
 
                     # Update checkpoint
-                    state.setdefault("phases", {}).setdefault(batch_name, []).append(
-                        phase_name
-                    )
+                    state.setdefault("phases", {}).setdefault(batch_name, []).append(phase_name)
                     save_checkpoint(state)
 
                 except Exception as e:
@@ -288,10 +287,8 @@ def main():
     parser.add_argument("--asset", help="Run for specific asset only")
     parser.add_argument("--resume", action="store_true", help="Resume from checkpoint")
     parser.add_argument("--force-restart", action="store_true", help="Clear checkpoint")
-    parser.add_argument("--skip-source", action="store_true",
-                        help="Skip phases requiring source DB")
-    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG,
-                        help="Path to config file")
+    parser.add_argument("--skip-source", action="store_true", help="Skip phases requiring source DB")
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG, help="Path to config file")
     args = parser.parse_args()
 
     if args.force_restart and CHECKPOINT_PATH.exists():

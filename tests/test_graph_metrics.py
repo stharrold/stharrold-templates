@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for graph metrics service."""
+
 from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
-from data_catalog.db.models import Asset, ColumnVector, Relationship
+from data_catalog.db.models import Asset, Relationship
 from data_catalog.services.graph_metrics import GraphMetricsService
 
 
@@ -31,32 +30,38 @@ class TestGraphMetricsService:
         db.commit()
 
         # Orders -> Customers
-        db.add(Relationship(
-            id=str(uuid4()),
-            parent_asset_id=assets[1].id,
-            referenced_asset_id=assets[0].id,
-            relationship_type="foreign_key",
-            column_mappings=[{"parent": "CustomerID", "referenced": "CustomerID"}],
-            is_validated=True,
-        ))
+        db.add(
+            Relationship(
+                id=str(uuid4()),
+                parent_asset_id=assets[1].id,
+                referenced_asset_id=assets[0].id,
+                relationship_type="foreign_key",
+                column_mappings=[{"parent": "CustomerID", "referenced": "CustomerID"}],
+                is_validated=True,
+            )
+        )
         # OrderItems -> Orders
-        db.add(Relationship(
-            id=str(uuid4()),
-            parent_asset_id=assets[3].id,
-            referenced_asset_id=assets[1].id,
-            relationship_type="foreign_key",
-            column_mappings=[{"parent": "OrderID", "referenced": "OrderID"}],
-            is_validated=True,
-        ))
+        db.add(
+            Relationship(
+                id=str(uuid4()),
+                parent_asset_id=assets[3].id,
+                referenced_asset_id=assets[1].id,
+                relationship_type="foreign_key",
+                column_mappings=[{"parent": "OrderID", "referenced": "OrderID"}],
+                is_validated=True,
+            )
+        )
         # OrderItems -> Products
-        db.add(Relationship(
-            id=str(uuid4()),
-            parent_asset_id=assets[3].id,
-            referenced_asset_id=assets[2].id,
-            relationship_type="foreign_key",
-            column_mappings=[{"parent": "ProductID", "referenced": "ProductID"}],
-            is_validated=True,
-        ))
+        db.add(
+            Relationship(
+                id=str(uuid4()),
+                parent_asset_id=assets[3].id,
+                referenced_asset_id=assets[2].id,
+                relationship_type="foreign_key",
+                column_mappings=[{"parent": "ProductID", "referenced": "ProductID"}],
+                is_validated=True,
+            )
+        )
         db.commit()
         return assets
 

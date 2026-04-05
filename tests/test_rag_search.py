@@ -1,17 +1,16 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for RAG search service."""
+
 from __future__ import annotations
 
 from uuid import uuid4
 
 import numpy as np
-import pytest
 
 from data_catalog.db.models import (
     Asset,
     ColumnVector,
-    Relationship,
     SearchIndexColumn,
 )
 from data_catalog.services.rag_search import RAGSearchService

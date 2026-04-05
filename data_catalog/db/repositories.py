@@ -20,20 +20,11 @@ class AssetRepository:
         return self.db.query(Asset).filter(Asset.id == asset_id).first()
 
     def find_by_qualified_name(self, qualified_name: str) -> Asset | None:
-        return (
-            self.db.query(Asset)
-            .filter(Asset.qualified_name == qualified_name)
-            .first()
-        )
+        return self.db.query(Asset).filter(Asset.qualified_name == qualified_name).first()
 
     def find_by_schema_pattern(self, pattern: str) -> list[Asset]:
         """Find assets matching schema pattern (SQL LIKE syntax)."""
-        return (
-            self.db.query(Asset)
-            .filter(Asset.qualified_name.like(f"[{pattern}]%"))
-            .order_by(Asset.qualified_name)
-            .all()
-        )
+        return self.db.query(Asset).filter(Asset.qualified_name.like(f"[{pattern}]%")).order_by(Asset.qualified_name).all()
 
     def find_all(
         self,
@@ -106,18 +97,10 @@ class RelationshipRepository:
         )
 
     def find_foreign_keys(self, parent_asset_id: UUID) -> list[Relationship]:
-        return (
-            self.db.query(Relationship)
-            .filter(Relationship.parent_asset_id == parent_asset_id)
-            .all()
-        )
+        return self.db.query(Relationship).filter(Relationship.parent_asset_id == parent_asset_id).all()
 
     def find_primary_keys(self, referenced_asset_id: UUID) -> list[Relationship]:
-        return (
-            self.db.query(Relationship)
-            .filter(Relationship.referenced_asset_id == referenced_asset_id)
-            .all()
-        )
+        return self.db.query(Relationship).filter(Relationship.referenced_asset_id == referenced_asset_id).all()
 
     def create(self, rel: Relationship) -> Relationship:
         self.db.add(rel)
@@ -133,11 +116,7 @@ class RelationshipRepository:
         return relationships
 
     def find_by_constraint_name(self, constraint_name: str) -> Relationship | None:
-        return (
-            self.db.query(Relationship)
-            .filter(Relationship.constraint_name == constraint_name)
-            .first()
-        )
+        return self.db.query(Relationship).filter(Relationship.constraint_name == constraint_name).first()
 
 
 class LineageRepository:
@@ -147,18 +126,10 @@ class LineageRepository:
         self.db = db
 
     def find_upstream(self, asset_id: UUID, depth: int = 3) -> list[Lineage]:
-        return (
-            self.db.query(Lineage)
-            .filter(Lineage.downstream_asset_id == asset_id)
-            .all()
-        )
+        return self.db.query(Lineage).filter(Lineage.downstream_asset_id == asset_id).all()
 
     def find_downstream(self, asset_id: UUID, depth: int = 3) -> list[Lineage]:
-        return (
-            self.db.query(Lineage)
-            .filter(Lineage.upstream_asset_id == asset_id)
-            .all()
-        )
+        return self.db.query(Lineage).filter(Lineage.upstream_asset_id == asset_id).all()
 
     def create(self, lineage: Lineage) -> Lineage:
         self.db.add(lineage)
@@ -179,38 +150,11 @@ class AuditLogRepository:
         self.db.refresh(audit_log)
         return audit_log
 
-    def find_by_user(
-        self, user_email: str, limit: int = 100, offset: int = 0
-    ) -> list[AuditLog]:
-        return (
-            self.db.query(AuditLog)
-            .filter(AuditLog.user_email == user_email)
-            .order_by(AuditLog.timestamp.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
-        )
+    def find_by_user(self, user_email: str, limit: int = 100, offset: int = 0) -> list[AuditLog]:
+        return self.db.query(AuditLog).filter(AuditLog.user_email == user_email).order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset).all()
 
-    def find_by_asset(
-        self, asset_id: UUID, limit: int = 100, offset: int = 0
-    ) -> list[AuditLog]:
-        return (
-            self.db.query(AuditLog)
-            .filter(AuditLog.asset_id == asset_id)
-            .order_by(AuditLog.timestamp.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
-        )
+    def find_by_asset(self, asset_id: UUID, limit: int = 100, offset: int = 0) -> list[AuditLog]:
+        return self.db.query(AuditLog).filter(AuditLog.asset_id == asset_id).order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset).all()
 
-    def find_by_action(
-        self, action: str, limit: int = 100, offset: int = 0
-    ) -> list[AuditLog]:
-        return (
-            self.db.query(AuditLog)
-            .filter(AuditLog.action == action)
-            .order_by(AuditLog.timestamp.desc())
-            .limit(limit)
-            .offset(offset)
-            .all()
-        )
+    def find_by_action(self, action: str, limit: int = 100, offset: int = 0) -> list[AuditLog]:
+        return self.db.query(AuditLog).filter(AuditLog.action == action).order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset).all()

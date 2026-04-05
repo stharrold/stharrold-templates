@@ -53,10 +53,7 @@ class SQLServerDialect(SQLDialect):
         validate_identifier(schema)
         validate_identifier(table)
         # Try DMV first (fast for tables), fall back to COUNT for views
-        return (
-            f"SELECT COUNT_BIG(*) AS row_count "
-            f"FROM [{schema}].[{table}]"
-        )
+        return f"SELECT COUNT_BIG(*) AS row_count FROM [{schema}].[{table}]"
 
     # ------------------------------------------------------------------
     # Column metadata
@@ -89,11 +86,7 @@ class SQLServerDialect(SQLDialect):
         validate_identifier(seed_col)
 
         if pct >= 100:
-            return (
-                f"CREATE TABLE {temp_name} "
-                f"WITH (DISTRIBUTION = ROUND_ROBIN) AS "
-                f"SELECT * FROM [{schema}].[{table}]"
-            )
+            return f"CREATE TABLE {temp_name} WITH (DISTRIBUTION = ROUND_ROBIN) AS SELECT * FROM [{schema}].[{table}]"
         else:
             modulo = int(100 / pct)
             return (
@@ -105,10 +98,7 @@ class SQLServerDialect(SQLDialect):
             )
 
     def drop_temp_table(self, name: str) -> str:
-        return (
-            f"IF OBJECT_ID('tempdb..{name}') IS NOT NULL "
-            f"DROP TABLE {name}"
-        )
+        return f"IF OBJECT_ID('tempdb..{name}') IS NOT NULL DROP TABLE {name}"
 
     # ------------------------------------------------------------------
     # Cardinality / PK discovery
@@ -123,18 +113,12 @@ class SQLServerDialect(SQLDialect):
         exprs = ["COUNT_BIG(*) AS _row_count"]
         for i, col in enumerate(columns):
             validate_identifier(col)
-            exprs.append(
-                f"COUNT_BIG(DISTINCT [{col}]) AS [card_{i}]"
-            )
+            exprs.append(f"COUNT_BIG(DISTINCT [{col}]) AS [card_{i}]")
         for j, comp in enumerate(composites or []):
             for c in comp:
                 validate_identifier(c)
-            concat_expr = " + CHAR(124) + ".join(
-                f"ISNULL(CAST([{c}] AS NVARCHAR(MAX)), '')" for c in comp
-            )
-            exprs.append(
-                f"COUNT_BIG(DISTINCT ({concat_expr})) AS [comp_{j}]"
-            )
+            concat_expr = " + CHAR(124) + ".join(f"ISNULL(CAST([{c}] AS NVARCHAR(MAX)), '')" for c in comp)
+            exprs.append(f"COUNT_BIG(DISTINCT ({concat_expr})) AS [comp_{j}]")
         return f"SELECT {', '.join(exprs)} FROM {source}"
 
     def seed_column_query(
@@ -150,10 +134,7 @@ class SQLServerDialect(SQLDialect):
         for i, col in enumerate(columns):
             validate_identifier(col)
             exprs.append(f"COUNT(DISTINCT [{col}]) AS [sel_{i}]")
-        return (
-            f"SELECT {', '.join(exprs)} FROM "
-            f"(SELECT TOP {top_n} * FROM [{schema}].[{table}]) AS _sample"
-        )
+        return f"SELECT {', '.join(exprs)} FROM (SELECT TOP {top_n} * FROM [{schema}].[{table}]) AS _sample"
 
     # ------------------------------------------------------------------
     # Value frequency scanning
@@ -166,13 +147,7 @@ class SQLServerDialect(SQLDialect):
         top_n: int = 100,
     ) -> str:
         validate_identifier(column)
-        return (
-            f"SELECT TOP {top_n} [{column}] AS val, "
-            f"COUNT_BIG(*) AS freq "
-            f"FROM {source} "
-            f"GROUP BY [{column}] "
-            f"ORDER BY freq DESC"
-        )
+        return f"SELECT TOP {top_n} [{column}] AS val, COUNT_BIG(*) AS freq FROM {source} GROUP BY [{column}] ORDER BY freq DESC"
 
     def unpivot_frequency_query(
         self,
@@ -212,28 +187,16 @@ class SQLServerDialect(SQLDialect):
             validate_identifier(fk_col)
             validate_identifier(pk_col)
 
-        join_conditions = " AND ".join(
-            f"fk.[{fk_col}] = pk.[{pk_col}]"
-            for fk_col, pk_col in column_mappings
-        )
-        fk_null_checks = " AND ".join(
-            f"fk.[{fk_col}] IS NOT NULL"
-            for fk_col, _ in column_mappings
-        )
-        pk_null_checks = " AND ".join(
-            f"pk.[{pk_col}] IS NOT NULL"
-            for _, pk_col in column_mappings
-        )
+        join_conditions = " AND ".join(f"fk.[{fk_col}] = pk.[{pk_col}]" for fk_col, pk_col in column_mappings)
+        fk_null_checks = " AND ".join(f"fk.[{fk_col}] IS NOT NULL" for fk_col, _ in column_mappings)
+        pk_null_checks = " AND ".join(f"pk.[{pk_col}] IS NOT NULL" for _, pk_col in column_mappings)
 
         # Optional sampling on FK side
         fk_where = ""
         if sample_pct < 100 and seed_col:
             validate_identifier(seed_col)
             modulo = int(100 / sample_pct)
-            fk_where = (
-                f" WHERE ABS(CAST(BINARY_CHECKSUM([{seed_col}]) "
-                f"AS BIGINT)) % {modulo} = 0"
-            )
+            fk_where = f" WHERE ABS(CAST(BINARY_CHECKSUM([{seed_col}]) AS BIGINT)) % {modulo} = 0"
 
         return (
             f"SELECT "
@@ -260,11 +223,7 @@ class SQLServerDialect(SQLDialect):
             validate_identifier(c)
         col_list = ", ".join(f"[{c}]" for c in columns)
         hash_col = columns[0]
-        return (
-            f"CREATE TABLE {temp_name} "
-            f"WITH (DISTRIBUTION = HASH([{hash_col}])) AS "
-            f"SELECT DISTINCT {col_list} FROM [{schema}].[{table}]"
-        )
+        return f"CREATE TABLE {temp_name} WITH (DISTRIBUTION = HASH([{hash_col}])) AS SELECT DISTINCT {col_list} FROM [{schema}].[{table}]"
 
     # ------------------------------------------------------------------
     # Connection management

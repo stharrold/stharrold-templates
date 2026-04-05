@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
 """Tests for grain discovery service (pattern-based, no source DB)."""
+
 from __future__ import annotations
 
 from uuid import uuid4
-
-import pytest
 
 from data_catalog.db.models import Asset
 from data_catalog.models.data_model import GrainResult

@@ -6,13 +6,13 @@ Scans column cardinality at progressive sample levels and stores top-N
 value frequencies per column. Used for FK candidate identification and
 data profiling.
 """
+
 from __future__ import annotations
 
 import logging
 import re
 import time
 from collections.abc import Callable
-from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
@@ -64,9 +64,7 @@ class CardinalityScanner:
         old_autocommit = self.cursor.connection.autocommit
         try:
             self.cursor.connection.autocommit = True
-            sql = self.dialect.create_sample_table(
-                temp_name, schema, table, seed_col, sample_pct
-            )
+            sql = self.dialect.create_sample_table(temp_name, schema, table, seed_col, sample_pct)
             old_timeout = self.dialect.set_timeout(self.cursor, 600)
             try:
                 t0 = time.time()
@@ -85,10 +83,7 @@ class CardinalityScanner:
                 self.dialect.set_timeout(self.cursor, old_timeout)
             self.dialect.drain_cursor(self.cursor)
 
-            logger.info(
-                f"  Temp table {temp_name} ready: "
-                f"{row_count:,} rows in {elapsed:.1f}s"
-            )
+            logger.info(f"  Temp table {temp_name} ready: {row_count:,} rows in {elapsed:.1f}s")
         finally:
             self.cursor.connection.autocommit = old_autocommit
         return temp_name
@@ -108,9 +103,7 @@ class CardinalityScanner:
         except Exception:
             pass
 
-    def _get_fk_candidate_columns(
-        self, asset: Asset
-    ) -> list[dict[str, Any]]:
+    def _get_fk_candidate_columns(self, asset: Asset) -> list[dict[str, Any]]:
         """Get columns suitable for frequency scanning.
 
         Filters to columns with selectivity between 0.01% and 100%
@@ -121,10 +114,14 @@ class CardinalityScanner:
             return []
 
         # If cardinality data exists, filter by selectivity
-        cardinality = self.db.query(ColumnCardinalityHistory).filter(
-            ColumnCardinalityHistory.table_schema == asset.table_schema,
-            ColumnCardinalityHistory.table_name == asset.table_name,
-        ).all()
+        cardinality = (
+            self.db.query(ColumnCardinalityHistory)
+            .filter(
+                ColumnCardinalityHistory.table_schema == asset.table_schema,
+                ColumnCardinalityHistory.table_name == asset.table_name,
+            )
+            .all()
+        )
 
         if not cardinality:
             return columns  # No cardinality data, return all
@@ -179,9 +176,7 @@ class CardinalityScanner:
         # Create or reuse sample temp table
         if not seed_col and col_names:
             seed_col = col_names[0]
-        temp_name = self._create_temp_table(
-            schema, table, sample_pct, seed_col or col_names[0]
-        )
+        temp_name = self._create_temp_table(schema, table, sample_pct, seed_col or col_names[0])
 
         all_freqs: dict[str, list] = {c: [] for c in col_names}
         errors = []
@@ -189,11 +184,9 @@ class CardinalityScanner:
         try:
             # Batched UNPIVOT scan
             for batch_start in range(0, len(col_names), FREQ_BATCH_SIZE):
-                batch_cols = col_names[batch_start:batch_start + FREQ_BATCH_SIZE]
+                batch_cols = col_names[batch_start : batch_start + FREQ_BATCH_SIZE]
                 try:
-                    sql = self.dialect.unpivot_frequency_query(
-                        temp_name, batch_cols, top_n
-                    )
+                    sql = self.dialect.unpivot_frequency_query(temp_name, batch_cols, top_n)
                     old_timeout = self.dialect.set_timeout(self.cursor, 300)
                     try:
                         self.cursor.execute(sql)
@@ -212,14 +205,10 @@ class CardinalityScanner:
             # Per-column fallback for columns with 0 UNPIVOT rows
             empty_cols = [c for c in col_names if not all_freqs[c]]
             if empty_cols:
-                logger.info(
-                    f"  Per-column fallback for {len(empty_cols)} columns"
-                )
+                logger.info(f"  Per-column fallback for {len(empty_cols)} columns")
                 for col in empty_cols:
                     try:
-                        sql = self.dialect.frequency_query(
-                            temp_name, col, top_n
-                        )
+                        sql = self.dialect.frequency_query(temp_name, col, top_n)
                         old_timeout = self.dialect.set_timeout(self.cursor, 300)
                         try:
                             self.cursor.execute(sql)
@@ -307,24 +296,20 @@ class CardinalityScanner:
         results = []
         for i, asset in enumerate(assets, 1):
             if progress_callback:
-                progress_callback("asset", {
-                    "asset": asset.qualified_name,
-                    "current": i,
-                    "total": len(assets),
-                })
+                progress_callback(
+                    "asset",
+                    {
+                        "asset": asset.qualified_name,
+                        "current": i,
+                        "total": len(assets),
+                    },
+                )
             result = self.scan_view(asset.qualified_name, progress_callback)
             results.append(result)
 
         return {
             "schema_pattern": schema_pattern,
             "assets_scanned": len(results),
-            "total_columns": sum(
-                r.get("columns_scanned", 0) for r in results
-            ),
-            "errors": [
-                e for r in results
-                for e in (
-                    r.get("errors", []) + ([r["error"]] if "error" in r else [])
-                )
-            ],
+            "total_columns": sum(r.get("columns_scanned", 0) for r in results),
+            "errors": [e for r in results for e in (r.get("errors", []) + ([r["error"]] if "error" in r else []))],
         }

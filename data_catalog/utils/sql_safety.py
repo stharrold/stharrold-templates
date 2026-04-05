@@ -31,11 +31,7 @@ def validate_identifier(name: str) -> str:
         UnsafeIdentifierError: If the identifier contains invalid characters.
     """
     if not name or not _IDENTIFIER_RE.match(name):
-        raise UnsafeIdentifierError(
-            f"Unsafe SQL identifier: {name!r}. "
-            "Only letters, digits, underscores, spaces, and parentheses "
-            "are allowed."
-        )
+        raise UnsafeIdentifierError(f"Unsafe SQL identifier: {name!r}. Only letters, digits, underscores, spaces, and parentheses are allowed.")
     return name
 
 
@@ -48,10 +44,7 @@ def validate_qualified_name(qualified_name: str) -> str:
         UnsafeIdentifierError: If the name doesn't match expected pattern.
     """
     if not qualified_name or not _QUALIFIED_RE.match(qualified_name):
-        raise UnsafeIdentifierError(
-            f"Unsafe qualified name: {qualified_name!r}. "
-            "Expected format: [Schema].[Table] or Schema.Table"
-        )
+        raise UnsafeIdentifierError(f"Unsafe qualified name: {qualified_name!r}. Expected format: [Schema].[Table] or Schema.Table")
     return qualified_name
 
 

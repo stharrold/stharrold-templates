@@ -9,7 +9,6 @@ graph analysis configuration.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any, Literal
 
 
@@ -75,34 +74,16 @@ class PipelineConfig:
         return cls(
             phases=[
                 PipelinePhaseConfig("seed"),
-                PipelinePhaseConfig(
-                    "enrich", depends_on=["seed"]
-                ),
-                PipelinePhaseConfig(
-                    "pipeline", depends_on=["enrich"]
-                ),
-                PipelinePhaseConfig(
-                    "vectors", depends_on=["pipeline"]
-                ),
-                PipelinePhaseConfig(
-                    "fk", depends_on=["enrich", "vectors"]
-                ),
-                PipelinePhaseConfig(
-                    "col_populate", depends_on=["fk"]
-                ),
+                PipelinePhaseConfig("enrich", depends_on=["seed"]),
+                PipelinePhaseConfig("pipeline", depends_on=["enrich"]),
+                PipelinePhaseConfig("vectors", depends_on=["pipeline"]),
+                PipelinePhaseConfig("fk", depends_on=["enrich", "vectors"]),
+                PipelinePhaseConfig("col_populate", depends_on=["fk"]),
                 PipelinePhaseConfig("col_prepare"),
-                PipelinePhaseConfig(
-                    "col_describe", depends_on=["col_prepare"]
-                ),
-                PipelinePhaseConfig(
-                    "col_import", depends_on=["col_describe"]
-                ),
-                PipelinePhaseConfig(
-                    "col_embed", depends_on=["col_import"]
-                ),
-                PipelinePhaseConfig(
-                    "graph_analyze", depends_on=["col_embed"]
-                ),
+                PipelinePhaseConfig("col_describe", depends_on=["col_prepare"]),
+                PipelinePhaseConfig("col_import", depends_on=["col_describe"]),
+                PipelinePhaseConfig("col_embed", depends_on=["col_import"]),
+                PipelinePhaseConfig("graph_analyze", depends_on=["col_embed"]),
             ]
         )
 
