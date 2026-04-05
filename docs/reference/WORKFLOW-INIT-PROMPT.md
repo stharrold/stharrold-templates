@@ -7,7 +7,7 @@ last_updated: 2026-01-01
 follows: DRY principle (references files, doesn't duplicate)
 ---
 
-# Workflow System v8.9.0 - Quick Start Guide
+# Workflow System v9.0.0 - Quick Start Guide
 
 This repository implements a streamlined 4-step development workflow using built-in Gemini CLI tools for autonomous implementation and automated **Claude Code Review** for quality.
 

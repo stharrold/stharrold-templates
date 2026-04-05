@@ -1,8 +1,13 @@
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
-"""Repository pattern for data access layer."""
+"""Repository pattern for data access layer.
 
-from uuid import UUID
+Asset/Relationship/Lineage/AuditLog all store their primary keys as
+String(36) (stringified UUIDs) -- see data_catalog/db/models.py. The
+repository type hints use `str` accordingly; passing a `uuid.UUID`
+object would compare against the stored string column and silently
+fail to match.
+"""
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -16,7 +21,7 @@ class AssetRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def find_by_id(self, asset_id: UUID) -> Asset | None:
+    def find_by_id(self, asset_id: str) -> Asset | None:
         return self.db.query(Asset).filter(Asset.id == asset_id).first()
 
     def find_by_qualified_name(self, qualified_name: str) -> Asset | None:
@@ -84,7 +89,7 @@ class RelationshipRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def find_by_asset(self, asset_id: UUID) -> list[Relationship]:
+    def find_by_asset(self, asset_id: str) -> list[Relationship]:
         return (
             self.db.query(Relationship)
             .filter(
@@ -96,10 +101,10 @@ class RelationshipRepository:
             .all()
         )
 
-    def find_foreign_keys(self, parent_asset_id: UUID) -> list[Relationship]:
+    def find_foreign_keys(self, parent_asset_id: str) -> list[Relationship]:
         return self.db.query(Relationship).filter(Relationship.parent_asset_id == parent_asset_id).all()
 
-    def find_primary_keys(self, referenced_asset_id: UUID) -> list[Relationship]:
+    def find_primary_keys(self, referenced_asset_id: str) -> list[Relationship]:
         return self.db.query(Relationship).filter(Relationship.referenced_asset_id == referenced_asset_id).all()
 
     def create(self, rel: Relationship) -> Relationship:
@@ -125,10 +130,10 @@ class LineageRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def find_upstream(self, asset_id: UUID, depth: int = 3) -> list[Lineage]:
+    def find_upstream(self, asset_id: str, depth: int = 3) -> list[Lineage]:
         return self.db.query(Lineage).filter(Lineage.downstream_asset_id == asset_id).all()
 
-    def find_downstream(self, asset_id: UUID, depth: int = 3) -> list[Lineage]:
+    def find_downstream(self, asset_id: str, depth: int = 3) -> list[Lineage]:
         return self.db.query(Lineage).filter(Lineage.upstream_asset_id == asset_id).all()
 
     def create(self, lineage: Lineage) -> Lineage:
@@ -153,7 +158,7 @@ class AuditLogRepository:
     def find_by_user(self, user_email: str, limit: int = 100, offset: int = 0) -> list[AuditLog]:
         return self.db.query(AuditLog).filter(AuditLog.user_email == user_email).order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset).all()
 
-    def find_by_asset(self, asset_id: UUID, limit: int = 100, offset: int = 0) -> list[AuditLog]:
+    def find_by_asset(self, asset_id: str, limit: int = 100, offset: int = 0) -> list[AuditLog]:
         return self.db.query(AuditLog).filter(AuditLog.asset_id == asset_id).order_by(AuditLog.timestamp.desc()).limit(limit).offset(offset).all()
 
     def find_by_action(self, action: str, limit: int = 100, offset: int = 0) -> list[AuditLog]:

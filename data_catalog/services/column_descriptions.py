@@ -84,6 +84,7 @@ def phase_populate(db: Session) -> int:
 
             entry = SearchIndexColumn(
                 id=str(uuid4()),
+                asset_id=asset.id,
                 table_schema=asset.table_schema,
                 table_name=asset.table_name,
                 column_name=col["name"],
@@ -293,20 +294,38 @@ def _embed_batch(
     texts: list[str],
     columns: list,
 ) -> int:
-    """Embed a batch of description texts and store vectors."""
+    """Embed a batch of description texts and store vectors.
+
+    Mirrors the field layout used by VectorSimilarityService._store_vector
+    so the downstream Hamming prefilter can locate these rows (it filters
+    on bit_u0 IS NOT NULL).
+    """
+    from data_catalog.services.embedding import EmbeddingService
+
     vectors = embedding_svc.embed(texts)
-    binary = embedding_svc.binarize(vectors)
 
     stored = 0
     for i, col in enumerate(columns):
+        vec = vectors[i]
+        bitstring = EmbeddingService.binarize_single(vec)
+        ubigints, popcnt = EmbeddingService.quantize_ubigint(vec)
+
         vector = ColumnVector(
             id=str(uuid4()),
+            asset_id=col.asset_id,
             table_schema=col.table_schema,
             table_name=col.table_name,
             column_name=col.column_name,
             vector_type="semantic_description",
-            value_vector=vectors[i].tolist(),
-            binary_vector=binary[i],
+            value_vector=vec.tolist(),
+            vector_bits=bitstring,
+            bit_u0=ubigints[0],
+            bit_u1=ubigints[1],
+            bit_u2=ubigints[2],
+            bit_u3=ubigints[3],
+            bit_u4=ubigints[4],
+            bit_u5=ubigints[5],
+            bit_popcnt=popcnt,
         )
         db.add(vector)
         stored += 1

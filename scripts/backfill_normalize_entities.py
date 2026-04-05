@@ -40,7 +40,12 @@ def run():
             old_entities = data.get("entities", [])
             new_entities = normalize_entities(old_entities)
 
-            if len(old_entities) != len(new_entities) or any(o.get("type") != n.get("type") for o, n in zip(old_entities, new_entities)):
+            # normalize_entities can deduplicate and reorder, so an index-wise
+            # zip comparison would report spurious changes or miss real ones.
+            # Compare a canonical serialization instead.
+            old_canonical = json.dumps(old_entities, sort_keys=True)
+            new_canonical = json.dumps(new_entities, sort_keys=True)
+            if old_canonical != new_canonical:
                 data["entities"] = new_entities
                 updates.append((json.dumps(data), mid))
 

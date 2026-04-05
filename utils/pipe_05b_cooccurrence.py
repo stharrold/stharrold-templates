@@ -33,8 +33,13 @@ def compute_cooccurrences(mentions: list[tuple[str, str]]) -> dict[tuple[str, st
     return dict(pair_counts)
 
 
-def classify_edge(count_ab: int, total_a: int, total_b: int) -> str | None:
+def classify_edge(count_ab: int, total_a: int, total_b: int) -> tuple[str, bool] | None:
     """Classify a co-occurrence as related_to, part_of, or None.
+
+    Pair operands arrive in lexical order (see compute_cooccurrences), so
+    "part_of" direction cannot be inferred from the pair itself -- we have
+    to check both sides of the asymmetry and tell the caller whether the
+    stored edge should be reversed (narrow -> broad).
 
     Args:
         count_ab: Number of documents where both entities co-occur.
@@ -42,16 +47,21 @@ def classify_edge(count_ab: int, total_a: int, total_b: int) -> str | None:
         total_b: Total documents mentioning entity B.
 
     Returns:
-        "related_to" for symmetric co-occurrence, "part_of" when entity B
-        appears far more broadly than entity A, or None if below threshold.
+        None if below MIN_COOCCURRENCE.
+        ("related_to", False) for symmetric co-occurrence.
+        ("part_of", False) when B is much broader than A (A is part of B).
+        ("part_of", True) when A is much broader than B (B is part of A;
+        caller should swap operands so the stored edge is narrow -> broad).
     """
     if count_ab < MIN_COOCCURRENCE:
         return None
 
     if total_b > total_a * ASYMMETRY_RATIO:
-        return "part_of"
+        return ("part_of", False)
+    if total_a > total_b * ASYMMETRY_RATIO:
+        return ("part_of", True)
 
-    return "related_to"
+    return ("related_to", False)
 
 
 def run(db: CoreDB = None):
@@ -99,12 +109,16 @@ def run(db: CoreDB = None):
         total_a = entity_totals[entity_a]
         total_b = entity_totals[entity_b]
 
-        edge_type = classify_edge(count, total_a, total_b)
-        if edge_type is None:
+        result = classify_edge(count, total_a, total_b)
+        if result is None:
             continue
+        edge_type, swap = result
 
         weight = min(count / 10.0, 1.0)
-        edges.append((entity_a, entity_b, edge_type, weight))
+        if swap:
+            edges.append((entity_b, entity_a, edge_type, weight))
+        else:
+            edges.append((entity_a, entity_b, edge_type, weight))
 
     logger.info(
         "Creating %d co-occurrence edges (threshold >= %d).",

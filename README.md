@@ -7,7 +7,7 @@ Templates and utilities for MCP (Model Context Protocol) server configuration an
 - **sN workflow** - Streamlined 4-step autonomous development process
 - **Claude Code Review** - Automated PR analysis via GitHub Actions
 - **AgentDB Tracking** - Persistent state and metrics using DuckDB
-- **Containerized development** - Podman + uv + Python 3.11 for consistency
+- **Containerized development** - Podman + uv + Python 3.12 for consistency
 - **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
 - **AI-agent native** - Optimized for Claude Code and MCP (Model Context Protocol)
 

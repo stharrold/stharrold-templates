@@ -169,9 +169,11 @@ class VectorSimilarityService:
         num_values: int = 0,
     ) -> None:
         """Store or update a column vector."""
-        meta = asset.schema_metadata or {}
-        schema = meta.get("schema", "")
-        view_name = meta.get("view_name", "")
+        # Asset.table_schema / table_name are top-level columns; schema_metadata
+        # is reserved for JSON-flexible fields (columns, primary_key, etc.) and
+        # does not carry the schema/table names.
+        schema = asset.table_schema
+        view_name = asset.table_name
 
         existing = (
             self.db.query(ColumnVector)
@@ -224,7 +226,18 @@ class VectorSimilarityService:
         threshold: int,
         limit: int,
     ) -> list[ColumnVector]:
-        """Pre-filter using Hamming distance on UBIGINT decomposition."""
+        """Pre-filter using Hamming distance on UBIGINT decomposition.
+
+        TODO: implement the actual Hamming prefilter using the hamming_dist
+        macro (tests/conftest.py registers it) or the XOR+bit_count pattern
+        over bit_u0..bit_u5, ORDER BY distance, then LIMIT to a small
+        candidate set for cosine rerank. The current body is a scaffold that
+        returns an arbitrary `limit` rows regardless of `query_ubigints` and
+        `threshold`, which defeats the two-stage search contract described
+        in the module docstring. Tracked for follow-up; no caller currently
+        exercises this path in tests.
+        """
+        _ = (query_ubigints, threshold)  # parameters reserved for real impl
         return (
             self.db.query(ColumnVector)
             .filter(

@@ -17,9 +17,12 @@ def db_engine():
     engine = create_engine("duckdb:///:memory:")
 
     with engine.connect() as conn:
-        # Install and load extensions
-        conn.execute(text("INSTALL vss; LOAD vss;"))
-        conn.execute(text("INSTALL json; LOAD json;"))
+        # Install and load extensions. duckdb-engine / SQLAlchemy text()
+        # executes one statement at a time, so split INSTALL and LOAD.
+        conn.execute(text("INSTALL vss"))
+        conn.execute(text("LOAD vss"))
+        conn.execute(text("INSTALL json"))
+        conn.execute(text("LOAD json"))
         # Register hamming_dist macro (xor() function, not # operator)
         conn.execute(
             text("""

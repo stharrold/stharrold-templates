@@ -77,7 +77,13 @@ class TestRecordSyncRobustness:
         assert row[0] == 1
 
     def test_step_patterns_in_valid_patterns(self):
-        """Verify sN patterns are present in VALID_PATTERNS."""
+        """Verify legacy phase_v7x1_* pattern keys remain in VALID_PATTERNS.
+
+        The slash commands were renamed from v7x1_N-* to sN-* in v8.9 (see
+        de8e183), but the AgentDB pattern strings intentionally keep the
+        phase_v7x1_* prefix as backward-compatible schema keys so existing
+        recorded state continues to match.
+        """
         assert "phase_v7x1_1_worktree" in VALID_PATTERNS
         assert "phase_v7x1_2_integrate" in VALID_PATTERNS
         assert "phase_v7x1_3_release" in VALID_PATTERNS
