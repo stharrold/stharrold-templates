@@ -533,14 +533,14 @@ def generate_claude_md(config: RepositoryConfig, target_path: Path, source_path:
     info("Generating CLAUDE.md...")
 
     # Read source CLAUDE.md to extract workflow sections
-    source_gemini = source_path / "CLAUDE.md"
-    source_content = source_gemini.read_text() if source_gemini.exists() else ""
+    source_claude_md = source_path / "CLAUDE.md"
+    source_content = source_claude_md.read_text() if source_claude_md.exists() else ""
 
     # Extract workflow architecture section (lines between ## Workflow and next ##)
     workflow_match = re.search(r"(## Workflow.*?)(?=\n## [^#])", source_content, re.DOTALL)
     workflow_section = workflow_match.group(1) if workflow_match else ""
 
-    gemini_content = f"""# CLAUDE.md
+    claude_md_content = f"""# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -652,7 +652,7 @@ Generated with workflow system v9.0.0
 """
 
     target_file = target_path / "CLAUDE.md"
-    target_file.write_text(gemini_content)
+    target_file.write_text(claude_md_content)
     success("Generated CLAUDE.md")
 
 
