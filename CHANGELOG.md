@@ -31,12 +31,16 @@ as the inaugural 9.x release:
   - New `security-headers` bundle for Cloudflare Pages
   - `tests.yml` shipped with `lfs: true` + concurrency dedup
 
-### Changed (9.0.0)
+### Breaking Changes
 - **Python 3.11 -> 3.12**: `Containerfile`, `pyproject.toml`
   (`requires-python`, `[tool.ruff] target-version`, `[tool.mypy]
   python_version`). `.python-version` was already 3.12.
 - **Version bump: 8.7.0 -> 9.0.0.** Major bump because of the
   Python version requirement change.
+- **`agentdb-state-manager` removed from the `full` bundle.** See
+  the `### Removed` section below and the new opt-in `agentdb`
+  bundle under `### Added`. Users of `--bundle full` who rely on
+  AgentDB must now also run `--bundle agentdb`.
 
 ### Migration notes (8.x -> 9.x)
 
@@ -50,11 +54,10 @@ as the inaugural 9.x release:
    `requires-python`).
 4. **If your repo still needs 3.11**, pin the template version when
    applying: `git clone --branch v8.7.0 stharrold-templates ...`.
-5. All the CLAUDE.md / slash-command / AgentDB changes listed under
-   [Unreleased] below are also part of 9.0.0. See the individual
-   sections for migration guidance.
-
-## [8.9.0] - (pre-release notes consolidated into 9.0.0)
+5. All the CLAUDE.md / slash-command / AgentDB changes listed in
+   the `### Added` / `### Changed` / `### Removed` sections below
+   are also part of 9.0.0. See "Migration notes for downstream
+   consumers" at the end of this version for the apply steps.
 
 ### Added
 - **`sql-pipeline` bundle** -- SQL Server ETL pipeline template with 13 Python modules (`src/`), SharePoint doc builder, Azure Pipelines CI, and project scaffolding files. Captures the shared pattern from OracleERP/CPSC repos: pyodbc orchestrator, GO-batch deployer, paginated query runner, retry-on-transient-error, YAML-frontmatter JSONL outputs, and config-per-environment validation.
