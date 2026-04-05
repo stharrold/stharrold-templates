@@ -76,8 +76,8 @@ class TestRecordSyncRobustness:
         conn.close()
         assert row[0] == 1
 
-    def test_v7x1_patterns_in_valid_patterns(self):
-        """Verify v7x1 patterns are present in VALID_PATTERNS."""
+    def test_step_patterns_in_valid_patterns(self):
+        """Verify sN patterns are present in VALID_PATTERNS."""
         assert "phase_v7x1_1_worktree" in VALID_PATTERNS
         assert "phase_v7x1_2_integrate" in VALID_PATTERNS
         assert "phase_v7x1_3_release" in VALID_PATTERNS

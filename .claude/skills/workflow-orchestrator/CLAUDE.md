@@ -367,33 +367,33 @@ if quality_gates_passed() and not pr_created():
 
 ---
 
-## Workflow Phase Map (v7x1)
+## Workflow Phase Map (sN)
 
 ```
 Phase 0: Session Start
 ├── Load: tech-stack-adapter
 └── Action: Detect project configuration
 
-Phase 1: Worktree (/workflow:v7x1_1-worktree)
+Phase 1: Worktree (/workflow:s1-worktree)
 ├── Load: git-workflow-manager
 ├── Action: Create feature worktree
 └── Action: Record state in AgentDB
 
-Phase 2: Integration (/workflow:v7x1_2-integrate)
+Phase 2: Integration (/workflow:s2-integrate)
 ├── Load: git-workflow-manager
 ├── Action: Push feature → Create PR (feature -> contrib)
 ├── Action: Cleanup worktree
 ├── Action: Push contrib → Create PR (contrib -> develop)
 └── Action: Record state in AgentDB
 
-Phase 3: Release (/workflow:v7x1_3-release)
+Phase 3: Release (/workflow:s3-release)
 ├── Load: git-workflow-manager
 ├── Action: Create release branch
 ├── Action: Create PR (release -> main)
 ├── Action: Tag release
 └── Action: Record state in AgentDB
 
-Phase 4: Backmerge (/workflow:v7x1_4-backmerge)
+Phase 4: Backmerge (/workflow:s4-backmerge)
 ├── Load: git-workflow-manager
 ├── Action: Create PR (release -> develop)
 ├── Action: Rebase contrib on develop

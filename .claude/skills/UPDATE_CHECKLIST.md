@@ -120,7 +120,7 @@ Find and update relevant sections:
 
 **File:** `CLAUDE.md` (root directory)
 
-- [ ] Update "## Workflow v7x1 Architecture" section:
+- [ ] Update "## Workflow sN Architecture" section:
   - [ ] Skill list and descriptions
   - [ ] Token savings metrics
 
@@ -401,7 +401,7 @@ Added interactive Q&A for database migration strategy in `create_planning.py`
 ```
 feat(bmad): add database migration strategy Q&A
 
-Updated bmad-planner from v7x1.0 to v5.1.0:
+Updated bmad-planner from v8.9 to v5.1.0:
 - Added interactive Q&A for database migration strategy (Alembic/Manual/None)
 - Enhanced architecture document generation with migration details
 

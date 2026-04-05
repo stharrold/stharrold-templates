@@ -57,10 +57,10 @@ Skills, commands, and documentation for the `main <- develop <- contrib/* <- fea
 - `.claude/skills/workflow-utilities/`
 
 **Commands (template-owned):**
-- `.claude/commands/workflow/v7x1_1-worktree.md`
-- `.claude/commands/workflow/v7x1_2-integrate.md`
-- `.claude/commands/workflow/v7x1_3-release.md`
-- `.claude/commands/workflow/v7x1_4-backmerge.md`
+- `.claude/commands/workflow/s1-worktree.md`
+- `.claude/commands/workflow/s2-integrate.md`
+- `.claude/commands/workflow/s3-release.md`
+- `.claude/commands/workflow/s4-backmerge.md`
 - `.claude/commands/workflow/status.md`
 
 **Docs (template-owned):**

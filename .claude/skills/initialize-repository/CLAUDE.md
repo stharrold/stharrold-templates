@@ -122,7 +122,7 @@ python .claude/skills/initialize-repository/scripts/initialize_repository.py \
    - Stage all files (`git add .`)
    - Create initial commit on main:
      ```
-     chore: initialize repository with workflow system v7x1
+     chore: initialize repository with workflow system sN
 
      Bootstrapped from <source-repo> using initialize-repository meta-skill.
 
@@ -488,7 +488,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 {description}
 
-## Workflow v7x1 Architecture
+## Workflow sN Architecture
 
 This repository uses a **skill-based workflow system** located in `.claude/skills/`.
 
@@ -546,7 +546,7 @@ context_stats:
   total_workflows_completed: 0
   current_token_usage: 0
   last_checkpoint: "{current_timestamp}"
-  recent_improvements: "Repository initialized with workflow system v7x1"
+  recent_improvements: "Repository initialized with workflow system sN"
 ---
 
 # Master TODO Manifest

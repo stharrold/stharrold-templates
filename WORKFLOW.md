@@ -1,4 +1,4 @@
-# Workflow Guide - v7x1 (Implementation)
+# Workflow Guide - sN (Implementation)
 
 **Version:** 7.0.0
 **Date:** 2026-01-01
@@ -44,28 +44,28 @@ If you have cloned `stharrold-templates` into a subdirectory (e.g., `.tmp/`):
 python .tmp/stharrold-templates/.claude/skills/initialize-repository/scripts/apply_workflow.py .tmp/stharrold-templates .
 ```
 
-## v7x1 Workflow
+## sN workflow
 
 ```
-/workflow:v7x1_1-worktree "feature description"
+/workflow:s1-worktree "feature description"
     | creates worktree, user implements feature in worktree
     v
-/workflow:v7x1_2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
+/workflow:s2-integrate "feature/YYYYMMDDTHHMMSSZ_slug"
     | PR feature->contrib->develop
     v
-/workflow:v7x1_3-release
+/workflow:s3-release
     | create release, PR to main, tag
     v
-/workflow:v7x1_4-backmerge
+/workflow:s4-backmerge
     | PR release->develop, rebase contrib, manual cleanup
 ```
 
-### Step 1: Create Worktree (`/workflow:v7x1_1-worktree`)
+### Step 1: Create Worktree (`/workflow:s1-worktree`)
 
 Creates isolated git worktree for feature development.
 
 ```bash
-/workflow:v7x1_1-worktree "add user authentication"
+/workflow:s1-worktree "add user authentication"
 ```
 
 **Output:**
@@ -92,12 +92,12 @@ cd <worktree-path>
 
 No separate planning documents needed.
 
-### Step 3: Integrate (`/workflow:v7x1_2-integrate`)
+### Step 3: Integrate (`/workflow:s2-integrate`)
 
 From main repo, after implementation is complete:
 
 ```bash
-/workflow:v7x1_2-integrate "feature/20251229T120000Z_add-user-auth"
+/workflow:s2-integrate "feature/20251229T120000Z_add-user-auth"
 ```
 
 **Two modes:**
@@ -106,13 +106,13 @@ From main repo, after implementation is complete:
 
 **Manual gates:** PRs require approval in GitHub UI.
 
-### Step 4: Release (`/workflow:v7x1_3-release`)
+### Step 4: Release (`/workflow:s3-release`)
 
 Creates release from develop:
 
 ```bash
-/workflow:v7x1_3-release           # Auto-calculate version
-/workflow:v7x1_3-release v1.2.0    # Explicit version
+/workflow:s3-release           # Auto-calculate version
+/workflow:s3-release v1.2.0    # Explicit version
 ```
 
 **Creates:**
@@ -120,12 +120,12 @@ Creates release from develop:
 - PR to main (requires approval)
 - Tag on main after merge
 
-### Step 5: Backmerge (`/workflow:v7x1_4-backmerge`)
+### Step 5: Backmerge (`/workflow:s4-backmerge`)
 
 Syncs release changes back:
 
 ```bash
-/workflow:v7x1_4-backmerge
+/workflow:s4-backmerge
 ```
 
 **Actions:**
@@ -158,11 +158,11 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 - `feature/*` - Feature development
 
 **Ephemeral branches:**
-- `release/*` - Created in `/workflow:v7x1_3-release`, manually deleted after `/workflow:v7x1_4-backmerge`
+- `release/*` - Created in `/workflow:s3-release`, manually deleted after `/workflow:s4-backmerge`
 
 ## Key Differences from v1-v7
 
-| Aspect | v1-v7 | v7x1 |
+| Aspect | v1-v7 | sN |
 |--------|-------|-----|
 | Planning | BMAD documents + SpecKit specs | Built-in Claude Code tools |
 | Quality gates | 5 separate gates | Claude Code Review |

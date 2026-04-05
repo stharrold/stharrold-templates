@@ -77,7 +77,7 @@ uv run python .claude/skills/workflow-utilities/scripts/deprecate_files.py \
 Result: `ARCHIVED/YYYYMMDDTHHMMSSZ_description.zip`
 
 ### Worktree Cleanup
-If a worktree was not cleaned up automatically by `/workflow:v7x1_2-integrate`:
+If a worktree was not cleaned up automatically by `/workflow:s2-integrate`:
 
 ```bash
 uv run python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py slug
