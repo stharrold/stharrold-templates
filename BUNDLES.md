@@ -108,6 +108,16 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 **Merge files (user-owned):**
 - `pyproject.toml` -- adds `ruff`, `pytest`, `pre-commit` to `[dependency-groups] dev`
 
+#### Known CI gotchas (baked into the shipped `tests.yml`)
+
+Lessons from running these workflows in downstream repos; the shipped file already applies each fix:
+
+- **`lfs: true` on every `actions/checkout@v4`.** Without it, Git LFS-tracked files arrive on the runner as 131-byte pointer files and any validator that hashes file contents reports spurious "checksum mismatch" errors. Enable even when the template's own repo has no LFS content — it's a correctness gate for every downstream consumer. Traced to synavistra PR #706: the source-registry validator had been silently failing for 3+ weeks.
+- **`concurrency:` block keyed by workflow + PR number or ref.** Cancels the older in-flight run when a new commit lands on the same branch, so rapid-fire pushes don't burn CI minutes on stale runs. Note: push and pull_request events on the same commit intentionally stay in different groups because they test different commits (push tests raw HEAD, pull_request tests GitHub's synthetic merge commit).
+- **When adding Node.js steps, scope `npm audit` to `--omit=dev`.** Dev-only transitive vulns are commonly pinned behind a devDependency (vitest-pool-workers, storybook, etc.) and cannot be upgraded without breaking the test harness. Production-dep vulns still gate the build; dev-dep vulns are visible via Dependabot.
+- **For multi-project Playwright configs, pass `--project=<name>` explicitly in CI.** Projects that require real Chrome + WebGPU (`channel: chrome`, `--enable-unsafe-webgpu`) cannot run on headless GitHub-hosted runners and should be reserved for manual/local runs.
+- **`claude-code-review.yml` requires `fetch-depth: 0`, `id-token: write`, and `claude_args: "--allowedTools ..."`.** Without these the reviewer can't diff against the base branch, can't authenticate via OIDC, and has every tool call denied.
+
 ---
 
 ### `pipeline` -- Document Processing Pipeline
