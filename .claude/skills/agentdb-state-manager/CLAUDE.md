@@ -1,23 +1,3 @@
----
-type: claude-context
-directory: .claude/skills/agentdb-state-manager
-purpose: Persistent state management using AgentDB (DuckDB) for workflow state tracking and analytics.
-
-Tracks workflow transitions via slash command invocations.
-
-**Primary purpose:** Workflow state tracking and analytics
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - schemas/CLAUDE.md
-  - scripts/CLAUDE.md
-  - templates/CLAUDE.md
-related_skills:
-  - workflow-orchestrator
-  - workflow-utilities
-  - git-workflow-manager
----
 
 # Claude Code Context: agentdb-state-manager
 
@@ -169,26 +149,10 @@ python .claude/skills/agentdb-state-manager/scripts/checkpoint_manager.py store
 4. **Session awareness:** AgentDB lasts 24 hours, re-initialize if expired
 5. **specs/*/tasks.md is truth:** AgentDB caches specs data for efficiency
 
+---
 
+## See also
 
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[schemas/CLAUDE.md](schemas/CLAUDE.md)** - Schemas
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-- **[templates/CLAUDE.md](templates/CLAUDE.md)** - Templates
-
-## Related Skills
-
-- workflow-orchestrator
-- workflow-utilities
-- git-workflow-manager
+- `SKILL.md` -- canonical skill definition
+- Opt-in as of v8.9: use git branches and PR state as the primary
+  source of workflow truth; this skill is for analytics only.

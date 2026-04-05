@@ -1,18 +1,3 @@
----
-type: claude-context
-directory: .claude/skills/workflow-utilities
-purpose: Workflow Utilities provides **shared utilities** for all workflow skills. It includes file deprecation, directory structure creation, CLAUDE.md hierarchy management, VCS abstraction (GitHub/Azure DevOps), documentation maintenance tools, and version validation. All other skills depend on workflow-utilities for consistent file operations.
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - scripts/CLAUDE.md
-related_skills:
-  - workflow-orchestrator
-  - git-workflow-manager
-  - initialize-repository
-  - agentdb-state-manager
----
 
 # Claude Code Context: workflow-utilities
 
@@ -587,25 +572,8 @@ directory/
 
 ---
 
+## See also
 
-
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-
-## Related Skills
-
-- **workflow-orchestrator** - Uses workflow utilities for phase tracking
-- **git-workflow-manager** - Uses VCS abstraction, worktree_context.py
-- **initialize-repository** - Uses directory_structure.py, create_skill.py
-- **agentdb-state-manager** - Workflow state tracking (replaces TODO_*.md)
+- `SKILL.md` -- canonical skill definition
+- `git-workflow-manager` -- consumes VCS wrapper + archive helpers
+- `workflow-orchestrator` -- coordinates multi-skill workflow execution

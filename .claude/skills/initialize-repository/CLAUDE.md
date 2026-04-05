@@ -1,20 +1,3 @@
----
-type: claude-context
-directory: .claude/skills/initialize-repository
-purpose: Initialize-repository is a **meta-skill (Phase 0)** that bootstraps new repositories with the complete workflow system. It provides an interactive callable tool for replicating skills, documentation, and standards from a source repository to a new target repository. Unlike other skills that operate within a repository, this meta-skill operates across repositories (source → target) and is used once per new project.
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - scripts/CLAUDE.md
-related_skills:
-  - workflow-orchestrator - Main coordinator for workflow phases
-  - tech-stack-adapter - Detects Python/uv project configuration
-  - git-workflow-manager - Git operations, worktrees, semantic versioning
-  - workflow-utilities - Shared utilities for all skills
-  - agentdb-state-manager - Persistent state tracking (optional)
-  - initialize-repository - This meta-skill (for future replication)
----
 
 # Claude Code Context: initialize-repository
 
@@ -1013,33 +996,8 @@ SKILL_NAMES = [
 
 ---
 
+## See also
 
-
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-
-## Related Skills
-
-**Does NOT integrate with other skills during execution** - this is a meta-skill that creates the environment for other skills.
-
-**After initialization, the target repository has all 9 skills ready to use:**
-- workflow-orchestrator - Main coordinator for workflow phases
-- tech-stack-adapter - Detects Python/uv project configuration
-- git-workflow-manager - Git operations, worktrees, semantic versioning
-- bmad-planner - Creates BMAD planning documents (Phase 1)
-- speckit-author - Creates detailed specifications (Phase 2)
-- quality-enforcer - Enforces quality gates (Phase 3)
-- workflow-utilities - Shared utilities for all skills
-- agentdb-state-manager - Persistent state tracking (optional)
-- initialize-repository - This meta-skill (for future replication)
+- `SKILL.md` -- canonical skill definition
+- `BUNDLES.md` at repo root -- bundle catalog and file-ownership rules
+- `tech-stack-adapter` -- detects project stack after initialization

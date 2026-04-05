@@ -1,25 +1,14 @@
----
-type: claude-context
-directory: .claude/skills/git-workflow-manager
-purpose: Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub).
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - scripts/CLAUDE.md
-related_skills:
-  - workflow-orchestrator
-  - workflow-utilities
-  - agentdb-state-manager
----
-
 # Claude Code Context: git-workflow-manager
 
 ## Purpose
 
-Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub).
+Git Workflow Manager provides **automated git operations** for the git-flow + GitHub-flow hybrid workflow with worktrees. It handles branch creation, worktree management, commits, PRs, semantic versioning, and daily rebase operations. All operations are designed to work with the isolated worktree development pattern and VCS provider abstraction (GitHub + Azure DevOps).
 
-> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Some scripts in this skill (create_worktree.py, cleanup_feature.py) still reference TODO files but will be updated in a future release. See `agentdb-state-manager` for the current state tracking system.
+See [`SKILL.md`](SKILL.md) for the authoritative skill definition; this file holds tactical notes only.
+
+## State tracking
+
+Workflow state is tracked via **git branches and PR state** -- that is the source of truth. Some older scripts (`create_worktree.py`, `cleanup_feature.py`) still reference `TODO_*.md` files for backward compatibility; these are deprecated and will be removed when the scripts are next rewritten. The `agentdb-state-manager` skill remains available as an opt-in for teams that want persistent analytics queries over historical workflow state, but it is no longer included in the `full` bundle (as of v8.9).
 
 ## Directory Structure
 
@@ -660,16 +649,11 @@ subprocess.run([
 
 **workflow-utilities:**
 - Uses workflow_archiver.py to archive TODO files
-- Uses vcs abstraction for PR creation (gh/az cli)
+- Uses the `vcs` wrapper for PR creation (auto-detects gh/az from git remote)
 
-**agentdb-state-manager:**
-- Tracks workflow state transitions
-- Replaces legacy TODO file tracking
-
-**Legacy Skills (Archived):**
-- **bmad-planner**: Replaced by autonomous planning
-- **speckit-author**: Replaced by autonomous implementation
-- **quality-enforcer**: Replaced by Claude Code Review
+**agentdb-state-manager** (opt-in, not in `full` bundle as of v8.9):
+- Persistent DuckDB for analytics queries over historical workflow state
+- Not required for normal workflow operation; git branches are the source of truth
 
 ---
 
@@ -712,24 +696,9 @@ This skill implements a hybrid workflow:
 
 ---
 
+## See also
 
-
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-
-## Related Skills
-
-- **workflow-orchestrator** - Calls git-workflow-manager scripts
-- **workflow-utilities** - Provides VCS abstraction and TODO utilities
-- **agentdb-state-manager** - Tracks workflow state
+- [`SKILL.md`](SKILL.md) -- canonical skill definition (loaded on invocation)
+- [`README.md`](README.md) -- human-readable overview
+- `workflow-orchestrator` -- calls git-workflow-manager scripts
+- `workflow-utilities` -- VCS wrapper (gh/az) and TODO archiver

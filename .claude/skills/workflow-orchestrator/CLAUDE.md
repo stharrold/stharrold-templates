@@ -1,27 +1,12 @@
----
-type: claude-context
-directory: .claude/skills/workflow-orchestrator
-purpose: Workflow Orchestrator is **the main coordinator skill** for the 4-phase v7x1 workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Claude Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - scripts/CLAUDE.md
-  - templates/CLAUDE.md
-related_skills:
-  - tech-stack-adapter
-  - git-workflow-manager
-  - workflow-utilities
-  - agentdb-state-manager
----
-
 # Claude Code Context: workflow-orchestrator
 
 ## Purpose
 
-Workflow Orchestrator is **the main coordinator skill** for the 7-phase workflow system. Unlike other skills, it contains no executable scripts - instead, it provides algorithmic guidance for Claude Code to detect workflow context, determine current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Gemini's behavior rather than providing callable tools.
+Workflow Orchestrator is **the main coordinator skill** for the 4-step sN (step-N) workflow system (s1-worktree → s2-integrate → s3-release → s4-backmerge, renamed from v7x1_N in v8.9). It contains no executable scripts of its own; instead it provides algorithmic guidance for Claude Code to detect workflow context, determine the current phase, load appropriate skills dynamically, and manage context usage. This is a **conceptual skill** that directs Claude's behavior rather than providing callable tools.
 
-> **Note**: As of v7x1.0, workflow state tracking has migrated from TODO_*.md files to AgentDB (DuckDB). Use `query_workflow_state.py` from `agentdb-state-manager` to determine current phase instead of parsing TODO files.
+See [`SKILL.md`](SKILL.md) for the authoritative orchestration algorithm; this file holds tactical notes only.
+
+> **Note on state tracking**: Git branches and PR state are the source of truth for workflow state. Some parts of the algorithm below still reference `query_workflow_state.py` from the `agentdb-state-manager` skill and the `bmad-planner` / `speckit-author` / `quality-enforcer` skills — those are all archived or opt-in as of v8.9. The algorithm pseudocode in this file is scheduled for a rewrite; treat it as illustrative, not prescriptive.
 
 ## Directory Structure
 
@@ -459,26 +444,9 @@ Phase 4: Backmerge (/workflow:v7x1_4-backmerge)
 
 ---
 
+## See also
 
-
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-- **[templates/CLAUDE.md](templates/CLAUDE.md)** - Templates
-
-## Related Skills
-
-- **tech-stack-adapter** - Always loaded first
-- **git-workflow-manager** - Loaded in Phases 1, 2, 3, 4
-- **workflow-utilities** - Loaded as needed
-- **agentdb-state-manager** - Tracks workflow state
+- `SKILL.md` -- canonical orchestration algorithm
+- `tech-stack-adapter` -- always loaded first
+- `git-workflow-manager` -- loaded in all four steps (s1..s4)
+- `workflow-utilities` -- loaded on demand for VCS/archive helpers
