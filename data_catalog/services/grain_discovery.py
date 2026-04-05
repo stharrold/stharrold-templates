@@ -13,6 +13,7 @@ Discovers primary keys (grain) in database tables/views using:
 The service delegates all SQL generation to a ``SQLDialect`` instance,
 making it portable across database engines.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,7 +30,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from data_catalog.db.repositories import AssetRepository
 from data_catalog.models.data_model import GrainResult
 from data_catalog.services.sql_dialect import SQLDialect
-from data_catalog.utils.sql_safety import validate_identifier, validate_qualified_name
+from data_catalog.utils.sql_safety import validate_identifier
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,25 @@ logger = logging.getLogger(__name__)
 PROGRESSIVE_SCAN_THRESHOLD = 10_000_000  # 10 million rows
 
 # Column types to skip in PK candidate testing
-_SKIP_TYPES = frozenset({
-    "xml", "image", "text", "ntext", "geography", "geometry",
-    "varbinary", "binary", "hierarchyid", "sql_variant",
-})
+_SKIP_TYPES = frozenset(
+    {
+        "xml",
+        "image",
+        "text",
+        "ntext",
+        "geography",
+        "geometry",
+        "varbinary",
+        "binary",
+        "hierarchyid",
+        "sql_variant",
+    }
+)
 
 # Column name patterns to skip
 _SKIP_NAME_PATTERNS = [
-    re.compile(r"^__\$"),            # CDC columns
-    re.compile(r"ArchiveDTS$"),      # Archive timestamps
+    re.compile(r"^__\$"),  # CDC columns
+    re.compile(r"ArchiveDTS$"),  # Archive timestamps
     re.compile(r"^rowguid$", re.IGNORECASE),
 ]
 
@@ -79,10 +90,10 @@ class GrainDiscoveryService:
     UNIQUENESS_THRESHOLD = 99.99
 
     # -- Varying Column Chase (VCC) constants --
-    _VCC_MAX_DUPE_GROUPS = 20         # Fetch rows from this many duplicate groups
-    _VCC_VARIATION_THRESHOLD = 0.30   # Column must vary in >30% of dupe groups
+    _VCC_MAX_DUPE_GROUPS = 20  # Fetch rows from this many duplicate groups
+    _VCC_VARIATION_THRESHOLD = 0.30  # Column must vary in >30% of dupe groups
     _VCC_UNIQUENESS_THRESHOLD = 0.9999  # Composite must achieve this selectivity
-    _VCC_MAX_COMPOSITE_TESTS = 10     # Cap composite tests to limit query cost
+    _VCC_MAX_COMPOSITE_TESTS = 10  # Cap composite tests to limit query cost
 
     # -- Iterative Accumulation (IA) constants --
     _IA_MAX_DEPTH = 10
@@ -167,10 +178,7 @@ class GrainDiscoveryService:
             schema, table = self._parse_qualified_name(qualified_name)
             sql = self.dialect.column_metadata_query(schema, table)
             self.cursor.execute(sql)
-            return [
-                {"name": row[0], "data_type": row[1], "ordinal_position": row[2]}
-                for row in self.cursor.fetchall()
-            ]
+            return [{"name": row[0], "data_type": row[1], "ordinal_position": row[2]} for row in self.cursor.fetchall()]
         return []
 
     def _get_row_count(self, schema: str, table: str) -> int | None:
@@ -226,9 +234,7 @@ class GrainDiscoveryService:
             logger.warning(f"Uniqueness test failed: {e}")
             return 0.0
 
-    def _pattern_based_discovery(
-        self, qualified_name: str, columns: list[dict]
-    ) -> GrainResult | None:
+    def _pattern_based_discovery(self, qualified_name: str, columns: list[dict]) -> GrainResult | None:
         """Try pattern-based PK detection.
 
         Looks for common naming patterns:
@@ -304,13 +310,7 @@ class GrainDiscoveryService:
             else:
                 source = f"[{schema}].[{table}]"
 
-            sql = (
-                f"SELECT MAX(cnt) FROM ("
-                f"  SELECT COUNT(DISTINCT [{col}]) AS cnt"
-                f"  FROM {source}"
-                f"  GROUP BY {group_cols}"
-                f") AS fd_check"
-            )
+            sql = f"SELECT MAX(cnt) FROM (  SELECT COUNT(DISTINCT [{col}]) AS cnt  FROM {source}  GROUP BY {group_cols}) AS fd_check"
 
             try:
                 old_timeout = self.dialect.set_timeout(self.cursor, 600)
@@ -390,15 +390,10 @@ class GrainDiscoveryService:
             # Validate pattern result against source DB
             schema, table = self._parse_qualified_name(qualified_name)
             if self.cursor and self.dialect:
-                selectivity = self._test_uniqueness(
-                    schema, table, pattern_result.primary_key, sample_pct=1.0
-                )
+                selectivity = self._test_uniqueness(schema, table, pattern_result.primary_key, sample_pct=1.0)
                 if selectivity >= self.UNIQUENESS_THRESHOLD:
                     return pattern_result
-                logger.info(
-                    f"  Pattern candidate {pattern_result.primary_key} "
-                    f"selectivity={selectivity:.2f}%, not unique"
-                )
+                logger.info(f"  Pattern candidate {pattern_result.primary_key} selectivity={selectivity:.2f}%, not unique")
             else:
                 # No source DB to validate, return pattern result
                 return pattern_result
@@ -427,9 +422,7 @@ class GrainDiscoveryService:
                     pk_minimal = None
                     fd_removed = None
                     if len(pk_cols) > 1:
-                        pk_minimal, fd_removed = self._fd_minimize_pk(
-                            schema, table, pk_cols
-                        )
+                        pk_minimal, fd_removed = self._fd_minimize_pk(schema, table, pk_cols)
                         if not fd_removed:
                             pk_minimal = None
                             fd_removed = None
@@ -450,15 +443,20 @@ class GrainDiscoveryService:
                     best_sel = last_step.best_selectivity
                     if best_cand and best_sel:
                         chase_result = self._varying_column_chase(
-                            qualified_name, best_cand, best_sel,
-                            columns, row_count,
+                            qualified_name,
+                            best_cand,
+                            best_sel,
+                            columns,
+                            row_count,
                         )
                         if chase_result:
                             return chase_result
 
                 # Step 6: Iterative accumulation (includes VCC escalation)
                 ia_result = self._iterative_accumulation(
-                    qualified_name, columns, row_count,
+                    qualified_name,
+                    columns,
+                    row_count,
                 )
                 if ia_result:
                     return ia_result
@@ -504,15 +502,12 @@ class GrainDiscoveryService:
         if not self.cursor or not self.dialect:
             return None
 
-        logger.info(
-            f"Varying column chase for {qualified_name}: "
-            f"candidate={best_candidate} selectivity={best_selectivity:.2%}"
-        )
+        logger.info(f"Varying column chase for {qualified_name}: candidate={best_candidate} selectivity={best_selectivity:.2%}")
         start_time = time.time()
 
         schema, table = self._parse_qualified_name(qualified_name)
 
-        # Step 1: Parse candidate — split "ColA + ColB" into ["ColA", "ColB"]
+        # Step 1: Parse candidate -- split "ColA + ColB" into ["ColA", "ColB"]
         candidate_cols = [c.strip() for c in best_candidate.split(" + ")]
         candidate_set = set(candidate_cols)
 
@@ -544,7 +539,8 @@ class GrainDiscoveryService:
 
             if temp_table is None:
                 temp_table = self._ia_create_temp_sample(
-                    schema, table,
+                    schema,
+                    table,
                     sample_pct=1 if (row_count and row_count > 100_000) else 100,
                 )
                 if temp_table is None:
@@ -553,14 +549,10 @@ class GrainDiscoveryService:
 
         try:
             # Step 4: Fetch dupe rows from top N duplicate groups
-            safe_cand_cols = ", ".join(
-                f"[{validate_identifier(c)}]" for c in candidate_cols
-            )
+            safe_cand_cols = ", ".join(f"[{validate_identifier(c)}]" for c in candidate_cols)
             # NULL-safe join: (s.col = dk.col OR (s.col IS NULL AND dk.col IS NULL))
             join_conditions = " AND ".join(
-                f"(s.[{validate_identifier(c)}] = dk.[{validate_identifier(c)}]"
-                f" OR (s.[{validate_identifier(c)}] IS NULL"
-                f" AND dk.[{validate_identifier(c)}] IS NULL))"
+                f"(s.[{validate_identifier(c)}] = dk.[{validate_identifier(c)}] OR (s.[{validate_identifier(c)}] IS NULL AND dk.[{validate_identifier(c)}] IS NULL))"
                 for c in candidate_cols
             )
 
@@ -594,15 +586,11 @@ class GrainDiscoveryService:
                 logger.info("  VCC: no duplicate groups found in sample")
                 return None
 
-            logger.info(
-                f"  VCC: fetched {len(dupe_rows)} rows from duplicate groups"
-            )
+            logger.info(f"  VCC: fetched {len(dupe_rows)} rows from duplicate groups")
 
             # Step 5: Identify varying columns (Python analysis)
             col_idx_map = {name: i for i, name in enumerate(col_names)}
-            cand_indices = [
-                col_idx_map[c] for c in candidate_cols if c in col_idx_map
-            ]
+            cand_indices = [col_idx_map[c] for c in candidate_cols if c in col_idx_map]
 
             groups: dict[tuple, list] = {}
             for row in dupe_rows:
@@ -625,25 +613,14 @@ class GrainDiscoveryService:
                 variation_counts[col] = varying_groups
 
             # Filter columns that vary in >30% of dupe groups
-            varying_cols = [
-                (col, count / num_groups)
-                for col, count in variation_counts.items()
-                if count / num_groups > self._VCC_VARIATION_THRESHOLD
-            ]
+            varying_cols = [(col, count / num_groups) for col, count in variation_counts.items() if count / num_groups > self._VCC_VARIATION_THRESHOLD]
             varying_cols.sort(key=lambda x: x[1], reverse=True)
 
             if not varying_cols:
-                logger.info(
-                    f"  VCC: no columns vary in "
-                    f">{self._VCC_VARIATION_THRESHOLD:.0%} "
-                    f"of {num_groups} dupe groups"
-                )
+                logger.info(f"  VCC: no columns vary in >{self._VCC_VARIATION_THRESHOLD:.0%} of {num_groups} dupe groups")
                 return None
 
-            logger.info(
-                f"  VCC: {len(varying_cols)} varying columns: "
-                + ", ".join(f"{c}({f:.0%})" for c, f in varying_cols[:5])
-            )
+            logger.info(f"  VCC: {len(varying_cols)} varying columns: " + ", ".join(f"{c}({f:.0%})" for c, f in varying_cols[:5]))
 
             # Step 6: Test refined composites
             composites_to_test: list[list[str]] = []
@@ -655,17 +632,14 @@ class GrainDiscoveryService:
                     break
 
             # Top-2 varying columns together
-            if (
-                len(varying_cols) >= 2
-                and len(composites_to_test) < self._VCC_MAX_COMPOSITE_TESTS
-            ):
-                composites_to_test.append(
-                    candidate_cols + [varying_cols[0][0], varying_cols[1][0]]
-                )
+            if len(varying_cols) >= 2 and len(composites_to_test) < self._VCC_MAX_COMPOSITE_TESTS:
+                composites_to_test.append(candidate_cols + [varying_cols[0][0], varying_cols[1][0]])
 
             # Use dialect.count_distinct for composite testing
             test_sql = self.dialect.count_distinct(
-                temp_table, columns=[], composites=composites_to_test,
+                temp_table,
+                columns=[],
+                composites=composites_to_test,
             )
 
             try:
@@ -688,26 +662,22 @@ class GrainDiscoveryService:
 
             # Step 7: Check for PK
             for idx, composite in enumerate(composites_to_test):
-                distinct = (
-                    int(test_row[idx + 1])
-                    if test_row[idx + 1] is not None
-                    else 0
-                )
+                distinct = int(test_row[idx + 1]) if test_row[idx + 1] is not None else 0
                 selectivity = distinct / sample_count
 
                 if selectivity >= self._VCC_UNIQUENESS_THRESHOLD:
                     # FD minimization
                     pk_minimal, fd_removed_list = self._fd_minimize_pk(
-                        schema, table, composite, temp_table=temp_table,
+                        schema,
+                        table,
+                        composite,
+                        temp_table=temp_table,
                     )
                     pk_min = pk_minimal if fd_removed_list else None
                     fd_rem = fd_removed_list if fd_removed_list else None
 
                     duration = time.time() - start_time
-                    logger.info(
-                        f"  VCC found PK: {composite} "
-                        f"(selectivity {selectivity:.4%}) in {duration:.1f}s"
-                    )
+                    logger.info(f"  VCC found PK: {composite} (selectivity {selectivity:.4%}) in {duration:.1f}s")
 
                     return GrainResult(
                         qualified_name=qualified_name,
@@ -720,9 +690,7 @@ class GrainDiscoveryService:
                         metadata={
                             "original_candidate": best_candidate,
                             "original_selectivity": best_selectivity,
-                            "discriminating_column": [
-                                c for c in composite if c not in candidate_set
-                            ],
+                            "discriminating_column": [c for c in composite if c not in candidate_set],
                             "dupe_groups_analyzed": num_groups,
                             "varying_columns": [c for c, _ in varying_cols],
                             "duration_seconds": round(duration, 1),
@@ -730,10 +698,7 @@ class GrainDiscoveryService:
                     )
 
             duration = time.time() - start_time
-            logger.info(
-                f"  VCC: no PK found after testing "
-                f"{len(composites_to_test)} composites in {duration:.1f}s"
-            )
+            logger.info(f"  VCC: no PK found after testing {len(composites_to_test)} composites in {duration:.1f}s")
             return None
 
         finally:
@@ -777,7 +742,11 @@ class GrainDiscoveryService:
         temp_name = f"#ia_sample_{int(time.time())}"
 
         sql = self.dialect.create_sample_table(
-            temp_name, schema, table, seed_col, float(sample_pct),
+            temp_name,
+            schema,
+            table,
+            seed_col,
+            float(sample_pct),
         )
 
         try:
@@ -799,9 +768,7 @@ class GrainDiscoveryService:
                 self.dialect.set_timeout(self.cursor, old_timeout)
 
             self.dialect.drain_cursor(self.cursor)
-            logger.info(
-                f"  IA temp sample ready: {row_count:,} rows in {elapsed:.1f}s"
-            )
+            logger.info(f"  IA temp sample ready: {row_count:,} rows in {elapsed:.1f}s")
             return temp_name
         except Exception as e:
             logger.warning(f"  IA temp table creation failed: {e}")
@@ -823,16 +790,16 @@ class GrainDiscoveryService:
             pass
 
     def _ia_select_seed_column(
-        self, schema: str, table: str,
+        self,
+        schema: str,
+        table: str,
     ) -> str:
         """Select a high-cardinality column for sampling."""
         if not self.cursor or not self.dialect:
             return "1"  # Fallback: use constant (full scan)
 
         # Get columns first
-        columns = self._get_asset_columns(
-            f"[{schema}].[{table}]"
-        )
+        columns = self._get_asset_columns(f"[{schema}].[{table}]")
         col_names = [c["name"] for c in columns if c.get("name")][:30]
         if not col_names:
             return "1"
@@ -880,13 +847,13 @@ class GrainDiscoveryService:
         sample_row_count: int | None = None
 
         for batch_start in range(0, len(columns), self._IA_SELECTIVITY_BATCH):
-            batch_cols = columns[
-                batch_start : batch_start + self._IA_SELECTIVITY_BATCH
-            ]
+            batch_cols = columns[batch_start : batch_start + self._IA_SELECTIVITY_BATCH]
 
             # Use dialect.count_distinct with individual columns
             sql = self.dialect.count_distinct(
-                source, columns=batch_cols, composites=None,
+                source,
+                columns=batch_cols,
+                composites=None,
             )
 
             try:
@@ -897,9 +864,7 @@ class GrainDiscoveryService:
                 finally:
                     self.dialect.set_timeout(self.cursor, old_timeout)
             except Exception as e:
-                logger.warning(
-                    f"  Selectivity measurement failed (batch {batch_start}): {e}"
-                )
+                logger.warning(f"  Selectivity measurement failed (batch {batch_start}): {e}")
                 return selectivities
 
             if not row:
@@ -916,14 +881,8 @@ class GrainDiscoveryService:
                 distinct = int(row[idx + 1]) if row[idx + 1] is not None else 0
                 selectivities[col] = distinct / row_count
 
-        n_batches = (
-            (len(columns) + self._IA_SELECTIVITY_BATCH - 1)
-            // self._IA_SELECTIVITY_BATCH
-        )
-        logger.info(
-            f"  Measured selectivities for {len(selectivities)} columns "
-            f"({sample_row_count:,} sample rows, {n_batches} batch(es))"
-        )
+        n_batches = (len(columns) + self._IA_SELECTIVITY_BATCH - 1) // self._IA_SELECTIVITY_BATCH
+        logger.info(f"  Measured selectivities for {len(selectivities)} columns ({sample_row_count:,} sample rows, {n_batches} batch(es))")
         return selectivities
 
     def _ia_try_accumulation_batched(
@@ -962,7 +921,9 @@ class GrainDiscoveryService:
                 batch_composites.append(accumulated_plus)
 
             sql = self.dialect.count_distinct(
-                temp_table, columns=[], composites=batch_composites,
+                temp_table,
+                columns=[],
+                composites=batch_composites,
             )
 
             try:
@@ -973,10 +934,7 @@ class GrainDiscoveryService:
                 finally:
                     self.dialect.set_timeout(self.cursor, old_timeout)
             except Exception as e:
-                logger.warning(
-                    f"  Accumulation query failed ({ordering} batch "
-                    f"{col_idx + 1}-{batch_end}): {e}"
-                )
+                logger.warning(f"  Accumulation query failed ({ordering} batch {col_idx + 1}-{batch_end}): {e}")
                 return None
 
             if not row:
@@ -988,23 +946,14 @@ class GrainDiscoveryService:
 
             for i in range(len(batch_cols)):
                 depth = col_idx + i + 1
-                distinct = (
-                    int(row[i + 1]) if row[i + 1] is not None else 0
-                )
+                distinct = int(row[i + 1]) if row[i + 1] is not None else 0
                 selectivity = distinct / row_count
 
-                logger.debug(
-                    f"  {ordering} depth {depth}: "
-                    f"{', '.join(batch_composites[i])} -> "
-                    f"{selectivity:.4%} ({distinct:,}/{row_count:,})"
-                )
+                logger.debug(f"  {ordering} depth {depth}: {', '.join(batch_composites[i])} -> {selectivity:.4%} ({distinct:,}/{row_count:,})")
 
                 if selectivity >= self._IA_UNIQUENESS_THRESHOLD:
                     pk_cols = batch_composites[i]
-                    logger.info(
-                        f"  {ordering} PK found at depth {depth}: "
-                        f"{pk_cols} ({selectivity:.4%})"
-                    )
+                    logger.info(f"  {ordering} PK found at depth {depth}: {pk_cols} ({selectivity:.4%})")
                     return pk_cols
 
                 improvement = selectivity - prev_selectivity
@@ -1015,16 +964,10 @@ class GrainDiscoveryService:
                     plateau_count = 0
 
                 if plateau_count >= self._IA_PLATEAU_LIMIT:
-                    logger.info(
-                        f"  {ordering} plateau after depth {depth} "
-                        f"({selectivity:.4%}), stopping"
-                    )
+                    logger.info(f"  {ordering} plateau after depth {depth} ({selectivity:.4%}), stopping")
                     # Track best plateau for VCC escalation
                     composite = batch_composites[i]
-                    if (
-                        self._ia_best_plateau is None
-                        or selectivity > self._ia_best_plateau[1]
-                    ):
+                    if self._ia_best_plateau is None or selectivity > self._ia_best_plateau[1]:
                         self._ia_best_plateau = (composite, selectivity)
                     return None
 
@@ -1059,7 +1002,9 @@ class GrainDiscoveryService:
                 composites.append(subset)
 
             sql = self.dialect.count_distinct(
-                temp_table, columns=[], composites=composites,
+                temp_table,
+                columns=[],
+                composites=composites,
             )
 
             try:
@@ -1082,17 +1027,12 @@ class GrainDiscoveryService:
 
             dropped = False
             for i in range(len(current)):
-                distinct = (
-                    int(row[i + 1]) if row[i + 1] is not None else 0
-                )
+                distinct = int(row[i + 1]) if row[i + 1] is not None else 0
                 selectivity = distinct / row_count
                 if selectivity >= self._IA_UNIQUENESS_THRESHOLD:
                     dropped_col = current[i]
                     current = candidates[i]
-                    logger.info(
-                        f"  Minimization: dropped [{dropped_col}], "
-                        f"{len(current)} cols remain ({selectivity:.4%})"
-                    )
+                    logger.info(f"  Minimization: dropped [{dropped_col}], {len(current)} cols remain ({selectivity:.4%})")
                     dropped = True
                     break
 
@@ -1144,7 +1084,9 @@ class GrainDiscoveryService:
         # Create materialized temp sample
         sample_pct = 1 if (row_count and row_count > 100_000) else 100
         temp_table = self._ia_create_temp_sample(
-            schema, table, sample_pct=sample_pct,
+            schema,
+            table,
+            sample_pct=sample_pct,
         )
         if not temp_table:
             return None
@@ -1152,7 +1094,10 @@ class GrainDiscoveryService:
         try:
             # Measure per-column selectivities
             selectivities = self._ia_measure_all_selectivities(
-                schema, table, testable, temp_table=temp_table,
+                schema,
+                table,
+                testable,
+                temp_table=temp_table,
             )
             if not selectivities:
                 return None
@@ -1164,23 +1109,27 @@ class GrainDiscoveryService:
 
             # Top-down: highest selectivity first
             top_down = sorted(
-                nonzero.keys(), key=lambda c: nonzero[c], reverse=True,
+                nonzero.keys(),
+                key=lambda c: nonzero[c],
+                reverse=True,
             )
             result = self._ia_try_accumulation_batched(
-                top_down, "top-down", temp_table=temp_table,
+                top_down,
+                "top-down",
+                temp_table=temp_table,
             )
             if result:
                 result = self._ia_minimize_pk(result, temp_table=temp_table)
                 pk_minimal, fd_removed = self._fd_minimize_pk(
-                    schema, table, result, temp_table=temp_table,
+                    schema,
+                    table,
+                    result,
+                    temp_table=temp_table,
                 )
                 fd_rem = fd_removed if fd_removed else None
                 pk_min = pk_minimal if fd_removed else None
                 duration = time.time() - start_time
-                logger.info(
-                    f"Iterative accumulation (top-down) found PK: "
-                    f"{result} in {duration:.1f}s"
-                )
+                logger.info(f"Iterative accumulation (top-down) found PK: {result} in {duration:.1f}s")
                 return GrainResult(
                     qualified_name=qualified_name,
                     status="confirmed",
@@ -1198,23 +1147,26 @@ class GrainDiscoveryService:
 
             # Bottom-up: lowest selectivity first
             bottom_up = sorted(
-                nonzero.keys(), key=lambda c: nonzero[c],
+                nonzero.keys(),
+                key=lambda c: nonzero[c],
             )
             result = self._ia_try_accumulation_batched(
-                bottom_up, "bottom-up", temp_table=temp_table,
+                bottom_up,
+                "bottom-up",
+                temp_table=temp_table,
             )
             if result:
                 result = self._ia_minimize_pk(result, temp_table=temp_table)
                 pk_minimal, fd_removed = self._fd_minimize_pk(
-                    schema, table, result, temp_table=temp_table,
+                    schema,
+                    table,
+                    result,
+                    temp_table=temp_table,
                 )
                 fd_rem = fd_removed if fd_removed else None
                 pk_min = pk_minimal if fd_removed else None
                 duration = time.time() - start_time
-                logger.info(
-                    f"Iterative accumulation (bottom-up) found PK: "
-                    f"{result} in {duration:.1f}s"
-                )
+                logger.info(f"Iterative accumulation (bottom-up) found PK: {result} in {duration:.1f}s")
                 return GrainResult(
                     qualified_name=qualified_name,
                     status="confirmed",
@@ -1234,28 +1186,22 @@ class GrainDiscoveryService:
             # try varying column chase to find the discriminating column.
             if self._ia_best_plateau is not None:
                 plateau_cols, plateau_sel = self._ia_best_plateau
-                logger.info(
-                    f"  IA plateau escalation to VCC: "
-                    f"{' + '.join(plateau_cols)} ({plateau_sel:.4%})"
-                )
+                logger.info(f"  IA plateau escalation to VCC: {' + '.join(plateau_cols)} ({plateau_sel:.4%})")
                 candidate_str = " + ".join(plateau_cols)
                 chase_result = self._varying_column_chase(
-                    qualified_name, candidate_str, plateau_sel,
-                    columns, row_count,
+                    qualified_name,
+                    candidate_str,
+                    plateau_sel,
+                    columns,
+                    row_count,
                     temp_table=temp_table,
                 )
                 if chase_result:
-                    chase_result.metadata["source"] = (
-                        f"IA plateau -> varying column chase "
-                        f"(plateau at {plateau_sel:.4%})"
-                    )
+                    chase_result.metadata["source"] = f"IA plateau -> varying column chase (plateau at {plateau_sel:.4%})"
                     return chase_result
 
             duration = time.time() - start_time
-            logger.info(
-                f"Iterative accumulation found no PK for "
-                f"{qualified_name} after {duration:.1f}s"
-            )
+            logger.info(f"Iterative accumulation found no PK for {qualified_name} after {duration:.1f}s")
             return None
         finally:
             self._ia_drop_temp_sample(temp_table)
@@ -1292,13 +1238,8 @@ class GrainDiscoveryService:
                 if gs in ("confirmed", "no_natural_pk"):
                     continue
 
-            logger.info(
-                f"[{i}/{len(assets)}] Discovering grain for "
-                f"{asset.qualified_name}..."
-            )
-            result = self.discover_grain(
-                asset.qualified_name, sample_size=sample_size
-            )
+            logger.info(f"[{i}/{len(assets)}] Discovering grain for {asset.qualified_name}...")
+            result = self.discover_grain(asset.qualified_name, sample_size=sample_size)
             results.append(result)
 
             # Sync to catalog
@@ -1306,9 +1247,7 @@ class GrainDiscoveryService:
 
         return results
 
-    def sync_to_catalog(
-        self, qualified_name: str, result: GrainResult
-    ) -> None:
+    def sync_to_catalog(self, qualified_name: str, result: GrainResult) -> None:
         """Persist grain discovery result to the catalog database.
 
         Updates Asset.schema_metadata with grain_status, primary_key,
@@ -1328,9 +1267,7 @@ class GrainDiscoveryService:
                 "discovered_at": datetime.now(UTC).isoformat(),
             }
             if result.metadata.get("pattern_used"):
-                meta["pk_discovery"]["pattern_used"] = result.metadata[
-                    "pattern_used"
-                ]
+                meta["pk_discovery"]["pattern_used"] = result.metadata["pattern_used"]
             if result.pk_minimal:
                 meta["pk_minimal"] = result.pk_minimal
                 meta["fd_removed"] = result.fd_removed
@@ -1380,15 +1317,16 @@ class GrainDiscoveryService:
         if output_format == "json":
             import json as json_mod
 
-            return json_mod.dumps({
-                "total": total,
-                "confirmed": confirmed,
-                "no_natural_pk": no_pk,
-                "unknown": unknown,
-                "coverage_pct": round(
-                    (confirmed + no_pk) / total * 100, 1
-                ) if total else 0,
-            }, indent=2)
+            return json_mod.dumps(
+                {
+                    "total": total,
+                    "confirmed": confirmed,
+                    "no_natural_pk": no_pk,
+                    "unknown": unknown,
+                    "coverage_pct": round((confirmed + no_pk) / total * 100, 1) if total else 0,
+                },
+                indent=2,
+            )
 
         lines = [
             "Grain Discovery Report",
@@ -1397,14 +1335,11 @@ class GrainDiscoveryService:
             f"PK confirmed:    {confirmed}",
             f"No natural PK:   {no_pk}",
             f"Unknown:         {unknown}",
-            f"Coverage:        {(confirmed + no_pk) / total * 100:.1f}%"
-            if total else "Coverage: N/A",
+            f"Coverage:        {(confirmed + no_pk) / total * 100:.1f}%" if total else "Coverage: N/A",
         ]
         return "\n".join(lines)
 
-    def mark_no_natural_pk(
-        self, qualified_name: str, source: str, confirmed_by: str
-    ) -> GrainResult:
+    def mark_no_natural_pk(self, qualified_name: str, source: str, confirmed_by: str) -> GrainResult:
         """Mark an asset as having no natural primary key."""
         no_pk_list = self.config.setdefault("no_natural_pk", [])
         if qualified_name not in no_pk_list:

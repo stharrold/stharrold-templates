@@ -27,14 +27,6 @@ repos:
   # Local hooks for repository-specific checks
   - repo: local
     hooks:
-      # Check CLAUDE.md frontmatter
-      - id: claude-md-frontmatter
-        name: Check CLAUDE.md has YAML frontmatter
-        entry: python .claude/skills/workflow-utilities/scripts/check_claude_md_frontmatter.py
-        language: python
-        files: CLAUDE\.md$
-        pass_filenames: false
-
       # Verify skill directory structure
       - id: skill-structure
         name: Verify skill directory structure

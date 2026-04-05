@@ -33,10 +33,8 @@ Workflow Utilities provides **shared utilities** for all workflow skills. It inc
 │   ├── create_skill.py             # Create new skills
 │   ├── deprecate_files.py          # Archive deprecated files
 │   ├── directory_structure.py      # Create standard directory structure
-│   ├── generate_claude_md.py       # Generate missing CLAUDE.md files
 │   ├── safe_output.py              # ASCII-safe output formatting
 │   ├── sync_skill_docs.py          # Documentation sync
-│   ├── update_claude_md_refs.py    # Update CLAUDE.md children refs
 │   ├── update_claude_references.py # Update CLAUDE.md references
 │   ├── validate_versions.py        # Validate version consistency
 │   ├── verify_workflow_context.py  # Workflow context validation + pending worktree detection
@@ -544,13 +542,21 @@ directory/
 - ✅ Use directory_structure.py for consistency
 
 **CLAUDE.md hierarchy:**
-- ❌ Don't manually create CLAUDE.md files
-- ✅ Use generate_claude_md.py to create missing files
-- ✅ Use update_claude_md_refs.py to update children references
+- ✅ Write a CLAUDE.md only when you have a non-obvious fact to record.
+  Do NOT auto-generate stub files for every directory — they cost
+  context tokens on every session and provide no value beyond `ls`.
+  See the rubric at the top of the repo-root CLAUDE.md.
+- Historical note: `generate_claude_md.py`, `update_claude_md_refs.py`,
+  and `check_claude_md_frontmatter.py` were removed in v8.9 after
+  downstream usage showed the auto-generated stub pattern was
+  actively harmful. The `claude-md-frontmatter` pre-commit hook was
+  removed in the same change.
 
 **Workflow state tracking:**
 - ❌ Don't use TODO_*.md files (deprecated)
-- ✅ Use AgentDB via `agentdb-state-manager` scripts
+- Git branches and PR state are the source of truth. AgentDB
+  (`agentdb-state-manager` skill) is kept as an opt-in for
+  complex workflows but no longer included in the `full` bundle.
 
 **Documentation maintenance:**
 - ❌ Don't update versions without validation

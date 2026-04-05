@@ -10,7 +10,7 @@ Stages (in order):
 3. Consolidation: merges duplicate entities, creates has_alias edges
 4. Co-occurrence: creates related_to/part_of edges between co-occurring entities
 
-Each stage is idempotent — safe to re-run.
+Each stage is idempotent -- safe to re-run.
 """
 
 import logging
