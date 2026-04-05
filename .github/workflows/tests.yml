@@ -6,6 +6,16 @@ on:
   pull_request:
     branches: [main, develop, contrib/stharrold]
 
+# Deduplicate sequential runs of the same event type. Rapid-fire pushes to
+# contrib/* cancel the older in-flight Tests run; successive `synchronize`
+# events on a PR do the same. Push and pull_request events for the same
+# commit intentionally stay in different groups because they test
+# different commits: `push` tests the raw HEAD, `pull_request` tests
+# GitHub's synthetic merge commit against the base branch.
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -13,6 +23,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Fetch Git LFS objects. Downstream repos often LFS-track PDFs,
+          # model weights, and test fixtures; without this, validators
+          # that hash file contents on the runner see 131-byte pointer
+          # files and fail with spurious 'checksum mismatch' errors.
+          # Cheap to enable even when the template's own repo has no
+          # LFS content — it is a correctness gate for every consumer.
+          lfs: true
 
       - name: Install podman-compose
         run: pip install podman-compose

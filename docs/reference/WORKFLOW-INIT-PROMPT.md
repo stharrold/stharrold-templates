@@ -1,13 +1,13 @@
 ---
-name: workflow-v7x1-initialization-guide
+name: workflow-sN-initialization-guide
 version: 7.0.0
 type: navigation-guide
-description: Quick reference guide to v7x1 workflow system
+description: Quick reference guide to sN workflow system
 last_updated: 2026-01-01
 follows: DRY principle (references files, doesn't duplicate)
 ---
 
-# Workflow System v7x1.0.0 - Quick Start Guide
+# Workflow System v9.0.0 - Quick Start Guide
 
 This repository implements a streamlined 4-step development workflow using built-in Gemini CLI tools for autonomous implementation and automated **Claude Code Review** for quality.
 
@@ -27,16 +27,16 @@ User downloads stharrold-templates release to untracked directory in their repo,
 **Prompt for Claude Code:**
 > "Read `/path/to/stharrold-templates`. Apply the workflow from `/path/to/stharrold-templates` to the current repository."
 
-This copies all 6 skills, v7x1 command aliases, documentation, CI/CD configs, and directory structure.
+This copies all 6 skills, sN command aliases, documentation, CI/CD configs, and directory structure.
 
 ---
 
-## v7x1 Workflow Steps
+## sN workflow Steps
 
-The v7x1 workflow focuses on autonomous implementation using built-in tools.
+The sN workflow focuses on autonomous implementation using built-in tools.
 
 ### Step 1: Create Worktree
-→ **Command:** `/workflow:v7x1_1-worktree "feature description"`
+→ **Command:** `/workflow:s1-worktree "feature description"`
 → **Action:** Creates isolated git worktree and branch.
 → **Next:** Navigate to the worktree directory.
 
@@ -46,14 +46,14 @@ The v7x1 workflow focuses on autonomous implementation using built-in tools.
 → **Next:** Return to main repo after completion.
 
 ### Step 3: Integrate
-→ **Command:** `/workflow:v7x1_2-integrate ["feature/branch-name"]`
+→ **Command:** `/workflow:s2-integrate ["feature/branch-name"]`
 → **Action:** Creates PR from feature to `contrib`, then `contrib` to `develop`.
 → **Next:** Merge PRs in GitHub UI.
 
 ### Step 4: Release & Backmerge
-→ **Command:** `/workflow:v7x1_3-release`
+→ **Command:** `/workflow:s3-release`
 → **Action:** Creates release from `develop`, PR to `main`, tags release.
-→ **Command:** `/workflow:v7x1_4-backmerge`
+→ **Command:** `/workflow:s4-backmerge`
 → **Action:** Syncs release back to `develop`, rebases `contrib`, cleans up.
 
 ---
@@ -61,7 +61,7 @@ The v7x1 workflow focuses on autonomous implementation using built-in tools.
 ## Essential Reading
 
 ### 1. `CLAUDE.md` (~300 tokens)
-**Purpose:** Repository-specific guidance and v7x1 workflow overview.
+**Purpose:** Repository-specific guidance and sN workflow overview.
 **When:** First time working with this repository.
 
 ### 2. `WORKFLOW.md` (~1,500 tokens)

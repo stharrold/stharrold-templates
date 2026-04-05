@@ -1,16 +1,3 @@
----
-type: claude-context
-directory: .claude/skills/tech-stack-adapter
-purpose: Tech Stack Adapter provides **automatic project detection** for Python/uv projects. It reads `pyproject.toml`, detects installed dependencies and tools, and generates appropriate commands for testing, building, coverage, database migrations, and containerization. Enables workflow to adapt to different project configurations without hardcoded assumptions.
-parent: ../CLAUDE.md
-sibling_readme: README.md
-children:
-  - ARCHIVED/CLAUDE.md
-  - scripts/CLAUDE.md
-related_skills:
-  - **workflow-orchestrator** - Uses detect_stack.py at session start
-  - **git-workflow-manager** - Uses project_name and repo_root
----
 
 # Claude Code Context: tech-stack-adapter
 
@@ -359,23 +346,7 @@ uv build  # from SESSION_CONFIG['build_cmd']
 
 ---
 
+## See also
 
-
-
-
-
-
-
-## Related Documentation
-
-- **[README.md](README.md)** - Human-readable documentation for this directory
-- **[../CLAUDE.md](../CLAUDE.md)** - Parent directory: skills
-
-**Child Directories:**
-- **[ARCHIVED/CLAUDE.md](ARCHIVED/CLAUDE.md)** - Archived
-- **[scripts/CLAUDE.md](scripts/CLAUDE.md)** - Scripts
-
-## Related Skills
-
-- **workflow-orchestrator** - Uses detect_stack.py at session start
-- **git-workflow-manager** - Uses project_name and repo_root
+- `SKILL.md` -- canonical skill definition
+- `workflow-orchestrator` -- calls this skill first to determine TEST_CMD etc.

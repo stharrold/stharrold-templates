@@ -30,9 +30,12 @@ PHASE_MAP = {
     "phase_5_integrate": (5, "integrate", "/6_release"),
     "phase_6_release": (6, "release", "/7_backmerge"),
     "phase_7_backmerge": (7, "backmerge", None),
-    "phase_v7x1_1_worktree": (1, "worktree", "/workflow:v7x1_2-integrate"),
-    "phase_v7x1_2_integrate": (2, "integrate", "/workflow:v7x1_3-release"),
-    "phase_v7x1_3_release": (3, "release", "/workflow:v7x1_4-backmerge"),
+    # Schema keys are kept as phase_v7x1_* for backward compatibility
+    # with existing AgentDB rows even though the slash commands are
+    # now named s1-worktree .. s4-backmerge (renamed in v8.9).
+    "phase_v7x1_1_worktree": (1, "worktree", "/workflow:s2-integrate"),
+    "phase_v7x1_2_integrate": (2, "integrate", "/workflow:s3-release"),
+    "phase_v7x1_3_release": (3, "release", "/workflow:s4-backmerge"),
     "phase_v7x1_4_backmerge": (4, "backmerge", None),
 }
 

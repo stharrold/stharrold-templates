@@ -3,14 +3,16 @@
 
 [project]
 name = "stharrold-templates"
-version = "8.7.0"
+version = "9.0.0"
 description = "Templates and utilities for MCP server configuration and agentic development workflows"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "rich>=13.9.0", # Better terminal output
     "click>=8.1.0", # CLI framework
     "httpx>=0.27.0", # Modern HTTP client
     "duckdb>=1.4.2",
+    "sqlalchemy>=2.0.0", # data_catalog ORM layer
+    "duckdb-engine>=0.13.0", # SQLAlchemy dialect for duckdb:// URLs
 ]
 
 [tool.pytest.ini_options]
@@ -23,7 +25,7 @@ markers = [
 
 [tool.ruff]
 line-length = 170
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "UP"]
@@ -43,7 +45,13 @@ ignore = ["E402"]
 [tool.ruff.lint.per-file-ignores]
 ".agents/**/*.py" = ["N999", "B007", "B904", "B905"]
 ".claude/**/*.py" = ["N999", "B007", "B904", "B905"]
-"tests/**/*.py" = ["N999"]
+"tests/**/*.py" = ["N999", "F841"]
+# NetworkX / NumPy / scikit-learn convention: G for graph, X for feature matrix.
+# These are domain-standard identifiers, not lint violations.
+"data_catalog/services/graph_metrics.py" = ["N803", "N806"]
+# B905 strict= param: backfill/migration scripts zip pre-validated lists of
+# equal length (contract with the caller), adding strict= is noise.
+"scripts/backfill_normalize_entities.py" = ["B905"]
 
 [tool.uv]
 dev-dependencies = [
@@ -53,6 +61,14 @@ dev-dependencies = [
     "pytest-cov>=7.0.0",
     "ruff>=0.14.1",
     "tomlkit>=0.13.3",
+    # data_catalog.services test deps (module-level imports in embedding.py,
+    # graph_metrics.py, vector_similarity.py, rag_search.py). Kept out of
+    # runtime deps to avoid ~200MB ML bloat for users of the db/ layer only.
+    "numpy>=1.26.0",
+    "networkx>=3.2",
+    "scipy>=1.13.0", # networkx.pagerank / eigenvector algorithms
+    "onnxruntime>=1.18.0",
+    "tokenizers>=0.20.0",
 ]
 
 [build-system]
@@ -63,7 +79,7 @@ build-backend = "setuptools.build_meta"
 exclude = ["specs*", "planning*", "docs*", "tests*", ".claude*", ".agents*"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

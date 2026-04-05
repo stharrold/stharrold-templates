@@ -36,6 +36,9 @@ VALID_PATTERNS = [
     "phase_5_integrate",
     "phase_6_release",
     "phase_7_backmerge",
+    # Schema keys are kept as phase_v7x1_* for backward compatibility
+    # with existing AgentDB rows even though the slash commands are
+    # now named s1-worktree .. s4-backmerge (renamed in v8.9).
     "phase_v7x1_1_worktree",
     "phase_v7x1_2_integrate",
     "phase_v7x1_3_release",
