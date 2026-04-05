@@ -1,5 +1,10 @@
 # Containerfile for stharrold-templates
-# Python 3.11 + uv environment for development and CI/CD
+# Python 3.12 + uv environment for development and CI/CD
+#
+# Python 3.12 is the minimum version as of stharrold-templates v9.0.0.
+# Downstream repos on v8.x can still use Python 3.11; the 9.x series
+# targets 3.12 for datetime.UTC (Ruff UP017), improved error messages,
+# and PEP 695 type parameter syntax used by newer skill scripts.
 #
 # Build:  podman build -t stharrold-templates .
 # Run:    podman run --rm -v .:/app stharrold-templates <command>
@@ -20,10 +25,10 @@
 #
 #   See secrets.toml for required/optional secret definitions.
 
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 LABEL maintainer="stharrold"
-LABEL description="MCP templates development environment with uv + Python 3.11"
+LABEL description="MCP templates development environment with uv + Python 3.12"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \

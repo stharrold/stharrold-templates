@@ -3,9 +3,9 @@
 
 [project]
 name = "stharrold-templates"
-version = "8.7.0"
+version = "9.0.0"
 description = "Templates and utilities for MCP server configuration and agentic development workflows"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "rich>=13.9.0", # Better terminal output
     "click>=8.1.0", # CLI framework
@@ -23,7 +23,7 @@ markers = [
 
 [tool.ruff]
 line-length = 170
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "B", "UP"]
@@ -63,7 +63,7 @@ build-backend = "setuptools.build_meta"
 exclude = ["specs*", "planning*", "docs*", "tests*", ".claude*", ".agents*"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
