@@ -514,7 +514,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ---
 
-Generated with workflow system v8.9
+Generated with workflow system v9.0.0
 """
 
     target_file = target_path / "README.md"
@@ -533,16 +533,16 @@ def generate_claude_md(config: RepositoryConfig, target_path: Path, source_path:
     info("Generating CLAUDE.md...")
 
     # Read source CLAUDE.md to extract workflow sections
-    source_gemini = source_path / "CLAUDE.md"
-    source_content = source_gemini.read_text() if source_gemini.exists() else ""
+    source_claude_md = source_path / "CLAUDE.md"
+    source_content = source_claude_md.read_text() if source_claude_md.exists() else ""
 
     # Extract workflow architecture section (lines between ## Workflow and next ##)
     workflow_match = re.search(r"(## Workflow.*?)(?=\n## [^#])", source_content, re.DOTALL)
     workflow_section = workflow_match.group(1) if workflow_match else ""
 
-    gemini_content = f"""# CLAUDE.md
+    claude_md_content = f"""# CLAUDE.md
 
-This file provides guidance to Claude Code (gemini.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Repository Purpose
 
@@ -648,11 +648,11 @@ feature/<timestamp>_<slug>    <- Isolated feature (worktree)
 
 ---
 
-Generated with workflow system v8.9
+Generated with workflow system v9.0.0
 """
 
     target_file = target_path / "CLAUDE.md"
-    target_file.write_text(gemini_content)
+    target_file.write_text(claude_md_content)
     success("Generated CLAUDE.md")
 
 
@@ -891,7 +891,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial repository setup with workflow system v8.9
+- Initial repository setup with workflow system v9.0.0
 
 ## [0.1.0] - """
         + datetime.now(UTC).strftime("%Y-%m-%d")
@@ -1019,7 +1019,7 @@ def phase4_git_initialization(target_path: Path, config: RepositoryConfig) -> No
         # Create initial commit on main
         info("Creating initial commit...")
         subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        commit_msg = f"""chore: initialize repository with workflow system v8.9
+        commit_msg = f"""chore: initialize repository with workflow system v9.0.0
 
 Initialized {config.name} with skill-based workflow architecture:
 - 8 specialized skills for development workflow
@@ -1031,7 +1031,7 @@ Repository purpose: {config.purpose}
 
 [BOT] Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Gemini <noreply@google.com>
+Co-Authored-By: Claude <noreply@anthropic.com>
 """
         subprocess.run(["git", "commit", "-m", commit_msg], check=True, capture_output=True)
         success("Initial commit created on main")

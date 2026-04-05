@@ -226,24 +226,31 @@ class VectorSimilarityService:
         threshold: int,
         limit: int,
     ) -> list[ColumnVector]:
-        """Pre-filter using Hamming distance on UBIGINT decomposition.
+        """Pre-filter candidates for the cosine rerank stage.
 
-        TODO: implement the actual Hamming prefilter using the hamming_dist
-        macro (tests/conftest.py registers it) or the XOR+bit_count pattern
-        over bit_u0..bit_u5, ORDER BY distance, then LIMIT to a small
-        candidate set for cosine rerank. The current body is a scaffold that
-        returns an arbitrary `limit` rows regardless of `query_ubigints` and
-        `threshold`, which defeats the two-stage search contract described
-        in the module docstring. Tracked for follow-up; no caller currently
-        exercises this path in tests.
+        TODO: implement the real Hamming prefilter using the hamming_u6
+        macro registered in data_catalog/db/connection.py (or the
+        equivalent XOR + bit_count pattern over bit_u0..bit_u5),
+        ORDER BY distance, and LIMIT to a small candidate set.
+
+        Current behavior is a slow-but-correct fallback: it returns ALL
+        vectors of the requested type (ignoring query_ubigints, threshold,
+        and limit) so the Stage 2 cosine rerank in find_similar_columns()
+        operates on the full catalog and produces correct results. This
+        scales poorly on large catalogs -- that is what the real prefilter
+        will fix -- but it does not silently return wrong answers the way
+        a naive `.limit(limit)` truncation would (which would feed cosine
+        rerank a garbage subset of rows unrelated to the query).
+
+        Do not add a `.limit(limit)` here without first implementing
+        distance ordering; limit-before-ranking was the original bug.
         """
-        _ = (query_ubigints, threshold)  # parameters reserved for real impl
+        _ = (query_ubigints, threshold, limit)  # reserved for real impl
         return (
             self.db.query(ColumnVector)
             .filter(
                 ColumnVector.vector_type == vector_type,
                 ColumnVector.bit_u0.isnot(None),
             )
-            .limit(limit)
             .all()
         )
