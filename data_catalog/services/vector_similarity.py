@@ -226,24 +226,31 @@ class VectorSimilarityService:
         threshold: int,
         limit: int,
     ) -> list[ColumnVector]:
-        """Pre-filter using Hamming distance on UBIGINT decomposition.
+        """Pre-filter candidates for the cosine rerank stage.
 
-        NOT YET IMPLEMENTED. The real implementation should use the
-        hamming_u6 macro registered in data_catalog/db/connection.py
-        (or the equivalent XOR + bit_count pattern over bit_u0..bit_u5),
-        ORDER BY distance, then LIMIT to a small candidate set before
-        the cosine rerank in find_similar_columns().
+        TODO: implement the real Hamming prefilter using the hamming_u6
+        macro registered in data_catalog/db/connection.py (or the
+        equivalent XOR + bit_count pattern over bit_u0..bit_u5),
+        ORDER BY distance, and LIMIT to a small candidate set.
 
-        This method previously returned an arbitrary `limit` rows while
-        ignoring `query_ubigints` and `threshold`, which caused
-        find_similar_columns() to cosine-rerank a garbage candidate set
-        and silently return incorrect results (not just slow ones). The
-        stub is replaced with NotImplementedError so callers fail loudly
-        until the prefilter ships. No tests currently exercise this path.
+        Current behavior is a slow-but-correct fallback: it returns ALL
+        vectors of the requested type (ignoring query_ubigints, threshold,
+        and limit) so the Stage 2 cosine rerank in find_similar_columns()
+        operates on the full catalog and produces correct results. This
+        scales poorly on large catalogs -- that is what the real prefilter
+        will fix -- but it does not silently return wrong answers the way
+        a naive `.limit(limit)` truncation would (which would feed cosine
+        rerank a garbage subset of rows unrelated to the query).
+
+        Do not add a `.limit(limit)` here without first implementing
+        distance ordering; limit-before-ranking was the original bug.
         """
-        raise NotImplementedError(
-            "VectorSimilarityService._hamming_prefilter is not yet "
-            "implemented. find_similar_columns() depends on this to "
-            "produce correct results -- do not use it until the prefilter "
-            "ships. See the method docstring for the intended design."
+        _ = (query_ubigints, threshold, limit)  # reserved for real impl
+        return (
+            self.db.query(ColumnVector)
+            .filter(
+                ColumnVector.vector_type == vector_type,
+                ColumnVector.bit_u0.isnot(None),
+            )
+            .all()
         )
