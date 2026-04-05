@@ -15,48 +15,6 @@ from pathlib import Path
 SCRIPTS_DIR = Path(__file__).parent.parent.parent / ".claude" / "skills" / "workflow-utilities" / "scripts"
 
 
-class TestCheckClaudeMdFrontmatter:
-    """Tests for check_claude_md_frontmatter.py hook."""
-
-    def test_passes_with_valid_frontmatter(self, tmp_path, monkeypatch):
-        """Hook passes when all CLAUDE.md files have YAML frontmatter."""
-        monkeypatch.chdir(tmp_path)
-        claude_md = tmp_path / "CLAUDE.md"
-        claude_md.write_text("---\ntype: claude-context\n---\n# Test\n")
-
-        result = subprocess.run(
-            [sys.executable, str(SCRIPTS_DIR / "check_claude_md_frontmatter.py")],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-
-    def test_fails_without_frontmatter(self, tmp_path, monkeypatch):
-        """Hook fails when CLAUDE.md is missing YAML frontmatter."""
-        monkeypatch.chdir(tmp_path)
-        claude_md = tmp_path / "CLAUDE.md"
-        claude_md.write_text("# Test\nNo frontmatter here.\n")
-
-        result = subprocess.run(
-            [sys.executable, str(SCRIPTS_DIR / "check_claude_md_frontmatter.py")],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 1
-        assert "missing YAML frontmatter" in result.stdout
-
-    def test_passes_with_no_claude_md_files(self, tmp_path, monkeypatch):
-        """Hook passes when there are no CLAUDE.md files."""
-        monkeypatch.chdir(tmp_path)
-
-        result = subprocess.run(
-            [sys.executable, str(SCRIPTS_DIR / "check_claude_md_frontmatter.py")],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0
-
-
 class TestCheckSkillStructure:
     """Tests for check_skill_structure.py hook."""
 
@@ -65,7 +23,7 @@ class TestCheckSkillStructure:
         monkeypatch.chdir(tmp_path)
         skill_dir = tmp_path / ".claude" / "skills" / "test-skill"
         skill_dir.mkdir(parents=True)
-        (skill_dir / "CLAUDE.md").write_text("---\ntype: claude-context\n---\n")
+        (skill_dir / "CLAUDE.md").write_text("# Test Skill\n\nTactical notes for this skill.\n")
         (skill_dir / "README.md").write_text("# Test Skill\n")
         (skill_dir / "SKILL.md").write_text("---\nversion: 1.0.0\n---\n")
 
@@ -83,7 +41,7 @@ class TestCheckSkillStructure:
         skill_dir.mkdir(parents=True)
         # Only create CLAUDE.md, missing README.md and SKILL.md
 
-        (skill_dir / "CLAUDE.md").write_text("---\ntype: claude-context\n---\n")
+        (skill_dir / "CLAUDE.md").write_text("# Test Skill\n\nTactical notes for this skill.\n")
 
         result = subprocess.run(
             [sys.executable, str(SCRIPTS_DIR / "check_skill_structure.py")],

@@ -3,18 +3,18 @@
 **Parent:** [WORKFLOW.md](../../WORKFLOW.md)
 **Version:** 6.0.0
 
-This document covers the initial steps of the streamlined v7x1 workflow.
+This document covers the initial steps of the streamlined sN workflow.
 
 ---
 
-## v7x1 Workflow Overview
+## sN workflow Overview
 
-The v7x1 workflow simplifies development by leveraging built-in Gemini CLI tools for autonomous planning, architecture, and implementation.
+The sN workflow simplifies development by leveraging built-in Gemini CLI tools for autonomous planning, architecture, and implementation.
 
-1. **[/workflow:v7x1_1-worktree](command:workflow:v7x1_1-worktree)**: Create isolated development environment.
+1. **[/workflow:s1-worktree](command:workflow:s1-worktree)**: Create isolated development environment.
 2. **Implementation**: Autonomous development using built-in tools.
-3. **[/workflow:v7x1_2-integrate](command:workflow:v7x1_2-integrate)**: Sync with main repo and develop branch.
-4. **[/workflow:v7x1_3-release](command:workflow:v7x1_3-release)** & **[/workflow:v7x1_4-backmerge](command:workflow:v7x1_4-backmerge)**: Production deployment.
+3. **[/workflow:s2-integrate](command:workflow:s2-integrate)**: Sync with main repo and develop branch.
+4. **[/workflow:s3-release](command:workflow:s3-release)** & **[/workflow:s4-backmerge](command:workflow:s4-backmerge)**: Production deployment.
 
 ---
 
@@ -22,7 +22,7 @@ The v7x1 workflow simplifies development by leveraging built-in Gemini CLI tools
 
 **Location:** Main repository
 **Branch:** `contrib/<gh-user>`
-**Command:** `/workflow:v7x1_1-worktree "feature description"`
+**Command:** `/workflow:s1-worktree "feature description"`
 
 This command automates the creation of an isolated git worktree for your feature.
 

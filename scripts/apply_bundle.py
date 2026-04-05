@@ -6,7 +6,7 @@
 Usage:
     python scripts/apply_bundle.py <source-repo> <target-repo> --bundle <name> [--bundle <name>] [--force] [--dry-run]
 
-Bundles: git, secrets, ci, pipeline, graphrag, sql-pipeline, full
+Bundles: git, secrets, ci, pipeline, graphrag, sql-pipeline, data-catalog, full
 """
 
 from __future__ import annotations
@@ -63,6 +63,8 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "utils/core_llm.py",
             "utils/json_repair.py",
             "utils/pipe_04_vectorize.py",
+            "utils/pipe_04b_consolidate.py",
+            "utils/pipe_05b_cooccurrence.py",
             "utils/pipe_06_optimize.py",
             "utils/pipe_parallel.py",
             "utils/pipe_runner.py",
@@ -74,6 +76,8 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "scripts/ollama_stop.ps1",
             "scripts/run_pipeline.ps1",
             "scripts/run_pipeline_incremental.py",
+            "scripts/run_entity_quality.py",
+            "scripts/backfill_normalize_entities.py",
         ],
         "skip_on_update": [
             # Domain-specific (email examples, user customizes)
@@ -82,6 +86,7 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "utils/pipe_02b_strip.py",
             "utils/pipe_02c_threads.py",
             "utils/pipe_03_decompose.py",
+            "utils/pipe_03b_normalize.py",
             "utils/pipe_05_link.py",
             "config/pipeline_config.json",
         ],
@@ -134,6 +139,72 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
             "mypy>=1.10.0",
         ],
     },
+    "data-catalog": {
+        "skills": [],
+        "commands": [],
+        "copy_files": [
+            "data_catalog/__init__.py",
+            "data_catalog/exceptions.py",
+            "data_catalog/db/__init__.py",
+            "data_catalog/db/models.py",
+            "data_catalog/db/connection.py",
+            "data_catalog/db/repositories.py",
+            "data_catalog/models/__init__.py",
+            "data_catalog/models/data_model.py",
+            "data_catalog/utils/__init__.py",
+            "data_catalog/utils/sql_safety.py",
+            "data_catalog/services/__init__.py",
+            "data_catalog/services/sql_dialect.py",
+            "data_catalog/services/embedding.py",
+            "data_catalog/services/vector_similarity.py",
+            "data_catalog/services/graph_metrics.py",
+            "data_catalog/services/rag_search.py",
+            "data_catalog/services/grain_discovery.py",
+            "data_catalog/services/pk_discovery/__init__.py",
+            "data_catalog/services/pk_discovery/models.py",
+            "data_catalog/services/pk_discovery/scanner.py",
+            "data_catalog/services/pk_discovery/decision.py",
+            "data_catalog/services/fk_discovery.py",
+            "data_catalog/services/fk_validator.py",
+            "data_catalog/services/sample_pool.py",
+            "data_catalog/services/cardinality_scanner.py",
+            "data_catalog/services/pipeline_orchestrator.py",
+            "data_catalog/services/column_descriptions.py",
+            "data_catalog/cli.py",
+            "tests/__init__.py",
+            "tests/conftest.py",
+            "tests/test_models.py",
+            "tests/test_grain_discovery.py",
+            "tests/test_fk_discovery.py",
+            "tests/test_graph_metrics.py",
+            "tests/test_rag_search.py",
+            "tests/test_pipeline_orchestrator.py",
+            "tests/test_repositories.py",
+        ],
+        "skip_on_update": [
+            "data_catalog/services/dialects/__init__.py",
+            "data_catalog/services/dialects/sqlserver.py",
+            "data_catalog/services/fk_patterns.py",
+            "config/catalog_config.json",
+            "config/primary_keys_config.json",
+            "config/foreign_keys_config.json",
+            "scripts/run_catalog_pipeline.py",
+            "scripts/generate_column_descriptions.py",
+        ],
+        "merge_gitignore": True,
+        "merge_pyproject_deps": [
+            "duckdb>=1.2.0",
+            "duckdb-engine>=0.15.0",
+            "sqlalchemy>=2.0.0",
+            "onnxruntime>=1.21.0",
+            "numpy>=2.2.0",
+            "scikit-learn>=1.6.0",
+            "click>=8.1.0",
+            "rich>=13.0.0",
+            "networkx>=3.0",
+            "tokenizers>=0.21.0",
+        ],
+    },
     "graphrag": {
         "includes": ["pipeline"],
         "skills": [],
@@ -151,9 +222,40 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_gitignore": False,
         "merge_pyproject_deps": [],
     },
+    # Opt-in AgentDB state tracking. As of v8.9, NOT included in `full`.
+    # Git branches and PR state are the authoritative source of workflow
+    # state for new projects; this bundle ships the scripts + schema for
+    # teams that want persistent DuckDB-backed analytics over historical
+    # workflow transitions (complex release processes, cross-team metrics).
+    # Downstream reference: synavistra explicitly removed AgentDB in early
+    # 2026 and documented the decision in its own CLAUDE.md.
+    "agentdb": {
+        "skills": ["agentdb-state-manager"],
+        "commands": [],
+        "copy_files": [],
+        "merge_gitignore": False,
+        "merge_pyproject_deps": ["duckdb>=1.2.0"],
+    },
+    # Cloudflare Pages _headers template with baseline CSP, HSTS,
+    # COOP/COEP examples, and cache rules. Distilled from running
+    # synavistra.ai for 6+ months; see bundles/security-headers/README.md
+    # for the ~12 gotchas that each rule encodes.
+    "security-headers": {
+        "skills": [],
+        "commands": [],
+        "copy_files": [],
+        # _headers is user-owned (skip on update) so downstream
+        # customizations survive re-apply. Source path is
+        # bundles/security-headers/_headers; target is repo root.
+        "skip_on_update": [("bundles/security-headers/_headers", "_headers")],
+        "merge_gitignore": False,
+        "merge_pyproject_deps": [],
+    },
     "full": {
-        "includes": ["git", "secrets", "ci", "graphrag", "sql-pipeline"],
-        "skills": ["tech-stack-adapter", "agentdb-state-manager", "initialize-repository"],
+        # agentdb-state-manager was removed from `full` in v8.9. Users who
+        # want AgentDB tracking must apply --bundle agentdb explicitly.
+        "includes": ["git", "secrets", "ci", "graphrag", "sql-pipeline", "data-catalog"],
+        "skills": ["tech-stack-adapter", "initialize-repository"],
         "commands": [],
         "copy_files": [],
         "copy_dirs": ["docs/"],
@@ -278,21 +380,34 @@ def copy_files(source: Path, target: Path, rel_paths: list[str], *, dry_run: boo
     return count
 
 
-def copy_skip_on_update(source: Path, target: Path, rel_paths: list[str], *, force: bool, dry_run: bool) -> int:
-    """Copy if not exists; skip+warn if exists (unless *force*)."""
+def copy_skip_on_update(source: Path, target: Path, rel_paths: list, *, force: bool, dry_run: bool) -> int:
+    """Copy if not exists; skip+warn if exists (unless *force*).
+
+    Each entry in *rel_paths* is either:
+      - a string: used as both the source-relative and target-relative path
+      - a 2-tuple ``(source_rel, target_rel)``: the source path in the
+        template tree and the target path in the consumer repo may differ.
+        Used by the ``security-headers`` bundle to ship a `_headers` file
+        that lives under ``bundles/security-headers/`` in the template
+        but lands at the repo root in the consumer.
+    """
     count = 0
-    for rel in rel_paths:
-        src = source / rel
-        dst = target / rel
+    for entry in rel_paths:
+        if isinstance(entry, tuple):
+            src_rel, dst_rel = entry
+        else:
+            src_rel = dst_rel = entry
+        src = source / src_rel
+        dst = target / dst_rel
         if not src.exists():
-            print(f"  WARN {rel} not found in source, skipping")
+            print(f"  WARN {src_rel} not found in source, skipping")
             continue
         if dst.exists() and not force:
-            print(f"  SKIP {rel} (exists, use --force to overwrite)")
+            print(f"  SKIP {dst_rel} (exists, use --force to overwrite)")
             count += 1
             continue
         action = "COPY" if not dst.exists() else "REPLACE"
-        print(f"  {action} {rel}")
+        print(f"  {action} {dst_rel}" + (f" (from {src_rel})" if src_rel != dst_rel else ""))
         if not dry_run:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)

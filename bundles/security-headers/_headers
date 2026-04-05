@@ -1,0 +1,52 @@
+# Cloudflare Pages security headers template
+# Shipped by the `security-headers` bundle in stharrold-templates v8.9.
+#
+# This is a conservative baseline distilled from running synavistra.ai
+# for 6+ months with three separate security-review bots pointing out
+# issues. Customize the route-specific overrides for your own app;
+# leave the /* defaults alone unless you know what you're breaking.
+#
+# See bundles/security-headers/README.md for the full ~12 gotchas
+# documented during the synavistra session on 2026-04-05.
+
+# Baseline — applies to every page unless overridden below
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; frame-ancestors 'none'; form-action 'self'
+
+# Example: route that needs DuckDB-WASM / ONNX Runtime Web / WebGPU
+# (uncomment and adapt if you ship in-browser inference)
+#
+# Requires COOP/COEP for SharedArrayBuffer, a relaxed CSP that allows
+# wasm-unsafe-eval + unsafe-eval (Emscripten glue uses dynamic code
+# execution), and cdn.jsdelivr.net in script-src/worker-src (DuckDB's
+# Worker JS and WASM binary can't be fully vendored -- see the bundle
+# README for the upstream reasons).
+#
+# /*/showcases/my-wasm-app*
+#   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval' https://cdn.jsdelivr.net; connect-src 'self' https://models.example.com https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; worker-src 'self' blob: https://cdn.jsdelivr.net; frame-ancestors 'none'; form-action 'self'
+#   Cross-Origin-Opener-Policy: same-origin
+#   Cross-Origin-Embedder-Policy: credentialless
+
+# Cache headers for static assets
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable

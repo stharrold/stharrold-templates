@@ -57,10 +57,10 @@ Skills, commands, and documentation for the `main <- develop <- contrib/* <- fea
 - `.claude/skills/workflow-utilities/`
 
 **Commands (template-owned):**
-- `.claude/commands/workflow/v7x1_1-worktree.md`
-- `.claude/commands/workflow/v7x1_2-integrate.md`
-- `.claude/commands/workflow/v7x1_3-release.md`
-- `.claude/commands/workflow/v7x1_4-backmerge.md`
+- `.claude/commands/workflow/s1-worktree.md`
+- `.claude/commands/workflow/s2-integrate.md`
+- `.claude/commands/workflow/s3-release.md`
+- `.claude/commands/workflow/s4-backmerge.md`
 - `.claude/commands/workflow/status.md`
 
 **Docs (template-owned):**
@@ -108,6 +108,16 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 **Merge files (user-owned):**
 - `pyproject.toml` -- adds `ruff`, `pytest`, `pre-commit` to `[dependency-groups] dev`
 
+#### Known CI gotchas (baked into the shipped `tests.yml`)
+
+Lessons from running these workflows in downstream repos; the shipped file already applies each fix:
+
+- **`lfs: true` on every `actions/checkout@v4`.** Without it, Git LFS-tracked files arrive on the runner as 131-byte pointer files and any validator that hashes file contents reports spurious "checksum mismatch" errors. Enable even when the template's own repo has no LFS content — it's a correctness gate for every downstream consumer. Traced to synavistra PR #706: the source-registry validator had been silently failing for 3+ weeks.
+- **`concurrency:` block keyed by workflow + PR number or ref.** Cancels the older in-flight run when a new commit lands on the same branch, so rapid-fire pushes don't burn CI minutes on stale runs. Note: push and pull_request events on the same commit intentionally stay in different groups because they test different commits (push tests raw HEAD, pull_request tests GitHub's synthetic merge commit).
+- **When adding Node.js steps, scope `npm audit` to `--omit=dev`.** Dev-only transitive vulns are commonly pinned behind a devDependency (vitest-pool-workers, storybook, etc.) and cannot be upgraded without breaking the test harness. Production-dep vulns still gate the build; dev-dep vulns are visible via Dependabot.
+- **For multi-project Playwright configs, pass `--project=<name>` explicitly in CI.** Projects that require real Chrome + WebGPU (`channel: chrome`, `--enable-unsafe-webgpu`) cannot run on headless GitHub-hosted runners and should be reserved for manual/local runs.
+- **`claude-code-review.yml` requires `fetch-depth: 0`, `id-token: write`, and `claude_args: "--allowedTools ..."`.** Without these the reviewer can't diff against the base branch, can't authenticate via OIDC, and has every tool call denied.
+
 ---
 
 ### `pipeline` -- Document Processing Pipeline
@@ -121,6 +131,8 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `utils/core_llm.py` -- Ollama HTTP API wrapper
 - `utils/json_repair.py` -- JSON repair for LLM output
 - `utils/pipe_04_vectorize.py` -- ONNX embed + 1-bit quantize
+- `utils/pipe_04b_consolidate.py` -- Entity deduplication via fuzzy name matching + community clustering (token-based blocking for large groups)
+- `utils/pipe_05b_cooccurrence.py` -- Co-occurrence edges (related_to/part_of) between entities mentioned in same documents
 - `utils/pipe_06_optimize.py` -- PageRank, HITS, community detection, embedding clustering
 - `utils/pipe_parallel.py` -- 2-phase batch pipeline (DB released during LLM inference)
 - `utils/pipe_runner.py` -- Sequential pipeline orchestrator
@@ -131,6 +143,8 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `scripts/ollama_start.ps1`, `scripts/ollama_stop.ps1` -- Ollama lifecycle
 - `scripts/run_pipeline.ps1` -- Orchestrated pipeline run
 - `scripts/run_pipeline_incremental.py` -- Incremental import + process
+- `scripts/run_entity_quality.py` -- Run all entity quality stages (strip, normalize, consolidate, co-occurrence)
+- `scripts/backfill_normalize_entities.py` -- Backfill entity type normalization on existing data
 
 **Domain-specific (user-owned, skip on update):**
 - `utils/pipe_01_ingest.py` -- Document ingestion (email example)
@@ -138,6 +152,7 @@ GitHub Actions workflows, container definitions, pre-commit hooks, and linting c
 - `utils/pipe_02b_strip.py` -- Content preprocessing (email example)
 - `utils/pipe_02c_threads.py` -- Thread/relationship analysis (email example)
 - `utils/pipe_03_decompose.py` -- Entity types and LLM prompts (email example)
+- `utils/pipe_03b_normalize.py` -- Entity type normalization and blocklist (email example)
 - `utils/pipe_05_link.py` -- Edge types and linking rules (email example)
 - `config/pipeline_config.json` -- Model, LLM options, chunk tiers
 
@@ -198,18 +213,163 @@ Graph-based retrieval-augmented generation. Embeds queries, searches the knowled
 
 ---
 
-### `full` -- Everything
+### `data-catalog` -- Data Catalog Pipeline
 
-All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline`, plus additional skills and documentation.
+Full data catalog pipeline with PK/FK discovery, semantic vectors, RAG search, and graph analysis. Uses DuckDB + SQLAlchemy for the catalog database, ONNX embeddings (MiniLM-L6-v2, 384-dim), HDBSCAN clustering, and NetworkX graph metrics. Includes an 11-phase pipeline: PK discovery, cardinality scan, value frequencies, semantic vectors, FK discovery, column populate, column prepare, column describe, column import, column embed, and graph analysis.
+
+**Core infrastructure (template-owned):**
+- `data_catalog/__init__.py` -- Package init
+- `data_catalog/exceptions.py` -- Exception hierarchy (CatalogError base)
+- `data_catalog/db/__init__.py` -- DB package init
+- `data_catalog/db/models.py` -- SQLAlchemy ORM models (Asset, Relationship, ColumnVector, etc.)
+- `data_catalog/db/connection.py` -- DuckDB engine with vss/json extensions
+- `data_catalog/db/repositories.py` -- Repository pattern (AssetRepository, RelationshipRepository)
+- `data_catalog/models/__init__.py` -- Models package init
+- `data_catalog/models/data_model.py` -- Data model classes (GrainResult, FKCandidate, etc.)
+- `data_catalog/utils/__init__.py` -- Utils package init
+- `data_catalog/utils/sql_safety.py` -- SQL injection guards for dynamic identifiers
+- `data_catalog/services/__init__.py` -- Services package init
+- `data_catalog/services/sql_dialect.py` -- SQL dialect abstraction
+- `data_catalog/services/embedding.py` -- ONNX all-MiniLM-L6-v2 (384-dim), binarization
+- `data_catalog/services/vector_similarity.py` -- Semantic vector computation + FK candidate similarity
+- `data_catalog/services/graph_metrics.py` -- Community detection, PageRank, HDBSCAN clustering
+- `data_catalog/services/rag_search.py` -- 6-stage RAG retrieval (embed, hamming prefilter, cosine rerank, merge, enrich, graph expand)
+- `data_catalog/services/grain_discovery.py` -- PK discovery (pattern-based + iterative accumulation)
+- `data_catalog/services/pk_discovery/__init__.py` -- PK discovery package init
+- `data_catalog/services/pk_discovery/models.py` -- PK discovery data models
+- `data_catalog/services/pk_discovery/scanner.py` -- Progressive 7-step PK scanner with early termination
+- `data_catalog/services/pk_discovery/decision.py` -- Decision engine (escalation thresholds, composites)
+- `data_catalog/services/fk_discovery.py` -- FK discovery (cardinality + pattern matching)
+- `data_catalog/services/fk_validator.py` -- FK validation with progressive sampling
+- `data_catalog/services/sample_pool.py` -- Shared temp table pool for source DB sampling
+- `data_catalog/services/cardinality_scanner.py` -- Value frequency scan (UNPIVOT + sampling)
+- `data_catalog/services/pipeline_orchestrator.py` -- Pipeline orchestrator
+- `data_catalog/services/column_descriptions.py` -- Column description pipeline
+- `data_catalog/cli.py` -- Click CLI commands
+- `tests/__init__.py` -- Test package init
+- `tests/conftest.py` -- Shared DuckDB in-memory fixtures
+- `tests/test_models.py` -- ORM model tests
+- `tests/test_grain_discovery.py` -- Grain/PK discovery tests
+- `tests/test_fk_discovery.py` -- FK discovery and pattern tests
+- `tests/test_graph_metrics.py` -- Graph metrics tests
+- `tests/test_rag_search.py` -- RAG search tests
+- `tests/test_pipeline_orchestrator.py` -- Pipeline orchestrator tests
+- `tests/test_repositories.py` -- Repository pattern tests
+
+**Domain-specific (user-owned, skip on update):**
+- `data_catalog/services/dialects/__init__.py` -- SQL dialect registry (CUSTOMIZE: register source DB dialects)
+- `data_catalog/services/dialects/sqlserver.py` -- SQL Server dialect (CUSTOMIZE: add dialects for your source DB)
+- `data_catalog/services/fk_patterns.py` -- FK pattern classes (CUSTOMIZE: add patterns for your naming conventions)
+- `config/catalog_config.json` -- Catalog configuration (CUSTOMIZE: connection strings, schema filters)
+- `config/primary_keys_config.json` -- PK definitions (CUSTOMIZE: known PKs, no_natural_pk overrides)
+- `config/foreign_keys_config.json` -- FK definitions (CUSTOMIZE: known relationships)
+- `scripts/run_catalog_pipeline.py` -- Pipeline runner script (CUSTOMIZE: batch definitions, phase selection)
+- `scripts/generate_column_descriptions.py` -- Column description generator (CUSTOMIZE: LLM prompts, output paths)
+
+**Merge files (user-owned):**
+- `pyproject.toml` -- adds `duckdb`, `duckdb-engine`, `sqlalchemy`, `onnxruntime`, `numpy`, `scikit-learn`, `click`, `rich`, `networkx`, `tokenizers`
+- `.gitignore` -- appends `*.duckdb`, `*.duckdb.wal`, `.claude-state/`, `.tmp/`
+
+**Usage:**
+```bash
+# Apply data-catalog bundle
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog
+
+# Dry run first
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog --dry-run
+
+# Force overwrite skip-on-update files
+python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle data-catalog --force
+```
+
+---
+
+### `security-headers` -- Cloudflare Pages security headers template
+
+**NEW in v8.9.**
+
+Ship a conservative `_headers` file for Cloudflare Pages with baseline CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy, and cache rules. Distilled from running synavistra.ai for 6+ months; see [`bundles/security-headers/README.md`](bundles/security-headers/README.md) for the full ~12 gotchas each rule encodes (CSP / COOP / COEP / Emscripten / WebAssembly / importScripts / CDN interaction).
+
+**Files (user-owned, skip on update):**
+- `_headers` (at repo root) -- copied from `bundles/security-headers/_headers` in the template tree. First install copies; update skips with a warning; `--force` overwrites.
+
+**Merge files (user-owned):** none.
+
+**Dependencies:** none -- pure static configuration.
+
+**Use when:**
+- You're deploying to Cloudflare Pages and want a baseline CSP that passes common static-analysis reviewers on day one.
+- You ship in-browser WebAssembly / WebGPU workloads and need the COOP/COEP + `wasm-unsafe-eval` / `unsafe-eval` + CDN-in-script-src incantations documented in one place.
+
+**Do not use when:**
+- Your app runs on a non-Cloudflare platform that ignores `_headers`.
+- You have an existing carefully-tuned CSP that the template baseline would regress.
+
+---
+
+### `agentdb` -- Opt-in DuckDB workflow state tracking
+
+**NEW in v8.9**: broken out of the `full` bundle.
+
+AgentDB provides persistent state tracking for workflow transitions via a local DuckDB. Each invocation of `/workflow:s1-worktree` .. `/workflow:s4-backmerge` records its completion, enabling analytics queries over historical workflow state (which step a branch is in, how long phases took, cross-team dependency graphs).
+
+**This is opt-in.** Git branches and PR state are the authoritative source of workflow state for new projects. The downstream reference implementation (synavistra) explicitly removed AgentDB tracking and records the decision in its own CLAUDE.md. The `agentdb` bundle is kept for teams whose release processes benefit from the analytics layer -- it is NOT required for the `git` / `s1..s4` workflow to function.
+
+**Skill (template-owned):**
+- `.claude/skills/agentdb-state-manager/`
+
+**Merge files (user-owned):**
+- `pyproject.toml` -- adds `duckdb>=1.2.0` to `[dependency-groups] dev`
+
+**Schema stability**: the internal phase keys (`phase_v7x1_1_worktree` .. `phase_v7x1_4_backmerge`) are deliberately NOT renamed to match the sN slash-command names. They are stable dict keys in `PHASE_MAP` and row values in `agent_synchronizations`, kept for backward compatibility with existing AgentDB databases.
+
+---
+
+### `full` -- Everything (except agentdb)
+
+All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline` + `data-catalog`, plus additional skills and documentation.
+
+**Note (v8.9 breaking change)**: `agentdb-state-manager` is no longer bundled with `full`. Teams that want AgentDB tracking must apply `--bundle agentdb` explicitly. This was changed because the downstream reference (synavistra) removed AgentDB and the skill added ~200 lines of context load that most users don't need.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`
-- `.claude/skills/agentdb-state-manager/`
 - `.claude/skills/initialize-repository/`
 
 **Additional docs (template-owned):**
 - `docs/` directory structure (`archived/`, `guides/`, `plans/`, `reference/`, `research/`)
-- `CLAUDE.md` template
+- `CLAUDE.md` template (adapted per-target during initialize-repository bootstrap)
+
+---
+
+## Lessons incorporated (from downstream consumers)
+
+Traceability for the conventions shipped by these bundles. Each entry links back to the concrete consumer repo + commit where the lesson came from, so future users wondering "why do we do X?" can find the originating failure.
+
+### CI & GitHub Actions
+
+- **`lfs: true` on every `actions/checkout@v4`** (tests.yml, claude-code-review.yml, secrets-example.yml) -- traced to synavistra PR #706. Downstream source-registry validators had been silently failing on LFS pointer files for 3+ weeks.
+- **`concurrency:` block keyed by workflow + PR number or ref** (tests.yml) -- same PR. Dedups rapid-fire pushes on the same branch.
+- **`claude-code-review.yml` requires `fetch-depth: 0`, `id-token: write`, and `claude_args: "--allowedTools ..."`** -- discovered through iterative debugging on synavistra before the Claude reviewer could be used reliably.
+
+### CLAUDE.md discipline (v8.9 cleanup)
+
+- **Delete autogenerated per-directory CLAUDE.md stubs.** Synavistra commit `15a8f2b` deleted 17 Tier-B stub files whose only content was a directory listing. The template's own tree had the same stubs plus a generator script that stamped them into downstream repos during bootstrap. Both are removed in v8.9.
+- **Rubric: "earn it" rule for CLAUDE.md.** Synavistra commit `6ab55a0` added a 30-minute threshold and remove-when-stale priority to its root CLAUDE.md. The template's own root CLAUDE.md adopted the same rubric in v8.9.
+- **Partition gotchas into sub-sections.** Synavistra proved that a 115-entry flat gotcha list is unscannable; partitioning by subsystem (CI, Git, Pre-commit, Bundles, Skills) is the minimum usability gate.
+- **Split descriptive architecture out of CLAUDE.md.** Synavistra moved ~170 lines of architecture content into `docs/architecture.md` which is NOT auto-loaded per session. Repos created via `initialize-repository` now ship with this split pattern.
+- **Remove the `claude-md-frontmatter` pre-commit hook.** It required every CLAUDE.md to have `type: claude-context` frontmatter, which forced the stub pattern. Deleted in v8.9 along with `generate_claude_md.py` and `check_claude_md_frontmatter.py`.
+
+### Large-file handling (`pipeline`, `data-catalog`)
+
+- **Files > 1 MB go to GCS, not git.** Pre-commit `check-added-large-files --maxkb=1000` is a hard gate. Pattern: gitignore the data, upload to `gs://<bucket>/<prefix>/<YYYYMMDDTHHMMSSZ>/`, commit a small `manifest.json` with sha256 + line counts. Synavistra hit this pattern 4 times in one session (CCPA source, v5 training data, v5-reclassified, golden-v4).
+
+### Workflow command naming (v8.9)
+
+- **`v7x1_N` slash command prefixes renamed to `sN`** (step-N). `v7x1` was a historical workflow version identifier with no meaning for new users; `sN` reads as "step N" and matches the existing "Step X of 4" prose in the command descriptions.
+
+### AgentDB decision (v8.9)
+
+- **`agentdb-state-manager` moved from `full` to its own opt-in `agentdb` bundle.** Synavistra's auto-memory records the decision: *"No AgentDB: DuckDB state tracking removed; git branches are the state."* The skill still works and is kept for teams that want analytics queries, but new projects are no longer opted-in by default.
 
 ---
 
@@ -219,9 +379,9 @@ Ownership determines what happens when a bundle is applied to a repo that alread
 
 | Ownership | Files | First Install | Update | `--force` |
 |---|---|---|---|---|
-| **Template-owned** | Skills, commands, scripts, core `utils/`, core `src/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows, `docs/sharepoint/build.py` | Copy | Replace | Replace |
+| **Template-owned** | Skills, commands, scripts, core `utils/`, core `src/`, core `data_catalog/`, core `tests/`, `WORKFLOW.md`, `CONTRIBUTING.md`, `Containerfile`, workflows, `docs/sharepoint/build.py` | Copy | Replace | Replace |
 | **User-owned (merge)** | `pyproject.toml`, `.gitignore` | Create from template | Merge (add missing entries only) | Merge |
-| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `config/config.*.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py`, `.sqlfluff`, `azure-pipelines.yml`, `sql/v1/example_view.sql`, `docs/sharepoint/src/*.md` | Copy from template | Skip + print warning | Replace |
+| **User-owned (skip)** | `secrets.toml`, `.pre-commit-config.yaml`, `config/pipeline_config.json`, `config/config.*.json`, `config/catalog_config.json`, `config/*_keys_config.json`, `pipe_01_ingest.py`..`pipe_05_link.py`, `core_formatter.py`, `rag_directives.py`, `fk_patterns.py`, `dialects/*.py`, `.sqlfluff`, `azure-pipelines.yml`, `sql/v1/example_view.sql`, `docs/sharepoint/src/*.md`, `scripts/run_catalog_pipeline.py`, `scripts/generate_column_descriptions.py` | Copy from template | Skip + print warning | Replace |
 | **Override** | Template-owned + skip-on-update | -- | -- | Replace (merge files still merge) |
 
 ### Merge behavior details

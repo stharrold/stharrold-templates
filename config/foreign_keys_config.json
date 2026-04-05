@@ -1,0 +1,14 @@
+{
+    "_comment": "CUSTOMIZE: Add known foreign key relationships.",
+    "foreign_keys": {
+        "[dbo].[Orders]": [
+            {
+                "referenced_table": "[dbo].[Customers]",
+                "column_mappings": [
+                    {"parent": "CustomerID", "referenced": "CustomerID"}
+                ],
+                "confirmed_by": "schema_definition"
+            }
+        ]
+    }
+}

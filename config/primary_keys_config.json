@@ -1,0 +1,15 @@
+{
+    "_comment": "CUSTOMIZE: Add known primary keys for your assets.",
+    "primary_keys": {
+        "[dbo].[Customers]": {
+            "columns": ["CustomerID"],
+            "confirmed_by": "schema_definition"
+        },
+        "[dbo].[Orders]": {
+            "columns": ["OrderID"],
+            "confirmed_by": "schema_definition"
+        }
+    },
+    "no_natural_pk": [],
+    "business_keys": {}
+}
