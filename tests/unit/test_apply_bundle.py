@@ -71,9 +71,10 @@ def test_all_referenced_paths_exist():
             file_path = REPO_ROOT / f
             assert file_path.exists(), f"Bundle {name!r}: copy_file {file_path} does not exist"
 
-        # Skip on update
+        # Skip on update (entry is either a str path or a (src, dst) tuple)
         for f in defn.get("skip_on_update", []):
-            file_path = REPO_ROOT / f
+            src_rel = f[0] if isinstance(f, tuple) else f
+            file_path = REPO_ROOT / src_rel
             assert file_path.exists(), f"Bundle {name!r}: skip_on_update {file_path} does not exist"
 
         # Copy dirs

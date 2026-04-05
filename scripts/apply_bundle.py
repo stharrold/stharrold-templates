@@ -236,6 +236,21 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_gitignore": False,
         "merge_pyproject_deps": ["duckdb>=1.2.0"],
     },
+    # Cloudflare Pages _headers template with baseline CSP, HSTS,
+    # COOP/COEP examples, and cache rules. Distilled from running
+    # synavistra.ai for 6+ months; see bundles/security-headers/README.md
+    # for the ~12 gotchas that each rule encodes.
+    "security-headers": {
+        "skills": [],
+        "commands": [],
+        "copy_files": [],
+        # _headers is user-owned (skip on update) so downstream
+        # customizations survive re-apply. Source path is
+        # bundles/security-headers/_headers; target is repo root.
+        "skip_on_update": [("bundles/security-headers/_headers", "_headers")],
+        "merge_gitignore": False,
+        "merge_pyproject_deps": [],
+    },
     "full": {
         # agentdb-state-manager was removed from `full` in v8.9. Users who
         # want AgentDB tracking must apply --bundle agentdb explicitly.
@@ -365,21 +380,34 @@ def copy_files(source: Path, target: Path, rel_paths: list[str], *, dry_run: boo
     return count
 
 
-def copy_skip_on_update(source: Path, target: Path, rel_paths: list[str], *, force: bool, dry_run: bool) -> int:
-    """Copy if not exists; skip+warn if exists (unless *force*)."""
+def copy_skip_on_update(source: Path, target: Path, rel_paths: list, *, force: bool, dry_run: bool) -> int:
+    """Copy if not exists; skip+warn if exists (unless *force*).
+
+    Each entry in *rel_paths* is either:
+      - a string: used as both the source-relative and target-relative path
+      - a 2-tuple ``(source_rel, target_rel)``: the source path in the
+        template tree and the target path in the consumer repo may differ.
+        Used by the ``security-headers`` bundle to ship a `_headers` file
+        that lives under ``bundles/security-headers/`` in the template
+        but lands at the repo root in the consumer.
+    """
     count = 0
-    for rel in rel_paths:
-        src = source / rel
-        dst = target / rel
+    for entry in rel_paths:
+        if isinstance(entry, tuple):
+            src_rel, dst_rel = entry
+        else:
+            src_rel = dst_rel = entry
+        src = source / src_rel
+        dst = target / dst_rel
         if not src.exists():
-            print(f"  WARN {rel} not found in source, skipping")
+            print(f"  WARN {src_rel} not found in source, skipping")
             continue
         if dst.exists() and not force:
-            print(f"  SKIP {rel} (exists, use --force to overwrite)")
+            print(f"  SKIP {dst_rel} (exists, use --force to overwrite)")
             count += 1
             continue
         action = "COPY" if not dst.exists() else "REPLACE"
-        print(f"  {action} {rel}")
+        print(f"  {action} {dst_rel}" + (f" (from {src_rel})" if src_rel != dst_rel else ""))
         if not dry_run:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, dst)

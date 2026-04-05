@@ -284,6 +284,29 @@ python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates
 
 ---
 
+### `security-headers` -- Cloudflare Pages security headers template
+
+**NEW in v8.9.**
+
+Ship a conservative `_headers` file for Cloudflare Pages with baseline CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy, and cache rules. Distilled from running synavistra.ai for 6+ months; see [`bundles/security-headers/README.md`](bundles/security-headers/README.md) for the full ~12 gotchas each rule encodes (CSP / COOP / COEP / Emscripten / WebAssembly / importScripts / CDN interaction).
+
+**Files (user-owned, skip on update):**
+- `_headers` (at repo root) -- copied from `bundles/security-headers/_headers` in the template tree. First install copies; update skips with a warning; `--force` overwrites.
+
+**Merge files (user-owned):** none.
+
+**Dependencies:** none -- pure static configuration.
+
+**Use when:**
+- You're deploying to Cloudflare Pages and want a baseline CSP that passes common static-analysis reviewers on day one.
+- You ship in-browser WebAssembly / WebGPU workloads and need the COOP/COEP + `wasm-unsafe-eval` / `unsafe-eval` + CDN-in-script-src incantations documented in one place.
+
+**Do not use when:**
+- Your app runs on a non-Cloudflare platform that ignores `_headers`.
+- You have an existing carefully-tuned CSP that the template baseline would regress.
+
+---
+
 ### `agentdb` -- Opt-in DuckDB workflow state tracking
 
 **NEW in v8.9**: broken out of the `full` bundle.
