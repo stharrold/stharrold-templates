@@ -227,12 +227,10 @@ Proceed with initialization? (Y/n)
 ℹ Copying workflow skills...
 ✓ Copied skill: tech-stack-adapter
 ✓ Copied skill: git-workflow-manager
-✓ Copied skill: bmad-planner
-✓ Copied skill: speckit-author
-✓ Copied skill: quality-enforcer
 ✓ Copied skill: workflow-utilities
+✓ Copied skill: claude-md-hygiene
 ✓ Copied skill: initialize-repository
-✓ Copied 7/7 skills
+✓ Copied 5/5 skills
 
 ℹ Copying workflow documentation...
 ✓ Copied: WORKFLOW.md
@@ -342,15 +340,13 @@ Documentation:
 
 ### Always Copied (Workflow System)
 
-**Skills (7 total):**
+**Skills (5 total):**
 ```
 .claude/skills/
 ├── tech-stack-adapter/        (~200 lines, detect_stack.py)
 ├── git-workflow-manager/      (~200 lines, 3 scripts)
-├── bmad-planner/              (~400 lines, 1006-line script, 3 templates)
-├── speckit-author/            (~400 lines, 2 scripts, 2 templates)
-├── quality-enforcer/          (~300 lines, 2 scripts)
 ├── workflow-utilities/        (~200 lines, utility scripts)
+├── claude-md-hygiene/         (~100 lines, audit_claude_md.py)
 └── initialize-repository/     (~400 lines, this meta-skill)
 ```
 
@@ -537,7 +533,7 @@ Phase 6: Hotfix (production fixes)
 
 1. Read WORKFLOW.md (~2,000 lines → ~1,500 tokens)
 2. Read CLAUDE.md (~800 lines → ~600 tokens)
-3. Read all 7 skill SKILL.md files (~2,200 lines → ~1,700 tokens)
+3. Read all 5 skill SKILL.md files (~1,500 lines → ~1,100 tokens)
 4. Manually copy .claude/skills/ directory structure
 5. Manually adapt README.md, CLAUDE.md, pyproject.toml
 6. Manually create directory structure
@@ -1126,11 +1122,9 @@ The script validates and handles errors at each phase:
 **Does NOT integrate with other skills** - this is a meta-skill that creates the environment for them.
 
 **Creates foundation for:**
-- bmad-planner (Phase 1: Planning)
-- speckit-author (Phase 2: Specifications)
-- git-workflow-manager (Phase 2-4: Git operations)
-- quality-enforcer (Phase 3: Quality gates)
-- tech-stack-adapter (detect configuration)
+- git-workflow-manager (branch/worktree operations)
+- tech-stack-adapter (detect project configuration)
 - workflow-utilities (shared utilities)
+- claude-md-hygiene (CLAUDE.md audit)
 
-**After initialization, users interact with the 6 workflow skills, not this meta-skill.**
+**After initialization, users interact with the 4 workflow skills, not this meta-skill.**
