@@ -18,10 +18,7 @@ The Git Workflow Manager handles all git automation in the workflow system: bran
 
 - ✅ **Automated worktree creation** - Isolated development environments per feature/release/hotfix
 - ✅ **Semantic versioning** - Automatic version calculation from code changes (MAJOR.MINOR.PATCH)
-- ✅ **Daily rebase automation** - Keep contrib branches current with develop using safe force push
-- ✅ **Release workflow** - Complete release management (create, tag, back-merge, cleanup)
 - ✅ **GitHub integration** - PR creation and management via `gh` CLI
-- ✅ **TODO file integration** - Tracks all operations in workflow manifest
 - ✅ **Timestamp-based naming** - Avoid shell escaping issues with compact ISO8601 format
 
 ## Quick Start
@@ -44,26 +41,15 @@ python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
   feature auth-system contrib/stharrold
 
 # Output:
-# ✓ Created worktree: ../german_feature_auth-system
-# ✓ Created branch: feature/20251103T143000Z_auth-system
-# ✓ Created TODO file: TODO_feature_20251103T143000Z_auth-system.md
+# ✓ State directory: ../german_feature_auth-system/.claude-state
+# ✓ Worktree created: ../german_feature_auth-system
+# ✓ Branch: feature/20251103T143000Z_auth-system
+# {"worktree_path": "...", "branch_name": "...", "state_dir": "..."}
 #
 # Next steps:
 #   cd ../german_feature_auth-system
 #   python .claude/skills/speckit-author/scripts/create_specifications.py \
 #     feature auth-system stharrold --todo-file ../TODO_feature_*.md
-```
-
-### Daily Rebase (Keep Current)
-
-```bash
-# From main repo
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
-  contrib/stharrold
-
-# Output:
-# ✓ Rebased contrib/stharrold onto origin/develop
-# ✓ Force pushed with --force-with-lease (safe)
 ```
 
 ### Calculate Semantic Version
@@ -81,41 +67,13 @@ python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
 # - Bug fixes, refactoring, docs, tests → PATCH bump
 ```
 
-### Create Release
-
-```bash
-# Step 1: Create release branch from develop
-python .claude/skills/git-workflow-manager/scripts/create_release.py \
-  v1.6.0 develop
-
-# Step 2: Perform final QA, update docs in release branch
-
-# Step 3: Create PR (release/v1.6.0 → main) and merge in GitHub UI
-
-# Step 4: Tag release on main
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
-  v1.6.0 main
-
-# Step 5: Back-merge to develop
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
-  v1.6.0 develop
-
-# Step 6: Cleanup release branch
-python .claude/skills/git-workflow-manager/scripts/cleanup_release.py \
-  v1.6.0
-```
-
 ## Scripts Reference
 
 | Script | Purpose | When to Use |
 |--------|---------|-------------|
-| `create_worktree.py` | Create isolated worktree for feature/release/hotfix | Phase 2 (after planning) |
-| `daily_rebase.py` | Rebase contrib branch onto develop | Daily maintenance, before PR |
-| `semantic_version.py` | Calculate semantic version from changes | Phase 3 (after implementation) |
-| `create_release.py` | Create release branch from develop | Phase 5 (when ready for production) |
-| `tag_release.py` | Tag release on main after merge | Phase 5 (after release PR merged) |
-| `backmerge_release.py` | Merge release back to develop | Phase 5 (keep develop in sync) |
-| `cleanup_release.py` | Delete release branch after completion | Phase 5 (final cleanup) |
+| `create_worktree.py` | Create isolated worktree for feature/release/hotfix | After planning |
+| `cleanup_feature.py` | Archive TODO, remove worktree, print branch-delete commands | After PR merges |
+| `semantic_version.py` | Calculate semantic version (shim → release_lib.semver) | Before release |
 
 ## Branch Structure
 
@@ -139,10 +97,9 @@ feature/<timestamp>_<slug>    ← Isolated feature (worktree)
 3. Quality gates → PR (feature → contrib)
 4. Merge in GitHub UI → PR (contrib → develop)
 
-**Release workflow:**
-1. Develop ready → Create release branch
-2. Final QA + docs → PR (release → main)
-3. Tag on main → Back-merge to develop → Cleanup
+**Release workflow (via release-pilot skill + gh CLI):**
+1. Develop ready → create `release/vN.N.N` branch
+2. Final QA + docs → PR (release → main), tag, backmerge
 
 **Hotfix workflow:**
 1. Bug in production → Create hotfix worktree from main
@@ -259,36 +216,21 @@ python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
 ### Phase 4: Integration
 
 ```bash
-# Create PR: feature → contrib (done via GitHub UI)
+# Create PR: feature → contrib (done via gh CLI)
+gh pr create --base contrib/<user> --head <feature-branch> --title "feat: ..."
 
-# After merge, rebase contrib
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
-  contrib/stharrold
+# After merge, rebase contrib onto develop
+git fetch origin && git rebase origin/develop contrib/<user>
 
-# Create PR: contrib → develop (done via UI)
+# Create PR: contrib → develop
+gh pr create --base develop --head contrib/<user> --title "feat: ..."
 ```
 
 ### Phase 5: Release
 
-```bash
-# Create release
-python .claude/skills/git-workflow-manager/scripts/create_release.py \
-  v1.6.0 develop
-
-# QA + docs in release branch...
-
-# Create PR: release → main (done via UI)
-
-# After merge, tag and back-merge
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
-  v1.6.0 main
-
-python .claude/skills/git-workflow-manager/scripts/backmerge_release.py \
-  v1.6.0 develop
-
-python .claude/skills/git-workflow-manager/scripts/cleanup_release.py \
-  v1.6.0
-```
+See the `release-pilot` user skill and the `/workflow:s3-release` and
+`/workflow:s4-backmerge` slash commands — release management now uses
+`release_lib` helpers + `gh` CLI directly (scripts removed in #242).
 
 ## VCS Provider Support
 
@@ -300,33 +242,12 @@ Uses GitHub via `gh` CLI:
 gh auth status  # Must be authenticated
 ```
 
-## TODO File Integration
-
-All git operations create or update TODO files in the main repository:
-
-```bash
-# After create_worktree.py
-ls TODO_*.md
-# TODO_feature_20251103T143000Z_auth-system.md
-
-# TODO file tracks:
-# - Workflow type (feature/release/hotfix)
-# - Timestamp
-# - Slug
-# - Current phase
-# - Task progress
-# - Quality gates status
-# - Semantic version
-```
-
 ## Constants and Rationale
 
 | Constant | Value | Rationale |
 |----------|-------|-----------|
 | TIMESTAMP_FORMAT | `YYYYMMDDTHHMMSSZ` | No colons/hyphens, sortable, parseable |
 | VALID_WORKFLOW_TYPES | feature, release, hotfix | Covers all workflow phases |
-| TARGET_BRANCH | `origin/develop` | Integration branch for all contributions |
-| Force push safety | `--force-with-lease` | Only pushes if remote unchanged since last fetch |
 
 ## Troubleshooting
 
@@ -346,18 +267,6 @@ Fix: cd to main repository before running script
 Fix: Use different slug or delete existing branch:
   git branch -D feature/20251103T143000Z_auth
   git push origin --delete feature/20251103T143000Z_auth
-```
-
-### Error: "Force push failed (--force-with-lease)"
-
-```bash
-✗ Error: Force push rejected - remote changed since last fetch
-
-Fix: Someone else pushed to this branch. Fetch and review:
-  git fetch origin
-  git log contrib/stharrold..origin/contrib/stharrold
-  # If safe to overwrite:
-  git push origin contrib/stharrold --force
 ```
 
 ## Related Documentation

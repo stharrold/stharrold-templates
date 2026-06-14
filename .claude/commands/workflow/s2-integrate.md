@@ -29,9 +29,6 @@ Push `{contrib_branch}` and create PR to `develop`.
 ## Step 5: Manual Merge (contrib -> develop)
 **Action**: Merge the PR manually through the GitHub web portal GUI.
 
-## Step 6: Record State
-Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x1_2_integrate`
-
 ## Error Recovery
 - **PR creation fails**: Check `gh auth status`. Ensure branch is pushed (`git push origin <branch>`).
 - **Merge conflicts**: Resolve in GitHub UI or locally with `git merge --no-ff`, then push.

@@ -372,7 +372,6 @@ dev = [
 **See also:**
 - [WORKFLOW.md](../../WORKFLOW.md) - Complete workflow guide
 - [quality-enforcer](../quality-enforcer/) - Uses detected commands
-- [workflow-orchestrator](../workflow-orchestrator/) - Calls detection at session start
 
 ## Contributing
 

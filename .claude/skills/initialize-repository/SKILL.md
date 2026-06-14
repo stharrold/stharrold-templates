@@ -225,7 +225,6 @@ Proceed with initialization? (Y/n)
 === Phase 3: File Operations ===
 
 ℹ Copying workflow skills...
-✓ Copied skill: workflow-orchestrator
 ✓ Copied skill: tech-stack-adapter
 ✓ Copied skill: git-workflow-manager
 ✓ Copied skill: bmad-planner
@@ -233,7 +232,7 @@ Proceed with initialization? (Y/n)
 ✓ Copied skill: quality-enforcer
 ✓ Copied skill: workflow-utilities
 ✓ Copied skill: initialize-repository
-✓ Copied 9/9 skills
+✓ Copied 7/7 skills
 
 ℹ Copying workflow documentation...
 ✓ Copied: WORKFLOW.md
@@ -343,16 +342,15 @@ Documentation:
 
 ### Always Copied (Workflow System)
 
-**Skills (8 total):**
+**Skills (7 total):**
 ```
 .claude/skills/
-├── workflow-orchestrator/    (~300 lines SKILL.md, orchestrator logic)
 ├── tech-stack-adapter/        (~200 lines, detect_stack.py)
-├── git-workflow-manager/      (~500 lines, 8 scripts)
+├── git-workflow-manager/      (~200 lines, 3 scripts)
 ├── bmad-planner/              (~400 lines, 1006-line script, 3 templates)
 ├── speckit-author/            (~400 lines, 2 scripts, 2 templates)
 ├── quality-enforcer/          (~300 lines, 2 scripts)
-├── workflow-utilities/        (~200 lines, 7 utility scripts)
+├── workflow-utilities/        (~200 lines, utility scripts)
 └── initialize-repository/     (~400 lines, this meta-skill)
 ```
 
@@ -526,7 +524,6 @@ Phase 6: Hotfix (production fixes)
 3. All skills are available and ready to use
 
 **Does NOT interact with:**
-- workflow-orchestrator (orchestrator only coordinates Phases 1-6)
 - Other skills (they operate in the initialized repository)
 
 **Use case:**
@@ -540,7 +537,7 @@ Phase 6: Hotfix (production fixes)
 
 1. Read WORKFLOW.md (~2,000 lines → ~1,500 tokens)
 2. Read CLAUDE.md (~800 lines → ~600 tokens)
-3. Read all 9 skill SKILL.md files (~3,200 lines → ~2,400 tokens)
+3. Read all 7 skill SKILL.md files (~2,200 lines → ~1,700 tokens)
 4. Manually copy .claude/skills/ directory structure
 5. Manually adapt README.md, CLAUDE.md, pyproject.toml
 6. Manually create directory structure
@@ -1129,7 +1126,6 @@ The script validates and handles errors at each phase:
 **Does NOT integrate with other skills** - this is a meta-skill that creates the environment for them.
 
 **Creates foundation for:**
-- workflow-orchestrator (Phase 1-6 coordinator)
 - bmad-planner (Phase 1: Planning)
 - speckit-author (Phase 2: Specifications)
 - git-workflow-manager (Phase 2-4: Git operations)
@@ -1137,4 +1133,4 @@ The script validates and handles errors at each phase:
 - tech-stack-adapter (detect configuration)
 - workflow-utilities (shared utilities)
 
-**After initialization, users interact with the 7 workflow skills, not this meta-skill.**
+**After initialization, users interact with the 6 workflow skills, not this meta-skill.**

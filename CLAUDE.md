@@ -77,9 +77,7 @@ uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
 
 ### Git & VCS
 
-- **`release_workflow.py create-release`** auto-calculates version from the last git tag. Override manually for major bumps.
-- **`backmerge_workflow.py cleanup-release`** only prints instructions -- run `git branch -d release/vX.Y.Z && git push origin --delete release/vX.Y.Z` manually.
-- **Backmerge order**: always try `backmerge_workflow.py pr-develop` (release → develop) first so review comments can be fixed on the release branch. Only fall back to a `main → develop` PR when `gh pr create` returns "No commits between develop and release".
+- **Release branch cleanup**: after merging `release/vN.N.N -> develop` (backmerge), delete the branch manually: `git branch -d release/vN.N.N && git push origin --delete release/vN.N.N`.
 - **`uv.lock` drifts when `pyproject.toml` version changes.** `uv run` will modify `uv.lock` silently. Commit the updated lockfile or the next `rebase-contrib` call will fail with "Uncommitted changes detected".
 - **Git worktrees use a `.git` FILE, not a directory.** Use `.exists()`, not `.is_dir()`, when checking for a git repo.
 - **VCS abstraction**: `from vcs import create_pr, get_contrib_branch, get_username` -- NOT `get_vcs_adapter()` (removed in v8.5). Auto-detects GitHub (`gh`) or Azure DevOps (`az`) from `git remote.origin.url`.

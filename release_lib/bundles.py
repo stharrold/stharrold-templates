@@ -23,7 +23,7 @@ from pathlib import Path
 
 BUNDLE_DEFINITIONS: dict[str, dict] = {
     "git": {
-        "skills": ["git-workflow-manager", "workflow-orchestrator", "workflow-utilities"],
+        "skills": ["git-workflow-manager", "workflow-utilities"],
         "commands": [".claude/commands/workflow/"],
         "copy_files": ["WORKFLOW.md", "CONTRIBUTING.md"],
         "merge_gitignore": True,
@@ -221,20 +221,6 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_gitignore": False,
         "merge_pyproject_deps": [],
     },
-    # Opt-in AgentDB state tracking. As of v8.9, NOT included in `full`.
-    # Git branches and PR state are the authoritative source of workflow
-    # state for new projects; this bundle ships the scripts + schema for
-    # teams that want persistent DuckDB-backed analytics over historical
-    # workflow transitions (complex release processes, cross-team metrics).
-    # Downstream reference: synavistra explicitly removed AgentDB in early
-    # 2026 and documented the decision in its own CLAUDE.md.
-    "agentdb": {
-        "skills": ["agentdb-state-manager"],
-        "commands": [],
-        "copy_files": [],
-        "merge_gitignore": False,
-        "merge_pyproject_deps": ["duckdb>=1.2.0"],
-    },
     # Cloudflare Pages _headers template with baseline CSP, HSTS,
     # COOP/COEP examples, and cache rules. Distilled from running
     # synavistra.ai for 6+ months; see bundles/security-headers/README.md
@@ -251,8 +237,6 @@ BUNDLE_DEFINITIONS: dict[str, dict] = {
         "merge_pyproject_deps": [],
     },
     "full": {
-        # agentdb-state-manager was removed from `full` in v8.9. Users who
-        # want AgentDB tracking must apply --bundle agentdb explicitly.
         "includes": ["git", "secrets", "ci", "graphrag", "sql-pipeline", "data-catalog"],
         "skills": ["tech-stack-adapter", "initialize-repository"],
         "commands": [],
