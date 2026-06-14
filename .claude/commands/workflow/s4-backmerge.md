@@ -15,9 +15,9 @@ gh pr create --base develop --head release/{version} --title "Backmerge {version
 ## Step 3: Rebase Contrib (After Merge)
 ```bash
 git fetch origin develop
-git checkout contrib/stharrold
+git checkout contrib/<user>
 git rebase origin/develop
-git push --force-with-lease origin contrib/stharrold
+git push --force-with-lease origin contrib/<user>
 ```
 
 ## Step 4: Cleanup

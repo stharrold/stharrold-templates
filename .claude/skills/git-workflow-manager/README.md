@@ -217,13 +217,13 @@ python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
 
 ```bash
 # Create PR: feature → contrib (done via gh CLI)
-gh pr create --base contrib/stharrold --head <feature-branch> --title "feat: ..."
+gh pr create --base contrib/<user> --head <feature-branch> --title "feat: ..."
 
 # After merge, rebase contrib onto develop
-git fetch origin && git rebase origin/develop contrib/stharrold
+git fetch origin && git rebase origin/develop contrib/<user>
 
 # Create PR: contrib → develop
-gh pr create --base develop --head contrib/stharrold --title "feat: ..."
+gh pr create --base develop --head contrib/<user> --title "feat: ..."
 ```
 
 ### Phase 5: Release

@@ -8,7 +8,7 @@ argument-hint: "[version e.g. v9.2.0]"
 **Task**: Release version $ARGUMENTS (or compute from semver helper if empty)
 
 ## Step 1: Compute Next Version
-If $ARGUMENTS is empty, compute: `uv run python -c "from release_lib.semver import next_version_from_tag; print(next_version_from_tag(ref='origin/main'))"`
+If $ARGUMENTS is empty, compute: `uv run python -c "from release_lib.semver import next_version_from_tag; print(next_version_from_tag(ref='origin/main', base_branch='origin/main'))"`
 Sanity-check: new top-level packages qualify as MINOR even if the heuristic says PATCH.
 
 ## Step 2: Create Release Branch and Bump Version
