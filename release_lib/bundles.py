@@ -337,7 +337,10 @@ def copy_tree(source: Path, target: Path, rel_dir: str, *, dry_run: bool) -> int
     print(f"  {action} {rel_dir}")
     if not dry_run:
         if dst.exists():
-            shutil.rmtree(dst)
+            if dst.is_file() or dst.is_symlink():
+                dst.unlink()
+            else:
+                shutil.rmtree(dst)
         shutil.copytree(src, dst, dirs_exist_ok=True)
     return 1
 
@@ -440,10 +443,10 @@ def merge_pyproject_deps(target: Path, deps: list[str], *, dry_run: bool) -> int
         """)
         print(f"  CREATE pyproject.toml ({len(deps)} deps)")
         if not dry_run:
-            pyproject_path.write_text(content)
+            pyproject_path.write_text(content, encoding="utf-8")
         return 1
 
-    text = pyproject_path.read_text()
+    text = pyproject_path.read_text(encoding="utf-8")
 
     # Parse existing TOML to find current deps
     try:
@@ -475,33 +478,51 @@ def merge_pyproject_deps(target: Path, deps: list[str], *, dry_run: bool) -> int
         print("  MERGE pyproject.toml (0 deps added)")
         return 0
 
-    print(f"  MERGE pyproject.toml ({len(missing)} dep{'s' if len(missing) != 1 else ''} added)")
-
     if dry_run:
+        print(f"  MERGE pyproject.toml ({len(missing)} dep{'s' if len(missing) != 1 else ''} added)")
         return 1
 
     lines = text.splitlines(keepends=True)
+    inserted = False
 
     if section_key == "dependency-groups":
-        # Find the closing ] for [dependency-groups] dev = [...]
-        _insert_deps_into_array(lines, "[dependency-groups]", "dev", missing)
+        inserted = _insert_deps_into_array(lines, "[dependency-groups]", "dev", missing)
     elif section_key == "tool.uv":
-        _insert_deps_into_array(lines, "[tool.uv]", "dev-dependencies", missing)
-    else:
-        # Append a new section at the end
+        inserted = _insert_deps_into_array(lines, "[tool.uv]", "dev-dependencies", missing)
+
+    if not inserted:
+        if section_key is not None:
+            # Section exists but array is inline; inserting would bleed deps
+            # into the wrong section (cross-section state-machine bug).
+            print(f"  WARN {section_key} dev array appears inline; skipping dep merge")
+            return 0
+        # No existing dev section: append a new one.
         deps_str = "\n".join(f'    "{d}",' for d in sorted(missing))
         lines.append("\n[dependency-groups]\n")
         lines.append(f"dev = [\n{deps_str}\n]\n")
 
-    pyproject_path.write_text("".join(lines))
+    merged = "".join(lines)
+    try:
+        tomllib.loads(merged)
+    except Exception as exc:
+        print(f"  WARN post-write TOML validation failed ({exc}); pyproject.toml may be malformed")
+
+    pyproject_path.write_text(merged, encoding="utf-8")
+    print(f"  MERGE pyproject.toml ({len(missing)} dep{'s' if len(missing) != 1 else ''} added)")
     return 1
 
 
-def _insert_deps_into_array(lines: list[str], section_header: str, key: str, deps: list[str]) -> None:
+def _insert_deps_into_array(lines: list[str], section_header: str, key: str, deps: list[str]) -> bool:
     """Insert *deps* into a TOML array-of-strings in *lines* in-place.
 
     Locates *section_header* (e.g. ``[tool.uv]``), then the *key* = ``[`` line,
     then finds the closing ``]`` and inserts new entries just before it.
+
+    Returns True on success. Returns False (without modifying *lines*) when:
+    - the section or key is not found, or
+    - the array is inline (``key = ["a", "b"]`` on one line), which would
+      otherwise cause the closing ``]`` of a later section to be matched,
+      inserting deps into the wrong TOML table.
     """
     in_section = False
     found_key = False
@@ -509,15 +530,15 @@ def _insert_deps_into_array(lines: list[str], section_header: str, key: str, dep
 
     for i, line in enumerate(lines):
         stripped = line.strip()
-        # Track section headers
         if stripped.startswith("[") and not stripped.startswith("[["):
-            in_section = stripped == section_header or stripped.startswith(section_header.rstrip("]") + ".")
-            # Also match exact header
-            if stripped == section_header:
-                in_section = True
+            if found_key:
+                # We found the key but hit a new section before finding the
+                # closing ']' on its own line -- the array must be inline.
+                break
+            in_section = stripped == section_header
 
         if in_section and not found_key:
-            if stripped.startswith(f"{key}") and "=" in stripped:
+            if stripped.startswith(key) and "=" in stripped:
                 found_key = True
 
         if found_key:
@@ -525,10 +546,13 @@ def _insert_deps_into_array(lines: list[str], section_header: str, key: str, dep
                 insert_idx = i
                 break
 
-    if insert_idx is not None:
-        new_lines = [f'    "{d}",\n' for d in sorted(deps)]
-        for j, nl in enumerate(new_lines):
-            lines.insert(insert_idx + j, nl)
+    if insert_idx is None:
+        return False
+
+    new_lines = [f'    "{d}",\n' for d in sorted(deps)]
+    for j, nl in enumerate(new_lines):
+        lines.insert(insert_idx + j, nl)
+    return True
 
 
 def merge_gitignore(target: Path, source: Path, *, dry_run: bool) -> int:
@@ -541,14 +565,14 @@ def merge_gitignore(target: Path, source: Path, *, dry_run: bool) -> int:
 
     # Collect existing target lines
     if target_gi.exists():
-        existing_lines = set(target_gi.read_text().splitlines())
+        existing_lines = set(target_gi.read_text(encoding="utf-8").splitlines())
     else:
         existing_lines = set()
 
     # Collect candidate lines: workflow patterns + source .gitignore
     candidates: list[str] = list(GITIGNORE_WORKFLOW_PATTERNS)
     if source_gi.exists():
-        for line in source_gi.read_text().splitlines():
+        for line in source_gi.read_text(encoding="utf-8").splitlines():
             stripped = line.strip()
             if stripped and not stripped.startswith("#"):
                 candidates.append(stripped)
@@ -564,9 +588,9 @@ def merge_gitignore(target: Path, source: Path, *, dry_run: bool) -> int:
     if dry_run:
         return 1
 
-    with open(target_gi, "a") as f:
+    with open(target_gi, "a", encoding="utf-8") as f:
         if existing_lines:
-            if not target_gi.read_text().endswith("\n"):
+            if not target_gi.read_text(encoding="utf-8").endswith("\n"):
                 f.write("\n")
             f.write("\n# Added by apply_bundle\n")
         else:
