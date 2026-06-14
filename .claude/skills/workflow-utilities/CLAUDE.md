@@ -1,10 +1,9 @@
 # workflow-utilities (tactical notes)
 
 Shared utility scripts used by all other workflow skills: VCS wrapper
-(`gh`/`az`), TODO archiver, directory structure creator, skill
-scaffolder, SPDX/ASCII pre-commit hooks, and version validator. See
-[`SKILL.md`](SKILL.md) for the canonical skill definition and
-per-script reference.
+(`gh`/`az`), directory structure creator, skill scaffolder, SPDX/ASCII
+pre-commit hooks, and version validator. See [`SKILL.md`](SKILL.md) for
+the canonical skill definition and per-script reference.
 
 This file holds only gotchas that cost someone >30 minutes to
 rediscover.
@@ -28,19 +27,6 @@ rediscover.
   fallback parameter was added in v8.7.0 to deduplicate three copies
   of the same detection logic scattered across workflow scripts.
   Always pass a fallback for robustness.
-
-### TODO archiver (`workflow_archiver.py`)
-
-- **Archive destination is `ARCHIVED/` in the main repo**, not the
-  worktree. TODO files survive worktree deletion and are the audit
-  trail for completed work.
-- **Filename format**: `ARCHIVED/<original-TODO-name>-<timestamp>.md`
-  where `<timestamp>` is the archive time, not the original creation
-  time. Deliberate -- you want to know when a TODO was closed, not
-  just when it was opened.
-- **Not idempotent on same-second re-archive.** If you archive the
-  same TODO twice in one second you'll get a name collision.
-  Doesn't actually happen in practice.
 
 ### Directory structure (`directory_structure.py`)
 

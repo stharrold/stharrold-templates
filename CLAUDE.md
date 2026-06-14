@@ -23,7 +23,7 @@ deleting stale entries over adding caveats.
   (synavistra) proved the stubs were actively harmful.
 - Architecture descriptions, stack diagrams, bundle maps.
   → [`BUNDLES.md`](BUNDLES.md) for bundle contents and file ownership.
-  → [`WORKFLOW.md`](WORKFLOW.md) for the v7x1/sN workflow guide.
+  → [`WORKFLOW.md`](WORKFLOW.md) for the three-tier model and workflow guide.
 - Transient state, release notes, commit logs → git history,
   [`CHANGELOG.md`](CHANGELOG.md), GitHub issues.
 - Per-skill reference docs → each skill's `SKILL.md` is the canonical
@@ -50,9 +50,9 @@ the rest.
 
 ## Branch structure
 
-`main` <- `develop` <- `contrib/stharrold` <- `feature/*`
+`main` <- `develop` <- `contrib/<user>` <- `release/<ts>_<slug>` (worktree)
 
-Always end sessions on `contrib/stharrold`.
+Always end sessions on `contrib/<user>` (e.g. `contrib/stharrold`).
 
 ## Commands
 
@@ -102,8 +102,6 @@ uv run python .claude/skills/.../scripts/*.py  # Run skill scripts
   - `!{cmd}` → `` !`cmd` ``
   - `{{args}}` → `$ARGUMENTS`
 - **Workflow slash-command prefixes were renamed in v8.9**: `v7x1_1-worktree` → `s1-worktree`, `v7x1_2-integrate` → `s2-integrate`, `v7x1_3-release` → `s3-release`, `v7x1_4-backmerge` → `s4-backmerge`. The `sN` prefix ("step N") is shorter and more descriptive.
-- **`record_sync.py` (AgentDB state manager) auto-initializes the database on first use.** Failures print `[WARN]` to stderr and exit 0 (non-blocking by design).
-- **AgentDB `init_database_if_needed` checks for the `agent_synchronizations` table**, not just file existence. Pass `--db-path` to `init_database.py` for custom paths.
 - **After deleting or renaming Python modules under `.claude/skills/`**, grep all `*.md` files under the skills directory for stale references (CLAUDE.md, README.md, SKILL.md frontmatter all show up in the grep).
 
 ---
@@ -114,7 +112,7 @@ This repo provides installable workflow bundles. See [BUNDLES.md](BUNDLES.md)
 for the authoritative catalog and file-ownership rules.
 
 Current bundles: `git`, `secrets`, `ci`, `pipeline`, `sql-pipeline`,
-`graphrag`, `data-catalog`, `full`.
+`graphrag`, `data-catalog`, `security-headers`, `full`.
 
 CLI:
 
@@ -129,4 +127,4 @@ python scripts/apply_bundle.py <source-repo> <target-repo> \
 - **`../library/`** is the reference implementation for secrets management patterns.
 - **`../synavistra/`** is the reference implementation for `claude-code-review.yml` and has proven several CLAUDE.md conventions used here.
 - **`scripts/secrets_run.py`** runs commands with secrets from the OS keyring (#169).
-- **AgentDB state manager** (`.claude/skills/agentdb-state-manager/`) has test coverage in `tests/skills/`. Kept as opt-in; no longer included in the `full` bundle as of v8.9.
+- **`release_lib/`** is the Tier-2 deterministic library (`semver.py`, `vcs/`, `bundles.py`). Not shipped by any bundle — it is the engine that the `git` bundle's skills and the `release-pilot` user skill call into.

@@ -2,6 +2,17 @@
 
 Bundle manifest for `stharrold-templates`. Each bundle is a named set of files that can be applied to a target repository.
 
+## Three-tier model
+
+| Tier | Role | Bundle |
+|------|------|--------|
+| **Tier 1 — policy** | `release-pilot` skill (user-level, not bundled) + `git` bundle skills + sN slash commands | `git` |
+| **Tier 2 — library** | `release_lib` Python package (not shipped by any bundle; lives in this repo) | — |
+| **Tier 3 — CI** | GitHub Actions workflows (`tests.yml`, `claude-code-review.yml`) | `ci` |
+
+`release-pilot` (`~/.claude/skills/release-pilot/`) is installed at the user level and is **not shipped by any bundle** — it is the policy/playbook layer that calls into `release_lib` (Tier 2) and drives the `git`-bundle skills (Tier 1).
+
+
 ## Usage
 
 ### Quick Start
@@ -49,11 +60,10 @@ python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates
 
 ### `git` -- Git Workflow and Branch Management
 
-Skills, commands, and documentation for the `main <- develop <- contrib/* <- feature/*` branch workflow.
+Skills, commands, and documentation for the `main <- develop <- contrib/<user> <- release/<ts>_<slug>` branch workflow.
 
 **Skills (template-owned):**
 - `.claude/skills/git-workflow-manager/`
-- `.claude/skills/workflow-orchestrator/`
 - `.claude/skills/workflow-utilities/`
 
 **Commands (template-owned):**
@@ -307,29 +317,9 @@ Ship a conservative `_headers` file for Cloudflare Pages with baseline CSP, HSTS
 
 ---
 
-### `agentdb` -- Opt-in DuckDB workflow state tracking
-
-**NEW in v8.9**: broken out of the `full` bundle.
-
-AgentDB provides persistent state tracking for workflow transitions via a local DuckDB. Each invocation of `/workflow:s1-worktree` .. `/workflow:s4-backmerge` records its completion, enabling analytics queries over historical workflow state (which step a branch is in, how long phases took, cross-team dependency graphs).
-
-**This is opt-in.** Git branches and PR state are the authoritative source of workflow state for new projects. The downstream reference implementation (synavistra) explicitly removed AgentDB tracking and records the decision in its own CLAUDE.md. The `agentdb` bundle is kept for teams whose release processes benefit from the analytics layer -- it is NOT required for the `git` / `s1..s4` workflow to function.
-
-**Skill (template-owned):**
-- `.claude/skills/agentdb-state-manager/`
-
-**Merge files (user-owned):**
-- `pyproject.toml` -- adds `duckdb>=1.2.0` to `[dependency-groups] dev`
-
-**Schema stability**: the internal phase keys (`phase_v7x1_1_worktree` .. `phase_v7x1_4_backmerge`) are deliberately NOT renamed to match the sN slash-command names. They are stable dict keys in `PHASE_MAP` and row values in `agent_synchronizations`, kept for backward compatibility with existing AgentDB databases.
-
----
-
-### `full` -- Everything (except agentdb)
+### `full` -- Everything
 
 All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline` + `data-catalog`, plus additional skills and documentation.
-
-**Note (v8.9 breaking change)**: `agentdb-state-manager` is no longer bundled with `full`. Teams that want AgentDB tracking must apply `--bundle agentdb` explicitly. This was changed because the downstream reference (synavistra) removed AgentDB and the skill added ~200 lines of context load that most users don't need.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`
@@ -367,9 +357,9 @@ Traceability for the conventions shipped by these bundles. Each entry links back
 
 - **`v7x1_N` slash command prefixes renamed to `sN`** (step-N). `v7x1` was a historical workflow version identifier with no meaning for new users; `sN` reads as "step N" and matches the existing "Step X of 4" prose in the command descriptions.
 
-### AgentDB decision (v8.9)
+### AgentDB decision (removed in v9.1.0)
 
-- **`agentdb-state-manager` moved from `full` to its own opt-in `agentdb` bundle.** Synavistra's auto-memory records the decision: *"No AgentDB: DuckDB state tracking removed; git branches are the state."* The skill still works and is kept for teams that want analytics queries, but new projects are no longer opted-in by default.
+- **`agentdb-state-manager` skill deleted in #242.** Synavistra's auto-memory records the decision: *"No AgentDB: DuckDB state tracking removed; git branches are the state."* The skill was moved to opt-in in v8.9 and then deleted entirely in v9.1.0. Git branches + the GitHub PR/checks API are the authoritative source of workflow state.
 
 ---
 
