@@ -112,6 +112,23 @@ rm -rf .tmp/stharrold-templates
 
 See [BUNDLES.md](BUNDLES.md) for bundle contents, file ownership, and update behavior.
 
+### Step 3: Install user-level skills (optional)
+
+User skills (`release-pilot`, `scholar-labs-search`, etc.) install to `~/.claude/skills/` on your machine -- not into any specific repo. Install once per machine, then they are available everywhere:
+
+```bash
+# Workflow skills (release-pilot, branch-release, branch-start, pr-ship):
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow
+
+# Research skills (scholar-labs-search) -- for repos that use academic literature search:
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle research
+
+# Dry run to preview:
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow --dry-run
+```
+
+Existing local skills are skipped by default; use `--force` to pull upstream changes.
+
 ## Secrets Management
 
 Cross-platform secrets management using environment variables with keyring fallback.

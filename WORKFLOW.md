@@ -147,14 +147,14 @@ rm -rf .tmp/stharrold-templates
 For the full workflow system (all tiers):
 
 ```bash
-# Tier 1+3: apply git + ci bundles
+# Tier 1+3: apply git + ci bundles, then install user-level skills
 cd /path/to/new-repo
 git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
 uv run python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git --bundle ci
-rm -rf .tmp/stharrold-templates
 
-# Tier 1 policy skill: install release-pilot separately (user-level)
-# Copy ~/.claude/skills/release-pilot/ from a working instance or craft from SKILL.md.
+# Tier 1 policy skill: install release-pilot (user-level, installs to ~/.claude/skills/)
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow
+rm -rf .tmp/stharrold-templates
 ```
 
 Or use `initialize-repository` to interactively scaffold a complete project:
