@@ -147,13 +147,14 @@ gh pr create \
 
 ### Workflow Tools
 
-This repository includes 6 active workflow skills in `.claude/skills/`:
-- `workflow-orchestrator`: Main coordinator.
-- `git-workflow-manager`: Git automation.
-- `tech-stack-adapter`: Stack detection.
-- `workflow-utilities`: Shared utilities.
-- `agentdb-state-manager`: State tracking.
-- `initialize-repository`: Repository bootstrapping.
+This repository includes 5 active workflow skills in `.claude/skills/`:
+- `git-workflow-manager`: Git automation (worktrees, PRs, semantic versioning).
+- `tech-stack-adapter`: Stack detection (`TEST_CMD`/`BUILD_CMD` emission).
+- `workflow-utilities`: Shared utilities (VCS wrapper, pre-commit hooks, version validator).
+- `claude-md-hygiene`: Enforces the "earn it" CLAUDE.md discipline.
+- `initialize-repository`: Meta-skill to bootstrap new repos with the full workflow system.
+
+The `release-pilot` policy skill lives at `~/.claude/skills/release-pilot/` (user-level, not bundled).
 
 ## AI Configuration Guidelines
 
