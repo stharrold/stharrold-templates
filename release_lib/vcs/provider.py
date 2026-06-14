@@ -47,11 +47,11 @@ def detect_provider() -> VCSProvider:
             timeout=10,
         ).strip()
     except FileNotFoundError:
-        raise RuntimeError("'git' CLI not found")
+        raise RuntimeError("'git' CLI not found") from None
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Failed to read git remote URL: {e.stderr.strip() if e.stderr else str(e)}")
+        raise RuntimeError(f"Failed to read git remote URL: {e.stderr.strip() if e.stderr else str(e)}") from e
     except subprocess.TimeoutExpired:
-        raise RuntimeError("Timeout while reading git remote URL")
+        raise RuntimeError("Timeout while reading git remote URL") from None
 
     if "github.com" in url:
         _cached_provider = VCSProvider.GITHUB
