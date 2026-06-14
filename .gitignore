@@ -53,4 +53,8 @@ outputs/
 # Claude Code
 .claude/settings.local.json
 
+# Session state from the `remember` skill -- regenerated between commands,
+# not source-of-truth. Similar role to .venv/ or __pycache__/.
+.remember/
+
 gha-creds-*.json
