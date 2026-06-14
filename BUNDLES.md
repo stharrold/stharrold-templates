@@ -10,7 +10,7 @@ Bundle manifest for `stharrold-templates`. Each bundle is a named set of files t
 | **Tier 2 — library** | `release_lib` Python package (not shipped by any bundle; lives in this repo) | — |
 | **Tier 3 — CI** | GitHub Actions workflows (`tests.yml`, `claude-code-review.yml`, `secrets-example.yml`) | `ci` |
 
-`release-pilot` (`~/.claude/skills/release-pilot/`) is installed at the user level and is **not shipped by any bundle** — it is the policy/playbook layer that calls into `release_lib` (Tier 2) and drives the `git`-bundle skills (Tier 1).
+`release-pilot` (`~/.claude/skills/release-pilot/`) and other user-level skills live in `user-skills/` in this repo. Install them with `install_user_skills.py` — they are **not shipped by `apply_bundle.py`** because they target `~/.claude/skills/`, not a project repo.
 
 
 ## Usage
@@ -314,6 +314,41 @@ Ship a conservative `_headers` file for Cloudflare Pages with baseline CSP, HSTS
 **Do not use when:**
 - Your app runs on a non-Cloudflare platform that ignores `_headers`.
 - You have an existing carefully-tuned CSP that the template baseline would regress.
+
+---
+
+### User Skills
+
+User-level skills live in `user-skills/` and are installed to `~/.claude/skills/` (not a project repo). Use `scripts/install_user_skills.py`:
+
+```bash
+# Clone templates next to your repo (or into .tmp/)
+git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
+
+# Workflow skills -- release-pilot, branch-release.md, branch-start.md, pr-ship.md
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow
+
+# Research skills -- scholar-labs-search (for repos that do literature search)
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle research
+
+# All user skills
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle all
+
+# Dry run first
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow --dry-run
+
+# Force overwrite existing skills (picks up upstream changes)
+python .tmp/stharrold-templates/scripts/install_user_skills.py .tmp/stharrold-templates --bundle workflow --force
+```
+
+**Bundles:**
+
+| Bundle | Skills installed |
+|--------|-----------------|
+| `workflow` | `release-pilot/` (SKILL.md), `branch-release.md`, `branch-start.md`, `pr-ship.md` |
+| `research` | `scholar-labs-search/` (SKILL.md + scripts/) |
+
+**Ownership:** Skip-on-update by default (local edits survive reinstall). `--force` to pull upstream changes.
 
 ---
 
