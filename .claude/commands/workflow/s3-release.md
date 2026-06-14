@@ -1,31 +1,44 @@
 ---
 description: Release to production (Step 3 of 4)
-argument-hint: "[version]"
+argument-hint: "[version e.g. v9.2.0]"
 ---
 
 # /workflow:s3-release - Step 3 of 4
 
-**Task**: Release version $ARGUMENTS (auto-calculate if empty)
+**Task**: Release version $ARGUMENTS (or compute from semver helper if empty)
 
-**Context Check**: !`python3 .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 6`
+## Step 1: Compute Next Version
+If $ARGUMENTS is empty, compute: `uv run python -c "from release_lib.semver import next_version_from_tag; print(next_version_from_tag(ref='origin/main', base_branch='origin/main'))"`
+Sanity-check: new top-level packages qualify as MINOR even if the heuristic says PATCH.
 
-## Step 1: Create Release Branch
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py create-release`
+## Step 2: Create Release Branch and Bump Version
+`{version}` = `vX.Y.Z` (with `v`); pyproject.toml uses `X.Y.Z` (no `v`).
+```bash
+git checkout develop && git pull origin develop
+git checkout -b release/{version}
+# Bump version in pyproject.toml to X.Y.Z (strip the v), then:
+uv lock
+git add pyproject.toml uv.lock
+git commit -m "chore(release): bump version to X.Y.Z"
+git push origin release/{version}
+```
 
-## Step 2: Create PR to Main
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py pr-main`
+## Step 3: PR release -> main
+```bash
+gh pr create --base main --head release/{version} --title "Release {version}" --body "Release {version}"
+```
 
-## Step 3: Manual Merge (release -> main)
-**Action**: Merge the PR manually through the GitHub web portal GUI.
+## Step 4: Manual Merge (release -> main)
+**Action**: Confirm CI is green, then merge the PR through GitHub.
 
-## Step 4: Tag Release (After Merge)
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py tag-release`
-
-## Step 5: Record State
-Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x1_3_release`
+## Step 5: Tag Release (After Merge)
+```bash
+git fetch origin main
+git tag -a {version} -m "Release {version}" origin/main
+git push origin {version}
+```
 
 ## Error Recovery
-- **Context check fails**: Ensure you are on `contrib/*` branch in the main repo. Run `git checkout contrib/<user>`.
-- **Release branch exists**: A previous release may be in progress. Run `git branch -a | grep release` to check.
-- **Version conflict**: Pass explicit version via $ARGUMENTS (e.g., `/workflow:s3-release v8.2.0`).
-- **Tag already exists**: Delete with `git tag -d <tag> && git push origin --delete <tag>`, then re-run.
+- **Release branch exists**: Previous release in progress -- run `git branch -a | grep release` to check.
+- **Version conflict**: Pass explicit version via $ARGUMENTS (e.g., `/workflow:s3-release v9.2.0`).
+- **Tag already exists**: Delete with `git tag -d {version} && git push origin --delete {version}`, then re-run.

@@ -145,10 +145,6 @@ Find and update relevant sections:
 
 For each skill that integrates with the updated skill:
 
-- [ ] **workflow-orchestrator/SKILL.md**:
-  - [ ] Update phase instructions
-  - [ ] Update script invocation examples
-
 - [ ] **Other dependent skills**:
   - [ ] List dependent skills: `_________________`
   - [ ] Update their SKILL.md integration sections
@@ -333,7 +329,6 @@ CLAUDE.md             ← Update: commands, version history
 
 ### Integration Files (Check if Applicable)
 ```
-.claude/skills/workflow-orchestrator/SKILL.md    ← If orchestrator calls updated
 .claude/skills/bmad-planner/SKILL.md             ← If BMAD integrates
 .claude/skills/speckit-author/SKILL.md           ← If SpecKit integrates
 .claude/skills/git-workflow-manager/SKILL.md     ← If git operations changed

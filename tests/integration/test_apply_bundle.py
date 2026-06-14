@@ -37,7 +37,6 @@ def test_apply_git_bundle_to_empty_repo(target_repo):
     assert result.returncode == 0, result.stderr
 
     assert (target_repo / ".claude" / "skills" / "git-workflow-manager").is_dir()
-    assert (target_repo / ".claude" / "skills" / "workflow-orchestrator").is_dir()
     assert (target_repo / ".claude" / "skills" / "workflow-utilities").is_dir()
     assert (target_repo / ".claude" / "commands" / "workflow").is_dir()
     assert (target_repo / "WORKFLOW.md").exists()

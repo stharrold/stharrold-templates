@@ -4,25 +4,29 @@ description: Sync release to develop and contrib (Step 4 of 4)
 
 # /workflow:s4-backmerge - Step 4 of 4
 
-**Context Check**: !`python3 .claude/skills/workflow-utilities/scripts/verify_workflow_context.py --step 7`
-
 ## Step 1: PR release -> develop
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py pr-develop`
+```bash
+gh pr create --base develop --head release/{version} --title "Backmerge {version} -> develop" --body "Backmerge {version}"
+```
 
 ## Step 2: Manual Merge (release -> develop)
-**Action**: Merge the PR manually through the GitHub web portal GUI.
+**Action**: Merge the PR through GitHub.
 
 ## Step 3: Rebase Contrib (After Merge)
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py rebase-contrib`
+```bash
+git fetch origin develop
+git checkout contrib/<user>
+git rebase origin/develop
+git push --force-with-lease origin contrib/<user>
+```
 
 ## Step 4: Cleanup
-Run: `uv run python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py cleanup-release`
-
-## Step 5: Record State
-Run: `uv run python .claude/skills/agentdb-state-manager/scripts/record_sync.py --sync-type workflow_transition --pattern phase_v7x1_4_backmerge`
+```bash
+git branch -d release/{version}
+git push origin --delete release/{version}
+```
 
 ## Error Recovery
-- **Context check fails**: Ensure you are on `contrib/*` branch in the main repo.
-- **No release branch found**: Backmerge requires an active `release/*` branch. Run `/workflow:s3-release` first.
+- **No release branch**: Backmerge requires an active `release/*` branch. Run `/workflow:s3-release` first.
 - **Rebase conflicts**: Resolve manually with `git rebase --continue` or `git rebase --abort` to restart.
-- **Branch divergence**: If contrib diverged from remote, run `git fetch origin && git reset --hard origin/{contrib_branch}`.
+- **Branch divergence**: If contrib diverged from remote, run `git fetch origin && git rebase origin/develop`.

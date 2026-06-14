@@ -12,86 +12,15 @@ Note: TODO file generation is removed. Use GitHub Issues for task tracking.
 """
 
 import argparse
-import os
+import hashlib
 import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-# Add workflow-utilities to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "workflow-utilities" / "scripts"))
-from worktree_context import compute_worktree_id
-
 # Constants with documented rationale
 TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"  # Compact ISO8601 for filename/branch safety
 VALID_WORKFLOW_TYPES = ["feature", "release", "hotfix"]  # Supported workflow types
-
-
-def setup_agentdb_symlink(worktree_path: Path, main_repo_path: Path) -> bool:
-    """Create link from worktree's agentdb.duckdb to main repo's database.
-
-    Uses symlinks on Unix/macOS. On Windows, attempts symlink first (requires
-    Developer Mode or admin), then falls back to hard link (works on same volume).
-
-    This enables all worktrees to share a unified AgentDB, allowing cross-session
-    visibility of workflow state.
-
-    Args:
-        worktree_path: Path to the newly created worktree
-        main_repo_path: Path to the main repository (source of AgentDB)
-
-    Returns:
-        True if link created successfully, False otherwise
-    """
-    worktree_state_dir = worktree_path / ".claude-state"
-    main_state_dir = main_repo_path / ".claude-state"
-    main_db_path = main_state_dir / "agentdb.duckdb"
-    worktree_db_path = worktree_state_dir / "agentdb.duckdb"
-
-    try:
-        # Ensure main repo state directory exists
-        main_state_dir.mkdir(parents=True, exist_ok=True)
-
-        # Initialize main repo database if it doesn't exist
-        if not main_db_path.exists():
-            # Touch the file so link target exists
-            main_db_path.touch()
-
-        # Skip if link already exists (idempotent)
-        if worktree_db_path.exists() or worktree_db_path.is_symlink():
-            return True
-
-        # Try symlink first (works on all platforms if permissions allow)
-        try:
-            relative_target = os.path.relpath(main_db_path, worktree_state_dir)
-            worktree_db_path.symlink_to(relative_target)
-            return True
-        except (OSError, PermissionError) as symlink_error:
-            # On Windows, symlink may fail without Developer Mode or admin
-            if sys.platform == "win32":
-                # Fall back to hard link (works on same volume without special perms)
-                try:
-                    os.link(main_db_path, worktree_db_path)
-                    print(
-                        "[INFO]  Using hard link for AgentDB (symlink requires Developer Mode)",
-                        file=sys.stderr,
-                    )
-                    return True
-                except OSError as hardlink_error:
-                    # Hard link also failed (likely cross-volume)
-                    print(
-                        f"[WARN]  Could not create AgentDB link: symlink failed ({symlink_error}), hard link failed ({hardlink_error})",
-                        file=sys.stderr,
-                    )
-                    return False
-            else:
-                # On Unix, symlink should work - if it fails, report and return False
-                print(f"[WARN]  Could not create AgentDB symlink: {symlink_error}", file=sys.stderr)
-                return False
-
-    except (OSError, PermissionError) as e:
-        print(f"[WARN]  Could not create AgentDB link: {e}", file=sys.stderr)
-        return False
 
 
 def create_worktree(workflow_type, slug, base_branch):
@@ -160,16 +89,10 @@ def create_worktree(workflow_type, slug, base_branch):
         state_dir.mkdir(exist_ok=True)
         # Create .gitignore in state dir
         (state_dir / ".gitignore").write_text("# Ignore all files in state directory\n*\n")
-        # Create .worktree-id with hash of worktree path (using shared implementation)
-        worktree_id = compute_worktree_id(worktree_path)
+        # Create .worktree-id with hash of worktree path
+        worktree_id = hashlib.sha256(str(worktree_path).encode()).hexdigest()[:12]
         (state_dir / ".worktree-id").write_text(worktree_id)
         print(f"[OK] State directory: {state_dir}")
-
-        # Create symlink for shared AgentDB (repo_root is main repo)
-        if setup_agentdb_symlink(worktree_path, repo_root):
-            print(f"[OK] AgentDB symlink: {state_dir / 'agentdb.duckdb'} -> main repo")
-        else:
-            print("[INFO]  AgentDB: isolated (symlink creation failed)")
     except (OSError, PermissionError) as e:
         print(f"[WARN]  Could not create state directory: {e}", file=sys.stderr)
 

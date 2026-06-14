@@ -1,18 +1,16 @@
 ---
 name: workflow-utilities
-version: 5.2.0
+version: 5.3.0
 description: |
   Shared utilities for file deprecation, directory structure creation,
-  TODO file updates, workflow lifecycle management, archive management,
-  and VCS abstraction (GitHub/Azure DevOps).
+  archive management, skill scaffolding, pre-commit hooks, version
+  validation, and VCS abstraction (GitHub/Azure DevOps via release_lib.vcs).
   Used by all other skills.
 
-  Use when: Need shared utilities, deprecating files, updating TODO,
-  registering/archiving workflows, managing TODO.md manifest, VCS operations,
-  PR feedback handling
+  Use when: Need shared utilities, deprecating files, archiving files,
+  creating skill scaffolds, running VCS operations.
 
-  Triggers: deprecate, archive, update TODO, create directory, register workflow,
-  archive workflow, sync manifest, VCS operations, PR feedback
+  Triggers: deprecate, archive, create directory, create skill, VCS operations
 ---
 
 ## Quick Reference
@@ -72,27 +70,6 @@ python .claude/skills/workflow-utilities/scripts/directory_structure.py \
 - `README.md` - Human-readable documentation
 - `ARCHIVED/` subdirectory (with its own CLAUDE.md and README.md)
 
-### todo_updater.py
-
-Update task status and workflow progress in TODO file.
-
-```bash
-python .claude/skills/workflow-utilities/scripts/todo_updater.py \
-  <todo_file> <task_id> <status> [context_usage]
-```
-
-**Arguments:**
-- `todo_file`: Path to TODO file
-- `task_id`: Task ID (e.g., 'impl_003')
-- `status`: New status ('pending' | 'complete' | 'blocked')
-- `context_usage` (optional): Context usage percentage
-
-**Updates:**
-- Task status in YAML frontmatter
-- `completed_at` timestamp
-- `workflow_progress.last_task`
-- `workflow_progress.last_update`
-
 ### archive_manager.py
 
 List and extract archived files.
@@ -105,90 +82,19 @@ python .claude/skills/workflow-utilities/scripts/archive_manager.py list [direct
 python .claude/skills/workflow-utilities/scripts/archive_manager.py extract <archive> [output_dir]
 ```
 
-### workflow_registrar.py
-
-Register new workflow in TODO.md master manifest.
-
-```bash
-python .claude/skills/workflow-utilities/scripts/workflow_registrar.py \
-  <todo_file> <workflow_type> <slug> [--title TITLE]
-```
-
-**Arguments:**
-- `todo_file`: Path to TODO_*.md file
-- `workflow_type`: Workflow type ('feature' | 'release' | 'hotfix')
-- `slug`: Workflow slug
-- `--title` (optional): Workflow title (auto-generated if not provided)
-
-**Updates:**
-- Adds workflow to `TODO.md workflows.active[]` array
-- Updates `TODO.md last_update` timestamp
-
-**When to use:**
-- After creating BMAD planning (Phase 1)
-- After creating feature worktree (Phase 2)
-- Ensures TODO.md tracks all active workflows
-
-### workflow_archiver.py
-
-Archive completed workflow and update TODO.md manifest.
-
-```bash
-python .claude/skills/workflow-utilities/scripts/workflow_archiver.py \
-  <todo_file> [--summary SUMMARY] [--version VERSION]
-```
-
-**Arguments:**
-- `todo_file`: Path to TODO_*.md file to archive
-- `--summary` (optional): Summary of what was completed
-- `--version` (optional): Semantic version (e.g., '1.5.0')
-
-**Actions:**
-1. Moves TODO_*.md → ARCHIVED/TODO_*.md
-2. Updates TODO.md: moves workflow from active[] to archived[] array
-3. Updates TODO.md statistics (total_workflows_completed)
-4. Extracts metadata from workflow file (version, summary)
-
-**When to use:**
-- Phase 4.3: After PR merged to contrib branch
-- Before creating PR contrib → develop
-
-### sync_manifest.py
-
-Synchronize TODO.md manifest with filesystem state.
-
-```bash
-# Preview changes
-python .claude/skills/workflow-utilities/scripts/sync_manifest.py --dry-run
-
-# Sync TODO.md
-python .claude/skills/workflow-utilities/scripts/sync_manifest.py
-```
-
-**Actions:**
-1. Scans current directory for TODO_*.md files (active)
-2. Scans ARCHIVED/ for TODO_*.md files (archived)
-3. Rebuilds TODO.md workflows.active[] and workflows.archived[] arrays
-4. Updates statistics
-
-**When to use:**
-- Recovery: TODO.md out of sync with filesystem
-- Verification: Check TODO.md reflects actual files
-- Migration: Rebuilding TODO.md from scratch
-
-**Warning:** Replaces TODO.md arrays with filesystem state. Manual metadata edits may be lost.
-
 ### VCS Abstraction Layer (vcs/)
 
-Wrapper functions for GitHub (`gh`) and Azure DevOps (`az`) CLI operations.
+Backward-compat shim over `release_lib.vcs` (extracted in issue #240).
 
-**Location:** `.claude/skills/workflow-utilities/scripts/vcs/`
+**Location:** `.claude/skills/workflow-utilities/scripts/vcs/__init__.py`
 
-**Key files:**
-- `provider.py` - VCS provider enum + `detect_provider()` (auto-detects from git remote URL, cached)
-- `operations.py` - Wrapper functions: `get_username`, `get_contrib_branch`, `create_pr`, `create_release`, `create_issue`, `query_pr_review_threads`, `check_auth`
+**Canonical home:** `release_lib/vcs/` — new code should import from there directly.
 
-**Usage:**
+**Exported functions** (re-exported from `release_lib.vcs`):
+`get_username`, `get_contrib_branch`, `create_pr`, `create_release`,
+`create_issue`, `query_pr_review_threads`, `check_auth`, `detect_provider`
+
+**Usage (legacy callers):**
 ```python
 from vcs import create_pr, get_contrib_branch, get_username
 
@@ -207,7 +113,6 @@ pr_url = create_pr(
 **Key features:**
 - Auto-detects provider from `git remote.origin.url` (github.com / dev.azure.com)
 - Errors surfaced as `RuntimeError(stderr)` — callers inspect string contents
-- Module-level caching for provider detection
 - PR creation, issue creation, release management, auth checking
 
 ## Usage Examples
@@ -238,53 +143,6 @@ subprocess.run([
     'python',
     '.claude/skills/workflow-utilities/scripts/directory_structure.py',
     'planning/json-validator'
-], check=True)
-```
-
-### Updating TODO Tasks
-
-```python
-import subprocess
-
-# Mark task as complete
-subprocess.run([
-    'python',
-    '.claude/skills/workflow-utilities/scripts/todo_updater.py',
-    'TODO_feature_20251022T143022Z_json-validator.md',
-    'impl_003',
-    'complete',
-    '35'  # context usage percentage
-], check=True)
-```
-
-### Managing Workflow Lifecycle
-
-```python
-import subprocess
-
-# Register new workflow in TODO.md (Phase 1/2)
-subprocess.run([
-    'python',
-    '.claude/skills/workflow-utilities/scripts/workflow_registrar.py',
-    'TODO_feature_20251103T143000Z_auth.md',
-    'feature',
-    'auth',
-    '--title', 'User Authentication System'
-], check=True)
-
-# Archive completed workflow (Phase 4.3)
-subprocess.run([
-    'python',
-    '.claude/skills/workflow-utilities/scripts/workflow_archiver.py',
-    'TODO_feature_20251103T143000Z_auth.md',
-    '--summary', 'Implemented OAuth2 authentication with Google and GitHub',
-    '--version', '1.5.0'
-], check=True)
-
-# Sync TODO.md with filesystem (recovery)
-subprocess.run([
-    'python',
-    '.claude/skills/workflow-utilities/scripts/sync_manifest.py'
 ], check=True)
 ```
 

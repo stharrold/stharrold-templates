@@ -37,8 +37,7 @@ def test_bundle_definitions_have_required_keys():
 
 def test_full_bundle_includes_all_others():
     """The 'full' bundle's 'includes' list contains git, secrets, ci, graphrag,
-    sql-pipeline, and data-catalog -- but NOT agentdb, which became an opt-in
-    bundle in v8.9 (see BUNDLES.md)."""
+    sql-pipeline, and data-catalog."""
     assert BUNDLE_DEFINITIONS["full"]["includes"] == [
         "git",
         "secrets",
@@ -47,10 +46,6 @@ def test_full_bundle_includes_all_others():
         "sql-pipeline",
         "data-catalog",
     ]
-    # agentdb is intentionally excluded from full
-    assert "agentdb" not in BUNDLE_DEFINITIONS["full"]["includes"]
-    # agentdb exists as its own bundle
-    assert "agentdb" in BUNDLE_DEFINITIONS
 
 
 def test_all_referenced_paths_exist():
@@ -122,8 +117,7 @@ def test_dry_run_makes_no_changes(tmp_path):
 
 
 def test_resolve_bundles_expands_full():
-    """resolve_bundles(['full']) returns all included bundles then 'full'.
-    As of v8.9, 'data-catalog' is in full and 'agentdb' is not."""
+    """resolve_bundles(['full']) returns all included bundles then 'full'."""
     resolved = resolve_bundles(["full"])
     assert resolved == [
         "git",
@@ -135,14 +129,12 @@ def test_resolve_bundles_expands_full():
         "data-catalog",
         "full",
     ]
-    assert "agentdb" not in resolved
 
 
 def test_resolve_bundles_deduplicates():
     """resolve_bundles(['git', 'full']) should contain 'git' only once."""
     resolved = resolve_bundles(["git", "full"])
     assert resolved.count("git") == 1
-    # Should still contain all expected bundles (agentdb is opt-in, not in full)
     assert set(resolved) == {
         "git",
         "secrets",

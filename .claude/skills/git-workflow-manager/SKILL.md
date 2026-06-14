@@ -3,11 +3,11 @@ name: git-workflow-manager
 version: 5.1.0
 description: |
   Manages git operations: worktree creation, branch management, commits,
-  PRs, semantic versioning, daily rebase workflow, and PR feedback handling.
+  PRs, and semantic versioning (shim over release_lib.semver).
 
-  Use when: Creating branches/worktrees, committing, pushing, versioning, handling PR feedback
+  Use when: Creating branches/worktrees, committing, pushing, versioning
 
-  Triggers: create worktree, commit, push, rebase, version, PR, PR feedback
+  Triggers: create worktree, commit, push, rebase, version, PR
 ---
 
 ## Quick Reference
@@ -17,14 +17,8 @@ description: |
 uv run python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
   feature <slug> contrib/<user>
 
-# Daily rebase
-uv run python .claude/skills/git-workflow-manager/scripts/daily_rebase.py contrib/<user>
-
-# Semantic version
+# Semantic version (shim -> release_lib.semver)
 uv run python .claude/skills/git-workflow-manager/scripts/semantic_version.py develop <current-version>
-
-# Release workflow
-uv run python .claude/skills/git-workflow-manager/scripts/release_workflow.py <step>
 ```
 
 # Git Workflow Manager
@@ -70,7 +64,7 @@ hotfix/vX.Y.Z-hotfix.N       ← Production hotfix (worktree)
 
 ### create_worktree.py
 
-Creates feature/release/hotfix worktree with TODO file.
+Creates feature/release/hotfix worktree.
 
 ```bash
 python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
@@ -82,29 +76,17 @@ python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
 - `slug`: Short descriptive name (e.g., 'json-validator')
 - `base_branch`: Branch to create from (e.g., 'contrib/username')
 
-**Output:**
-- Creates worktree directory
-- Creates new branch
-- Generates TODO file in main repo
+### cleanup_feature.py
 
-### daily_rebase.py
-
-Performs daily rebase of contrib branch onto develop.
+Archives TODO file, removes worktree, prints branch-deletion commands.
 
 ```bash
-python .claude/skills/git-workflow-manager/scripts/daily_rebase.py \
-  <contrib_branch>
+python .claude/skills/git-workflow-manager/scripts/cleanup_feature.py <slug>
 ```
-
-**Steps:**
-1. Checkout contrib branch
-2. Fetch origin
-3. Rebase onto origin/develop
-4. Force push with lease
 
 ### semantic_version.py
 
-Calculates semantic version based on component changes.
+Backward-compat shim that re-exports from `release_lib.semver` (issue #240).
 
 ```bash
 python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
@@ -116,285 +98,10 @@ python .claude/skills/git-workflow-manager/scripts/semantic_version.py \
 - **MINOR**: New features (new files, new functions)
 - **PATCH**: Bug fixes, refactoring, docs
 
-### create_release.py
-
-Creates release branch from develop with TODO file generation.
-
-```bash
-python .claude/skills/git-workflow-manager/scripts/create_release.py \
-  <version> <base_branch>
-```
-
-**Arguments:**
-- `version`: Semantic version (e.g., v1.1.0, v2.0.0)
-- `base_branch`: Branch to release from (typically 'develop')
-
-**Steps:**
-1. Validates version format and inputs
-2. Checks semantic version recommendation
-3. Creates release branch (release/vX.Y.Z)
-4. Generates TODO_release_*.md file
-5. Pushes branch to origin
-
-**Output:**
-```
-✓ Created release branch: release/v1.1.0
-✓ Base: develop (commit abc123)
-✓ TODO file: TODO_release_20251023T143000Z_v1-1-0.md
-✓ Ready for final QA and documentation updates
-```
-
-### tag_release.py
-
-Creates annotated tag on main branch after release merge.
-
-```bash
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
-  <version> <branch>
-```
-
-**Arguments:**
-- `version`: Semantic version to tag (e.g., v1.1.0)
-- `branch`: Branch to tag (typically 'main')
-
-**Steps:**
-1. Validates version format and inputs
-2. Checks out and pulls latest from branch
-3. Creates annotated tag with release message
-4. Pushes tag to origin
-5. Optionally creates GitHub release via gh CLI
-
-**Output:**
-```
-✓ Checked out main branch
-✓ Pulled latest changes (commit def456)
-✓ Created annotated tag: v1.1.0
-  Message: "Release v1.1.0: Production release with vocabulary modules"
-✓ Pushed tag to origin
-✓ GitHub release created: https://github.com/user/german/releases/tag/v1.1.0
-```
-
-### backmerge_workflow.py
-
-Orchestrates backmerge of release changes to develop via manual PR.
-
-```bash
-python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py \
-  <step>
-```
-
-**Steps:**
-1. `pr-develop`: Creates PR from release branch to develop
-2. `rebase-contrib`: Rebases contrib on updated develop (after manual merge)
-3. `cleanup-release`: Instructs manual release branch deletion
-
-**Output:**
-```
-✓ Created PR: https://github.com/user/german/pull/46
-  Title: "backmerge: v1.1.0 -> develop"
-
-MANUAL STEP: Merge the PR in GitHub
-Then run: backmerge_workflow.py rebase-contrib
-```
-
-### cleanup_release.py
-
-Instructs user to delete release branch after successful release and back-merge.
-
-```bash
-python .claude/skills/git-workflow-manager/scripts/cleanup_release.py \
-  <version>
-```
-
-**Arguments:**
-- `version`: Release version (e.g., v1.1.0)
-
-**Safety Checks (all must pass):**
-1. Tag exists
-2. Tag is on main branch
-3. Release commits are in develop
-4. Branch is fully merged
-
-**Steps:**
-1. Runs comprehensive safety checks
-2. Instructs user to manually delete local release branch
-3. Instructs user to manually delete remote release branch
-4. Archives TODO file
-
-**Output:**
-```
-✓ Verified tag v1.1.0 exists
-✓ Verified tag on main branch
-✓ Verified back-merge to develop complete
-[NOTE] Manual branch deletion required for: release/v1.1.0
-✓ Archived: TODO_release_20251023T143000Z_v1-1-0.md
-✓ Release workflow complete for v1.1.0
-```
-
-### generate_work_items_from_pr.py
-
-Generates work-items from unresolved PR conversations for tracking follow-up work.
-
-```bash
-python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.py \
-  <pr_number>
-```
-
-**Arguments:**
-- `pr_number`: Pull request number to analyze
-
-**Purpose:**
-- Extracts unresolved PR review conversations
-- Creates separate work-items (GitHub issues) for each conversation
-- Enables PR approval while tracking feedback as separate feature work
-
-**When to use:**
-- After PR review, when conversations require follow-up work
-- Before approving PR in web portal
-- When feedback is substantive enough to warrant separate features
-
-**What it does:**
-1. Fetches PR conversations/threads via GitHub API
-2. Filters for unresolved conversations:
-   - `reviewThreads.isResolved == false`
-3. For each unresolved conversation, creates work-item:
-   - `gh issue create` with label "pr-feedback"
-5. Work-item slug pattern: `pr-{pr_number}-issue-{sequence}`
-   - Example: `pr-94-issue-1`, `pr-94-issue-2`
-6. Links work-item to original PR in title/body
-7. Outputs work-item URLs for tracking
-
-**GitHub Integration:**
-- Uses GitHub GraphQL API for `isResolved` status
-- Query: `repository.pullRequest.reviewThreads`
-- Filters: `isResolved: false, isOutdated: false`
-- Creates issues with:
-  - Title: "PR #94 feedback: {first line of conversation}"
-  - Body: Full conversation thread with file/line context
-  - Labels: `pr-feedback`, `pr-94`
-  - Metadata: Author, file path, line number, PR link
-
-**Workflow Pattern:**
-```bash
-# 1. Create PR from feature to contrib
-gh pr create --base contrib/stharrold --head feature/20251108T112041Z_auth
-
-# 2. Reviewers add comments in web portal
-
-# 3. Generate work-items for unresolved conversations
-python .claude/skills/git-workflow-manager/scripts/generate_work_items_from_pr.py 94
-
-# Output:
-# ✓ Found 3 unresolved conversations
-# ✓ Created work-item: pr-94-issue-1 (https://github.com/user/repo/issues/123)
-# ✓ Created work-item: pr-94-issue-2 (https://github.com/user/repo/issues/124)
-# ✓ Created work-item: pr-94-issue-3 (https://github.com/user/repo/issues/125)
-
-# 4. Approve PR in web portal (conversations remain as work-items)
-
-# 5. For each work-item, create new feature worktree:
-python .claude/skills/git-workflow-manager/scripts/create_worktree.py \
-  feature pr-94-issue-1 contrib/stharrold
-
-# 6. Implement fix, create PR, merge
-# 7. Repeat for remaining work-items
-```
-
-**Key Features:**
-- Uses GitHub Issues for work-item tracking
-- Preserves conversation context (file, line, author, timestamps)
-- Enables PR approval without blocking on follow-up work
-- Creates traceable lineage: PR → work-items → feature branches → new PRs
-
-**Decision Tree:**
-```
-PR reviewed with comments
-├─ Simple fixes (typos, formatting)
-│  └─ Fix directly on feature branch, push update
-└─ Substantive changes (new features, refactoring)
-   └─ Generate work-items, approve PR, fix in separate features
-```
-
-## Release Workflow
-
-The release workflow implements Phase 5 from WORKFLOW.md, providing a complete automation of git-flow release process.
-
-### When to Use Release Workflow
-
-**Use release workflow when:**
-- Ready to create production release from develop
-- All features for version are integrated and tested
-- Quality gates pass on develop branch
-- Following semantic versioning for the release
-
-**Use hotfix workflow when:**
-- Critical production bug needs immediate fix
-- Cannot wait for regular release cycle
-- Fix targets specific production version
-
-### Typical Release Sequence
-
-```bash
-# Step 1: Create release branch from develop
-python .claude/skills/git-workflow-manager/scripts/create_release.py \
-  v1.1.0 develop
-
-# Step 2: Perform QA on release branch
-# - Run quality gates
-# - Update documentation
-# - Update version in pyproject.toml
-
-# Step 3: Create PR: release/v1.1.0 → main
-gh pr create --base main --title "Release v1.1.0"
-
-# Step 4: User merges PR in GitHub UI
-# (Manual step - review and merge)
-
-# Step 5: Tag release on main
-python .claude/skills/git-workflow-manager/scripts/tag_release.py \
-  v1.1.0 main
-
-# Step 6: Back-merge to develop (Part 1)
-python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py \
-  pr-develop
-
-# Step 7: User merges PR in GitHub UI
-# (Manual step)
-
-# Step 8: Rebase contrib (Part 2)
-python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py \
-  rebase-contrib
-
-# Step 9: Cleanup release branch (Part 3)
-python .claude/skills/git-workflow-manager/scripts/backmerge_workflow.py \
-  cleanup-release
-```
-
-### Integration with Phase 5
-
-The release scripts implement the 8-step process documented in WORKFLOW.md Phase 5:
-
-| Step | Script | Description |
-|------|--------|-------------|
-| 5.1 | create_release.py | Create release branch |
-| 5.2 | Manual | QA and documentation updates |
-| 5.3 | gh pr create | Create PR to main |
-| 5.4 | Manual | User merges in GitHub UI |
-| 5.5 | tag_release.py | Tag release on main |
-| 5.6 | backmerge_workflow.py | Create PR to develop |
-| 5.7 | Manual | User merges in GitHub UI |
-| 5.8 | backmerge_workflow.py | Rebase contrib & manual cleanup |
-
-### Error Recovery
-
-If a release workflow step fails:
-
-1. **create_release.py fails**: Branch and TODO file are cleaned up automatically
-2. **tag_release.py fails**: Local tag is cleaned up on push failure
-3. **backmerge_workflow.py failure**: Manual PR creation or merge required
-4. **cleanup_release.py safety checks fail**: Branch is NOT deleted, manual cleanup required
-
-All scripts include comprehensive error messages with recovery instructions.
+Removed in #242 (superseded by `release-pilot` skill + `release_lib`):
+`create_release.py`, `tag_release.py`, `backmerge_workflow.py`,
+`cleanup_release.py`, `daily_rebase.py`, `generate_work_items_from_pr.py`,
+`release_workflow.py`, `pr_workflow.py`.
 
 ## Commit Message Format
 

@@ -43,10 +43,12 @@ this skill and every other workflow skill:
   interactive Q&A (repo name, description, license, Python version).
   The adapt logic is in `initialize_repository.py::generate_*()` --
   one function per file.
-- **`SKILL_NAMES`**: the 9 skills the meta-skill expects to find in
-  the source. As of v8.9, `agentdb-state-manager` is on this list
-  but is NOT included in the `full` bundle by default (it's opt-in
-  via `--bundle agentdb`).
+- **`SKILL_NAMES`**: the 5 skills the meta-skill expects to find in
+  the source: `tech-stack-adapter`, `git-workflow-manager`,
+  `workflow-utilities`, `claude-md-hygiene`, `initialize-repository`.
+  (`agentdb-state-manager`, `workflow-orchestrator`, `bmad-planner`,
+  `speckit-author`, `quality-enforcer` were all removed -- the first
+  two in #242, the latter three before v6).
 
 ### Version and timestamp format
 

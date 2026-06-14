@@ -208,11 +208,6 @@ else:
 
 ## Integration with Other Skills
 
-**workflow-orchestrator:**
-- Orchestrator calls detect_stack.py at session start
-- Stores config in session state
-- Uses config throughout workflow phases
-
 **git-workflow-manager:**
 - Uses project_name for worktree naming
 - Uses repo_root for path resolution
@@ -349,4 +344,4 @@ uv build  # from SESSION_CONFIG['build_cmd']
 ## See also
 
 - `SKILL.md` -- canonical skill definition
-- `workflow-orchestrator` -- calls this skill first to determine TEST_CMD etc.
+- `git-workflow-manager` -- uses project_name for worktree naming
