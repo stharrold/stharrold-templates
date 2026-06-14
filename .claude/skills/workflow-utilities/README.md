@@ -55,7 +55,7 @@ A backward-compat shim over `release_lib.vcs` (extracted in issue #240).
 **New code should import from `release_lib.vcs` directly.**
 
 ```python
-from vcs import create_pr, get_contrib_branch, get_username
+from release_lib.vcs import create_pr, get_contrib_branch, get_username
 
 branch = get_contrib_branch()   # auto-detects provider (gh / az)
 username = get_username()
