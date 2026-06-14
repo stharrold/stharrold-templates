@@ -8,7 +8,7 @@ Bundle manifest for `stharrold-templates`. Each bundle is a named set of files t
 |------|------|--------|
 | **Tier 1 — policy** | `release-pilot` skill (user-level, not bundled) + `git` bundle skills + sN slash commands | `git` |
 | **Tier 2 — library** | `release_lib` Python package (not shipped by any bundle; lives in this repo) | — |
-| **Tier 3 — CI** | GitHub Actions workflows (`tests.yml`, `claude-code-review.yml`) | `ci` |
+| **Tier 3 — CI** | GitHub Actions workflows (`tests.yml`, `claude-code-review.yml`, `secrets-example.yml`) | `ci` |
 
 `release-pilot` (`~/.claude/skills/release-pilot/`) is installed at the user level and is **not shipped by any bundle** — it is the policy/playbook layer that calls into `release_lib` (Tier 2) and drives the `git`-bundle skills (Tier 1).
 
@@ -317,9 +317,11 @@ Ship a conservative `_headers` file for Cloudflare Pages with baseline CSP, HSTS
 
 ---
 
-### `full` -- Everything
+### `full` -- Everything (except security-headers)
 
 All files from `git` + `secrets` + `ci` + `graphrag` (which includes `pipeline`) + `sql-pipeline` + `data-catalog`, plus additional skills and documentation.
+
+**Note**: `security-headers` is **not** included in `full`. Its `_headers` file is user-owned (skip-on-update) and is intentionally kept separate so downstream customizations survive re-apply. Apply `--bundle security-headers` explicitly when needed.
 
 **Additional skills (template-owned):**
 - `.claude/skills/tech-stack-adapter/`

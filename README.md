@@ -91,8 +91,8 @@ Replace `--bundle git` with whichever bundles you need:
 | `pipeline` | 6-stage document processing ETL |
 | `sql-pipeline` | SQL Server ETL with pyodbc, retry, resumption |
 | `graphrag` | Graph RAG retrieval (includes `pipeline`) |
-| `security-headers` | Cloudflare Pages baseline CSP / HSTS headers |
-| `full` | Everything above + extra skills and docs |
+| `security-headers` | Cloudflare Pages baseline CSP / HSTS headers (not in `full`) |
+| `full` | All of the above except `security-headers` + extra skills/docs |
 
 **Or run manually:**
 

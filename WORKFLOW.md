@@ -140,7 +140,7 @@ Apply the `git` bundle (Tier 1 skills + sN commands + `WORKFLOW.md` + `CONTRIBUT
 ```bash
 cd /path/to/new-repo
 git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
-python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git
+uv run python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git
 rm -rf .tmp/stharrold-templates
 ```
 
@@ -148,7 +148,10 @@ For the full workflow system (all tiers):
 
 ```bash
 # Tier 1+3: apply git + ci bundles
-python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git --bundle ci
+cd /path/to/new-repo
+git clone https://github.com/stharrold/stharrold-templates.git .tmp/stharrold-templates
+uv run python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates . --bundle git --bundle ci
+rm -rf .tmp/stharrold-templates
 
 # Tier 1 policy skill: install release-pilot separately (user-level)
 # Copy ~/.claude/skills/release-pilot/ from a working instance or craft from SKILL.md.
@@ -157,19 +160,19 @@ python .tmp/stharrold-templates/scripts/apply_bundle.py .tmp/stharrold-templates
 Or use `initialize-repository` to interactively scaffold a complete project:
 
 ```bash
-python .claude/skills/initialize-repository/scripts/initialize_repository.py . /path/to/new-repo
+uv run python .claude/skills/initialize-repository/scripts/initialize_repository.py . /path/to/new-repo
 ```
 
 ## Skills
 
-| Skill | Tier | Purpose |
-|-------|------|---------|
-| `release-pilot` | 1 (user-level) | Declarative release playbook; drives the full cycle |
-| `git-workflow-manager` | 1 (bundled) | Worktrees, PR operations, semantic versioning helpers |
-| `workflow-utilities` | 1 (bundled) | VCS wrapper (`gh`/`az`), pre-commit hooks, version validator |
-| `tech-stack-adapter` | 1 (bundled) | Python/uv stack detection, `TEST_CMD`/`BUILD_CMD` emission |
-| `claude-md-hygiene` | 1 (bundled) | Enforces the "earn it" CLAUDE.md discipline |
-| `initialize-repository` | 1 (bundled) | Meta-skill: bootstraps a new repo with the full workflow system |
+| Skill | Bundle | Purpose |
+|-------|--------|---------|
+| `release-pilot` | user-level (not bundled) | Declarative release playbook; drives the full cycle |
+| `git-workflow-manager` | `git` | Worktrees, PR operations, semantic versioning helpers |
+| `workflow-utilities` | `git` | VCS wrapper (`gh`/`az`), pre-commit hooks, version validator |
+| `tech-stack-adapter` | `full` | Python/uv stack detection, `TEST_CMD`/`BUILD_CMD` emission |
+| `claude-md-hygiene` | not bundled (in-repo only) | Enforces the "earn it" CLAUDE.md discipline |
+| `initialize-repository` | `full` | Meta-skill: bootstraps a new repo with the full workflow system |
 
 ## Related documentation
 
