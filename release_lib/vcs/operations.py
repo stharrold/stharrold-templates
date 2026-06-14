@@ -69,12 +69,12 @@ def _run(cmd: list[str], *, timeout: int = 30) -> str:
         result = subprocess.check_output(cmd, text=True, stderr=subprocess.PIPE, timeout=timeout)
         return result.strip()
     except FileNotFoundError:
-        raise RuntimeError(f"'{cmd[0]}' CLI not found")
+        raise RuntimeError(f"'{cmd[0]}' CLI not found") from None
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr.strip() if e.stderr else str(e)
-        raise RuntimeError(error_msg)
+        raise RuntimeError(error_msg) from e
     except subprocess.TimeoutExpired:
-        raise RuntimeError(f"Timeout while running: {' '.join(cmd)}")
+        raise RuntimeError(f"Timeout while running: {' '.join(cmd)}") from None
 
 
 # ---------------------------------------------------------------------------
@@ -348,7 +348,7 @@ def _parse_github_remote() -> tuple[str, str]:
             stderr=subprocess.PIPE,
         ).strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        raise RuntimeError(f"Failed to read git remote URL: {e}")
+        raise RuntimeError(f"Failed to read git remote URL: {e}") from e
 
     if remote_url.startswith("https://"):
         parts = remote_url.replace("https://github.com/", "").replace(".git", "").split("/")
@@ -360,7 +360,7 @@ def _parse_github_remote() -> tuple[str, str]:
     try:
         return parts[0], parts[1]
     except IndexError:
-        raise RuntimeError(f"Failed to parse owner/repo from: {remote_url}")
+        raise RuntimeError(f"Failed to parse owner/repo from: {remote_url}") from None
 
 
 def _query_github_review_threads(pr_number: int) -> list[dict]:
@@ -387,13 +387,13 @@ def _query_github_review_threads(pr_number: int) -> list[dict]:
     try:
         data = json.loads(raw)
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"Failed to parse GitHub GraphQL response: {e}")
+        raise RuntimeError(f"Failed to parse GitHub GraphQL response: {e}") from e
 
     try:
         pr_data = data["data"]["repository"]["pullRequest"]
         review_threads = pr_data["reviewThreads"]["nodes"]
     except (KeyError, TypeError) as e:
-        raise RuntimeError(f"Failed to parse GitHub review threads: {e}")
+        raise RuntimeError(f"Failed to parse GitHub review threads: {e}") from e
 
     conversations: list[dict] = []
     for thread in review_threads:
@@ -444,7 +444,7 @@ def _query_azure_review_threads(pr_number: int) -> list[dict]:
     try:
         threads = json.loads(raw)
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"Failed to parse Azure DevOps threads: {e}")
+        raise RuntimeError(f"Failed to parse Azure DevOps threads: {e}") from e
 
     conversations: list[dict] = []
     for thread in threads or []:

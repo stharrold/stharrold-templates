@@ -18,6 +18,16 @@ from release_lib.semver import (
     get_last_tag,
     next_version_from_tag,
 )
+from release_lib.vcs import (
+    VCSProvider,
+    create_issue,
+    create_pr,
+    create_release,
+    detect_provider,
+    get_contrib_branch,
+    get_username,
+    query_pr_review_threads,
+)
 
 __all__ = [
     "analyze_changes",
@@ -26,4 +36,12 @@ __all__ = [
     "get_changed_files",
     "get_last_tag",
     "next_version_from_tag",
+    "VCSProvider",
+    "create_issue",
+    "create_pr",
+    "create_release",
+    "detect_provider",
+    "get_contrib_branch",
+    "get_username",
+    "query_pr_review_threads",
 ]

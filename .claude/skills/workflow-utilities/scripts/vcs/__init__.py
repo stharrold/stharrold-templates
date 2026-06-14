@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
 # SPDX-FileCopyrightText: 2025 stharrold
 # SPDX-License-Identifier: Apache-2.0
-"""VCS interface for workflow scripts (GitHub + Azure DevOps).
+"""Backward-compat shim. Canonical home: release_lib.vcs (issue #240).
 
-This module provides wrapper functions for interacting with GitHub (gh)
-and Azure DevOps (az) CLIs.  The provider is auto-detected from the
-git remote URL.
-
-Usage:
-    from vcs import get_username, get_contrib_branch, create_pr
-
-    username = get_username()
-    branch = get_contrib_branch()
-    pr_url = create_pr(base="develop", head="contrib/user", title="...", body="...")
+Runtime callers still do `sys.path.insert(.../workflow-utilities/scripts)`
+then `from vcs import create_pr, ...`. This shim keeps those imports
+working by delegating to release_lib.vcs until issue #242 removes the old
+skill scripts. New code should import from release_lib.vcs directly.
 """
 
-from .operations import (
+import sys
+from pathlib import Path
+
+# release_lib is a top-level package; add the repo root so callers that
+# only put .../workflow-utilities/scripts on sys.path can still import it.
+sys.path.insert(0, str(Path(__file__).resolve().parents[5]))
+
+from release_lib.vcs import (  # noqa: E402,F401
     GITHUB_GRAPHQL_TEMPLATE,
+    VCSProvider,
     check_auth,
     create_issue,
     create_pr,
     create_release,
+    detect_provider,
     get_contrib_branch,
     get_username,
     query_pr_review_threads,
 )
-from .provider import VCSProvider, detect_provider
 
 __all__ = [
     "VCSProvider",
