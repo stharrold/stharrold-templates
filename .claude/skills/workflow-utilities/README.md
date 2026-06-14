@@ -157,11 +157,10 @@ directory/
 
 **All skills depend on workflow-utilities:**
 
-- **bmad-planner:** Uses `directory_structure.py`, `workflow_registrar.py`
-- **speckit-author:** Uses `directory_structure.py`, `todo_updater.py`
-- **quality-enforcer:** Uses `todo_updater.py` for quality gates
-- **git-workflow-manager:** Uses VCS abstraction, workflow lifecycle tools
-- **workflow-orchestrator:** Uses workflow lifecycle, context management
+- **bmad-planner:** Uses `directory_structure.py`
+- **speckit-author:** Uses `directory_structure.py`
+- **quality-enforcer:** Uses `validate_versions.py`
+- **git-workflow-manager:** Uses VCS abstraction (`vcs/`)
 - **initialize-repository:** Uses `directory_structure.py`, `create_skill.py` patterns
 
 ## Examples
