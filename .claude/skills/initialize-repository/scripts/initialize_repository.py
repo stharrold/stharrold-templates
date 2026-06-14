@@ -51,12 +51,10 @@ from vcs import get_username
 SKILL_NAMES = [
     "tech-stack-adapter",
     "git-workflow-manager",
-    "bmad-planner",
-    "speckit-author",
-    "quality-enforcer",
     "workflow-utilities",
+    "claude-md-hygiene",
     "initialize-repository",  # Include this meta-skill
-]  # 7 skills that comprise the workflow system
+]  # 5 skills that comprise the workflow system
 
 REQUIRED_TOOLS = ["git"]  # Required for workflow functionality (VCS CLI detected automatically)
 TIMESTAMP_FORMAT = "%Y%m%dT%H%M%SZ"  # Compact ISO8601 for file names

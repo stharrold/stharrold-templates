@@ -35,15 +35,11 @@ from pathlib import Path
 
 # Constants with documented rationale
 SKILL_DIRS = [
-    "workflow-orchestrator",
     "tech-stack-adapter",
     "git-workflow-manager",
-    "bmad-planner",
-    "speckit-author",
-    "quality-enforcer",
     "workflow-utilities",
+    "claude-md-hygiene",
     "initialize-repository",
-    "agentdb-state-manager",
 ]  # Expected skills to validate
 
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")  # Semantic versioning: MAJOR.MINOR.PATCH

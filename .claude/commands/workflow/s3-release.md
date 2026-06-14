@@ -12,13 +12,14 @@ If $ARGUMENTS is empty, compute: `uv run python -c "from release_lib.semver impo
 Sanity-check: new top-level packages qualify as MINOR even if the heuristic says PATCH.
 
 ## Step 2: Create Release Branch and Bump Version
+`{version}` = `vX.Y.Z` (with `v`); pyproject.toml uses `X.Y.Z` (no `v`).
 ```bash
 git checkout develop && git pull origin develop
 git checkout -b release/{version}
-# Bump version in pyproject.toml, then:
+# Bump version in pyproject.toml to X.Y.Z (strip the v), then:
 uv lock
 git add pyproject.toml uv.lock
-git commit -m "chore: bump version to {version}"
+git commit -m "chore(release): bump version to X.Y.Z"
 git push origin release/{version}
 ```
 
