@@ -2,14 +2,23 @@
 
 Templates and utilities for MCP (Model Context Protocol) server configuration and agentic development workflows.
 
+## Three-tier model
+
+| Tier | What | Where |
+|------|------|--------|
+| **Tier 1 — policy** | `release-pilot` skill (declarative playbook: gates, topology, autonomy contract) | `~/.claude/skills/release-pilot/` (user-level, not bundled) |
+| **Tier 2 — library** | `release_lib` Python package (deterministic helpers: semver, VCS, bundle engine) | `release_lib/` in this repo |
+| **Tier 3 — CI** | GitHub Actions workflows (tests, Claude code-review) | `.github/workflows/` (shipped via `ci` bundle) |
+
+The `git` bundle ships Tier-1 **skills** (`git-workflow-manager`, `workflow-utilities`) and the sN slash commands. The `ci` bundle ships Tier-3 CI artifacts. `release-pilot` is installed separately at the user level.
+
 ## Features
 
-- **sN workflow** - Streamlined 4-step autonomous development process
+- **release-pilot skill** - User-level declarative playbook driving the full release cycle
+- **release_lib** - Deterministic Python helpers: `semver.py` (auto-bump), `vcs/` (gh/az), `bundles.py` (bundle engine)
 - **Claude Code Review** - Automated PR analysis via GitHub Actions
-- **AgentDB Tracking** - Persistent state and metrics using DuckDB
+- **Installable bundles** - `git`, `secrets`, `ci`, `pipeline`, `sql-pipeline`, `graphrag`, `data-catalog`, `security-headers`, `full`
 - **Containerized development** - Podman + uv + Python 3.12 for consistency
-- **AI-optimized documentation** - Modular guides (≤30KB per file) for context efficiency
-- **AI-agent native** - Optimized for Claude Code and MCP (Model Context Protocol)
 
 ## Prerequisites
 
@@ -76,13 +85,14 @@ Replace `--bundle git` with whichever bundles you need:
 
 | Bundle | What you get |
 |--------|-------------|
-| `git` | Branch workflow, slash commands, skills |
+| `git` | Branch workflow, slash commands, skills (Tier 1) |
 | `secrets` | Keyring-backed secrets management |
-| `ci` | GitHub Actions, containers, pre-commit |
+| `ci` | GitHub Actions, containers, pre-commit (Tier 3) |
 | `pipeline` | 6-stage document processing ETL |
 | `sql-pipeline` | SQL Server ETL with pyodbc, retry, resumption |
 | `graphrag` | Graph RAG retrieval (includes `pipeline`) |
-| `full` | Everything above + extra skills and docs |
+| `security-headers` | Cloudflare Pages baseline CSP / HSTS headers (not in `full`) |
+| `full` | All of the above except `security-headers` + extra skills/docs |
 
 **Or run manually:**
 
@@ -176,7 +186,7 @@ See `secrets.toml` for secret definitions.
 │   ├── guides/             # Production guides
 │   ├── research/           # Exploratory documents
 │   └── reference/          # Reference materials
-├── .claude/skills/         # AI workflow skills (6 active)
+├── .claude/skills/         # AI workflow skills (5 active)
 ├── scripts/                # Utility scripts (secrets, run helpers)
 └── ARCHIVED/               # Archived specs, planning docs, deprecated code
 ```
