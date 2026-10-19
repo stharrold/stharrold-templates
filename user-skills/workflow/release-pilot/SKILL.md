@@ -125,7 +125,13 @@ there. Do not restart from step 1 if a later branch/PR/tag already exists.
    doesn't drift (commit both); open `release/vN.N.N -> main`; merge only
    after confirm; then create an **annotated** tag `vN.N.N` on the merge
    commit and push it.
-8. **Backmerge.** Open/merge `release/vN.N.N -> develop` (autonomous gate).
+8. **Backmerge.** First fast-forward the version branch to the main merge
+   commit (`git push origin origin/main:refs/heads/release/vN.N.N`; check
+   `git merge-base --is-ancestor origin/release/vN.N.N origin/main`). Cut
+   from `develop`, it has no commits `develop` lacks, so the PR fails with
+   "No commits between develop and release/vN.N.N" (learned in planb
+   v1.3.1). Then open/merge `release/vN.N.N -> develop` (autonomous gate);
+   `develop` ends one merge commit ahead of `main`.
 9. **Re-sync contrib.** Rebase `contrib/<user>` onto `develop`.
 10. **Clean up.** Remove the worktree; delete the merged `release/*` branches
     locally and on the remote.
